@@ -66,7 +66,7 @@ namespace V1 {
     parentId: string
   }
 
-  type Transform = {
+  type OBBInfo = {
     x: number
     y: number
     width: number
@@ -74,8 +74,11 @@ namespace V1 {
     rotation: number
   }
 
+  type Transform = [number, number, number, number, number]
+
   type NodeBase = NodeMeta &
-    Transform & {
+    OBBInfo & {
+      transform: Transform
       opacity: number
       hFlip: boolean
       vFlip: boolean
