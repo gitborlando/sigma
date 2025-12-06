@@ -80,8 +80,7 @@ namespace V1 {
     OBBInfo & {
       transform: Transform
       opacity: number
-      hFlip: boolean
-      vFlip: boolean
+      flip?: 'x' | 'y' | 'xy'
       fills: Fill[]
       strokes: Stroke[]
       blurs: any[]
