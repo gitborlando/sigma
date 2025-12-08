@@ -6,10 +6,10 @@ import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { snapGridRound, snapGridRoundXY } from 'src/editor/utils'
-import { Drag } from 'src/global/event/drag'
+import { StageDrag } from 'src/global/event/drag'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { getZoom, StageViewport } from '../viewport'
+import { getZoom } from '../viewport'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
 
@@ -43,7 +43,7 @@ class StageCreateService {
   }
 
   private create() {
-    Drag.onStart(this.onCreateStart)
+    StageDrag.onStart(this.onCreateStart)
       .onMove(this.onCreateMove)
       .onDestroy(this.onCreateEnd)
   }
@@ -64,15 +64,15 @@ class StageCreateService {
 
   private onCreateMove({ marquee, current, start }: DragData) {
     if (this.node.type === 'line') {
-      current = snapGridRoundXY(StageViewport.toSceneXY(current))
-      start = snapGridRoundXY(StageViewport.toSceneXY(start))
+      current = snapGridRoundXY(current)
+      start = snapGridRoundXY(start)
 
       const rotation = Angle.fromTwoVector(current, start)
       const width = XY.distanceOf(current, start)
 
       OperateGeometry.setActiveGeometries({ ...start, width, rotation }, false)
     } else {
-      const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
+      const { x, y, width, height } = marquee
 
       OperateGeometry.setActiveGeometries(
         {
@@ -99,8 +99,7 @@ class StageCreateService {
     YUndo.track2('all', t('created node'))
   }
 
-  private createNode(start: IXY) {
-    const { x, y } = StageViewport.toSceneXY(start)
+  private createNode({ x, y }: IXY) {
     const size = 0.01 / getZoom()
     const node = SchemaCreator[this.currentType]({ x, y, width: size, height: size })
 

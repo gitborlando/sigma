@@ -9,7 +9,7 @@ import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageMove } from 'src/editor/stage/interact/move'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
-import { Drag } from 'src/global/event/drag'
+import { StageDrag } from 'src/global/event/drag'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
@@ -155,9 +155,8 @@ const VertexComp: FC<{
     StageCursor.lock()
     const { rotation } = OperateGeometry.activeGeometry
 
-    Drag.onStart()
+    StageDrag.onStart()
       .onMove(({ delta, current }) => {
-        delta = StageViewport.toSceneShift(delta)
         const deltaX = XY.from(delta).getDot(XY.xAxis(rotation))
         const deltaY = XY.from(delta).getDot(XY.yAxis(rotation))
 
@@ -302,10 +301,9 @@ const VertexComp: FC<{
 
     const { center } = transformOBB
     let last: IXY
-    Drag.onStart()
+    StageDrag.onStart()
       .onMove(({ current, start }) => {
-        if (!last) last = StageViewport.toSceneXY(start)
-        current = StageViewport.toSceneXY(current)
+        if (!last) last = start
         const deltaRotation = XY.from(current).getAngle(last, center)
         last = current
 

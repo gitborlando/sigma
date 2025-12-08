@@ -1,7 +1,6 @@
 import { Graphics } from '@pixi/react'
 import { FC, memo, useState } from 'react'
 import { PIXI } from 'src/editor/stage/pixi'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
 import { IXY } from 'src/shared/utils/normal'
 
@@ -17,7 +16,7 @@ export const PointComp: FC<IPointComp> = memo(
     const [hovered, setHovered] = useState(false)
     const onMouseDown = () => {
       Drag.onDown(select)
-        .onMove(({ shift }) => onChangeXY(StageViewport.toSceneShift(shift)))
+        .onMove(({ shift }) => onChangeXY(shift))
         .onDestroy(({ dragService }) => dragService.started && onChangeEnd?.())
     }
 
