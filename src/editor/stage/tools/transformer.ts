@@ -2,9 +2,8 @@ import { AABB, OBB } from 'src/editor/math'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
 import { StageCursor } from 'src/editor/stage/cursor'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRound } from 'src/editor/utils'
-import { Drag } from 'src/global/event/drag'
+import { StageDrag } from 'src/global/event/drag'
 
 class StageTransformerService {
   obb = OBB.identityOBB()
@@ -26,35 +25,27 @@ class StageTransformerService {
   }
 
   move(e: MouseEvent) {
-    const offsetXY = XY._()
+    const originalObb = this.obb.clone()
 
-    Drag.onStart(({ start }) => {
-      start = StageViewport.toSceneXY(start)
-
-      offsetXY.x = this.obb.x - start.x
-      offsetXY.y = this.obb.y - start.y
-
+    StageDrag.onStart(() => {
       if (e.altKey) {
         StageCursor.setCursor('copy')
         // OperateNode.copySelectNodes()
         // OperateNode.pasteNodes()
       }
     })
-      .onMove(({ current }) => {
+      .onMove(({ shift }) => {
         this.isMoving = true
 
-        current = StageViewport.toSceneXY(current)
-        const newObbXY = XY.from(current).plus(offsetXY)
-        const newObb = this.obb.clone().shift(newObbXY.minus(this.obb))
-
-        const aabb = AABB.fromOBB(newObb)
+        const obb = originalObb.clone().shift(shift)
+        const aabb = AABB.fromOBB(obb)
         const snapDelta = XY._(
           snapGridRound(aabb.minX) - aabb.minX,
           snapGridRound(aabb.minY) - aabb.minY,
         )
-        newObb.shift(snapDelta)
+        obb.shift(snapDelta)
 
-        const finalDeltaXY = XY.from(newObb).minus(this.obb)
+        const finalDeltaXY = XY.from(obb).minus(this.obb)
         OperateGeometry.setActiveGeometries(finalDeltaXY)
       })
       .onDestroy(({ moved }) => {
@@ -76,9 +67,8 @@ class StageTransformerService {
       OperateGeometry
     const { rotation } = activeGeometry
 
-    Drag.onStart()
+    StageDrag.onStart()
       .onMove(({ delta }) => {
-        delta = StageViewport.toSceneShift(delta)
         const deltaX = XY.from(delta).getDot(XY.xAxis(rotation))
         const deltaY = XY.from(delta).getDot(XY.yAxis(rotation))
 
