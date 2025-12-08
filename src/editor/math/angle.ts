@@ -51,9 +51,19 @@ export class Angle {
 
   static rotatePoint(ax: number, ay: number, ox: number, oy: number, angle: number) {
     const radian = Angle.radianFy(angle)
-    return {
-      x: (ax - ox) * cos(radian) - (ay - oy) * sin(radian) + ox,
-      y: (ax - ox) * sin(radian) + (ay - oy) * cos(radian) + oy,
-    }
+    return XY._(
+      (ax - ox) * cos(radian) - (ay - oy) * sin(radian) + ox,
+      (ax - ox) * sin(radian) + (ay - oy) * cos(radian) + oy,
+    )
+  }
+
+  static sweep(a: IXY, b: IXY, clockwise = false) {
+    const dot = a.x * b.x + a.y * b.y
+    const det = a.x * b.y - a.y * b.x
+    return Angle.normal(Angle.atan2(det, dot) * (clockwise ? 1 : -1))
+  }
+
+  static sweepFromXAxis(xy: IXY, clockwise = false) {
+    return Angle.sweep(xy, XY.xAxis(), clockwise)
   }
 }

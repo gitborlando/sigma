@@ -189,15 +189,19 @@ export class XY {
     return XY.of(arr[0], arr[1])
   }
 
-  static xAxis(rotation: number) {
+  static xAxis(rotation: number = 0) {
     return XY.of(Angle.cos(rotation), Angle.sin(rotation))
   }
 
-  static yAxis(rotation: number) {
+  static yAxis(rotation: number = 0) {
     return XY.of(-Angle.sin(rotation), Angle.cos(rotation))
   }
 
   static distanceOf(self: IXY, another: IXY) {
     return sqrt((self.x - another.x) ** 2 + (self.y - another.y) ** 2)
+  }
+
+  static vectorOf(a: IXY, b: IXY) {
+    return XY.of(a.x - b.x, a.y - b.y)
   }
 }

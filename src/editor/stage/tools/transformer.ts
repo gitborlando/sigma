@@ -7,6 +7,9 @@ import { StageDrag } from 'src/global/event/drag'
 
 class StageTransformerService {
   obb = OBB.identity()
+  width = 0
+  height = 0
+  matrix = Matrix.identity()
 
   @observable isMoving = false
 
