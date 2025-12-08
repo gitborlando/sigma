@@ -1,11 +1,10 @@
+import { AABB } from '@gitborlando/geo'
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { EditorSetting } from 'src/editor/editor/setting'
-import { AABB } from 'src/editor/math'
 import { max } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
-import { xy_from } from 'src/editor/math/xy'
 import { StageSurface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
@@ -28,8 +27,6 @@ class ElemDrawerService {
     this.ctx = ctx
     this.path2d = path2d
     this.dirtyRects = [elem.aabb]
-
-    StageSurface.setOBBMatrix(this.elem.obb, false)
 
     this.drawShapePath()
 
@@ -152,20 +149,26 @@ class ElemDrawerService {
 
   private drawPath(points: V1.Point[]) {
     loopFor(points, (cur, next, last, i) => {
-      if (i === points.length - 1 && cur.endPath) {
+      if (i === points.length - 1 && cur.isEnd) {
         return this.path2d.closePath()
       }
-      if (cur.startPath) {
+      if (cur.isStart) {
         this.path2d.moveTo(cur.x, cur.y)
       }
-      if (cur.handleR && next.handleL) {
-        const [cp2, cp1] = [next.handleL, cur.handleR]
-        this.path2d.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, next.x, next.y)
-      } else if (cur.handleR) {
-        this.path2d.quadraticCurveTo(cur.handleR.x, cur.handleR.y, next.x, next.y)
-      } else if (next.handleL) {
-        this.path2d.quadraticCurveTo(next.handleL.x, next.handleL.y, cur.x, cur.y)
-      } else if (!next.startPath) {
+      if (cur.out && next.in) {
+        this.path2d.bezierCurveTo(
+          cur.out.x,
+          cur.out.y,
+          next.in.x,
+          next.in.y,
+          next.x,
+          next.y,
+        )
+      } else if (cur.out) {
+        this.path2d.quadraticCurveTo(cur.out.x, cur.out.y, next.x, next.y)
+      } else if (next.in) {
+        this.path2d.quadraticCurveTo(next.in.x, next.in.y, cur.x, cur.y)
+      } else if (!next.isStart) {
         this.path2d.lineTo(next.x, next.y)
       }
     })
@@ -230,11 +233,11 @@ class ElemDrawerService {
         break
 
       case 'linearGradient':
-        const start = XY._(
+        const start = XY.$(
           fill.start.x * this.node.width,
           fill.start.y * this.node.height,
         )
-        const end = XY._(fill.end.x * this.node.width, fill.end.y * this.node.height)
+        const end = XY.$(fill.end.x * this.node.width, fill.end.y * this.node.height)
 
         const gradient = this.ctx.createLinearGradient(
           start.x,
@@ -372,7 +375,7 @@ class ElemDrawerService {
   }
 
   private updateHitTest = () => {
-    const { width, height } = this.elem.obb
+    const { width, height } = this.elem.mrect
 
     switch (this.node.type) {
       case 'frame':
@@ -426,22 +429,22 @@ class ElemDrawerService {
 
   private getPathCollideXys() {
     const points = (this.node as V1.Path).points
-    const collideXys = <IXY[]>[xy_from(points[0])]
+    const collideXys = <IXY[]>[XY.of(points[0])]
 
     loopFor(points, (cur, next) => {
-      if (next.startPath) return
-      if (cur.handleR && next.handleL) {
-        const [cp2, cp1] = [cur.handleR, next.handleL]
+      if (next.isStart) return
+      if (cur.out && next.in) {
+        const [cp2, cp1] = [cur.out, next.in]
         const xys = pointsOnBezierCurves([cur, cp2, cp1, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
-      } else if (cur.handleR) {
-        const xys = pointsOnBezierCurves([cur, cur.handleR, next, next], 0.3, 0.3)
+      } else if (cur.out) {
+        const xys = pointsOnBezierCurves([cur, cur.out, next, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
-      } else if (next.handleL) {
-        const xys = pointsOnBezierCurves([cur, cur, next.handleL, next], 0.3, 0.3)
+      } else if (next.in) {
+        const xys = pointsOnBezierCurves([cur, cur, next.in, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
       } else {
-        collideXys.push(xy_from(next))
+        collideXys.push(XY.of(next))
       }
     })
 
@@ -454,7 +457,7 @@ class ElemDrawerService {
 
     this.splitTexts.forEach(({ start, width }, i) => {
       const y = i * lineHeight + fontSize / 2
-      collideXys.push(XY._(start, y), XY._(start + width, y))
+      collideXys.push(XY.$(start, y), XY.$(start + width, y))
     })
 
     return collideXys

@@ -47,6 +47,7 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
     ignoreUnVisible,
     needSliceRender,
     showDirtyRect,
+    fullRender,
   } = setting
 
   return (
@@ -70,6 +71,11 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
         label={t('dev mode')}
         value={devMode}
         onChange={(value) => (setting.devMode = value)}
+      />
+      <BooleanSettingComp
+        label={t('full render')}
+        value={fullRender}
+        onChange={(value) => (setting.fullRender = value)}
       />
       <BooleanSettingComp
         label={t('show dirty rect')}

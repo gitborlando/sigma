@@ -72,7 +72,7 @@ const SquareComp: FC<{}> = observer(({}) => {
 
   const [x, setX] = useState(saturation / 100)
   const [y, setY] = useState(1 - value / 100)
-  const [lastXY] = useState(() => XY._(0, 0))
+  const [lastXY] = useState(() => XY.$(0, 0))
   const ref = useRef<HTMLDivElement>(null)
 
   const backgroundGradient = useMemo(() => {
@@ -98,16 +98,16 @@ const SquareComp: FC<{}> = observer(({}) => {
 
   const handleMove = (e: React.MouseEvent) => {
     onPointerDown(...XY.client(e).tuple())
-    Drag.onStart(e)
-      .onMove(({ current }) => {
-        onPointerDown(current.x, current.y)
-      })
-      .onDestroy(({ current }) => {
-        if (equal(lastXY, current)) return
+    Drag.onMove(({ current }) => {
+      onPointerDown(current.x, current.y)
+    })
+      .onDestroy(({ current, moved }) => {
+        if (equal(lastXY, current) && !moved) return
         lastXY.x = current.x
         lastXY.y = current.y
         YUndo.track({ type: 'state', description: t('adjust color') })
       })
+      .start(e)
   }
 
   return (
@@ -119,6 +119,7 @@ const SquareComp: FC<{}> = observer(({}) => {
       />
       <G
         className={cls('pointer')}
+        onMouseDown={handleMove}
         style={{
           left: `${x * 100}%`,
           top: `${y * 100}%`,
@@ -149,15 +150,15 @@ function useSlider(
 
   const handleMove = (e: React.MouseEvent) => {
     handleSetX(e.clientX)
-    Drag.onStart(e)
-      .onMove(({ current }) => {
-        handleSetX(current.x)
-      })
+    Drag.onMove(({ current }) => {
+      handleSetX(current.x)
+    })
       .onDestroy(({ current }) => {
         if (lastValue.current === current.x) return
         lastValue.current = current.x
         YUndo.track({ type: 'state', description: t('adjust color') })
       })
+      .start(e)
   }
 
   return {

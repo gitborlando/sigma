@@ -1,4 +1,5 @@
-import { firstOne, iife, stableIndex } from '@gitborlando/utils'
+import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
+import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import { SchemaCreator } from '../schema/creator'
@@ -6,8 +7,18 @@ import { Schema } from '../schema/schema'
 
 class HandleNodeService {
   datumId = ''
-  @observable.ref datumXY = XY._(0, 0)
+  @observable.ref datumXY = XY.$(0, 0)
   copiedIds = <ID[]>[]
+
+  private mrectCache = createCache<ID, MRect>()
+
+  getMRect(node: V1.Node) {
+    return this.mrectCache.getSet(node.id, () => MRect.of(node), [
+      node.width,
+      node.height,
+      node.matrix,
+    ])
+  }
 
   subscribe() {
     return Disposer.collect(YClients.afterSelect.hook(() => this.getDatum()))
@@ -81,7 +92,7 @@ class HandleNodeService {
     const newSelectIds = <ID[]>[]
     const traverse = SchemaHelper.createTraverse({
       callback: (props) => {
-        const { node, parent, upLevelRef, depth } = props
+        const { node, parent, forwardRef: upLevelRef, depth } = props
         const newParent = upLevelRef?.newNode || parent
         const newNode = SchemaCreator.clone(node)
         newNode.name = SchemaCreator.createNodeName(node.type)
@@ -175,9 +186,9 @@ class HandleNodeService {
     const datum = YState.find<V1.Node>(this.datumId)
     if (datum && !SchemaHelper.isPageById(datum.id)) {
       const aabb = OBB.fromRect(datum, datum.rotation).aabb
-      this.datumXY = XY._(aabb.minX, aabb.minY)
+      this.datumXY = XY.$(aabb.minX, aabb.minY)
     } else {
-      this.datumXY = XY._(0, 0)
+      this.datumXY = XY.$(0, 0)
     }
   }
 }

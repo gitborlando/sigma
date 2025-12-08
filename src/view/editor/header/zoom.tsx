@@ -72,7 +72,7 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
     const setting = getEditorSetting()
     setting.dev.fixedSceneMatrix = shouldSave
     if (shouldSave) {
-      setting.dev.sceneMatrix = StageViewport.sceneMatrix.tuple()
+      setting.dev.sceneMatrix = StageViewport.sceneMatrix
     }
   }
 

@@ -1,5 +1,6 @@
 namespace V1 {
   type IXY = { x: number; y: number }
+  type Matrix = import('src/editor/math/matrix').IMatrix
 
   type Schema = {
     meta: Meta
@@ -28,7 +29,7 @@ namespace V1 {
     selectPageId: string
     cursor: IXY
     color: string
-    sceneMatrix: import('src/editor/math/matrix').IMatrixTuple
+    sceneMatrix: Matrix
   }
 
   type Clients = {
@@ -43,6 +44,7 @@ namespace V1 {
     type: 'page'
     id: `page_${string}`
     name: string
+    matrix: Matrix
   }
 
   type NodeParent = Frame | Group | Page
@@ -74,11 +76,9 @@ namespace V1 {
     rotation: number
   }
 
-  type Transform = [number, number, number, number, number]
-
   type NodeBase = NodeMeta &
     OBBInfo & {
-      transform: Transform
+      matrix: Matrix
       opacity: number
       flip?: 'x' | 'y' | 'xy'
       fills: Fill[]
@@ -100,15 +100,16 @@ namespace V1 {
     }
 
   type Point = {
+    id: string
     type: 'point'
     symmetric: 'angle' | 'complete' | 'none'
     x: number
     y: number
     radius: number
-    handleL?: XY
-    handleR?: XY
-    endPath?: boolean
-    startPath?: boolean
+    in?: XY
+    out?: XY
+    isStart?: boolean
+    isEnd?: boolean
   }
 
   type Vector = Rectangle | Ellipse | Polygon | Star | Line | Path

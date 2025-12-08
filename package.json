@@ -19,6 +19,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@gitborlando/geo": "^5.2.0",
     "@gitborlando/signal": "^1.0.1",
     "@gitborlando/utils": "^4.9.1",
     "@gitborlando/widget": "^1.0.2",
@@ -95,7 +96,7 @@
     "unplugin-auto-import": "^19.3.0",
     "vite": "^7.1.12",
     "vite-plugin-react-click-to-component": "^4.1.0",
-    "vite-plugin-react-x-if": "^1.0.0"
+    "vite-plugin-react-x-if": "^1.1.0"
   },
   "simple-git-hooks": {
     "pre-commit": "npx pretty-quick --staged"

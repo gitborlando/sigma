@@ -42,18 +42,18 @@ const StopsBar: FC<{
 
   const handleMove = (e: React.MouseEvent, stopIndex: number) => {
     setStopIndex(stopIndex)
-    Drag.onStart(e)
-      .onMove(({ delta }) => {
-        const deltaOffset = delta.x / stopBarRef.current!.clientWidth
-        OperateFill.setFill<V1.FillLinearGradient>(index, (draft) => {
-          const oldOffset = draft.stops[stopIndex].offset
-          draft.stops[stopIndex].offset = min(max(oldOffset + deltaOffset, 0), 1)
-        })
+    Drag.onMove(({ delta }) => {
+      const deltaOffset = delta.x / stopBarRef.current!.clientWidth
+      OperateFill.setFill<V1.FillLinearGradient>(index, (draft) => {
+        const oldOffset = draft.stops[stopIndex].offset
+        draft.stops[stopIndex].offset = min(max(oldOffset + deltaOffset, 0), 1)
       })
+    })
       .onDestroy(({ moved }) => {
         if (!moved) return
         YUndo.track({ type: 'state', description: t('move gradient point') })
       })
+      .start(e)
   }
 
   return (

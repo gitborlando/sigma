@@ -14,10 +14,10 @@ export function bezierParametricEquation(
   t: number, //参数t
 ) {
   const newXY = xy_plus_all(
-    xy_multiply(XY._(p1x, p1y), pow3(1 - t)),
-    xy_multiply(XY._(a1x, a1y), 3, t, pow2(1 - t)),
-    xy_multiply(XY._(a2x, a2y), 3, pow2(t), 1 - t),
-    xy_multiply(XY._(p2x, p2y), pow3(t)),
+    xy_multiply(XY.$(p1x, p1y), pow3(1 - t)),
+    xy_multiply(XY.$(a1x, a1y), 3, t, pow2(1 - t)),
+    xy_multiply(XY.$(a2x, a2y), 3, pow2(t), 1 - t),
+    xy_multiply(XY.$(p2x, p2y), pow3(t)),
   )
   return [newXY.x, newXY.y]
 }
@@ -40,17 +40,17 @@ export function bezierMidpoint(
     subLength: number
     shift: number
   }[] = []
-  let lastX = XY._(p1x, p1y)
+  let lastX = XY.$(p1x, p1y)
   let iteration = 30 //粒度, 越大拟合越精细
   let length = 0
   for (let i = 0; i <= iteration; i++) {
     let t = i / iteration
     let [x, y] = bezierParametricEquation(p1x, p1x, p2x, p2y, a1x, a1y, a2x, a2y, t)
-    let subLength = xy_distance(XY._(x, y), lastX)
+    let subLength = xy_distance(XY.$(x, y), lastX)
 
     arr.push({ t, x, y, subLength, shift: 0 })
     length += subLength
-    lastX = XY._(x, y)
+    lastX = XY.$(x, y)
   }
   arr = arr.map((i) => ({ ...i, shift: abs(length / 2 - i.subLength) }))
   arr.sort((a, b) => a.shift - b.shift)
@@ -74,10 +74,10 @@ export function bezierDivide(
   a2y: number,
   t: number,
 ) {
-  const A = XY._(p1x, p1y)
-  const B = XY._(p2x, p2y)
-  const C = XY._(a1x, a1y)
-  const D = XY._(a2x, a2y)
+  const A = XY.$(p1x, p1y)
+  const B = XY.$(p2x, p2y)
+  const C = XY.$(a1x, a1y)
+  const D = XY.$(a2x, a2y)
   const AC = xy_multiply(xy_minus(C, A), t)
   const BD = xy_multiply(xy_minus(D, B), t)
   const CD = xy_multiply(xy_minus(D, C), t)

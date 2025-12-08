@@ -13,7 +13,3 @@ export function multiply(...numbers: number[]) {
 export function divide(a: number, b: number) {
   return b === 0 ? 1 : a / b
 }
-
-export function minMax(min: number, max: number, value: number) {
-  return Math.min(Math.max(min, value), max)
-}

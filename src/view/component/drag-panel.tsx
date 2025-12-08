@@ -38,20 +38,20 @@ export const DragPanel: FC<DragPanelProps> = ({
   onMove,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState(xy || XY._(480, 240))
+  const [position, setPosition] = useState(xy || XY.$(480, 240))
   const [zIndex, setZIndex] = useState(0)
 
   useLayoutEffect(() => {
     if (!xy) return
     const bound = ref.current!.getBoundingClientRect()
-    setPosition(XY.of(xy.x, min(xy.y, innerHeight - bound.height - 12)))
+    setPosition(XY.$(xy.x, min(xy.y, innerHeight - bound.height - 12)))
   }, [xy])
 
   useLayoutEffect(() => {
     if (!center) return
     const bound = ref.current!.getBoundingClientRect()
     setPosition(
-      XY.of(innerWidth / 2 - bound.width / 2, innerHeight / 2 - bound.height / 2),
+      XY.$(innerWidth / 2 - bound.width / 2, innerHeight / 2 - bound.height / 2),
     )
   }, [center])
 
@@ -69,11 +69,11 @@ export const DragPanel: FC<DragPanelProps> = ({
 
   const handleHeaderMouseDown = (e: React.MouseEvent) => {
     const startXY = position
-    Drag.onSlide(({ current, shift }) => {
+    Drag.onMove(({ current, shift }) => {
       if (current.x > innerWidth || current.y > innerHeight) return
-      setPosition(XY.from(startXY).plus(shift))
+      setPosition(XY.of(startXY).plus(shift))
       onMove?.(position)
-    }, e)
+    }).start(e)
   }
 
   return createPortal(
