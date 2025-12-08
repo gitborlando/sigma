@@ -1,6 +1,5 @@
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { xy_distance, xy_minus } from 'src/editor/math/xy'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -41,7 +40,7 @@ export class Elem {
     StageSurface.collectDirty(this)
   }
 
-  private _obb = OBB.identityOBB()
+  private _obb = OBB.identity()
   private memoObb = memorized(() => {
     return this._obb.updateFromRect(this.node, this.node.rotation)
   })
@@ -56,8 +55,16 @@ export class Elem {
     ])
   }
 
+  private _mrect = MRect.identity()
+  private memoMRect = memorized(() => {
+    return this._mrect.clone(this.node)
+  })
+  get mrect() {
+    return this.memoMRect([this.node.width, this.node.height, this.node.matrix])
+  }
+
   get aabb() {
-    return this.obb.aabb
+    return this.mrect.aabb
   }
 
   private memoVisible = memorized(() => {
@@ -79,16 +86,7 @@ export class Elem {
   getDirtyRect() {
     if (!this.node) return null
 
-    const { center, width, height, rotation } = this.obb
-    const strokeWidth = this.node.strokes.reduce(
-      (acc, stroke) => acc + stroke.width,
-      0,
-    )
-    const outlineWidth = this.node.outline?.width || 0
-    const extend = max(strokeWidth, outlineWidth, 1)
-
-    return OBB.fromCenter(center, width + extend * 2, height + extend * 2, rotation)
-      .aabb
+    return this.aabb
   }
 
   traverseDraw() {
@@ -105,19 +103,19 @@ export class Elem {
 
     StageSurface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
+      let resetTransform = () => {}
 
-      StageSurface.ctxSaveRestore(() => {
-        this.node && ElemDrawer.draw(this, ctx, path2d)
-      })
+      if (this.node) {
+        resetTransform = StageSurface.setTransform(this.node.matrix)
+        StageSurface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d))
+      }
 
       if (this.children.length) {
-        if (this.clip) {
-          StageSurface.setOBBMatrix(this.obb, false)
-          ctx.clip(path2d)
-          StageSurface.setOBBMatrix(this.obb, true)
-        }
+        if (this.clip) ctx.clip(path2d)
         this.children.forEach((child) => child.traverseDraw())
       }
+
+      resetTransform()
     })
 
     resetCtx()
@@ -299,12 +297,12 @@ export class HitTest {
         return inRect
       } else {
         if (!inRect) return false
-        if (xy_distance(xy, XY._(r, r)) > r && xy.x < r && xy.y < r) return false
-        if (xy_distance(xy, XY._(w - r, r)) > r && xy.x > w - r && xy.y < r)
+        if (XY.distance(xy, XY.$(r, r)) > r && xy.x < r && xy.y < r) return false
+        if (XY.distance(xy, XY.$(w - r, r)) > r && xy.x > w - r && xy.y < r)
           return false
-        if (xy_distance(xy, XY._(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r)
+        if (XY.distance(xy, XY.$(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r)
           return false
-        if (xy_distance(xy, XY._(r, h - r)) > r && xy.x < r && xy.y > h - r)
+        if (XY.distance(xy, XY.$(r, h - r)) > r && xy.x < r && xy.y > h - r)
           return false
         return true
       }
@@ -359,7 +357,7 @@ export class HitTest {
 
       if (startAngle === 0 && endAngle === 0) return true
 
-      const angle = Angle.fromTwoVector(xy, XY._(cx, cy))
+      const angle = Angle.sweep(XY.vector(xy, XY.$(cx, cy)))
 
       if (startAngle <= endAngle) {
         return angle >= startAngle && angle <= endAngle
@@ -390,8 +388,8 @@ export class HitTest {
       if (cur.y < xy.y && next.y < xy.y) return
       const small = cur.y < next.y ? cur : next
       const large = cur.y > next.y ? cur : next
-      const A = xy_minus(large, small)
-      const B = xy_minus(xy, small)
+      const A = XY.of(large).minus(small)
+      const B = XY.of(xy).minus(small)
       if (A.x * B.y - A.y * B.x > 0) inside = !inside
     })
     return inside
@@ -403,10 +401,10 @@ export class HitTest {
     const radian = Math.atan2(dy, dx)
     const xShift = spread * Math.sin(radian)
     const yShift = spread * Math.cos(radian)
-    const TL = XY._(p1.x - xShift, p1.y + yShift)
-    const TR = XY._(p2.x - xShift, p2.y + yShift)
-    const BR = XY._(p2.x + xShift, p2.y - yShift)
-    const BL = XY._(p1.x + xShift, p1.y - yShift)
+    const TL = XY.$(p1.x - xShift, p1.y + yShift)
+    const TR = XY.$(p2.x - xShift, p2.y + yShift)
+    const BR = XY.$(p2.x + xShift, p2.y - yShift)
+    const BL = XY.$(p1.x + xShift, p1.y - yShift)
     return [TL, TR, BR, BL]
   }
 }

@@ -1,14 +1,11 @@
-import { objKeys } from '@gitborlando/utils'
-import { HandleNode } from 'src/editor/handle/node'
+import { createCache, objKeys } from '@gitborlando/utils'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
-import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
+import { getSelectedNodes } from 'src/editor/y-state/y-state'
 import { MULTI_VALUE } from 'src/global/constant'
 import { cleanObject, iife } from 'src/shared/utils/normal'
-import { xy_rotate } from '../math/xy'
-import { getSelectIdList } from '../y-state/y-clients'
 
-function createAllGeometry() {
+function createDesignGeoInfos() {
   return {
     x: 0,
     y: 0,
@@ -25,138 +22,127 @@ function createAllGeometry() {
 }
 
 function createActiveKeys(
-  set: Set<keyof AllGeometry>,
-  keys: (keyof AllGeometry)[] = [],
+  set: Set<keyof DesignGeoInfo>,
+  keys: (keyof DesignGeoInfo)[] = [],
 ) {
   set.clear()
   keys.forEach((key) => set.add(key))
   return set
 }
 
-export type AllGeometry = ReturnType<typeof createAllGeometry>
+const obbKeySet = new Set(['x', 'y', 'width', 'height', 'rotation'])
 
-class OperateGeometryService {
-  activeGeometry = createAllGeometry()
-  activeKeys = createActiveKeys(new Set())
-  operateKeys = createActiveKeys(new Set())
-  deltaKeys = createActiveKeys(new Set())
+export type DesignGeoInfo = ReturnType<typeof createDesignGeoInfos>
 
-  setupActiveKeys(selectedNodes: V1.Node[]) {
-    createActiveKeys(this.activeKeys, ['x', 'y', 'width', 'height', 'rotation'])
+class DesignGeometryService {
+  currentGeometries = createDesignGeoInfos()
+  currentKeys = createActiveKeys(new Set())
+  changingKeys = createActiveKeys(new Set())
+  isDelta = true
+
+  setupGeometries(selectedNodes: V1.Node[]) {
+    cleanObject(this.currentGeometries)
+    createActiveKeys(this.currentKeys, ['x', 'y', 'width', 'height', 'rotation'])
 
     selectedNodes.forEach((node) => {
-      if (node.type === 'frame') this.activeKeys.add('radius')
-      if (node.type === 'rect') this.activeKeys.add('radius')
-      if (node.type === 'polygon') this.activeKeys.add('sides')
+      if (node.type === 'frame') this.currentKeys.add('radius')
+      if (node.type === 'rect') this.currentKeys.add('radius')
+      if (node.type === 'polygon') this.currentKeys.add('sides')
       if (node.type === 'star') {
-        this.activeKeys.add('innerRate')
-        this.activeKeys.add('pointCount')
+        this.currentKeys.add('innerRate')
+        this.currentKeys.add('pointCount')
       }
       if (node.type === 'ellipse') {
-        this.activeKeys.add('startAngle')
-        this.activeKeys.add('endAngle')
-        this.activeKeys.add('innerRate')
+        this.currentKeys.add('startAngle')
+        this.currentKeys.add('endAngle')
+        this.currentKeys.add('innerRate')
       }
     })
-  }
 
-  setupActiveGeometry(selectedNodes: V1.Node[]) {
-    cleanObject(this.activeGeometry)
     selectedNodes.forEach((node, i) => {
-      this.activeKeys.forEach((key) => {
-        if (i === 0) this.activeGeometry[key] = T<any>(node)[key]
-        else if (this.activeGeometry[key] !== T<any>(node)[key])
-          T<any>(this.activeGeometry)[key] = MULTI_VALUE
+      this.currentKeys.forEach((key) => {
+        if (i === 0) this.currentGeometries[key] = this.getGeometryValue(node, key)
+        else if (this.currentGeometries[key] !== this.getGeometryValue(node, key))
+          T<any>(this.currentGeometries)[key] = MULTI_VALUE
       })
     })
   }
 
-  setActiveGeometries(
-    geometries: Partial<Record<keyof AllGeometry, number>>,
-    delta: boolean = true,
-  ) {
-    for (const key of objKeys(geometries)) {
-      if (delta) this.deltaKeys.add(key)
-      this.operateKeys.add(key)
-      this.activeGeometry[key] = geometries[key] as number
+  getGeometryValue(node: V1.Node, key: keyof DesignGeoInfo) {
+    if (obbKeySet.has(key)) {
+      const mrect = getNodeMRect(node)
+      return mrect[key as 'x' | 'y' | 'width' | 'height' | 'rotation']
     }
-    const traverse = SchemaHelper.createTraverse({
-      callback: this.applyChangeToNode,
-    })
-    traverse(getSelectIdList())
-    YState.next()
-
-    this.operateKeys.clear()
-    this.deltaKeys.clear()
+    return T<any>(node)[key]
   }
 
-  setActiveGeometry(key: keyof AllGeometry, value: number, delta: boolean = true) {
-    if (delta) this.deltaKeys.add(key)
-    this.operateKeys.add(key)
-    this.activeGeometry[key] = value
+  private nodeGeoInfoCache = createCache<ID, Partial<DesignGeoInfo>>()
 
-    const traverse = SchemaHelper.createTraverse({
-      callback: this.applyChangeToNode,
+  onStartSetGeometries() {
+    getSelectedNodes().forEach((node) => {
+      const geometries = <Partial<DesignGeoInfo>>{}
+      this.currentKeys.forEach((key) => {
+        geometries[key] = this.getGeometryValue(node, key)
+      })
+      this.nodeGeoInfoCache.set(node.id, geometries)
     })
-    traverse(getSelectIdList())
-    YState.next()
-
-    this.operateKeys.clear()
-    this.deltaKeys.clear()
   }
 
-  private delta(key: keyof AllGeometry, node: V1.Node) {
+  setGeometries(
+    geometries: Partial<Record<keyof DesignGeoInfo, number>>,
+    options: {
+      delta?: boolean
+    } = {},
+  ) {
+    const { delta = true } = options
+
+    this.isDelta = delta
+
+    for (const key of objKeys(geometries)) {
+      this.changingKeys.add(key)
+      this.currentGeometries[key] = geometries[key] as number
+    }
+
+    getSelectedNodes().forEach((node) => {
+      this.applyChangeToNode(node)
+    })
+    YState.next()
+
+    this.changingKeys.clear()
+    this.isDelta = true
+  }
+
+  onEndSetGeometries() {
+    this.nodeGeoInfoCache.clear()
+  }
+
+  private delta(key: keyof DesignGeoInfo, node: V1.Node) {
     const rawDelta = iife(() => {
-      if (this.deltaKeys.has(key)) return this.activeGeometry[key]
-      return this.activeGeometry[key] - T<any>(node)[key]
+      if (this.isDelta) return this.currentGeometries[key]
+      return this.currentGeometries[key] - T<any>(node)[key]
     })
-    // if (['width', 'height'].includes(key)) {
-    //   if (T<any>(node)[key] + rawDelta < 1) return T<any>(node)[key] - 1
-    //   return rawDelta
-    // }
     return rawDelta
   }
 
-  private deltaRate(key: keyof AllGeometry, node: any) {
+  private deltaRate(key: keyof DesignGeoInfo, node: any) {
     return divide(this.delta(key, node), node[key])
   }
 
-  private applyChangeToNode(traverseData: SchemaUtilTraverseData) {
-    const { node, depth } = traverseData
-
-    if (depth === 0) this.patchChangeToVectorPoints(node.id)
-
-    this.operateKeys.forEach((key) => {
-      if (key === 'width') {
-        if (depth !== 0) return
-        return YState.set(`${node.id}.width`, node.width + this.delta(key, node))
-      }
-      if (key === 'height') {
-        if (depth !== 0 || node.type === 'line') return
-        return YState.set(`${node.id}.height`, node.height + this.delta(key, node))
+  private applyChangeToNode(node: V1.Node) {
+    this.changingKeys.forEach((key) => {
+      if (obbKeySet.has(key)) {
+        if (key === 'height' && node.type === 'line') return
+        this.applyChangeToMRect(key as any, node)
       }
       if (key === 'radius') {
-        if (depth !== 0) return
-        return YState.set(
-          `${node.id}.radius`,
-          max(0, T<any>(node).radius + this.delta(key, node)),
-        )
-      }
-      if (key === 'rotation') {
-        if (this.operateKeys.size === 1) {
-          return this.applyRotationToNode(traverseData, node, depth)
-        }
-        return YState.set(
-          `${node.id}.rotation`,
-          Angle.normal(node.rotation + this.delta('rotation', node)),
-        )
+        const radius = max(0, T<any>(node).radius + this.delta(key, node))
+        YState.set(`${node.id}.radius`, radius)
       }
       if (key === 'sides') {
         let { width, height, sides } = node as V1.Polygon
         sides = max(3, sides + floor(this.delta(key, node)))
         YState.set(`${node.id}.sides`, sides)
         YState.set(`${node.id}.points`, createRegularPolygon(width, height, sides))
-        return
       }
       if (key === 'pointCount' || key === 'innerRate') {
         let { width, height, pointCount, innerRate } = node as V1.Star
@@ -169,38 +155,23 @@ class OperateGeometryService {
           createStarPolygon(width, height, pointCount, innerRate),
         )
       }
-      YState.set(`${node.id}.${key}`, T<any>(node)[key] + this.delta(key, node))
     })
   }
 
-  private applyRotationToNode(
-    traverseData: SchemaUtilTraverseData,
+  private applyChangeToMRect(
+    key: 'x' | 'y' | 'width' | 'height' | 'rotation',
     node: V1.Node,
-    depth: number,
   ) {
-    const { getNodeCenterXY } = HandleNode
-    const centerXY = getNodeCenterXY(node)
-    const newXY = xy_rotate(node, centerXY, this.delta('rotation', node))
-
-    YState.set(
-      `${node.id}.rotation`,
-      Angle.normal(node.rotation + this.delta('rotation', node)),
-    )
-
-    if (depth === 0) {
-      YState.set(`${node.id}.x`, newXY.x)
-      YState.set(`${node.id}.y`, newXY.y)
+    const mrect = getNodeMRect(node)
+    if (this.isDelta) {
+      mrect[key] = mrect[key] + this.currentGeometries[key]
     } else {
-      let upLevelRef = traverseData.upLevelRef!
-      while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
-      const ancestorCenter = getNodeCenterXY(upLevelRef.node)
-      const newCenter = XY.from(centerXY).rotate(
-        ancestorCenter,
-        this.delta('rotation', node),
-      )
-      const centerShift = newCenter.minus(centerXY)
-      YState.set(`${node.id}.x`, newXY.x + centerShift.x)
-      YState.set(`${node.id}.y`, newXY.y + centerShift.y)
+      mrect[key] = this.currentGeometries[key]
+    }
+    if (key === 'x' || key === 'y' || key === 'rotation') {
+      YState.set(`${node.id}.matrix`, mrect.matrix)
+    } else {
+      YState.set(`${node.id}.${key}`, mrect[key])
     }
   }
 
@@ -209,7 +180,7 @@ class OperateGeometryService {
     if (!node.points) return
 
     node.points.forEach((point, i) => {
-      if (this.operateKeys.has('width')) {
+      if (this.changingKeys.has('width')) {
         const deltaRate = this.deltaRate('width', node)
         const newX = point.x * (1 + deltaRate)
         YState.set(`${node.id}.points.${i}.x`, newX)
@@ -224,7 +195,7 @@ class OperateGeometryService {
         }
       }
 
-      if (this.operateKeys.has('height')) {
+      if (this.changingKeys.has('height')) {
         const deltaRate = this.deltaRate('height', node)
         const newY = point.y * (1 + deltaRate)
         YState.set(`${node.id}.points.${i}.y`, newY)
@@ -242,4 +213,4 @@ class OperateGeometryService {
   }
 }
 
-export const OperateGeometry = autoBind(new OperateGeometryService())
+export const DesignGeometry = autoBind(new DesignGeometryService())

@@ -149,5 +149,6 @@
   "snap to grid": "吸附到网格",
   "zoom to fit all": "缩放以适应全部",
   "zoom to fit selection": "缩放以适应选区",
+  "transformer rotated": "transformer 旋转",
   "modify geometry property": "修改几何属性"
 }

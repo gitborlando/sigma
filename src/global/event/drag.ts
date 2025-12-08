@@ -1,4 +1,4 @@
-import { iife, noopFunc } from '@gitborlando/utils'
+import { iife } from '@gitborlando/utils'
 import { IRect } from 'src/editor/math'
 import { StageViewport } from 'src/editor/stage/viewport'
 
@@ -15,32 +15,37 @@ export type DragData = {
 }
 
 export type DragOptions = {
-  throttle?: boolean
-  processingXY?: (xy: IXY) => IXY
-  processingShift?: (shift: IXY) => IXY
+  useRafThrottle?: boolean
+  processXY?: (xy: IXY) => IXY
+  processShift?: (shift: IXY) => IXY
 }
 
 export class DragHelper {
-  private canMove = false
-  private started = false
-  private current = XY.of(0, 0)
-  private start = XY.of(0, 0)
-  private shift = XY.of(0, 0)
-  private delta = XY.of(0, 0)
+  private current = XY.$(0, 0)
+  private origin = XY.$(0, 0)
+  private shift = XY.$(0, 0)
+  private delta = XY.$(0, 0)
   private marquee = { x: 0, y: 0, width: 0, height: 0 }
-  private startHandler?: (e: MouseEventLike) => any
-  private moveHandler?: (e: MouseEvent) => any
-  private endHandler?: (e: MouseEvent) => any
   private movePending = false
   private isInfinity = false
   private needThrottle = false
-  private processingXY = (xy: IXY) => xy
-  private processingShift = (shift: IXY) => shift
+  private processXY = (xy: IXY) => xy
+  private processShift = (shift: IXY) => shift
+  private defaultStartHandler = (e: MouseEventLike) => {
+    this.current = XY.client(e)
+    this.origin = XY.client(e)
+  }
+  private defaultMoveHandler = (e: MouseEvent) => {}
+  private defaultEndHandler = (e: MouseEventLike) => this.destroy()
+  private startHandler = this.defaultStartHandler
+  private moveHandler = this.defaultMoveHandler
+  private endHandler = this.defaultEndHandler
+  private moveCallback?: (data: DragData & { delta: IXY }) => void
 
   constructor(options?: DragOptions) {
-    this.needThrottle = options?.throttle ?? true
-    this.processingXY = options?.processingXY ?? this.processingXY
-    this.processingShift = options?.processingShift ?? this.processingShift
+    this.needThrottle = options?.useRafThrottle ?? true
+    this.processXY = options?.processXY ?? this.processXY
+    this.processShift = options?.processShift ?? this.processShift
   }
 
   needInfinity = () => {
@@ -48,12 +53,8 @@ export class DragHelper {
     return this
   }
 
-  onStart = (eventOrCallback?: MouseEventLike | ((data: DragData) => void)) => {
-    if (this.startHandler) return this
-
-    const isCallback = typeof eventOrCallback === 'function'
-    const event = isCallback ? undefined : eventOrCallback
-    const callback = isCallback ? eventOrCallback : undefined
+  onStart = (callback?: (data: DragData) => void) => {
+    if (this.startHandler !== this.defaultStartHandler) return this
 
     this.startHandler = (e: MouseEventLike) => {
       if (this.isInfinity) {
@@ -61,84 +62,64 @@ export class DragHelper {
       }
 
       this.current = XY.client(e)
-      this.start = XY.client(e)
+      this.origin = XY.client(e)
       this.marquee = this.calculateMarquee()
 
       callback?.({
-        current: this.processingXY(this.current.plain()),
-        start: this.processingXY(this.start.plain()),
-        shift: this.processingShift(this.shift.plain()),
+        current: XY.of(this.processXY(this.current)).$(),
+        start: XY.of(this.processXY(this.origin)).$(),
+        shift: XY.of(this.processShift(this.shift)).$(),
         marquee: this.marquee,
       })
-
-      this.canMove = true
-      this.started = true
-    }
-
-    if (event) {
-      this.startHandler(event)
-    } else {
-      window.addEventListener('mousedown', this.startHandler)
     }
 
     return this
   }
 
   onMove = (callback: (data: DragData & { delta: IXY }) => void) => {
-    if (this.moveHandler) return this
+    this.moveCallback = callback
+    if (this.moveHandler !== this.defaultMoveHandler) return this
 
     this.moveHandler = (e) => {
-      this.delta = this.delta.plus(XY._(e.movementX, e.movementY))
+      this.delta = XY.of(this.delta).plus(XY.$(e.movementX, e.movementY))
 
       if (this.movePending) return
       this.movePending = true
 
-      const throttleFunc = this.needThrottle ? requestAnimationFrame : iife
+      const throttle = this.needThrottle ? requestAnimationFrame : iife
 
-      throttleFunc(() => {
+      throttle(() => {
         this.movePending = false
 
-        if (!this.canMove) return
-        this.canMove = true
-
-        if (!this.started) {
-          this.startHandler?.(e)
-          this.started = true
-        }
-
-        this.current = this.current.plus(this.delta)
-        this.shift = this.current.minus(this.start)
+        this.current = XY.of(this.current).plus(this.delta)
+        this.shift = XY.of(this.current).minus(this.origin)
         this.marquee = this.calculateMarquee()
 
-        callback({
-          current: this.processingXY(this.current.plain()),
-          start: this.processingXY(this.start.plain()),
-          shift: this.processingShift(this.shift.plain()),
-          delta: this.processingShift(this.delta.plain()),
+        this.moveCallback?.({
+          current: XY.of(this.processXY(this.current)).$(),
+          start: XY.of(this.processXY(this.origin)).$(),
+          shift: XY.of(this.processShift(this.shift)).$(),
+          delta: XY.of(this.processShift(this.delta)).$(),
           marquee: this.marquee,
         })
 
-        this.delta = XY.of(0, 0)
+        this.delta = XY.$(0, 0)
       })
     }
-
-    window.addEventListener('mousemove', this.moveHandler)
 
     return this
   }
 
   onDestroy = (callback?: (data: DragData & { moved: boolean }) => void) => {
-    if (this.endHandler) return this
+    if (this.endHandler !== this.defaultEndHandler) return this
 
     this.endHandler = () => {
-      if (!this.canMove) return
-
       this.marquee = this.calculateMarquee()
 
       callback?.({
-        current: this.processingXY(this.current.plain()),
-        start: this.processingXY(this.start.plain()),
-        shift: this.processingShift(this.shift.plain()),
+        current: XY.of(this.processXY(this.current)).$(),
+        start: XY.of(this.processXY(this.origin)).$(),
+        shift: XY.of(this.processShift(this.shift)).$(),
         marquee: this.marquee,
         moved: this.shift.x !== 0 || this.shift.y !== 0,
       })
@@ -146,61 +127,59 @@ export class DragHelper {
       this.destroy()
     }
 
-    window.addEventListener('mouseup', this.endHandler)
-
     return this
   }
 
-  onSlide = (
-    callback: (data: DragData & { delta: IXY }) => void,
-    e?: MouseEventLike,
-  ) => {
-    this.onStart(e).onMove(callback).onDestroy()
+  start(event?: MouseEventLike) {
+    if (event) {
+      this.startHandler?.(event)
+    } else {
+      window.addEventListener('mousedown', this.startHandler)
+    }
+    window.addEventListener('mousemove', this.moveHandler)
+    window.addEventListener('mouseup', this.endHandler)
     return this
   }
 
   private destroy = () => {
-    window.removeEventListener('mousedown', this.startHandler || noopFunc)
-    window.removeEventListener('mousemove', this.moveHandler || noopFunc)
-    window.removeEventListener('mouseup', this.endHandler || noopFunc)
-    this.startHandler = undefined
-    this.moveHandler = undefined
-    this.endHandler = undefined
-
-    if (this.isInfinity) {
-      document.exitPointerLock()
-    }
-
+    window.removeEventListener('mousedown', this.startHandler)
+    window.removeEventListener('mousemove', this.moveHandler)
+    window.removeEventListener('mouseup', this.endHandler)
     this.setDataToDefault()
   }
 
   private calculateMarquee = () => {
-    const x = this.shift.x < 0 ? this.start.x + this.shift.x : this.start.x
-    const y = this.shift.y < 0 ? this.start.y + this.shift.y : this.start.y
+    const x = this.shift.x < 0 ? this.origin.x + this.shift.x : this.origin.x
+    const y = this.shift.y < 0 ? this.origin.y + this.shift.y : this.origin.y
     const width = Math.abs(this.shift.x)
     const height = Math.abs(this.shift.y)
-    const xy = this.processingXY(XY.of(x, y))
-    const bound = this.processingShift(XY.of(width, height))
+    const xy = this.processXY(XY.$(x, y))
+    const bound = this.processShift(XY.$(width, height))
     this.marquee = { ...xy, width: bound.x, height: bound.y }
     return this.marquee
   }
 
   private setDataToDefault = () => {
-    this.started = false
-    this.canMove = false
+    if (this.isInfinity) {
+      document.exitPointerLock()
+    }
+    this.current = XY.$(0, 0)
+    this.origin = XY.$(0, 0)
+    this.shift = XY.$(0, 0)
+    this.delta = XY.$(0, 0)
+    this.marquee = { x: 0, y: 0, width: 0, height: 0 }
     this.movePending = false
     this.isInfinity = false
-    this.current = XY.of(0, 0)
-    this.start = XY.of(0, 0)
-    this.shift = XY.of(0, 0)
-    this.delta = XY.of(0, 0)
-    this.marquee = { x: 0, y: 0, width: 0, height: 0 }
+    this.moveCallback = undefined
+    this.startHandler = this.defaultStartHandler
+    this.moveHandler = this.defaultMoveHandler
+    this.endHandler = this.defaultEndHandler
   }
 }
 
 export const StageDrag = new DragHelper({
-  processingXY: (xy) => StageViewport.toSceneXY(xy),
-  processingShift: (shift) => StageViewport.toSceneShift(shift),
+  processXY: (xy) => StageViewport.toSceneXY(xy),
+  processShift: (shift) => StageViewport.toSceneShift(shift),
 })
 
 export const Drag = new DragHelper({})

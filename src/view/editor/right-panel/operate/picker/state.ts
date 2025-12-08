@@ -1,7 +1,7 @@
 import { OperateFill } from 'src/editor/operate/fill'
 
 class FillPickerStateService {
-  @observable pickerPos = XY._()
+  @observable pickerPos = XY.$()
   @observable fillIndex = -1
   @observable isShowPicker = false
   @observable fillType: V1.Fill['type'] = 'color'

@@ -1,5 +1,5 @@
 import { firstOne } from '@gitborlando/utils'
-import { IRectWithCenter } from 'src/editor/math/types'
+import { IRect, IRectWithCenter } from 'src/editor/math/types'
 import { OBB } from './obb'
 import { XY } from './xy'
 
@@ -29,6 +29,32 @@ export class AABB {
       aabb.maxX - aabb.minX,
       aabb.maxY - aabb.minY,
     ] as const
+  }
+
+  static update(aabb: AABB, minX: number, minY: number, maxX: number, maxY: number) {
+    aabb.minX = minX
+    aabb.minY = minY
+    aabb.maxX = maxX
+    aabb.maxY = maxY
+    return aabb
+  }
+
+  static updateFromRect(aabb: AABB, rect: IRect) {
+    return AABB.update(
+      aabb,
+      rect.x,
+      rect.y,
+      rect.x + rect.width,
+      rect.y + rect.height,
+    )
+  }
+
+  static shift(aabb: AABB, delta: IXY) {
+    aabb.minX += delta.x
+    aabb.minY += delta.y
+    aabb.maxX += delta.x
+    aabb.maxY += delta.y
+    return aabb
   }
 
   static collide(one: AABB, another: AABB): boolean {
@@ -91,8 +117,8 @@ export class AABB {
   }
 
   static fromOBB(obb: OBB) {
-    const width = obb.projectionLengthAt(XY._(1, 0))
-    const height = obb.projectionLengthAt(XY._(0, 1))
+    const width = obb.projectionLengthAt(XY.$(1, 0))
+    const height = obb.projectionLengthAt(XY.$(0, 1))
     return new AABB(
       obb.center.x - width / 2,
       obb.center.y - height / 2,
@@ -102,8 +128,8 @@ export class AABB {
   }
 
   static updateFromOBB(aabb: AABB, obb: OBB) {
-    const width = obb.projectionLengthAt(XY._(1, 0))
-    const height = obb.projectionLengthAt(XY._(0, 1))
+    const width = obb.projectionLengthAt(XY.$(1, 0))
+    const height = obb.projectionLengthAt(XY.$(0, 1))
     aabb.minX = obb.center.x - width / 2
     aabb.minY = obb.center.y - height / 2
     aabb.maxX = obb.center.x + width / 2

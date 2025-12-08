@@ -127,7 +127,7 @@ class SchemaCreatorService {
 
   line(option?: Partial<V1.Line>): V1.Line {
     const nodeBase = this.createNodeBase()
-    const start = XY._(nodeBase.x, nodeBase.y)
+    const start = XY.$(nodeBase.x, nodeBase.y)
     const length = option?.width || nodeBase.width
     const rotation = option?.rotation || nodeBase.rotation
     const points = createLine(start, length, rotation)
@@ -189,8 +189,8 @@ class SchemaCreatorService {
   }
 
   fillLinearGradient(
-    start: IXY = XY._(0, 0),
-    end: IXY = XY._(1, 1),
+    start: IXY = XY.$(0, 0),
+    end: IXY = XY.$(1, 1),
   ): V1.FillLinearGradient {
     return {
       type: 'linearGradient',
@@ -284,12 +284,11 @@ class SchemaCreatorService {
       height: 100,
       opacity: 1,
       rotation: 0,
-      hFlip: false,
-      vFlip: false,
       fills: [this.fillColor()],
       strokes: [],
       blurs: [],
       shadows: [],
+      matrix: Matrix.identity(),
     }
   }
 

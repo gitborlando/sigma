@@ -165,7 +165,7 @@ const matrix = CanvasKit.Matrix.multiply(
 canvas.concat(matrix)
 
 // 重置变换
-canvas.resetMatrix()
+canvas.resetMatrix.of()
 ```
 
 ### 裁剪
@@ -846,7 +846,7 @@ const colorMatrix = [
   0, // A
 ]
 const filter = CanvasKit.ImageFilter.MakeColorFilter(
-  CanvasKit.ColorFilter.MakeMatrix(colorMatrix),
+  CanvasKit.ColorFilter.MakeMatrix.of(colorMatrix),
   null,
 )
 paint.setImageFilter(filter)

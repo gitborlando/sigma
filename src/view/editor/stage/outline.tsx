@@ -63,9 +63,11 @@ const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer
     const node = T<V1.Node>(useSchema((schema) => schema[id]))
     const strokeColor = hovered || selected ? themeColor() : color
     const strokeWidth = selected ? 1 : 2
+    const matrix = SchemaHelper.getSceneMatrix(node)
     const outline = SchemaCreator.clone<V1.Node>(node, {
       id: `${id}-outline`,
       fills: [],
+      matrix: matrix,
     })
 
     if (node.type === 'text') {

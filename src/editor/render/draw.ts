@@ -5,7 +5,6 @@ import { EditorSetting } from 'src/editor/editor/setting'
 import { AABB } from 'src/editor/math'
 import { max } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
-import { xy_from } from 'src/editor/math/xy'
 import { StageSurface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
@@ -28,8 +27,6 @@ class ElemDrawerService {
     this.ctx = ctx
     this.path2d = path2d
     this.dirtyRects = [elem.aabb]
-
-    StageSurface.setOBBMatrix(this.elem.obb, false)
 
     this.drawShapePath()
 
@@ -230,11 +227,11 @@ class ElemDrawerService {
         break
 
       case 'linearGradient':
-        const start = XY._(
+        const start = XY.$(
           fill.start.x * this.node.width,
           fill.start.y * this.node.height,
         )
-        const end = XY._(fill.end.x * this.node.width, fill.end.y * this.node.height)
+        const end = XY.$(fill.end.x * this.node.width, fill.end.y * this.node.height)
 
         const gradient = this.ctx.createLinearGradient(
           start.x,
@@ -426,7 +423,7 @@ class ElemDrawerService {
 
   private getPathCollideXys() {
     const points = (this.node as V1.Path).points
-    const collideXys = <IXY[]>[xy_from(points[0])]
+    const collideXys = <IXY[]>[XY.of(points[0])]
 
     loopFor(points, (cur, next) => {
       if (next.startPath) return
@@ -441,7 +438,7 @@ class ElemDrawerService {
         const xys = pointsOnBezierCurves([cur, cur, next.handleL, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
       } else {
-        collideXys.push(xy_from(next))
+        collideXys.push(XY.of(next))
       }
     })
 
@@ -454,7 +451,7 @@ class ElemDrawerService {
 
     this.splitTexts.forEach(({ start, width }, i) => {
       const y = i * lineHeight + fontSize / 2
-      collideXys.push(XY._(start, y), XY._(start + width, y))
+      collideXys.push(XY.$(start, y), XY.$(start + width, y))
     })
 
     return collideXys

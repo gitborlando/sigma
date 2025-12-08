@@ -9,20 +9,13 @@ export class Angle {
     return sin(Angle.radianFy(angle))
   }
 
+  static cosSin(angle: number) {
+    const radians = Angle.radianFy(angle)
+    return { cos: cos(radians), sin: sin(radians) }
+  }
+
   static tan(angle: number) {
     return tan(Angle.radianFy(angle))
-  }
-
-  static acos(angle: number) {
-    return Angle.angleFy(acos(Angle.radianFy(angle)))
-  }
-
-  static asin(angle: number) {
-    return Angle.angleFy(asin(Angle.radianFy(angle)))
-  }
-
-  static atan(angle: number) {
-    return Angle.angleFy(atan(Angle.radianFy(angle)))
   }
 
   static atan2(y: number, x: number) {
@@ -38,22 +31,20 @@ export class Angle {
   }
 
   static normal(angle: number) {
-    return (angle + 360) % 360
+    return ((angle % 360) + 360) % 360
+  }
+
+  static minor(angle: number) {
+    return Math.min(angle, 360 - angle)
   }
 
   static snap(angle: number, step = 90) {
     return Angle.normal(Math.round(angle / step) * step)
   }
 
-  static fromTwoVector(xy: IXY, origin: IXY) {
-    return Angle.atan2(xy.y - origin.y, xy.x - origin.x)
-  }
-
-  static rotatePoint(ax: number, ay: number, ox: number, oy: number, angle: number) {
-    const radian = Angle.radianFy(angle)
-    return {
-      x: (ax - ox) * cos(radian) - (ay - oy) * sin(radian) + ox,
-      y: (ax - ox) * sin(radian) + (ay - oy) * cos(radian) + oy,
-    }
+  static sweep(v1: IXY, v2: IXY = XY.xAxis(), clockwise = false) {
+    const dot = v1.x * v2.x + v1.y * v2.y
+    const det = v1.x * v2.y - v1.y * v2.x
+    return Angle.normal(Angle.atan2(det, dot) * (clockwise ? 1 : -1))
   }
 }

@@ -22,7 +22,7 @@ class OperatePageService {
   addPage(page = SchemaCreator.page()) {
     Schema.addItem(page)
     Schema.itemAdd(Schema.meta, ['pageIds', Schema.meta.pageIds.length], page.id)
-    Schema.itemAdd(Schema.client, ['viewport', page.id], { zoom: 1, xy: XY._(0, 0) })
+    Schema.itemAdd(Schema.client, ['viewport', page.id], { zoom: 1, xy: XY.$(0, 0) })
     this.selectPage(page.id)
     Schema.finalOperation('添加页面')
   }
@@ -39,7 +39,7 @@ class OperatePageService {
   getCurrentViewport() {
     return this.pageViewport.getSet(this.currentPage.id, () => ({
       zoom: 1,
-      offset: XY._(),
+      offset: XY.$(),
     }))
   }
 

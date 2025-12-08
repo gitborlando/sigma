@@ -4,7 +4,6 @@ import { nanoid } from 'nanoid'
 import { StageScene } from 'src/editor/render/scene'
 import { clone } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { xy_rotate } from '../math/xy'
 import { SchemaCreator } from '../schema/creator'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
@@ -13,7 +12,7 @@ import { ID, INode, INodeParent } from '../schema/type'
 @autobind
 class OperateNodeService {
   datumId = Signal.create('')
-  datumXY = XY._(0, 0)
+  datumXY = XY.$(0, 0)
   selectIds = Signal.create(new Set<ID>())
   afterRemoveNodes = Signal.create<ID[]>()
   selectedNodes = Signal.create(<INode[]>[])
@@ -194,8 +193,8 @@ class OperateNodeService {
   }
 
   getNodeCenterXY(node: INode) {
-    const center = XY._(node.x + node.width / 2, node.y + node.height / 2)
-    return xy_rotate(center, XY._(node.x, node.y), node.rotation)
+    const center = XY.$(node.x + node.width / 2, node.y + node.height / 2)
+    return XY.of(center).rotate(XY.$(node.x, node.y), node.rotation).xy
   }
 
   private autoGetDatumId(selectIds: Set<string>) {
@@ -212,8 +211,8 @@ class OperateNodeService {
       if (parentIds.size > 1) this.datumId.dispatch('')
     }
     const elem = StageScene.findElem(this.datumId.value)
-    if (!elem) return (this.datumXY = XY._(0, 0))
-    this.datumXY = XY._(elem.obb.aabb.minX, elem.obb.aabb.minY)
+    if (!elem) return (this.datumXY = XY.$(0, 0))
+    this.datumXY = XY.$(elem.obb.aabb.minX, elem.obb.aabb.minY)
   }
 }
 

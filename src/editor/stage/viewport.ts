@@ -3,7 +3,6 @@ import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
 import { AABB, IRect } from 'src/editor/math'
 import { minMax } from 'src/editor/math/base'
-import { Matrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
@@ -22,7 +21,7 @@ class StageViewportService {
   @observable bound = createInitBound()
 
   @observable zoom = 1
-  @observable offset = XY._(0, 0)
+  @observable offset = XY.$(0, 0)
   @observable isZooming = false
 
   sceneAABB = new AABB(0, 0, 0, 0)
@@ -49,16 +48,16 @@ class StageViewportService {
   }
 
   toCanvasXY(xy: IXY) {
-    return XY.from(xy).minus(XY.leftTop(this.bound))
+    return XY.of(xy).minus(XY.leftTop(this.bound))
   }
   toStageXY(xy: IXY) {
-    return XY.from(this.toCanvasXY(xy)).minus(this.offset)
+    return XY.of(this.toCanvasXY(xy)).minus(this.offset)
   }
   toSceneXY(xy: IXY) {
-    return XY.from(this.toStageXY(xy)).divide(this.zoom)
+    return XY.of(this.toStageXY(xy)).divide(this.zoom)
   }
   toSceneShift(xy: IXY) {
-    return XY.from(xy).divide(this.zoom)
+    return XY.of(xy).divide(this.zoom)
   }
   toSceneMarquee(marquee: IRect) {
     return {
@@ -68,7 +67,7 @@ class StageViewportService {
     }
   }
   sceneXYToClientXY(xy: IXY) {
-    return XY.from(xy)
+    return XY.of(xy)
       .multiply(this.zoom)
       .plus(this.offset)
       .plus(XY.leftTop(this.bound))
@@ -86,11 +85,9 @@ class StageViewportService {
 
   updateZoom(newZoom: number, center?: IXY) {
     const deltaZoom = this.limitZoom(newZoom) / this.zoom
-    const { width, height } = this.bound
-    center ||= XY.of(width / 2, height / 2)
+    center ||= XY.center(this.bound)
 
-    this.sceneMatrix = this.sceneMatrix
-      .clone()
+    this.sceneMatrix = Matrix.of(this.sceneMatrix)
       .translate(-center.x, -center.y)
       .scale(deltaZoom, deltaZoom)
       .translate(center.x, center.y)
@@ -108,13 +105,12 @@ class StageViewportService {
     e.preventDefault()
 
     if (!e.ctrlKey) {
-      if (e.shiftKey) {
-        this.sceneMatrix = this.sceneMatrix.clone().translate(e.deltaY, 0)
-      } else {
-        if (e.deltaY === 0)
-          this.sceneMatrix = this.sceneMatrix.clone().translate(-e.deltaX, 0)
-        else this.sceneMatrix = this.sceneMatrix.clone().translate(0, -e.deltaY)
-      }
+      const shift = e.shiftKey
+        ? XY.$(e.deltaY, 0)
+        : e.deltaY === 0
+          ? XY.$(-e.deltaX, 0)
+          : XY.$(0, -e.deltaY)
+      this.sceneMatrix = Matrix.of(this.sceneMatrix).shift(shift)
       return
     }
 
@@ -138,17 +134,15 @@ class StageViewportService {
   }
 
   private onMatrixChange() {
-    return Disposer.collect(
-      reaction(
-        () => this.sceneMatrix,
-        (_, prev) => (this.prevSceneMatrix = prev.clone()),
-      ),
-      autorun(() => {
+    return reaction(
+      () => this.sceneMatrix,
+      (_, prev) => {
+        this.prevSceneMatrix = prev
         this.zoom = this.sceneMatrix.a
-        this.offset = XY.of(this.sceneMatrix.tx, this.sceneMatrix.ty)
+        this.offset = XY.from(this.sceneMatrix.tx, this.sceneMatrix.ty)
         this.sceneAABB = this.sceneMatrix.invertAABB(this.boundAABB)
         this.prevSceneAABB = this.prevSceneMatrix.invertAABB(this.boundAABB)
-      }),
+      },
     )
   }
 
@@ -166,7 +160,7 @@ class StageViewportService {
   private onObserving() {
     return Disposer.collect(
       autorun(() => {
-        YClients.client.sceneMatrix = this.sceneMatrix.tuple()
+        YClients.client.sceneMatrix = Matrix.of(this.sceneMatrix)
       }),
       autorun(() => {
         const client = YClients.observingClient
@@ -180,9 +174,9 @@ class StageViewportService {
       () => YClients.client.selectPageId,
       (pageId) => {
         const getMatrix = () =>
-          getEditorSetting().dev.sceneMatrix || Matrix.identity().tuple()
+          getEditorSetting().dev.sceneMatrix || Matrix.identity()
         const matrix = HandlePage.pageSceneMatrix.getSet(pageId, getMatrix)
-        StageViewport.sceneMatrix = Matrix.of(...matrix)
+        StageViewport.sceneMatrix = Matrix.of(matrix)
       },
     )
   }
@@ -190,7 +184,7 @@ class StageViewportService {
   @action
   private DEV_loadSceneMatrix() {
     const { fixedSceneMatrix, sceneMatrix } = getEditorSetting().dev
-    if (fixedSceneMatrix) this.sceneMatrix = Matrix.of(...sceneMatrix)
+    if (fixedSceneMatrix) this.sceneMatrix = Matrix.of(sceneMatrix)
   }
 
   handleZoomToFitAll() {
@@ -213,12 +207,11 @@ class StageViewportService {
     const zoom = this.limitZoom(
       min(this.bound.width / rect.width, this.bound.height / rect.height),
     )
-    const offset = XY.center(rect).minus(
-      XY.of(this.bound.width, this.bound.height).divide(2, zoom),
-    )
+    const boundCenter = XY.center(this.bound).divide(zoom)
+    const offset = XY.center(rect).minus(boundCenter)
 
     this.sceneMatrix = Matrix.identity()
-      .translate(-offset.x, -offset.y)
+      .shift(offset.multiplyNum(-1))
       .scale(zoom, zoom)
   }
 }

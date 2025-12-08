@@ -19,9 +19,9 @@ class YClientsService {
   @observable client: V1.Client = {
     selectIdMap: {},
     selectPageId: '',
-    cursor: new XY(0, 0),
+    cursor: XY.$(0, 0),
     color: COLOR.random(),
-    sceneMatrix: StageViewport.sceneMatrix.tuple(),
+    sceneMatrix: StageViewport.sceneMatrix,
     userId: '',
     userName: '',
     userAvatar: '',

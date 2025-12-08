@@ -24,8 +24,8 @@ export function point(option?: Partial<IPoint>): IPoint {
   }
 }
 
-export function createLine(start: IXY, length: number, rotation: number) {
-  const end = XY.of(start.x + length, start.y).plain()
+export function createLine(start: IXY, length: number) {
+  const end = XY.$(start.x + length, start.y)
   const points = [point(start), point(end)]
   optionalSet(firstOne(points), 'startPath', true)
   optionalSet(lastOne(points), 'endPath', true)
@@ -38,7 +38,7 @@ export function createRegularPolygon(
   sideCount: number,
 ) {
   sideCount = Math.max(sideCount | 0, 3)
-  const center = XY._(width / 2, height / 2)
+  const center = XY.$(width / 2, height / 2)
   const radius = max(width, height) / 2
   const delta = 360 / sideCount
   const points = range(sideCount).map((i) => {
@@ -65,7 +65,7 @@ export function createStarPolygon(
   innerRate: number,
 ) {
   pointCount = max(pointCount | 0, 3)
-  const center = XY._(width / 2, height / 2)
+  const center = XY.$(width / 2, height / 2)
   const outerRadius = max(width, height) / 2
   const innerRadius = innerRate * outerRadius
   const delta = 360 / pointCount / 2

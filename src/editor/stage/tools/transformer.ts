@@ -1,138 +1,190 @@
-import { AABB, OBB } from 'src/editor/math'
-import { OperateGeometry } from 'src/editor/operate/geometry'
-import { StageScene } from 'src/editor/render/scene'
-import { StageCursor } from 'src/editor/stage/cursor'
-import { snapGridRound } from 'src/editor/utils'
+import { createCache, iife } from '@gitborlando/utils'
+import { AABB, IMRect } from 'src/editor/math'
+import { SchemaHelper } from 'src/editor/schema/helper'
+import { snapGridRound, TRBL } from 'src/editor/utils'
+import { getSelectIdList } from 'src/editor/y-state/y-clients'
+import { getSelectedNodes } from 'src/editor/y-state/y-state'
 import { StageDrag } from 'src/global/event/drag'
 
-class StageTransformerService {
-  obb = OBB.identityOBB()
+type TransformerAction = 'move' | 'resize' | 'rotate'
 
+class StageTransformerService {
+  @observable.ref mrect = MRect.identity()
+  @observable.ref diffMatrix = Matrix.identity()
   @observable isMoving = false
 
+  @computed get isSingleSelect() {
+    return getSelectIdList().length === 1
+  }
+
+  private action: TransformerAction = 'move'
   isSelectOnlyLine = false
 
-  calcOBB(selectNodes: V1.Node[]) {
-    if (selectNodes.length === 0) {
-      return (this.obb = OBB.identityOBB())
-    }
+  setup(selectNodes: V1.Node[]) {
     if (selectNodes.length === 1) {
-      return (this.obb = OBB.fromRect(selectNodes[0], selectNodes[0].rotation))
+      const matrix = SchemaHelper.getSceneMatrix(selectNodes[0])
+      return (this.mrect = MRect.fromRect(selectNodes[0], matrix))
     }
-    return (this.obb = OBB.fromAABB(
-      AABB.merge(selectNodes.map((node) => StageScene.findElem(node.id).obb.aabb)),
-    ))
+
+    const aabbList = selectNodes.map((node) => {
+      const matrix = SchemaHelper.getSceneMatrix(node)
+      return MRect.fromRect(node, matrix).aabb
+    })
+    const rect = AABB.rect(AABB.merge(aabbList))
+    this.mrect = MRect.fromRect(rect, Matrix.identity().shift(rect))
+    return this.mrect
   }
 
   move(e: MouseEvent) {
-    const originalObb = this.obb.clone()
+    const { startMRect, startMatrix } = this.onStartTransform()
+    const startAABB = startMRect.aabb
 
-    StageDrag.onStart(() => {
-      if (e.altKey) {
-        StageCursor.setCursor('copy')
-        // OperateNode.copySelectNodes()
-        // OperateNode.pasteNodes()
-      }
+    StageDrag.onMove(({ shift }) => {
+      this.action = 'move'
+      this.isMoving = true
+
+      const aabb = AABB.shift(startAABB, shift)
+      const snapDelta = XY.$(
+        snapGridRound(aabb.minX) - aabb.minX,
+        snapGridRound(aabb.minY) - aabb.minY,
+      )
+
+      const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)
+      this.diffMatrix = newMatrix.divide(startMatrix)
+
+      this.transform()
     })
-      .onMove(({ shift }) => {
-        this.isMoving = true
-
-        const obb = originalObb.clone().shift(shift)
-        const aabb = AABB.fromOBB(obb)
-        const snapDelta = XY._(
-          snapGridRound(aabb.minX) - aabb.minX,
-          snapGridRound(aabb.minY) - aabb.minY,
-        )
-        obb.shift(snapDelta)
-
-        const finalDeltaXY = XY.from(obb).minus(this.obb)
-        OperateGeometry.setActiveGeometries(finalDeltaXY)
-      })
       .onDestroy(({ moved }) => {
         this.isMoving = false
-
-        if (!moved) return
-
-        if (e.altKey) {
-          // StageCursor.setCursor('select')
-          // OperateGeometry.operateKeys.clear()
-          // Schema.finalOperation('alt 复制节点')
+        this.onEndTransform()
+        if (moved) {
+          YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
         }
-        YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
       })
+      .start(e)
   }
 
-  onDragLine(type: 'top' | 'bottom' | 'left' | 'right', e: MouseEvent) {
-    const { setActiveGeometry, setActiveGeometries, activeGeometry } =
-      OperateGeometry
-    const { rotation } = activeGeometry
+  onResize(
+    directions: TRBL[],
+    options?: {
+      e?: MouseEvent
+      shiftKey?: boolean
+    },
+  ) {
+    const { startMRect, startMatrix } = this.onStartTransform()
+    const endMatrix = Matrix.of(startMatrix)
 
-    StageDrag.onStart()
-      .onMove(({ delta }) => {
-        const deltaX = XY.from(delta).getDot(XY.xAxis(rotation))
-        const deltaY = XY.from(delta).getDot(XY.yAxis(rotation))
+    StageDrag.onMove(({ shift }) => {
+      this.action = 'resize'
+      shift = Matrix.of(startMRect.matrix).applyShift(shift, true)
 
-        if (this.isSelectOnlyLine) {
-          setActiveGeometry('x', XY.from(delta).getDot(XY.xAxis(0)))
-          setActiveGeometry('y', XY.from(delta).getDot(XY.yAxis(0)))
-          return
+      const { tx, ty, scaleX, scaleY } = iife(() => {
+        let width = startMRect.width
+        let height = startMRect.height
+        let tx = startMatrix.tx
+        let ty = startMatrix.ty
+        const maxShift = Math.max(shift.x, shift.y)
+        const shiftX = options?.shiftKey ? maxShift : shift.x
+        const shiftY = options?.shiftKey ? maxShift : shift.y
+        if (directions.includes('left')) {
+          width -= shiftX
+          tx += shiftX
         }
-
-        if (e.shiftKey) {
-          switch (type) {
-            case 'top':
-              setActiveGeometry('x', -(deltaY / 2) * Angle.sin(rotation))
-              setActiveGeometry('y', (deltaY / 2) * Angle.cos(rotation))
-              setActiveGeometry('height', -deltaY)
-              setActiveGeometry('height', -deltaY)
-              break
-            case 'right':
-              setActiveGeometry('width', deltaX)
-              setActiveGeometry('x', (-deltaX / 2) * Angle.cos(rotation))
-              setActiveGeometry('y', (-deltaX / 2) * Angle.sin(rotation))
-              setActiveGeometry('width', -deltaX)
-              break
-            case 'bottom':
-              setActiveGeometry('height', +deltaY)
-              setActiveGeometry('x', (-deltaY / 2) * Angle.sin(rotation))
-              setActiveGeometry('y', (-deltaY / 2) * Angle.cos(rotation))
-              setActiveGeometry('height', -(-deltaY))
-              break
-            case 'left':
-              setActiveGeometry('x', (deltaX / 2) * Angle.cos(rotation))
-              setActiveGeometry('y', (deltaX / 2) * Angle.sin(rotation))
-              setActiveGeometry('width', deltaX)
-              setActiveGeometry('width', -deltaX)
-              break
-          }
-        } else {
-          switch (type) {
-            case 'top':
-              setActiveGeometry('x', -deltaY * Angle.sin(rotation))
-              setActiveGeometry('y', deltaY * Angle.cos(rotation))
-              setActiveGeometry('height', -deltaY)
-              break
-            case 'right':
-              setActiveGeometry('width', deltaX)
-              break
-            case 'bottom':
-              setActiveGeometry('height', deltaY)
-              break
-            case 'left':
-              setActiveGeometries({
-                x: deltaX * Angle.cos(rotation),
-                y: deltaX * Angle.sin(rotation),
-                width: -deltaX,
-              })
-              break
-          }
+        if (directions.includes('top')) {
+          height -= shiftY
+          ty += shiftY
         }
+        if (directions.includes('right')) width += shiftX
+        if (directions.includes('bottom')) height += shiftY
+        const scaleX = width / startMRect.width
+        const scaleY = height / startMRect.height
+        return { tx, ty, scaleX, scaleY }
       })
+
+      endMatrix.set({ a: scaleX, d: scaleY, tx: tx, ty: ty })
+      this.diffMatrix = Matrix.of(endMatrix).divide(startMatrix)
+
+      this.transform()
+    })
       .onDestroy(({ moved }) => {
-        if (!moved) return
-
-        YUndo.track2('state', sentence(t('verb.scale'), t('noun.node')))
+        this.onEndTransform()
+        if (moved) {
+          YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
+        }
       })
+      .start(options?.e)
+  }
+
+  onRotate() {
+    const { startMRect } = this.onStartTransform()
+    const startRect = AABB.rect(startMRect.aabb)
+    const startMatrix = Matrix.identity().shift(startRect)
+
+    StageDrag.onMove(({ current, start }) => {
+      this.action = 'rotate'
+
+      const rotation = Angle.sweep(
+        XY.vector(current, startMRect.center),
+        XY.vector(start, startMRect.center),
+      )
+      const aabbMRect = MRect.fromRect(startRect, startMatrix)
+      const endMatrix = aabbMRect.rotate(rotation).matrix
+      this.diffMatrix = Matrix.of(endMatrix).divide(startMatrix)
+
+      this.transform()
+    })
+      .onDestroy(({ moved }) => {
+        this.onEndTransform()
+        if (moved) {
+          YUndo.track2('state', sentence(t('verb.rotate'), t('noun.node')))
+        }
+      })
+      .start()
+  }
+
+  private mrectCache = createCache<ID, IMRect>()
+
+  private onStartTransform() {
+    getSelectedNodes().forEach((node) => {
+      this.mrectCache.set(node.id, MRect.of(node))
+    })
+    const startMRect = this.mrect.clone()
+    const startMatrix = this.isSingleSelect
+      ? Matrix.identity()
+      : Matrix.of(startMRect.matrix)
+    return { startMRect, startMatrix }
+  }
+
+  private transform() {
+    getSelectedNodes().forEach(this.applyToNode)
+    YState.next()
+  }
+
+  private onEndTransform() {
+    this.mrectCache.clear()
+    this.diffMatrix = Matrix.identity()
+  }
+
+  private applyToNode(node: V1.Node) {
+    const mrect = this.mrectCache.get(node.id)
+    if (!this.diffMatrix || !mrect) return
+
+    const startMRect = MRect.of(mrect)
+    const forwardMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
+
+    if (getSelectIdList().length === 1 && this.action === 'resize') {
+      startMRect.transform(this.diffMatrix, true)
+    } else {
+      const localDiff = Matrix.of(forwardMatrix)
+        .invert()
+        .append(this.diffMatrix)
+        .append(forwardMatrix)
+      startMRect.transform(localDiff)
+    }
+
+    YState.set(`${node.id}.width`, startMRect.width)
+    YState.set(`${node.id}.height`, startMRect.height)
+    YState.set(`${node.id}.matrix`, startMRect.matrix)
   }
 }
 

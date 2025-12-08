@@ -1,7 +1,7 @@
 import { jsonParse } from '@gitborlando/utils'
 import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
-import { mockCollide } from 'src/editor/editor/mock/collide'
+import { mock_transform_v } from 'src/editor/editor/mock/transfrom_v'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
@@ -16,7 +16,6 @@ import { OperateFill } from '../operate/fill'
 import { OperateShadow } from '../operate/shadow'
 import { OperateStroke } from '../operate/stroke'
 import { OperateText } from '../operate/text'
-import { StageDrop } from '../stage/drop'
 import { StageInteract } from '../stage/interact/interact'
 import { StageViewport } from '../stage/viewport'
 
@@ -49,8 +48,6 @@ export class EditorService {
     OperateStroke.initHook()
     OperateShadow.initHook()
     OperateText.initHook()
-
-    StageDrop.initHook()
   }
 
   dispose() {
@@ -64,7 +61,7 @@ export class EditorService {
     let schema: V1.Schema | undefined
 
     if (fileId === 'mock') {
-      let mockSchema = mockCollide()
+      let mockSchema = mock_transform_v()
       if (mockSchema) schema = mockSchema
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)

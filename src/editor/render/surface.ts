@@ -1,9 +1,9 @@
 import { NoopFunc, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { AABB, OBB } from 'src/editor/math'
+import { AABB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
-import { Matrix } from 'src/editor/math/matrix'
+import { IMatrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
@@ -104,15 +104,10 @@ export class StageSurfaceService {
     return () => (this.currentCtx = lastCtx)
   }
 
-  setOBBMatrix = (obb: OBB, inverse = false) => {
-    const { x, y, rotation } = obb
-    if (!inverse) {
-      this.currentCtx.translate(x, y)
-      this.currentCtx.rotate(Angle.radianFy(rotation))
-    } else {
-      this.currentCtx.rotate(-Angle.radianFy(rotation))
-      this.currentCtx.translate(-x, -y)
-    }
+  setTransform = (transform: IMatrix) => {
+    const matrix = Matrix.of(transform)
+    this.currentCtx.transform(...matrix.tuple())
+    return () => this.currentCtx.transform(...matrix.invert().tuple())
   }
 
   private renderType?: SurfaceRenderType
@@ -129,9 +124,11 @@ export class StageSurfaceService {
     if (type !== 'nextFullRender') this.renderTasks.length = 0
 
     this.renderTasks.push(() => {
-      if (type === 'firstFullRender') this.clearSurface()
-      if (type === 'partialRender') this.partialRender()
-      else this.fullRender()
+      if (type === 'firstFullRender' || getEditorSetting().fullRender)
+        this.clearSurface()
+      const isPartialRender =
+        type === 'partialRender' && !getEditorSetting().fullRender
+      isPartialRender ? this.partialRender() : this.fullRender()
     })
 
     this.raf.cancelAll().request((next) => {
@@ -173,10 +170,10 @@ export class StageSurfaceService {
     this.fullRenderElemsMinHeap = new TinyQueue(undefined, (a, b) => {
       if (a.layerIndex !== b.layerIndex) return a.layerIndex - b.layerIndex
       const aDistance = XY.center(AABB.rect(a.elem.aabb)).minus(
-        this.eventXY || XY._(0, 0),
+        this.eventXY || XY.$(0, 0),
       )
       const bDistance = XY.center(AABB.rect(b.elem.aabb)).minus(
-        this.eventXY || XY._(0, 0),
+        this.eventXY || XY.$(0, 0),
       )
       const aLane = max(abs(aDistance.x), abs(aDistance.y))
       const bLane = max(abs(bDistance.x), abs(bDistance.y))
@@ -228,7 +225,7 @@ export class StageSurfaceService {
     if (this.renderType) return
 
     const { width, height } = this.canvas
-    const delta = XY.from(cur).minus(prev)
+    const delta = XY.of(cur).minus(prev)
     const reRenderElems = new Set<Elem>()
 
     const traverse = (elem: Elem) => {
@@ -328,14 +325,14 @@ export class StageSurfaceService {
         const path2d = new Path2D()
         const { minX, minY, maxX, maxY } = this.devDirtyArea
         path2d.rect(minX, minY, maxX - minX, maxY - minY)
-        ctx.lineWidth = 1 / dpr / getZoom()
+        ctx.lineWidth = 2 / getZoom()
         ctx.strokeStyle = rgba(0, 255, 100, 1)
         ctx.stroke(path2d)
       })
     })
   }
 
-  private dprMatrix = Matrix.of(dpr, 0, 0, dpr, 0, 0)
+  private dprMatrix = Matrix.identity().scale(dpr, dpr)
 
   transformCanvas = () => {
     this.ctx.transform(...this.dprMatrix.tuple())
@@ -357,7 +354,7 @@ export class StageSurfaceService {
         },
       ),
       reaction(
-        () => XY.from(StageViewport.offset),
+        () => XY.of(StageViewport.offset),
         (offset, prevOffset) => {
           this.translate(offset, prevOffset)
           this.requestRenderTopCanvas()
@@ -395,7 +392,7 @@ export class StageSurfaceService {
 
   getVisualSize = (aabb: AABB) => {
     const zoom = getZoom()
-    return XY._((aabb.maxX - aabb.minX) * zoom, (aabb.maxY - aabb.minY) * zoom)
+    return XY.$((aabb.maxX - aabb.minX) * zoom, (aabb.maxY - aabb.minY) * zoom)
   }
 
   addEvent = <K extends keyof HTMLElementEventMap>(
@@ -422,43 +419,60 @@ export class StageSurfaceService {
   }
 
   private traverseLayerList = (
-    func: (
-      elem: Elem,
-      capture: boolean,
-      stopped: boolean,
-      stopPropagation: NoopFunc,
-      hitList?: Elem[],
-      xy?: IXY,
-    ) => any,
+    func: (props: {
+      elem: Elem
+      capture: boolean
+      stopped: boolean
+      stopPropagation: NoopFunc
+      hitList?: Elem[]
+      xy?: IXY
+    }) => any,
     noBubble?: boolean,
   ) => {
     let stopped = false
     const stopPropagation = () => (stopped = true)
 
-    const traverse = (layerIndex: number, elem: Elem, hitList?: Elem[]) => {
+    const traverse = (props: {
+      layerIndex: number
+      elem: Elem
+      hitList?: Elem[]
+      xy?: IXY
+    }) => {
+      const { layerIndex, elem, hitList } = props
+      let xy = props.xy
       if (!elem.visible) return
 
-      if (this.eventXY) {
-        const xy = XY.from(this.eventXY)
-          .rotate(elem.obb.xy, -elem.obb.rotation)
-          .minus(elem.obb.xy)
+      if (xy) {
+        if (elem.node?.matrix) {
+          xy = Matrix.of(elem.node.matrix).invertXY(xy)
+        } else {
+          xy = XY.of(this.eventXY)
+            .rotate(elem.obb.xy, -elem.obb.rotation)
+            .minus(elem.obb.xy)
+        }
 
-        func(elem, true, stopped, stopPropagation, hitList!, xy)
+        func({ elem, capture: true, stopped, stopPropagation, hitList, xy })
 
         const subHitList: Elem[] = []
-        reverseFor(elem.children, (elem) => traverse(layerIndex, elem, subHitList))
+        reverseFor(elem.children, (elem) =>
+          traverse({ layerIndex, elem, hitList: subHitList, xy }),
+        )
         this.elemsFromPoint.push(...subHitList)
 
-        !noBubble && func(elem, false, stopped, stopPropagation, undefined, xy)
+        !noBubble &&
+          func({ elem, capture: false, stopped, stopPropagation, hitList, xy })
       } else {
-        func(elem, true, stopped, stopPropagation)
+        func({ elem, capture: true, stopped, stopPropagation })
 
-        reverseFor(elem.children, (elem) => traverse(layerIndex, elem))
-        !noBubble && func(elem, false, stopped, stopPropagation)
+        reverseFor(elem.children, (elem) => traverse({ layerIndex, elem }))
+
+        !noBubble && func({ elem, capture: false, stopped, stopPropagation })
       }
     }
 
-    reverseFor(StageScene.rootElems, (elem, i) => traverse(i, elem, []))
+    reverseFor(StageScene.rootElems, (elem, layerIndex) =>
+      traverse({ layerIndex, elem, xy: this.eventXY, hitList: [] }),
+    )
   }
 
   private elemsFromPoint: Elem[] = []
@@ -467,12 +481,9 @@ export class StageSurfaceService {
     if (!e) return this.elemsFromPoint
 
     this.getEventXY(e)
-    this.traverseLayerList(
-      (elem, capture, stopped, stopPropagation, hitList, xy) => {
-        const hit = elem.hitTest(xy!)
-        if (hit) hitList?.push(elem)
-      },
-    )
+    this.traverseLayerList(({ elem, hitList, xy }) => {
+      if (elem.hitTest(xy!)) hitList?.push(elem)
+    })
 
     return this.elemsFromPoint
   }
@@ -485,7 +496,7 @@ export class StageSurfaceService {
 
       this.getEventXY(e)
       this.traverseLayerList(
-        (elem, capture, stopped, stopPropagation, hitList, xy) => {
+        ({ elem, capture, stopped, stopPropagation, hitList, xy }) => {
           const hit = elem.hitTest(xy!)
           if (hit) hitList?.push(elem)
           if (!stopped)

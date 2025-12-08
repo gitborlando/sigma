@@ -1,7 +1,6 @@
 import { Angle } from 'src/editor/math/angle'
 import { IRect } from 'src/editor/math/types'
 import { AABB } from './aabb'
-import { XY, xy_dot, xy_minus, xy_rotate } from './xy'
 
 type IAxis = { widthAxis: IXY; heightAxis: IXY }
 
@@ -25,19 +24,19 @@ export class OBB {
   }
 
   get xy() {
-    return XY._(this.x, this.y)
+    return XY.$(this.x, this.y)
   }
 
   #calcCenter = () => {
-    const center = XY._(this.x + this.width / 2, this.y + this.height / 2)
-    return xy_rotate(center, XY._(this.x, this.y), this.rotation)
+    const center = XY.from(this.x + this.width / 2, this.y + this.height / 2)
+    return center.rotate(XY.$(this.x, this.y), this.rotation)
   }
 
   #calcAxis = () => {
     const cos = Angle.cos(this.rotation)
     const sin = Angle.sin(this.rotation)
-    const widthAxis = XY._(cos, -sin)
-    const heightAxis = XY._(sin, cos)
+    const widthAxis = XY.$(cos, -sin)
+    const heightAxis = XY.$(sin, cos)
     return (this.axis = { widthAxis, heightAxis })
   }
 
@@ -81,10 +80,10 @@ export class OBB {
     const sinWidth = sin * this.width
     const cosHeight = cos * this.height
     const sinHeight = sin * this.height
-    const TL = XY._(this.x, this.y)
-    const TR = XY._(this.x + cosWidth, this.y + sinWidth)
-    const BR = XY._(this.x + cosWidth - sinHeight, this.y + sinWidth + cosHeight)
-    const BL = XY._(this.x - sinHeight, this.y + cosHeight)
+    const TL = XY.$(this.x, this.y)
+    const TR = XY.$(this.x + cosWidth, this.y + sinWidth)
+    const BR = XY.$(this.x + cosWidth - sinHeight, this.y + sinWidth + cosHeight)
+    const BL = XY.$(this.x - sinHeight, this.y + cosHeight)
     return (this.vertexes = [TL, TR, BR, BL])
   }
 
@@ -95,37 +94,37 @@ export class OBB {
   projectionLengthAt = (anotherAxis: IXY) => {
     const { widthAxis, heightAxis } = this.axis
     return (
-      Math.abs(xy_dot(widthAxis, anotherAxis)) * this.width +
-      Math.abs(xy_dot(heightAxis, anotherAxis)) * this.height
+      Math.abs(XY.dot(widthAxis, anotherAxis)) * this.width +
+      Math.abs(XY.dot(heightAxis, anotherAxis)) * this.height
     )
   }
 
   collide = (another: OBB) => {
-    const centerVector = xy_minus(this.center, another.center)
+    const centerVector = XY.of(this.center).minus(another.center)
     if (
       this.projectionLengthAt(another.axis.widthAxis) + another.width <=
-      2 * Math.abs(xy_dot(centerVector, another.axis.widthAxis))
+      2 * Math.abs(XY.dot(centerVector, another.axis.widthAxis))
     )
       return false
     if (
       this.projectionLengthAt(another.axis.heightAxis) + another.height <=
-      2 * Math.abs(xy_dot(centerVector, another.axis.heightAxis))
+      2 * Math.abs(XY.dot(centerVector, another.axis.heightAxis))
     )
       return false
     if (
       another.projectionLengthAt(this.axis.widthAxis) + this.width <=
-      2 * Math.abs(xy_dot(centerVector, this.axis.widthAxis))
+      2 * Math.abs(XY.dot(centerVector, this.axis.widthAxis))
     )
       return false
     if (
       another.projectionLengthAt(this.axis.heightAxis) + this.height <=
-      2 * Math.abs(xy_dot(centerVector, this.axis.heightAxis))
+      2 * Math.abs(XY.dot(centerVector, this.axis.heightAxis))
     )
       return false
     return true
   }
 
-  static identityOBB() {
+  static identity() {
     return new OBB(0, 0, 0, 0, 0)
   }
 
@@ -137,7 +136,7 @@ export class OBB {
   static fromCenter(center: IXY, width: number, height: number, rotation = 0) {
     const dx = center.x - width / 2
     const dy = center.y - height / 2
-    const xy = XY.of(dx, dy).rotate(center, rotation)
+    const xy = XY.from(dx, dy).rotate(center, rotation)
     return new OBB(xy.x, xy.y, width, height, rotation)
   }
 
