@@ -45,25 +45,9 @@ export class Angle {
     return Angle.normal(Math.round(angle / step) * step)
   }
 
-  static fromTwoVector(xy: IXY, origin: IXY) {
-    return Angle.atan2(xy.y - origin.y, xy.x - origin.x)
-  }
-
-  static rotatePoint(ax: number, ay: number, ox: number, oy: number, angle: number) {
-    const radian = Angle.radianFy(angle)
-    return XY._(
-      (ax - ox) * cos(radian) - (ay - oy) * sin(radian) + ox,
-      (ax - ox) * sin(radian) + (ay - oy) * cos(radian) + oy,
-    )
-  }
-
-  static sweep(a: IXY, b: IXY, clockwise = false) {
-    const dot = a.x * b.x + a.y * b.y
-    const det = a.x * b.y - a.y * b.x
+  static sweep(v1: IXY, v2: IXY = XY.xAxis(), clockwise = false) {
+    const dot = v1.x * v2.x + v1.y * v2.y
+    const det = v1.x * v2.y - v1.y * v2.x
     return Angle.normal(Angle.atan2(det, dot) * (clockwise ? 1 : -1))
-  }
-
-  static sweepFromXAxis(xy: IXY, clockwise = false) {
-    return Angle.sweep(xy, XY.xAxis(), clockwise)
   }
 }

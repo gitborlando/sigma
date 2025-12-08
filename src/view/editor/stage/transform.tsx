@@ -174,7 +174,7 @@ const VertexComp: FC<{
                   x: current.x,
                   y: current.y,
                   width: XY.distanceOf(current, end),
-                  rotation: Angle.fromTwoVector(end, current),
+                  rotation: Angle.sweep(XY.vectorOf(end, current)),
                 },
                 false,
               )
@@ -186,7 +186,7 @@ const VertexComp: FC<{
               setActiveGeometries(
                 {
                   width: XY.distanceOf(current, start),
-                  rotation: Angle.fromTwoVector(current, start),
+                  rotation: Angle.sweep(XY.vectorOf(current, start)),
                 },
                 false,
               )
@@ -296,25 +296,23 @@ const VertexComp: FC<{
 
   const handleRotatePointerMouseDown = (e: ElemMouseEvent) => {
     e.stopPropagation()
-
     StageCursor.setCursor('rotate').lock().upReset()
 
-    const { center } = transformOBB
     let last: IXY
+    const center = transformOBB.center
     StageDrag.onStart()
       .onMove(({ current, start }) => {
         if (!last) last = start
-        const deltaRotation = XY.from(current).getAngle(last, center)
-        last = current
-
+        const deltaRotation = Angle.sweep(
+          XY.vectorOf(current, center),
+          XY.vectorOf(last, center),
+        )
         setActiveGeometry('rotation', deltaRotation)
+        last = current
       })
       .onDestroy(({ moved }) => {
         if (!moved) return
-        YUndo.track({
-          type: 'state',
-          description: sentence(t('verb.rotate'), t('noun.node')),
-        })
+        YUndo.track2('state', t('transformer rotated'))
       })
   }
 

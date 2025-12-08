@@ -67,7 +67,7 @@ class StageCreateService {
       current = snapGridRoundXY(current)
       start = snapGridRoundXY(start)
 
-      const rotation = Angle.fromTwoVector(current, start)
+      const rotation = Angle.sweep(XY.vectorOf(current, start))
       const width = XY.distanceOf(current, start)
 
       OperateGeometry.setActiveGeometries({ ...start, width, rotation }, false)

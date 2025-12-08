@@ -51,7 +51,7 @@ export function hslColor(h: number, s: number, l: number) {
   return hslRgb(h, s, l)
 }
 export function makeLinearGradientCss({ start, end, stops }: V1.FillLinearGradient) {
-  const degree = Angle.fromTwoVector(end, start) + 90
+  const degree = Angle.sweep(XY.vectorOf(end, start)) + 90
   return `linear-gradient(${degree}deg, ${stops[0].color} 0%, ${stops
     .map(({ color, offset }) => `${color} ${offset * 100}%`)
     .join(', ')}, ${stops[stops.length - 1].color} 100%)`

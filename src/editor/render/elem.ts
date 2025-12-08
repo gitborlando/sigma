@@ -359,7 +359,7 @@ export class HitTest {
 
       if (startAngle === 0 && endAngle === 0) return true
 
-      const angle = Angle.fromTwoVector(xy, XY._(cx, cy))
+      const angle = Angle.sweep(XY.vectorOf(xy, XY._(cx, cy)))
 
       if (startAngle <= endAngle) {
         return angle >= startAngle && angle <= endAngle

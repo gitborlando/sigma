@@ -1,8 +1,5 @@
+import { cos, sin } from 'src/editor/math/angle'
 import { sqrt } from 'src/editor/math/base'
-
-export function xy_(x: number = 0, y: number = 0) {
-  return { x, y }
-}
 
 export function xy_client(e: any) {
   return { x: e.clientX, y: e.clientY }
@@ -61,7 +58,13 @@ export function xy_distance(self: IXY, another: IXY = XY._(0, 0)) {
 
 export function xy_rotate(self: IXY, origin: IXY, rotation: number) {
   if (rotation === 0) return self
-  return Angle.rotatePoint(self.x, self.y, origin.x, origin.y, rotation)
+  const radian = Angle.radianFy(rotation)
+  const dx = self.x - origin.x
+  const dy = self.y - origin.y
+  return XY._(
+    dx * cos(radian) - dy * sin(radian) + origin.x,
+    dx * sin(radian) + dy * cos(radian) + origin.y,
+  )
 }
 
 export function xy_dot(self: IXY, another: IXY) {
@@ -74,13 +77,6 @@ export function xy_symmetric(self: IXY, origin: IXY) {
 
 export function xy_opposite(self: IXY) {
   return { x: -self.x, y: -self.y }
-}
-
-export function xy_getRotation(self: IXY, another: IXY, origin: IXY) {
-  return Angle.angleFy(
-    Math.atan2(self.y - origin.y, self.x - origin.x) -
-      Math.atan2(another.y - origin.y, another.x - origin.x),
-  )
 }
 
 export function xy_toArray(self: IXY) {
@@ -132,7 +128,11 @@ export class XY {
 
   rotate(origin: IXY, rotation: number) {
     if (rotation === 0) return XY.from(this)
-    return XY.from(Angle.rotatePoint(this.x, this.y, origin.x, origin.y, rotation))
+    const cos = Angle.cos(rotation)
+    const sin = Angle.sin(rotation)
+    const dx = this.x - origin.x
+    const dy = this.y - origin.y
+    return XY.of(dx * cos - dy * sin + origin.x, dx * sin + dy * cos + origin.y)
   }
 
   symmetric(origin: IXY) {
@@ -151,13 +151,6 @@ export class XY {
 
   getDistance(another: IXY) {
     return sqrt((this.x - another.x) ** 2 + (this.y - another.y) ** 2)
-  }
-
-  getAngle(another: IXY, origin: IXY) {
-    return Angle.angleFy(
-      Math.atan2(this.y - origin.y, this.x - origin.x) -
-        Math.atan2(another.y - origin.y, another.x - origin.x),
-    )
   }
 
   static _(x: number = 0, y: number = 0) {
@@ -197,8 +190,8 @@ export class XY {
     return XY.of(-Angle.sin(rotation), Angle.cos(rotation))
   }
 
-  static distanceOf(self: IXY, another: IXY) {
-    return sqrt((self.x - another.x) ** 2 + (self.y - another.y) ** 2)
+  static distanceOf(a: IXY, b: IXY) {
+    return Math.hypot(a.x - b.x, a.y - b.y)
   }
 
   static vectorOf(a: IXY, b: IXY) {

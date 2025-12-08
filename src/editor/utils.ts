@@ -8,5 +8,5 @@ export function snapGridRound(value: number) {
 }
 
 export function snapGridRoundXY(xy: IXY) {
-  return XY.of(snapGridRound(xy.x), snapGridRound(xy.y))
+  return XY._(snapGridRound(xy.x), snapGridRound(xy.y))
 }
