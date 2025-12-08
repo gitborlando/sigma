@@ -74,7 +74,7 @@ namespace V1 {
     rotation: number
   }
 
-  type Transform = [number, number, number, number, number]
+  type Transform = [number, number, number, number, number, number]
 
   type NodeBase = NodeMeta &
     OBBInfo & {

@@ -45,8 +45,8 @@ export class Matrix {
   }
 
   rotate = (angle: number) => {
-    const cos = Math.cos(angle)
-    const sin = Math.sin(angle)
+    const cos = Angle.cos(angle)
+    const sin = Angle.sin(angle)
 
     const a1 = this.a
     const c1 = this.c
@@ -141,5 +141,13 @@ export class Matrix {
 
   static of(...args: IMatrixTuple) {
     return new Matrix(...args)
+  }
+
+  static fromTuple(tuple: IMatrixTuple) {
+    return new Matrix(...tuple)
+  }
+
+  static fromXYR(x: number, y: number, rotation: number) {
+    return Matrix.identity().rotate(rotation).translate(x, y)
   }
 }

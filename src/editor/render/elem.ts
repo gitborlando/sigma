@@ -41,7 +41,7 @@ export class Elem {
     StageSurface.collectDirty(this)
   }
 
-  private _obb = OBB.identityOBB()
+  private _obb = OBB.identity()
   private memoObb = memorized(() => {
     return this._obb.updateFromRect(this.node, this.node.rotation)
   })

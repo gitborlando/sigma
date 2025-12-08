@@ -6,7 +6,7 @@ import { snapGridRound } from 'src/editor/utils'
 import { StageDrag } from 'src/global/event/drag'
 
 class StageTransformerService {
-  obb = OBB.identityOBB()
+  obb = OBB.identity()
 
   @observable isMoving = false
 
@@ -14,7 +14,7 @@ class StageTransformerService {
 
   calcOBB(selectNodes: V1.Node[]) {
     if (selectNodes.length === 0) {
-      return (this.obb = OBB.identityOBB())
+      return (this.obb = OBB.identity())
     }
     if (selectNodes.length === 1) {
       return (this.obb = OBB.fromRect(selectNodes[0], selectNodes[0].rotation))

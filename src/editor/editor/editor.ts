@@ -1,7 +1,7 @@
 import { jsonParse } from '@gitborlando/utils'
 import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
-import { mockCollide } from 'src/editor/editor/mock/collide'
+import { mock } from 'src/editor/editor/mock/transfrom'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
@@ -64,7 +64,7 @@ export class EditorService {
     let schema: V1.Schema | undefined
 
     if (fileId === 'mock') {
-      let mockSchema = mockCollide()
+      let mockSchema = mock()
       if (mockSchema) schema = mockSchema
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)

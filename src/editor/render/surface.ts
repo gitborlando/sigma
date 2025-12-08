@@ -3,7 +3,7 @@ import { listen } from '@gitborlando/utils/browser'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { AABB, OBB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
-import { Matrix } from 'src/editor/math/matrix'
+import { IMatrixTuple, Matrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
@@ -102,6 +102,12 @@ export class StageSurfaceService {
     let lastCtx = this.currentCtx
     this.currentCtx = type === 'mainCanvas' ? this.ctx : this.topCtx
     return () => (this.currentCtx = lastCtx)
+  }
+
+  setTransform = (transform: IMatrixTuple) => {
+    const invert = Matrix.fromTuple(transform).invert().tuple()
+    this.currentCtx.transform(...transform)
+    return () => this.currentCtx.transform(...invert)
   }
 
   setOBBMatrix = (obb: OBB, inverse = false) => {

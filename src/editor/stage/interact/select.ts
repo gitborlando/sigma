@@ -149,7 +149,7 @@ class StageSelectService {
   }
 
   private onMarqueeSelect() {
-    let marqueeOBB = OBB.identityOBB()
+    let marqueeOBB = OBB.identity()
 
     const hitTest = (obb: OBB) => {
       const aabbResult = AABB.collide(marqueeOBB.aabb, obb.aabb)

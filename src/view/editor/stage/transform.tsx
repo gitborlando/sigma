@@ -13,7 +13,7 @@ import { StageDrag } from 'src/global/event/drag'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
-let transformOBB = OBB.identityOBB()
+let transformOBB = OBB.identity()
 let isSelectOnlyLine = false
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {

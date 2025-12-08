@@ -284,12 +284,11 @@ class SchemaCreatorService {
       height: 100,
       opacity: 1,
       rotation: 0,
-      hFlip: false,
-      vFlip: false,
       fills: [this.fillColor()],
       strokes: [],
       blurs: [],
       shadows: [],
+      transform: Matrix.identity().tuple(),
     }
   }
 
