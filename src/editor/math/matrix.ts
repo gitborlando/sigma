@@ -28,6 +28,12 @@ export class Matrix {
     return new Matrix(...this.tuple())
   }
 
+  shift = (delta: IXY) => {
+    this.tx += delta.x
+    this.ty += delta.y
+    return this
+  }
+
   translate = (x: number, y: number) => {
     this.tx += x
     this.ty += y

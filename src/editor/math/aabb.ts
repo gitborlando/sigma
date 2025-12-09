@@ -31,6 +31,14 @@ export class AABB {
     ] as const
   }
 
+  static shift(aabb: AABB, delta: IXY) {
+    aabb.minX += delta.x
+    aabb.minY += delta.y
+    aabb.maxX += delta.x
+    aabb.maxY += delta.y
+    return aabb
+  }
+
   static collide(one: AABB, another: AABB): boolean {
     return (
       one.minX <= another.maxX &&
