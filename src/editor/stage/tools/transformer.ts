@@ -1,7 +1,6 @@
 import { AABB, OBB } from 'src/editor/math'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
-import { StageCursor } from 'src/editor/stage/cursor'
 import { snapGridRound } from 'src/editor/utils'
 import { StageDrag } from 'src/global/event/drag'
 
@@ -30,13 +29,7 @@ class StageTransformerService {
   move(e: MouseEvent) {
     const originalObb = this.obb.clone()
 
-    StageDrag.onStart(() => {
-      if (e.altKey) {
-        StageCursor.setCursor('copy')
-        // OperateNode.copySelectNodes()
-        // OperateNode.pasteNodes()
-      }
-    })
+    StageDrag.onStart()
       .onMove(({ shift }) => {
         this.isMoving = true
 
@@ -53,14 +46,7 @@ class StageTransformerService {
       })
       .onDestroy(({ moved }) => {
         this.isMoving = false
-
         if (!moved) return
-
-        if (e.altKey) {
-          // StageCursor.setCursor('select')
-          // OperateGeometry.operateKeys.clear()
-          // Schema.finalOperation('alt 复制节点')
-        }
         YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
       })
   }
