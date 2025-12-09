@@ -26,6 +26,14 @@ class StageTransformerService {
     ))
   }
 
+  setup(selectNodes: V1.Node[]) {
+    if (selectNodes.length === 1) {
+      this.width = selectNodes[0].width
+      this.height = selectNodes[0].height
+      this.matrix = Matrix.fromTuple(selectNodes[0].transform)
+    }
+  }
+
   move(e: MouseEvent) {
     const originalObb = this.obb.clone()
 
