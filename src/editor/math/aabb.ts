@@ -1,3 +1,5 @@
+import { IMatrixTuple } from 'src/editor/math/matrix'
+import { MRect } from 'src/editor/math/mrect'
 import { firstOne } from '@gitborlando/utils'
 import { IRectWithCenter } from 'src/editor/math/types'
 import { OBB } from './obb'
@@ -29,6 +31,14 @@ export class AABB {
       aabb.maxX - aabb.minX,
       aabb.maxY - aabb.minY,
     ] as const
+  }
+
+  static update(aabb: AABB, minX: number, minY: number, maxX: number, maxY: number) {
+    aabb.minX = minX
+    aabb.minY = minY
+    aabb.maxX = maxX
+    aabb.maxY = maxY
+    return aabb
   }
 
   static shift(aabb: AABB, delta: IXY) {
@@ -117,5 +127,29 @@ export class AABB {
     aabb.maxX = obb.center.x + width / 2
     aabb.maxY = obb.center.y + height / 2
     return aabb
+  }
+
+  static fromMatrixRect(matrixTuple: IMatrixTuple, width: number, height: number) {
+    const matrix = Matrix.fromTuple(matrixTuple)
+    const TL = matrix.applyXY(XY._(0, 0))
+    const TR = matrix.applyXY(XY._(width, 0))
+    const BR = matrix.applyXY(XY._(width, height))
+    const BL = matrix.applyXY(XY._(0, height))
+    return new AABB(
+      min(TL.x, TR.x, BR.x, BL.x),
+      min(TL.y, TR.y, BR.y, BL.y),
+      max(TL.x, TR.x, BR.x, BL.x),
+      max(TL.y, TR.y, BR.y, BL.y),
+    )
+  }
+
+  static fromMRect(mrect: MRect) {
+    const [TL, TR, BR, BL] = mrect.vertexes
+    return new AABB(
+      min(TL.x, TR.x, BR.x, BL.x),
+      min(TL.y, TR.y, BR.y, BL.y),
+      max(TL.x, TR.x, BR.x, BL.x),
+      max(TL.y, TR.y, BR.y, BL.y),
+    )
   }
 }

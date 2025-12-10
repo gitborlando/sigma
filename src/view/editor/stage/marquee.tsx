@@ -21,9 +21,11 @@ export const EditorStageMarqueeComp: FC<{}> = observer(({}) => {
       0.393345670365656,
       0.6043342843027781,
       -0.7967308659869083,
-      5,
-      0,
-    ).tuple(),
+      marquee.x,
+      marquee.y,
+    )
+      .invert()
+      .tuple(),
   })
 
   return <elem node={rect} />
