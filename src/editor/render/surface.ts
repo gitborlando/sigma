@@ -135,9 +135,11 @@ export class StageSurfaceService {
     if (type !== 'nextFullRender') this.renderTasks.length = 0
 
     this.renderTasks.push(() => {
-      if (type === 'firstFullRender') this.clearSurface()
-      if (type === 'partialRender') this.partialRender()
-      else this.fullRender()
+      if (type === 'firstFullRender' || getEditorSetting().fullRender)
+        this.clearSurface()
+      const isPartialRender =
+        type === 'partialRender' && !getEditorSetting().fullRender
+      isPartialRender ? this.partialRender() : this.fullRender()
     })
 
     this.raf.cancelAll().request((next) => {
@@ -445,9 +447,14 @@ export class StageSurfaceService {
       if (!elem.visible) return
 
       if (this.eventXY) {
-        const xy = XY.from(this.eventXY)
-          .rotate(elem.obb.xy, -elem.obb.rotation)
-          .minus(elem.obb.xy)
+        let xy = this.eventXY
+        if (elem.node?.transform) {
+          xy = Matrix.fromTuple(elem.node.transform).invertXY(this.eventXY)
+        } else {
+          xy = XY.from(this.eventXY)
+            .rotate(elem.obb.xy, -elem.obb.rotation)
+            .minus(elem.obb.xy)
+        }
 
         func(elem, true, stopped, stopPropagation, hitList!, xy)
 

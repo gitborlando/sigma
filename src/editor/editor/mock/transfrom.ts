@@ -28,10 +28,17 @@ export function mock() {
   const rect = SchemaCreator.rect({
     // x: 0.5,
     // y: -0.15,
-    width: 6,
-    height: 4,
+    width: 60,
+    height: 40,
     // rotation: 33,
-    transform: Matrix.fromXYR(0.5, -0.15, 33).tuple(),
+    transform: Matrix.of(
+      -0.9193906588630281,
+      0.393345670365656,
+      0.6043342843027781,
+      -0.7967308659869083,
+      0,
+      0,
+    ).tuple(),
   })
   SchemaCreator.addToSchema(schema, rect)
   SchemaCreator.addChild(page, rect)

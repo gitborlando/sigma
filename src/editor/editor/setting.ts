@@ -10,6 +10,7 @@ const initSetting = () => {
     ignoreUnVisible: true,
     needSliceRender: true,
     showDirtyRect: false,
+    fullRender: false,
     dev: {
       fixedSceneMatrix: true,
       sceneMatrix: Matrix.identity().tuple(),
