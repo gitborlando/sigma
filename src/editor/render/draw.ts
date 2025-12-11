@@ -30,7 +30,7 @@ class ElemDrawerService {
     this.dirtyRects = [elem.aabb]
 
     // StageSurface.setOBBMatrix(this.elem.obb, false)
-    StageSurface.setTransform(this.node.transform)
+    StageSurface.setTransform(this.node.matrix)
 
     this.drawShapePath()
 

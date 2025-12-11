@@ -8,6 +8,7 @@ import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageMove } from 'src/editor/stage/interact/move'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
+import { StageTransformer2 } from 'src/editor/stage/tools/transformer2'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { StageDrag } from 'src/global/event/drag'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
@@ -15,6 +16,7 @@ import { themeColor } from 'src/view/styles/color'
 
 let transformOBB = OBB.identity()
 let isSelectOnlyLine = false
+let mrect = MRect.identity()
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const selectNodes = useSelectNodes()
@@ -26,10 +28,15 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 
   transformOBB = useMemo(() => StageTransformer.calcOBB(selectNodes), [selectNodes])
 
+  mrect = useMemo(() => {
+    return StageTransformer2.setup(selectNodes)
+  }, [selectNodes])
+
   const node = SchemaCreator.rect({
     id: 'transform',
     fills: [],
     ...transformOBB,
+    ...mrect.toSMRect(),
   })
 
   const mousedown = (e: ElemMouseEvent) => {
@@ -42,7 +49,9 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     }
   }
 
-  const [p0, p1, p2, p3] = transformOBB.vertexes
+  // const [p0, p1, p2, p3] = transformOBB.vertexes
+  const [p0, p1, p2, p3] = mrect.vertexes
+  console.log('p0, p1, p2, p3: ', p0, p1, p2, p3)
 
   return (
     <elem
@@ -114,6 +123,9 @@ const VertexComp: FC<{
     strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(COLOR.white)],
     radius: 2 / getZoom(),
+    matrix: Matrix.identity()
+      .translate(xy.x - size / 2, xy.y - size / 2)
+      .tuple(),
   })
 
   const rotatePointOBB = iife(() => {
@@ -127,11 +139,28 @@ const VertexComp: FC<{
     return OBB.fromCenter(newXY, size, size, 0)
   })
 
+  const rotatePointMatrix = iife(() => {
+    const offset = matchCase(type, {
+      topLeft: XY._(-size, -size),
+      topRight: XY._(size, -size),
+      bottomRight: XY._(size, size),
+      bottomLeft: XY._(-size, size),
+    })
+    const matrix = Matrix.identity()
+    return matrix
+
+      .rotate(mrect.rotation)
+      .translate(xy.x, xy.y)
+      .translate(-offset.x, -offset.y)
+      .tuple()
+  })
+
   const rotatePoint = SchemaCreator.rect({
     id: `transform-rotatePoint-${type}`,
     ...rotatePointOBB,
-    fills: [SchemaCreator.fillColor(COLOR.transparent)],
+    fills: [SchemaCreator.fillColor(COLOR.pinkRed)],
     radius: 2 / getZoom(),
+    // matrix: rotatePointMatrix,
   })
 
   const mouseenter = (e: ElemMouseEvent) => {

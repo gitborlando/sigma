@@ -30,7 +30,7 @@ class StageTransformerService {
     if (selectNodes.length === 1) {
       this.width = selectNodes[0].width
       this.height = selectNodes[0].height
-      this.matrix = Matrix.fromTuple(selectNodes[0].transform)
+      this.matrix = Matrix.fromTuple(selectNodes[0].matrix)
     }
   }
 

@@ -1,4 +1,10 @@
-import { Matrix } from 'src/editor/math/matrix'
+import { IMatrixTuple, Matrix } from 'src/editor/math/matrix'
+
+export type SMRect = /** Serializable MRect */ {
+  width: number
+  height: number
+  matrix: IMatrixTuple
+}
 
 /**
  * MRect: matrix rect
@@ -149,5 +155,37 @@ export class MRect {
   rotate(delta: number) {
     this.rotation = this._rotation + delta
     return this
+  }
+
+  update(width: number, height: number, matrix: Matrix) {
+    this._width = width
+    this._height = height
+    this._matrix = matrix
+    this.expired()
+    return this
+  }
+
+  fromSMRect(mrect: SMRect) {
+    this._width = mrect.width
+    this._height = mrect.height
+    this._matrix = Matrix.fromTuple(mrect.matrix)
+    this.expired()
+    return this
+  }
+
+  toSMRect() {
+    return {
+      width: this.width,
+      height: this.height,
+      matrix: this.matrix.tuple(),
+    }
+  }
+
+  static identity() {
+    return new MRect(0, 0, Matrix.identity())
+  }
+
+  static fromSMRect(mrect: SMRect) {
+    return new MRect(mrect.width, mrect.height, Matrix.fromTuple(mrect.matrix))
   }
 }

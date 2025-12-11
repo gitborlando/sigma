@@ -6,10 +6,7 @@ import { StageDrag } from 'src/global/event/drag'
 
 class StageTransformerService {
   obb = OBB.identity()
-  width = 0
-  height = 0
-  matrix = Matrix.identity()
-
+  mrect = MRect.identity()
   @observable isMoving = false
 
   isSelectOnlyLine = false
@@ -28,18 +25,13 @@ class StageTransformerService {
 
   setup(selectNodes: V1.Node[]) {
     if (selectNodes.length === 1) {
-      this.width = selectNodes[0].width
-      this.height = selectNodes[0].height
-      this.matrix = Matrix.fromTuple(selectNodes[0].transform)
+      return this.mrect.fromSMRect(selectNodes[0])
     }
+    return this.mrect
   }
 
   move(e: MouseEvent) {
-    const originalAABB = AABB.fromMatrixRect(
-      this.matrix.tuple(),
-      this.width,
-      this.height,
-    )
+    const originalAABB = this.mrect.aabb
 
     StageDrag.onStart()
       .onMove(({ shift }) => {
@@ -50,7 +42,7 @@ class StageTransformerService {
           snapGridRound(aabb.minX) - aabb.minX,
           snapGridRound(aabb.minY) - aabb.minY,
         )
-        this.matrix = this.matrix.shift(shift).shift(snapDelta)
+        this.mrect = this.mrect.shift(shift).shift(snapDelta)
       })
       .onDestroy(({ moved }) => {
         this.isMoving = false

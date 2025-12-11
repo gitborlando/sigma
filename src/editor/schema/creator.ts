@@ -288,7 +288,7 @@ class SchemaCreatorService {
       strokes: [],
       blurs: [],
       shadows: [],
-      transform: Matrix.identity().tuple(),
+      matrix: Matrix.identity().tuple(),
     }
   }
 

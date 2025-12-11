@@ -22,11 +22,11 @@ const TransformComp: FC<{
   node: V1.Node
   index: number
 }> = observer(({ node, index }) => {
-  const oldValue = useRef(node.transform[index])
-  oldValue.current = node.transform[index]
+  const oldValue = useRef(node.matrix[index])
+  oldValue.current = node.matrix[index]
 
   const handleChange = (value: number) => {
-    YState.set(`${node.id}.transform.${index}`, value)
+    YState.set(`${node.id}.matrix.${index}`, value)
     YState.next()
   }
   const handleSlide = (delta: number) => {
@@ -39,7 +39,7 @@ const TransformComp: FC<{
       size='small'
       prefix={['a', 'b', 'c', 'd', 'tx', 'ty'][index]}
       slideRate={0.2 / getZoom()}
-      value={node.transform[index]}
+      value={node.matrix[index]}
       onSlide={handleSlide}
       onChange={handleChange}
     />

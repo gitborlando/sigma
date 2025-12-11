@@ -448,8 +448,8 @@ export class StageSurfaceService {
 
       if (this.eventXY) {
         let xy = this.eventXY
-        if (elem.node?.transform) {
-          xy = Matrix.fromTuple(elem.node.transform).invertXY(this.eventXY)
+        if (elem.node?.matrix) {
+          xy = Matrix.fromTuple(elem.node.matrix).invertXY(this.eventXY)
         } else {
           xy = XY.from(this.eventXY)
             .rotate(elem.obb.xy, -elem.obb.rotation)

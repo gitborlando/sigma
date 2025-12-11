@@ -74,11 +74,11 @@ namespace V1 {
     rotation: number
   }
 
-  type Transform = [number, number, number, number, number, number]
+  type Matrix = import('src/editor/math/matrix').IMatrixTuple
 
   type NodeBase = NodeMeta &
     OBBInfo & {
-      transform: Transform
+      matrix: Matrix
       opacity: number
       flip?: 'x' | 'y' | 'xy'
       fills: Fill[]
