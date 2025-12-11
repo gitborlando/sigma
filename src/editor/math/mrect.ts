@@ -21,11 +21,13 @@ export class MRect {
   private _matrix = Matrix.identity()
   private _xy = XY._(0, 0)
   private _rotation = 0
+  private _center = XY._(0, 0)
   private _vertexes = [XY._(0, 0), XY._(0, 0), XY._(0, 0), XY._(0, 0)]
   private _aabb = new AABB(0, 0, 0, 0)
 
   private needReCalcXY = true
   private needReCalcRotation = true
+  private needReCalcCenter = true
   private needReCalcVertexes = true
   private needReCalcAABB = true
 
@@ -57,6 +59,14 @@ export class MRect {
     return this._rotation
   }
 
+  get center() {
+    if (this.needReCalcCenter) {
+      this._center = this.calcCenter()
+      this.needReCalcCenter = false
+    }
+    return this._center
+  }
+
   get vertexes() {
     if (this.needReCalcVertexes) {
       this._vertexes = this.calcVertexes()
@@ -79,7 +89,11 @@ export class MRect {
 
   private calcRotation() {
     const transformedXY = this.matrix.applyXY(XY.xAxis())
-    return Angle.sweep(transformedXY)
+    return Angle.sweep(transformedXY, XY.xAxis())
+  }
+
+  private calcCenter() {
+    return this.matrix.applyXY(XY._(this.width / 2, this.height / 2))
   }
 
   private calcVertexes() {
@@ -104,8 +118,9 @@ export class MRect {
 
   private expired() {
     this.needReCalcXY = true
-    this.needReCalcVertexes = true
     this.needReCalcRotation = true
+    this.needReCalcCenter = true
+    this.needReCalcVertexes = true
     this.needReCalcAABB = true
   }
 
@@ -128,6 +143,7 @@ export class MRect {
     const delta = XY.from(xy).minus(this.xy)
     this.matrix.translate(delta.x, delta.y)
     this._xy = xy
+    this.needReCalcCenter = true
     this.needReCalcVertexes = true
     this.needReCalcAABB = true
   }

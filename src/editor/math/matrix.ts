@@ -156,4 +156,8 @@ export class Matrix {
   static fromXYR(x: number, y: number, rotation: number) {
     return Matrix.identity().rotate(rotation).translate(x, y)
   }
+
+  static isFlipped(matrix: Matrix) {
+    return matrix.a * matrix.d - matrix.b * matrix.c < 0
+  }
 }

@@ -139,7 +139,7 @@ export class XY {
     return XY.of(2 * origin.x - this.x, 2 * origin.y - this.y)
   }
 
-  ratio(another: IXY, t: number) {
+  lerp(another: IXY, t: number) {
     const x = this.x + (another.x - this.x) * t
     const y = this.y + (another.y - this.y) * t
     return XY.of(x, y)
@@ -196,5 +196,9 @@ export class XY {
 
   static vectorOf(a: IXY, b: IXY) {
     return XY.of(a.x - b.x, a.y - b.y)
+  }
+
+  static lerpOf(a: IXY, b: IXY, t: number) {
+    return XY.of(a.x + (a.x - b.x) * t, a.y + (a.y - b.y) * t)
   }
 }

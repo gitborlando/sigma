@@ -13,18 +13,6 @@ export class Angle {
     return tan(Angle.radianFy(angle))
   }
 
-  static acos(angle: number) {
-    return Angle.angleFy(acos(Angle.radianFy(angle)))
-  }
-
-  static asin(angle: number) {
-    return Angle.angleFy(asin(Angle.radianFy(angle)))
-  }
-
-  static atan(angle: number) {
-    return Angle.angleFy(atan(Angle.radianFy(angle)))
-  }
-
   static atan2(y: number, x: number) {
     return Angle.angleFy(atan2(y, x))
   }
@@ -38,7 +26,11 @@ export class Angle {
   }
 
   static normal(angle: number) {
-    return (angle + 360) % 360
+    return ((angle % 360) + 360) % 360
+  }
+
+  static minor(angle: number) {
+    return Math.min(angle, 360 - angle)
   }
 
   static snap(angle: number, step = 90) {

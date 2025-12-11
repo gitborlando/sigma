@@ -1,4 +1,4 @@
-import { iife, matchCase } from '@gitborlando/utils'
+import { iife } from '@gitborlando/utils'
 import { isLeftMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
@@ -10,6 +10,7 @@ import { StageMove } from 'src/editor/stage/interact/move'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageTransformer2 } from 'src/editor/stage/tools/transformer2'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
+import { loopIndex } from 'src/editor/utils'
 import { StageDrag } from 'src/global/event/drag'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
@@ -49,9 +50,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     }
   }
 
-  // const [p0, p1, p2, p3] = transformOBB.vertexes
   const [p0, p1, p2, p3] = mrect.vertexes
-  console.log('p0, p1, p2, p3: ', p0, p1, p2, p3)
 
   return (
     <elem
@@ -67,6 +66,10 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
       <VertexComp type='topRight' xy={p1} />
       <VertexComp type='bottomRight' xy={p2} />
       <VertexComp type='bottomLeft' xy={p3} />
+      <RotatePointComp xy={p0} index={0} />
+      <RotatePointComp xy={p1} index={1} />
+      <RotatePointComp xy={p2} index={2} />
+      <RotatePointComp xy={p3} index={3} />
     </elem>
   )
 })
@@ -126,41 +129,6 @@ const VertexComp: FC<{
     matrix: Matrix.identity()
       .translate(xy.x - size / 2, xy.y - size / 2)
       .tuple(),
-  })
-
-  const rotatePointOBB = iife(() => {
-    const offset = matchCase(type, {
-      topLeft: XY._(-size, -size),
-      topRight: XY._(size, -size),
-      bottomRight: XY._(size, size),
-      bottomLeft: XY._(-size, size),
-    })
-    const newXY = XY.from(xy).plus(offset).rotate(xy, transformOBB.rotation)
-    return OBB.fromCenter(newXY, size, size, 0)
-  })
-
-  const rotatePointMatrix = iife(() => {
-    const offset = matchCase(type, {
-      topLeft: XY._(-size, -size),
-      topRight: XY._(size, -size),
-      bottomRight: XY._(size, size),
-      bottomLeft: XY._(-size, size),
-    })
-    const matrix = Matrix.identity()
-    return matrix
-
-      .rotate(mrect.rotation)
-      .translate(xy.x, xy.y)
-      .translate(-offset.x, -offset.y)
-      .tuple()
-  })
-
-  const rotatePoint = SchemaCreator.rect({
-    id: `transform-rotatePoint-${type}`,
-    ...rotatePointOBB,
-    fills: [SchemaCreator.fillColor(COLOR.pinkRed)],
-    radius: 2 / getZoom(),
-    // matrix: rotatePointMatrix,
   })
 
   const mouseenter = (e: ElemMouseEvent) => {
@@ -318,6 +286,51 @@ const VertexComp: FC<{
     moveVertex(e)
   }
 
+  return (
+    <elem
+      node={rect}
+      events={{
+        hover: mouseenter,
+        mousemove: (e) => e.stopPropagation(),
+        mousedown,
+      }}
+    />
+  )
+})
+
+const RotatePointComp: FC<{
+  xy: IXY
+  index: number
+}> = observer(({ xy, index }) => {
+  let p1 = mrect.vertexes[loopIndex(mrect.vertexes, index + 1)]
+  let p2 = mrect.vertexes[loopIndex(mrect.vertexes, index - 1)]
+
+  if (Matrix.isFlipped(mrect.matrix)) [p1, p2] = [p2, p1]
+
+  const sweep = Angle.minor(Angle.sweep(XY.vectorOf(p1, xy), XY.vectorOf(p2, xy)))
+  const p1_ = XY.from(p1).rotate(xy, sweep / 2)
+
+  const distance = XY.distanceOf(p1_, xy)
+  const offset = XY.lerpOf(xy, p1_, 16 / getZoom() / distance)
+
+  const size = 8 / getZoom()
+  const rotatePointMatrix = iife(() => {
+    return Matrix.identity()
+      .translate(offset.x, offset.y)
+      .translate(-size / 2, -size / 2)
+      .tuple()
+  })
+
+  const rotatePoint = SchemaCreator.ellipse({
+    id: `transform-rotatePoint-${index}`,
+    fills: [SchemaCreator.fillColor(COLOR.pinkRed)],
+    width: size,
+    height: size,
+    matrix: rotatePointMatrix,
+  })
+
+  const { setActiveGeometry } = OperateGeometry
+
   const handleRotatePointerHover = (e: ElemMouseEvent) => {
     if (!e.hovered) return StageCursor.setCursor('select')
     StageCursor.setCursor('rotate')
@@ -346,24 +359,12 @@ const VertexComp: FC<{
   }
 
   return (
-    <>
-      <elem
-        node={rect}
-        events={{
-          hover: mouseenter,
-          mousemove: (e) => e.stopPropagation(),
-          mousedown,
-        }}
-      />
-      <elem
-        x-if={!isSelectOnlyLine}
-        node={rotatePoint}
-        events={{
-          hover: handleRotatePointerHover,
-          mousedown: handleRotatePointerMouseDown,
-          mousemove: (e) => e.stopPropagation(),
-        }}
-      />
-    </>
+    <elem
+      node={rotatePoint}
+      events={{
+        hover: handleRotatePointerHover,
+        mousedown: handleRotatePointerMouseDown,
+      }}
+    />
   )
 })
