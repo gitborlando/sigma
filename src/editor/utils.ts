@@ -11,6 +11,7 @@ export function snapGridRoundXY(xy: IXY) {
   return XY._(snapGridRound(xy.x), snapGridRound(xy.y))
 }
 
-export function loopIndex(arr: any[], index: number) {
-  return index < 0 ? arr.length - 1 : index >= arr.length ? 0 : index
+export function arrayLoopGet(arr: any[], index: number) {
+  const loopIndex = index < 0 ? arr.length - 1 : index >= arr.length ? 0 : index
+  return arr[loopIndex]
 }

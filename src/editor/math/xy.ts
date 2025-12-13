@@ -78,9 +78,10 @@ export class XY {
   }
 
   static lerp(another: IXY, t: number) {
+    const distance = this.distance(another)
     return {
-      x: this._xy.x + (another.x - this._xy.x) * t,
-      y: this._xy.y + (another.y - this._xy.y) * t,
+      x: this._xy.x + (this._xy.x - another.x) * (t / distance),
+      y: this._xy.y + (this._xy.y - another.y) * (t / distance),
     }
   }
 

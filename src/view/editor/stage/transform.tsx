@@ -1,4 +1,3 @@
-import { iife } from '@gitborlando/utils'
 import { isLeftMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
@@ -10,7 +9,7 @@ import { StageMove } from 'src/editor/stage/interact/move'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageTransformer2 } from 'src/editor/stage/tools/transformer2'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
-import { loopIndex } from 'src/editor/utils'
+import { arrayLoopGet } from 'src/editor/utils'
 import { StageDrag } from 'src/global/event/drag'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
@@ -126,7 +125,7 @@ const VertexComp: FC<{
     strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(COLOR.white)],
     radius: 2 / getZoom(),
-    matrix: Matrix().shift(XY.of(xy).plusNum(-size / 2).xy).matrix,
+    matrix: Matrix().shift(XY.from(xy).plusNum(-size / 2).xy).matrix,
   })
 
   const mouseenter = (e: ElemMouseEvent) => {
@@ -302,25 +301,23 @@ const RotatePointComp: FC<{
   xy: IXY
   index: number
 }> = observer(({ xy, index }) => {
-  let p1 = mrect.vertexes[loopIndex(mrect.vertexes, index + 1)]
-  let p2 = mrect.vertexes[loopIndex(mrect.vertexes, index - 1)]
-
+  let p1 = arrayLoopGet(mrect.vertexes, index + 1)
+  let p2 = arrayLoopGet(mrect.vertexes, index - 1)
   if (MATRIX.isFlipped(mrect.matrix)) [p1, p2] = [p2, p1]
 
-  const sweep = Angle.minor(Angle.sweep(XY.of(p1).vector(xy), XY.of(p2).vector(xy)))
-  const p1_ = XY.of(p1).rotate(xy, sweep / 2).xy
-
-  const distance = XY.of(p1_).distance(xy)
-  const offset = XY.of(xy).lerp(p1_, 16 / getZoom() / distance)
-
   const size = 8 / getZoom()
-  const rotatePointMatrix = iife(() => {
-    return Matrix().shift(XY.of(offset).plusNum(-size / 2).xy).matrix
-  })
+  const sweep = Angle.minor(
+    Angle.sweep(XY.from(xy).vector(p1), XY.from(xy).vector(p2)),
+  )
+  const p1_ = XY.from(p1).rotate(xy, sweep / 2).xy
+  const offset = XY.of(xy).lerp(p1_, 16 / getZoom())
+  const rotatePointMatrix = Matrix().shift(
+    XY.of(offset).plusNum(-size / 2).xy,
+  ).matrix
 
   const rotatePoint = SchemaCreator.ellipse({
     id: `transform-rotatePoint-${index}`,
-    fills: [SchemaCreator.fillColor(COLOR.pinkRed)],
+    fills: [SchemaCreator.fillColor(COLOR.transparent)],
     width: size,
     height: size,
     matrix: rotatePointMatrix,
@@ -343,8 +340,8 @@ const RotatePointComp: FC<{
       .onMove(({ current, start }) => {
         if (!last) last = start
         const deltaRotation = Angle.sweep(
-          XY.of(current).vector(center),
-          XY.of(last).vector(center),
+          XY.from(current).vector(center),
+          XY.from(last).vector(center),
         )
         setActiveGeometry('rotation', deltaRotation)
         last = current
