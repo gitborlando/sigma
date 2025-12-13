@@ -14,11 +14,10 @@ import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
 import { Schema } from 'src/editor/schema/schema'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
-import { intersectRect } from 'src/editor/utils'
 import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { StageDrag } from 'src/global/event/drag'
-import { macroMatch, type IRect } from 'src/shared/utils/normal'
+import { type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 
 @autobind
@@ -151,25 +150,14 @@ class StageSelectService {
 
   private onMarqueeSelect() {
     let marqueeOBB = OBB.identity()
-    let marqueeMrect = MRect.identity()
-    let marqueeAABB = new AABB(0, 0, 0, 0)
-
-    const hitTest = (obb: OBB) => {
-      const aabbResult = AABB.collide(marqueeOBB.aabb, obb.aabb)
-      if (macroMatch`-180|-90|0|90|180`(obb.rotation)) return aabbResult
-      return aabbResult && marqueeOBB.collide(obb)
-    }
+    const marqueeAABB = new AABB(0, 0, 0, 0)
 
     const hitTestMrect = (mrect: MRect) => {
-      if (!intersectRect(AABB.rect(marqueeAABB), AABB.rect(mrect.aabb))) return false
-      marqueeAABB = Matrix(mrect.matrix).invertAABB(marqueeAABB)
-
-      return intersectRect(AABB.rect(marqueeAABB), {
-        x: 0,
-        y: 0,
-        width: mrect.width,
-        height: mrect.height,
-      })
+      if (!AABB.collide(marqueeAABB, mrect.aabb)) return false
+      return AABB.collide(
+        Matrix(mrect.matrix).invertAABB(marqueeAABB),
+        new AABB(0, 0, mrect.width, mrect.height),
+      )
     }
 
     const traverseTest = ({ id, node, childIds, depth }: SchemaUtilTraverseData) => {
@@ -201,16 +189,7 @@ class StageSelectService {
     StageDrag.onStart()
       .onMove(({ marquee }) => {
         this.marquee = marquee
-        marqueeMrect.width = marquee.width
-        marqueeMrect.height = marquee.height
-        marqueeMrect.matrix = Matrix().shift(marquee).matrix
-        marqueeAABB = AABB.update(
-          marqueeAABB,
-          marquee.x,
-          marquee.y,
-          marquee.x + marquee.width,
-          marquee.y + marquee.height,
-        )
+        AABB.updateFromRect(marqueeAABB, marquee)
         marqueeOBB = OBB.fromRect(this.marquee)
         this.clearSelect()
         runInAction(() => traverse())
