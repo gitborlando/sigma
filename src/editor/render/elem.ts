@@ -55,6 +55,14 @@ export class Elem {
     ])
   }
 
+  private _mrect = MRect.identity()
+  private memoMrect = memorized(() => {
+    return this._mrect.from(this.node)
+  })
+  get mrect() {
+    return this.memoMrect([this.node.width, this.node.height, this.node.matrix])
+  }
+
   get aabb() {
     return this.obb.aabb
   }
