@@ -77,10 +77,7 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
   observer(({ type, p1, p2 }) => {
     const line = SchemaCreator.line({
       id: `transform-line-${type}`,
-      points: [
-        SchemaCreator.point({ x: p1.x, y: p1.y }),
-        SchemaCreator.point({ x: p2.x, y: p2.y }),
-      ],
+      points: [SchemaCreator.point(p1), SchemaCreator.point(p2)],
       strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     })
 

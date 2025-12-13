@@ -16,14 +16,7 @@ export const EditorStageMarqueeComp: FC<{}> = observer(({}) => {
     ...marquee,
     strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(rgbToRgba(themeColor(55), 0.05))],
-    matrix: Matrix([
-      -0.9193906588630281,
-      0.393345670365656,
-      0.6043342843027781,
-      -0.7967308659869083,
-      marquee.x,
-      marquee.y,
-    ]).matrix,
+    matrix: Matrix().shift(marquee).matrix,
   })
 
   return <elem node={rect} />
