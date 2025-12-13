@@ -6,7 +6,6 @@ import { StageSelect } from 'src/editor/stage/interact/select'
 import { Uploader } from 'src/global/upload'
 import { IClientXY, preventDefault } from 'src/shared/utils/event'
 import { ImgManager } from '../editor/img-manager'
-import { xy_client } from '../math/xy'
 import { OperateNode } from '../operate/node'
 import { OperatePage } from '../operate/page'
 import { SvgParser } from '../parse/svg'
@@ -27,7 +26,7 @@ export class StageDropService {
   }
 
   private async onDrop(e: DragEvent) {
-    this.sceneXY = StageViewport.toSceneXY(xy_client(e))
+    this.sceneXY = StageViewport.toSceneXY(XY.of(e).xy)
     this.getContainerNode(e)
     await this.handleDrop(e)
     StageSelect.onCreateSelect(this.node.id)

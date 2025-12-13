@@ -5,7 +5,6 @@ import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
 import { MULTI_VALUE } from 'src/global/constant'
 import { cleanObject, iife } from 'src/shared/utils/normal'
-import { xy_rotate } from '../math/xy'
 import { getSelectIdList } from '../y-state/y-clients'
 
 function createAllGeometry() {
@@ -180,7 +179,7 @@ class OperateGeometryService {
   ) {
     const { getNodeCenterXY } = HandleNode
     const centerXY = getNodeCenterXY(node)
-    const newXY = xy_rotate(node, centerXY, this.delta('rotation', node))
+    const newXY = XY.of(node).rotate(centerXY, this.delta('rotation', node)).xy
 
     YState.set(
       `${node.id}.rotation`,
@@ -194,11 +193,11 @@ class OperateGeometryService {
       let upLevelRef = traverseData.upLevelRef!
       while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
       const ancestorCenter = getNodeCenterXY(upLevelRef.node)
-      const newCenter = XY.from(centerXY).rotate(
+      const newCenter = XY.of(centerXY).rotate(
         ancestorCenter,
         this.delta('rotation', node),
       )
-      const centerShift = newCenter.minus(centerXY)
+      const centerShift = newCenter.minus(centerXY).xy
       YState.set(`${node.id}.x`, newXY.x + centerShift.x)
       YState.set(`${node.id}.y`, newXY.y + centerShift.y)
     }

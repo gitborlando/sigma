@@ -49,16 +49,16 @@ class StageViewportService {
   }
 
   toCanvasXY(xy: IXY) {
-    return XY.from(xy).minus(XY.leftTop(this.bound))
+    return XY.from(xy).minus(XY.leftTop(this.bound)).xy
   }
   toStageXY(xy: IXY) {
-    return XY.from(this.toCanvasXY(xy)).minus(this.offset)
+    return XY.from(this.toCanvasXY(xy)).minus(this.offset).xy
   }
   toSceneXY(xy: IXY) {
-    return XY.from(this.toStageXY(xy)).divide(this.zoom)
+    return XY.from(this.toStageXY(xy)).divide(this.zoom).xy
   }
   toSceneShift(xy: IXY) {
-    return XY.from(xy).divide(this.zoom)
+    return XY.from(xy).divide(this.zoom).xy
   }
   toSceneMarquee(marquee: IRect) {
     return {
@@ -86,8 +86,7 @@ class StageViewportService {
 
   updateZoom(newZoom: number, center?: IXY) {
     const deltaZoom = this.limitZoom(newZoom) / this.zoom
-    const { width, height } = this.bound
-    center ||= XY.of(width / 2, height / 2)
+    center ||= XY.center(this.bound)
 
     this.sceneMatrix = Matrix(this.sceneMatrix)
       .translate(-center.x, -center.y)
@@ -146,7 +145,7 @@ class StageViewportService {
       ),
       autorun(() => {
         this.zoom = this.sceneMatrix[0]
-        this.offset = XY.of(this.sceneMatrix[4], this.sceneMatrix[5])
+        this.offset = XY._(this.sceneMatrix[4], this.sceneMatrix[5])
         this.sceneAABB = Matrix(this.sceneMatrix).invertAABB(this.boundAABB)
         this.prevSceneAABB = Matrix(this.prevSceneMatrix).invertAABB(this.boundAABB)
       }),
@@ -213,14 +212,11 @@ class StageViewportService {
     const zoom = this.limitZoom(
       min(this.bound.width / rect.width, this.bound.height / rect.height),
     )
-    const offset = XY.center(rect).minus(
-      XY.of(this.bound.width, this.bound.height).divide(2, zoom),
-    )
+    const offset = XY.of(XY.center(rect)).minus(
+      XY.of(XY.center(this.bound)).divide(zoom).xy,
+    ).xy
 
-    this.sceneMatrix = Matrix()
-      .shift(XY.from(offset).plusNum(-1))
-      .scale(zoom, zoom)
-      .clone()
+    this.sceneMatrix = Matrix().shift(XY.symmetric(offset)).scale(zoom, zoom).clone()
   }
 }
 

@@ -59,12 +59,12 @@ class StageTransformerService {
 
     StageDrag.onStart()
       .onMove(({ delta }) => {
-        const deltaX = XY.from(delta).getDot(XY.xAxis(rotation))
-        const deltaY = XY.from(delta).getDot(XY.yAxis(rotation))
+        const deltaX = XY.of(delta).dot(XY.xAxis(rotation))
+        const deltaY = XY.of(delta).dot(XY.yAxis(rotation))
 
         if (this.isSelectOnlyLine) {
-          setActiveGeometry('x', XY.from(delta).getDot(XY.xAxis(0)))
-          setActiveGeometry('y', XY.from(delta).getDot(XY.yAxis(0)))
+          setActiveGeometry('x', XY.of(delta).dot(XY.xAxis(0)))
+          setActiveGeometry('y', XY.of(delta).dot(XY.yAxis(0)))
           return
         }
 

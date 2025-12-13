@@ -1,6 +1,5 @@
 import { loopFor } from '@gitborlando/utils'
 import { camelCase } from 'nano-string-utils'
-import { xy_symmetric } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { normalizeColor } from 'src/shared/utils/color'
@@ -227,7 +226,7 @@ export class SvgParser {
           break
         case 'smooth curveto':
           const handleLeft = { x: command.x2, y: command.y2 }
-          const handleRight = xy_symmetric(prevPoint.handleL!, prevPoint)
+          const handleRight = XY.of(prevPoint.handleL!).symmetric(prevPoint)
           const point = SchemaCreator.point({ x, y, handleL: handleLeft })
           prevPoint.handleR = handleRight
           points.push(point)

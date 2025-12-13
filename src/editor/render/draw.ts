@@ -5,7 +5,6 @@ import { EditorSetting } from 'src/editor/editor/setting'
 import { AABB } from 'src/editor/math'
 import { max } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
-import { xy_from } from 'src/editor/math/xy'
 import { StageSurface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
@@ -427,7 +426,7 @@ class ElemDrawerService {
 
   private getPathCollideXys() {
     const points = (this.node as V1.Path).points
-    const collideXys = <IXY[]>[xy_from(points[0])]
+    const collideXys = <IXY[]>[XY.from(points[0]).xy]
 
     loopFor(points, (cur, next) => {
       if (next.startPath) return
@@ -442,7 +441,7 @@ class ElemDrawerService {
         const xys = pointsOnBezierCurves([cur, cur, next.handleL, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
       } else {
-        collideXys.push(xy_from(next))
+        collideXys.push(XY.from(next).xy)
       }
     })
 

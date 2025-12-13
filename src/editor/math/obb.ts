@@ -1,8 +1,6 @@
 import { Angle } from 'src/editor/math/angle'
-import { IMatrix } from 'src/editor/math/matrix'
 import { IRect } from 'src/editor/math/types'
 import { AABB } from './aabb'
-import { XY, xy_dot, xy_minus, xy_rotate } from './xy'
 
 type IAxis = { widthAxis: IXY; heightAxis: IXY }
 
@@ -31,7 +29,7 @@ export class OBB {
 
   #calcCenter = () => {
     const center = XY._(this.x + this.width / 2, this.y + this.height / 2)
-    return xy_rotate(center, XY._(this.x, this.y), this.rotation)
+    return XY.of(center).rotate(XY._(this.x, this.y), this.rotation).xy
   }
 
   #calcAxis = () => {
@@ -96,31 +94,31 @@ export class OBB {
   projectionLengthAt = (anotherAxis: IXY) => {
     const { widthAxis, heightAxis } = this.axis
     return (
-      Math.abs(xy_dot(widthAxis, anotherAxis)) * this.width +
-      Math.abs(xy_dot(heightAxis, anotherAxis)) * this.height
+      Math.abs(XY.of(widthAxis).dot(anotherAxis)) * this.width +
+      Math.abs(XY.of(heightAxis).dot(anotherAxis)) * this.height
     )
   }
 
   collide = (another: OBB) => {
-    const centerVector = xy_minus(this.center, another.center)
+    const centerVector = XY.of(this.center).minus(another.center).xy
     if (
       this.projectionLengthAt(another.axis.widthAxis) + another.width <=
-      2 * Math.abs(xy_dot(centerVector, another.axis.widthAxis))
+      2 * Math.abs(XY.of(centerVector).dot(another.axis.widthAxis))
     )
       return false
     if (
       this.projectionLengthAt(another.axis.heightAxis) + another.height <=
-      2 * Math.abs(xy_dot(centerVector, another.axis.heightAxis))
+      2 * Math.abs(XY.of(centerVector).dot(another.axis.heightAxis))
     )
       return false
     if (
       another.projectionLengthAt(this.axis.widthAxis) + this.width <=
-      2 * Math.abs(xy_dot(centerVector, this.axis.widthAxis))
+      2 * Math.abs(XY.of(centerVector).dot(this.axis.widthAxis))
     )
       return false
     if (
       another.projectionLengthAt(this.axis.heightAxis) + this.height <=
-      2 * Math.abs(xy_dot(centerVector, this.axis.heightAxis))
+      2 * Math.abs(XY.of(centerVector).dot(this.axis.heightAxis))
     )
       return false
     return true
@@ -138,16 +136,12 @@ export class OBB {
   static fromCenter(center: IXY, width: number, height: number, rotation = 0) {
     const dx = center.x - width / 2
     const dy = center.y - height / 2
-    const xy = XY.of(dx, dy).rotate(center, rotation)
+    const xy = XY.of(XY._(dx, dy)).rotate(center, rotation).xy
     return new OBB(xy.x, xy.y, width, height, rotation)
   }
 
   static fromAABB(aabb: AABB): OBB {
     const { minX, minY, maxX, maxY } = aabb
     return new OBB(minX, minY, maxX - minX, maxY - minY, 0)
-  }
-
-  static fromMatrix(matrix: IMatrix, width: number, height: number) {
-    const xy = Matrix.fromTuple(matrix).applyXY(XY._(0, 0))
   }
 }

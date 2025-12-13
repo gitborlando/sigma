@@ -180,12 +180,12 @@ export class StageSurfaceService {
   private calcFullRenderElemsMinHeap() {
     this.fullRenderElemsMinHeap = new TinyQueue(undefined, (a, b) => {
       if (a.layerIndex !== b.layerIndex) return a.layerIndex - b.layerIndex
-      const aDistance = XY.center(AABB.rect(a.elem.aabb)).minus(
+      const aDistance = XY.of(XY.center(AABB.rect(a.elem.aabb))).minus(
         this.eventXY || XY._(0, 0),
-      )
-      const bDistance = XY.center(AABB.rect(b.elem.aabb)).minus(
+      ).xy
+      const bDistance = XY.of(XY.center(AABB.rect(b.elem.aabb))).minus(
         this.eventXY || XY._(0, 0),
-      )
+      ).xy
       const aLane = max(abs(aDistance.x), abs(aDistance.y))
       const bLane = max(abs(bDistance.x), abs(bDistance.y))
       return aLane - bLane
@@ -236,7 +236,7 @@ export class StageSurfaceService {
     if (this.renderType) return
 
     const { width, height } = this.canvas
-    const delta = XY.from(cur).minus(prev)
+    const delta = XY.of(cur).minus(prev).xy
     const reRenderElems = new Set<Elem>()
 
     const traverse = (elem: Elem) => {
@@ -365,7 +365,7 @@ export class StageSurfaceService {
         },
       ),
       reaction(
-        () => XY.from(StageViewport.offset),
+        () => XY.from(StageViewport.offset).xy,
         (offset, prevOffset) => {
           this.translate(offset, prevOffset)
           this.requestRenderTopCanvas()
@@ -453,7 +453,7 @@ export class StageSurfaceService {
         } else {
           xy = XY.from(this.eventXY)
             .rotate(elem.obb.xy, -elem.obb.rotation)
-            .minus(elem.obb.xy)
+            .minus(elem.obb.xy).xy
         }
 
         func(elem, true, stopped, stopPropagation, hitList!, xy)

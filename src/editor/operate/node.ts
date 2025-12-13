@@ -4,7 +4,6 @@ import { nanoid } from 'nanoid'
 import { StageScene } from 'src/editor/render/scene'
 import { clone } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { xy_rotate } from '../math/xy'
 import { SchemaCreator } from '../schema/creator'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
@@ -195,7 +194,7 @@ class OperateNodeService {
 
   getNodeCenterXY(node: INode) {
     const center = XY._(node.x + node.width / 2, node.y + node.height / 2)
-    return xy_rotate(center, XY._(node.x, node.y), node.rotation)
+    return XY.of(center).rotate(XY._(node.x, node.y), node.rotation).xy
   }
 
   private autoGetDatumId(selectIds: Set<string>) {

@@ -25,7 +25,7 @@ export function point(option?: Partial<IPoint>): IPoint {
 }
 
 export function createLine(start: IXY, length: number, rotation: number) {
-  const end = XY.of(start.x + length, start.y).plain()
+  const end = XY._(start.x + length, start.y)
   const points = [point(start), point(end)]
   optionalSet(firstOne(points), 'startPath', true)
   optionalSet(lastOne(points), 'endPath', true)

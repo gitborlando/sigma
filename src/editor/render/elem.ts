@@ -1,6 +1,5 @@
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { xy_distance, xy_minus } from 'src/editor/math/xy'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -299,12 +298,16 @@ export class HitTest {
         return inRect
       } else {
         if (!inRect) return false
-        if (xy_distance(xy, XY._(r, r)) > r && xy.x < r && xy.y < r) return false
-        if (xy_distance(xy, XY._(w - r, r)) > r && xy.x > w - r && xy.y < r)
+        if (XY.of(xy).distance(XY._(r, r)) > r && xy.x < r && xy.y < r) return false
+        if (XY.of(xy).distance(XY._(w - r, r)) > r && xy.x > w - r && xy.y < r)
           return false
-        if (xy_distance(xy, XY._(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r)
+        if (
+          XY.of(xy).distance(XY._(w - r, h - r)) > r &&
+          xy.x > w - r &&
+          xy.y > h - r
+        )
           return false
-        if (xy_distance(xy, XY._(r, h - r)) > r && xy.x < r && xy.y > h - r)
+        if (XY.of(xy).distance(XY._(r, h - r)) > r && xy.x < r && xy.y > h - r)
           return false
         return true
       }
@@ -359,7 +362,7 @@ export class HitTest {
 
       if (startAngle === 0 && endAngle === 0) return true
 
-      const angle = Angle.sweep(XY.vectorOf(xy, XY._(cx, cy)))
+      const angle = Angle.sweep(XY.of(xy).vector(XY._(cx, cy)))
 
       if (startAngle <= endAngle) {
         return angle >= startAngle && angle <= endAngle
@@ -390,8 +393,8 @@ export class HitTest {
       if (cur.y < xy.y && next.y < xy.y) return
       const small = cur.y < next.y ? cur : next
       const large = cur.y > next.y ? cur : next
-      const A = xy_minus(large, small)
-      const B = xy_minus(xy, small)
+      const A = XY.of(large).minus(small).xy
+      const B = XY.of(xy).minus(small).xy
       if (A.x * B.y - A.y * B.x > 0) inside = !inside
     })
     return inside
