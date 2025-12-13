@@ -5,7 +5,7 @@ import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { observable } from 'mobx'
 import { EditorCommand } from 'src/editor/editor/command'
-import { OBB } from 'src/editor/math'
+import { MRect, OBB } from 'src/editor/math'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { ElemMouseEvent } from 'src/editor/render/elem'
@@ -14,6 +14,7 @@ import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
 import { Schema } from 'src/editor/schema/schema'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
+import { intersectRect } from 'src/editor/utils'
 import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { StageDrag } from 'src/global/event/drag'
@@ -150,11 +151,25 @@ class StageSelectService {
 
   private onMarqueeSelect() {
     let marqueeOBB = OBB.identity()
+    let marqueeMrect = MRect.identity()
+    let marqueeAABB = new AABB(0, 0, 0, 0)
 
     const hitTest = (obb: OBB) => {
       const aabbResult = AABB.collide(marqueeOBB.aabb, obb.aabb)
       if (macroMatch`-180|-90|0|90|180`(obb.rotation)) return aabbResult
       return aabbResult && marqueeOBB.collide(obb)
+    }
+
+    const hitTestMrect = (mrect: MRect) => {
+      if (!intersectRect(AABB.rect(marqueeAABB), AABB.rect(mrect.aabb))) return false
+      marqueeAABB = Matrix(mrect.matrix).invertAABB(marqueeAABB)
+
+      return intersectRect(AABB.rect(marqueeAABB), {
+        x: 0,
+        y: 0,
+        width: mrect.width,
+        height: mrect.height,
+      })
     }
 
     const traverseTest = ({ id, node, childIds, depth }: SchemaUtilTraverseData) => {
@@ -169,7 +184,7 @@ class StageSelectService {
         }
         return
       }
-      if (hitTest(elem.obb)) {
+      if (/* hitTest(elem.obb) */ hitTestMrect(elem.mrect)) {
         YUndo.untrack(() => YClients.select(id))
         // UILeftPanelLayer.needExpandIds.add(node.parentId)
         return
@@ -186,6 +201,16 @@ class StageSelectService {
     StageDrag.onStart()
       .onMove(({ marquee }) => {
         this.marquee = marquee
+        marqueeMrect.width = marquee.width
+        marqueeMrect.height = marquee.height
+        marqueeMrect.matrix = Matrix().shift(marquee).matrix
+        marqueeAABB = AABB.update(
+          marqueeAABB,
+          marquee.x,
+          marquee.y,
+          marquee.x + marquee.width,
+          marquee.y + marquee.height,
+        )
         marqueeOBB = OBB.fromRect(this.marquee)
         this.clearSelect()
         runInAction(() => traverse())
