@@ -1,5 +1,5 @@
 import { Angle } from 'src/editor/math/angle'
-import { IMatrixTuple } from 'src/editor/math/matrix'
+import { IMatrix } from 'src/editor/math/matrix'
 import { IRect } from 'src/editor/math/types'
 import { AABB } from './aabb'
 import { XY, xy_dot, xy_minus, xy_rotate } from './xy'
@@ -147,7 +147,7 @@ export class OBB {
     return new OBB(minX, minY, maxX - minX, maxY - minY, 0)
   }
 
-  static fromMatrix(matrix: IMatrixTuple, width: number, height: number) {
+  static fromMatrix(matrix: IMatrix, width: number, height: number) {
     const xy = Matrix.fromTuple(matrix).applyXY(XY._(0, 0))
   }
 }

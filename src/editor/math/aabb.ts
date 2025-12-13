@@ -1,4 +1,4 @@
-import { IMatrixTuple } from 'src/editor/math/matrix'
+import { IMatrix } from 'src/editor/math/matrix'
 import { MRect } from 'src/editor/math/mrect'
 import { firstOne } from '@gitborlando/utils'
 import { IRectWithCenter } from 'src/editor/math/types'
@@ -129,7 +129,7 @@ export class AABB {
     return aabb
   }
 
-  static fromMatrixRect(matrixTuple: IMatrixTuple, width: number, height: number) {
+  static fromMatrixRect(matrixTuple: IMatrix, width: number, height: number) {
     const matrix = Matrix.fromTuple(matrixTuple)
     const TL = matrix.applyXY(XY._(0, 0))
     const TR = matrix.applyXY(XY._(width, 0))

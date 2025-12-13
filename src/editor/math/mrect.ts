@@ -1,16 +1,16 @@
-import { IMatrixTuple, Matrix } from 'src/editor/math/matrix'
+import { IMatrix, MATRIX } from 'src/editor/math/matrix'
 
 export type SMRect = /** Serializable MRect */ {
   width: number
   height: number
-  matrix: IMatrixTuple
+  matrix: IMatrix
 }
 
 /**
  * MRect: matrix rect
  */
 export class MRect {
-  constructor(width: number, height: number, matrix: Matrix) {
+  constructor(width: number, height: number, matrix: IMatrix) {
     this._width = width
     this._height = height
     this._matrix = matrix
@@ -18,7 +18,7 @@ export class MRect {
 
   private _width = 0
   private _height = 0
-  private _matrix = Matrix.identity()
+  private _matrix = MATRIX.identity()
   private _xy = XY._(0, 0)
   private _rotation = 0
   private _center = XY._(0, 0)
@@ -84,7 +84,7 @@ export class MRect {
   }
 
   private calcXY() {
-    return this.matrix.applyXY(XY._(0, 0))
+    return MATRIX.xy(XY._(0, 0), this.matrix)
   }
 
   private calcRotation() {
@@ -134,7 +134,7 @@ export class MRect {
     this.expired()
   }
 
-  set matrix(matrix: Matrix) {
+  set matrix(matrix: MATRIX) {
     this._matrix = matrix
     this.expired()
   }
@@ -173,7 +173,7 @@ export class MRect {
     return this
   }
 
-  update(width: number, height: number, matrix: Matrix) {
+  update(width: number, height: number, matrix: MATRIX) {
     this._width = width
     this._height = height
     this._matrix = matrix
@@ -184,7 +184,7 @@ export class MRect {
   fromSMRect(mrect: SMRect) {
     this._width = mrect.width
     this._height = mrect.height
-    this._matrix = Matrix.fromTuple(mrect.matrix)
+    this._matrix = MATRIX.fromTuple(mrect.matrix)
     this.expired()
     return this
   }
@@ -198,10 +198,10 @@ export class MRect {
   }
 
   static identity() {
-    return new MRect(0, 0, Matrix.identity())
+    return new MRect(0, 0, MATRIX.identity())
   }
 
   static fromSMRect(mrect: SMRect) {
-    return new MRect(mrect.width, mrect.height, Matrix.fromTuple(mrect.matrix))
+    return new MRect(mrect.width, mrect.height, MATRIX.fromTuple(mrect.matrix))
   }
 }

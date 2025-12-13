@@ -28,7 +28,7 @@ namespace V1 {
     selectPageId: string
     cursor: IXY
     color: string
-    sceneMatrix: import('src/editor/math/matrix').IMatrixTuple
+    sceneMatrix: import('src/editor/math/matrix').IMatrix
   }
 
   type Clients = {
@@ -74,7 +74,7 @@ namespace V1 {
     rotation: number
   }
 
-  type Matrix = import('src/editor/math/matrix').IMatrixTuple
+  type Matrix = import('src/editor/math/matrix').IMatrix
 
   type NodeBase = NodeMeta &
     OBBInfo & {

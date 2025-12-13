@@ -3,7 +3,7 @@ import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
 import { AABB, IRect } from 'src/editor/math'
 import { minMax } from 'src/editor/math/base'
-import { Matrix } from 'src/editor/math/matrix'
+import { MATRIX } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
@@ -18,7 +18,7 @@ const createInitBound = () => ({
 })
 
 class StageViewportService {
-  @observable.ref sceneMatrix = Matrix.identity()
+  @observable.ref sceneMatrix = MATRIX.identity()
   @observable bound = createInitBound()
 
   @observable zoom = 1
@@ -28,7 +28,7 @@ class StageViewportService {
   sceneAABB = new AABB(0, 0, 0, 0)
   prevSceneAABB = new AABB(0, 0, 0, 0)
 
-  private prevSceneMatrix = Matrix.identity()
+  private prevSceneMatrix = MATRIX.identity()
   private boundAABB = new AABB(0, 0, 0, 0)
   private wheeler = new WheelUtil()
   private disposer = new Disposer()
@@ -180,9 +180,9 @@ class StageViewportService {
       () => YClients.client.selectPageId,
       (pageId) => {
         const getMatrix = () =>
-          getEditorSetting().dev.sceneMatrix || Matrix.identity().tuple()
+          getEditorSetting().dev.sceneMatrix || MATRIX.identity().tuple()
         const matrix = HandlePage.pageSceneMatrix.getSet(pageId, getMatrix)
-        StageViewport.sceneMatrix = Matrix.of(...matrix)
+        StageViewport.sceneMatrix = MATRIX.of(...matrix)
       },
     )
   }
@@ -190,7 +190,7 @@ class StageViewportService {
   @action
   private DEV_loadSceneMatrix() {
     const { fixedSceneMatrix, sceneMatrix } = getEditorSetting().dev
-    if (fixedSceneMatrix) this.sceneMatrix = Matrix.of(...sceneMatrix)
+    if (fixedSceneMatrix) this.sceneMatrix = MATRIX.of(...sceneMatrix)
   }
 
   handleZoomToFitAll() {
@@ -217,7 +217,7 @@ class StageViewportService {
       XY.of(this.bound.width, this.bound.height).divide(2, zoom),
     )
 
-    this.sceneMatrix = Matrix.identity()
+    this.sceneMatrix = MATRIX.identity()
       .translate(-offset.x, -offset.y)
       .scale(zoom, zoom)
   }

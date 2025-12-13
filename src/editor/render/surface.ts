@@ -3,7 +3,7 @@ import { listen } from '@gitborlando/utils/browser'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { AABB, OBB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
-import { IMatrixTuple, Matrix } from 'src/editor/math/matrix'
+import { IMatrix, MATRIX } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
@@ -104,8 +104,8 @@ export class StageSurfaceService {
     return () => (this.currentCtx = lastCtx)
   }
 
-  setTransform = (transform: IMatrixTuple) => {
-    const invert = Matrix.fromTuple(transform).invert().tuple()
+  setTransform = (transform: IMatrix) => {
+    const invert = MATRIX.fromTuple(transform).invert().tuple()
     this.currentCtx.transform(...transform)
     return () => this.currentCtx.transform(...invert)
   }
@@ -343,7 +343,7 @@ export class StageSurfaceService {
     })
   }
 
-  private dprMatrix = Matrix.of(dpr, 0, 0, dpr, 0, 0)
+  private dprMatrix = MATRIX.of(dpr, 0, 0, dpr, 0, 0)
 
   transformCanvas = () => {
     this.ctx.transform(...this.dprMatrix.tuple())
@@ -449,7 +449,7 @@ export class StageSurfaceService {
       if (this.eventXY) {
         let xy = this.eventXY
         if (elem.node?.matrix) {
-          xy = Matrix.fromTuple(elem.node.matrix).invertXY(this.eventXY)
+          xy = MATRIX.fromTuple(elem.node.matrix).invertXY(this.eventXY)
         } else {
           xy = XY.from(this.eventXY)
             .rotate(elem.obb.xy, -elem.obb.rotation)

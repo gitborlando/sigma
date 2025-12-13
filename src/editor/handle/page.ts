@@ -1,12 +1,12 @@
 import { createCache } from '@gitborlando/utils'
-import { IMatrixTuple } from 'src/editor/math'
+import { IMatrix } from 'src/editor/math'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { getSelectPageId } from 'src/editor/y-state/y-clients'
 import { ProdLog } from 'src/utils/global'
 import { SchemaCreator } from '../schema/creator'
 
 class HandlePageService {
-  pageSceneMatrix = createCache<ID, IMatrixTuple>()
+  pageSceneMatrix = createCache<ID, IMatrix>()
 
   subscribe() {
     return Disposer.collect(this.memoPageSceneMatrix())
