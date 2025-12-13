@@ -161,6 +161,6 @@ export class MATRIX {
   }
 }
 
-export function Matrix(matrix: IMatrix) {
+export function Matrix(matrix = MATRIX.identity()) {
   return MATRIX.from(matrix)
 }

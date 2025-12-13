@@ -37,7 +37,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     id: 'transform',
     fills: [],
     ...transformOBB,
-    ...mrect.toSMRect(),
+    ...mrect,
   })
 
   const mousedown = (e: ElemMouseEvent) => {
@@ -126,9 +126,7 @@ const VertexComp: FC<{
     strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(COLOR.white)],
     radius: 2 / getZoom(),
-    matrix: Matrix.identity()
-      .translate(xy.x - size / 2, xy.y - size / 2)
-      .tuple(),
+    matrix: Matrix().translate(xy.x - size / 2, xy.y - size / 2).matrix,
   })
 
   const mouseenter = (e: ElemMouseEvent) => {

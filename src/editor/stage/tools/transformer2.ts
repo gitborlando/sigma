@@ -25,7 +25,7 @@ class StageTransformerService {
 
   setup(selectNodes: V1.Node[]) {
     if (selectNodes.length === 1) {
-      return this.mrect.fromSMRect(selectNodes[0])
+      return this.mrect.from(selectNodes[0])
     }
     return this.mrect
   }

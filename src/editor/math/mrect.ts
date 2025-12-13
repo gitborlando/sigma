@@ -1,6 +1,6 @@
-import { IMatrix, MATRIX } from 'src/editor/math/matrix'
+import { IMatrix } from 'src/editor/math/matrix'
 
-export type SMRect = /** Serializable MRect */ {
+export type IMRect = /** Serializable MRect */ {
   width: number
   height: number
   matrix: IMatrix
@@ -84,24 +84,25 @@ export class MRect {
   }
 
   private calcXY() {
-    return MATRIX.xy(XY._(0, 0), this.matrix)
+    return Matrix(this.matrix).xy(XY._(0, 0))
   }
 
   private calcRotation() {
-    const transformedXY = this.matrix.applyXY(XY.xAxis())
+    const transformedXY = Matrix(this.matrix).xy(XY.xAxis())
     return Angle.sweep(transformedXY, XY.xAxis())
   }
 
   private calcCenter() {
-    return this.matrix.applyXY(XY._(this.width / 2, this.height / 2))
+    return Matrix(this.matrix).xy(XY._(this.width / 2, this.height / 2))
   }
 
   private calcVertexes() {
+    const matrix = Matrix(this.matrix)
     return [
-      this.matrix.applyXY(XY._(0, 0)),
-      this.matrix.applyXY(XY._(this.width, 0)),
-      this.matrix.applyXY(XY._(this.width, this.height)),
-      this.matrix.applyXY(XY._(0, this.height)),
+      matrix.xy(XY._(0, 0)),
+      matrix.xy(XY._(this.width, 0)),
+      matrix.xy(XY._(this.width, this.height)),
+      matrix.xy(XY._(0, this.height)),
     ]
   }
 
@@ -134,14 +135,14 @@ export class MRect {
     this.expired()
   }
 
-  set matrix(matrix: MATRIX) {
+  set matrix(matrix: IMatrix) {
     this._matrix = matrix
     this.expired()
   }
 
   set xy(xy: IXY) {
     const delta = XY.from(xy).minus(this.xy)
-    this.matrix.translate(delta.x, delta.y)
+    Matrix(this.matrix).translate(delta.x, delta.y)
     this._xy = xy
     this.needReCalcCenter = true
     this.needReCalcVertexes = true
@@ -150,20 +151,20 @@ export class MRect {
 
   set rotation(rotation: number) {
     const delta = rotation - this.rotation
-    this.matrix.rotate(delta)
+    Matrix(this.matrix).rotate(delta)
     this._rotation = rotation
     this.needReCalcVertexes = true
     this.needReCalcAABB = true
   }
 
   shift(delta: IXY) {
-    this.matrix.translate(delta.x, delta.y)
+    Matrix(this.matrix).translate(delta.x, delta.y)
     this.expired()
     return this
   }
 
   scale(scale: IXY) {
-    this.matrix.scale(scale.x, scale.y)
+    Matrix(this.matrix).scale(scale.x, scale.y)
     this.expired()
     return this
   }
@@ -173,7 +174,7 @@ export class MRect {
     return this
   }
 
-  update(width: number, height: number, matrix: MATRIX) {
+  update(width: number, height: number, matrix: IMatrix) {
     this._width = width
     this._height = height
     this._matrix = matrix
@@ -181,27 +182,15 @@ export class MRect {
     return this
   }
 
-  fromSMRect(mrect: SMRect) {
+  from(mrect: IMRect) {
     this._width = mrect.width
     this._height = mrect.height
-    this._matrix = MATRIX.fromTuple(mrect.matrix)
+    this._matrix = mrect.matrix
     this.expired()
     return this
   }
 
-  toSMRect() {
-    return {
-      width: this.width,
-      height: this.height,
-      matrix: this.matrix.tuple(),
-    }
-  }
-
   static identity() {
     return new MRect(0, 0, MATRIX.identity())
-  }
-
-  static fromSMRect(mrect: SMRect) {
-    return new MRect(mrect.width, mrect.height, MATRIX.fromTuple(mrect.matrix))
   }
 }
