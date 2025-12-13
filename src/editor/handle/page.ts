@@ -36,7 +36,7 @@ class HandlePageService {
     return reaction(
       () => StageViewport.sceneMatrix,
       (matrix) => {
-        this.pageSceneMatrix.set(getSelectPageId(), matrix.tuple())
+        this.pageSceneMatrix.set(getSelectPageId(), MATRIX.clone(matrix))
       },
     )
   }

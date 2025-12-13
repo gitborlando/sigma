@@ -126,7 +126,7 @@ const VertexComp: FC<{
     strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(COLOR.white)],
     radius: 2 / getZoom(),
-    matrix: Matrix().translate(xy.x - size / 2, xy.y - size / 2).matrix,
+    matrix: Matrix().shift(XY.from(xy).plusNum(-size / 2)).matrix,
   })
 
   const mouseenter = (e: ElemMouseEvent) => {
@@ -303,7 +303,7 @@ const RotatePointComp: FC<{
   let p1 = mrect.vertexes[loopIndex(mrect.vertexes, index + 1)]
   let p2 = mrect.vertexes[loopIndex(mrect.vertexes, index - 1)]
 
-  if (Matrix.isFlipped(mrect.matrix)) [p1, p2] = [p2, p1]
+  if (MATRIX.isFlipped(mrect.matrix)) [p1, p2] = [p2, p1]
 
   const sweep = Angle.minor(Angle.sweep(XY.vectorOf(p1, xy), XY.vectorOf(p2, xy)))
   const p1_ = XY.from(p1).rotate(xy, sweep / 2)
@@ -313,10 +313,7 @@ const RotatePointComp: FC<{
 
   const size = 8 / getZoom()
   const rotatePointMatrix = iife(() => {
-    return Matrix.identity()
-      .translate(offset.x, offset.y)
-      .translate(-size / 2, -size / 2)
-      .tuple()
+    return Matrix().shift(offset.plusNum(-size / 2)).matrix
   })
 
   const rotatePoint = SchemaCreator.ellipse({

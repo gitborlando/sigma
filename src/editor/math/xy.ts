@@ -110,6 +110,10 @@ export class XY {
     return XY.of(x, y)
   }
 
+  plusNum(num: number) {
+    return XY.of(this.x + num, this.y + num)
+  }
+
   minus(...others: IXY[]) {
     const x = others.reduce((sum, cur) => sum - cur.x, this.x)
     const y = others.reduce((sum, cur) => sum - cur.y, this.y)
@@ -166,8 +170,8 @@ export class XY {
     return XY.of(xy.x, xy.y)
   }
 
-  static center(xy: { centerX: number; centerY: number }) {
-    return XY.of(xy.centerX, xy.centerY)
+  static center(wh: { width: number; height: number }) {
+    return XY.of(wh.width / 2, wh.height / 2)
   }
 
   static leftTop(e: { left: number; top: number }) {
@@ -202,3 +206,27 @@ export class XY {
     return XY.of(a.x + (a.x - b.x) * t, a.y + (a.y - b.y) * t)
   }
 }
+
+export function Xy() {
+  let xy = XY.of(0, 0)
+  return {
+    get xy() {
+      return xy
+    },
+    plain() {
+      return { x: xy.x, y: xy.y }
+    },
+    tuple() {
+      return [xy.x, xy.y] as const
+    },
+    plus(...others: IXY[]) {
+      const x = others.reduce((sum, cur) => sum + cur.x, xy.x)
+      const y = others.reduce((sum, cur) => sum + cur.y, xy.y)
+      xy.x = x
+      xy.y = y
+      return this
+    },
+  }
+}
+
+Xy().plus(XY.of(1, 2), XY.of(3, 4)).plain()

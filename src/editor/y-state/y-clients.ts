@@ -21,7 +21,7 @@ class YClientsService {
     selectPageId: '',
     cursor: new XY(0, 0),
     color: COLOR.random(),
-    sceneMatrix: StageViewport.sceneMatrix.tuple(),
+    sceneMatrix: StageViewport.sceneMatrix,
     userId: '',
     userName: '',
     userAvatar: '',

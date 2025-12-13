@@ -8,7 +8,7 @@ class StageTransformerService {
   obb = OBB.identity()
   width = 0
   height = 0
-  matrix = Matrix.identity()
+  matrix = Matrix().matrix
 
   @observable isMoving = false
 
@@ -30,7 +30,7 @@ class StageTransformerService {
     if (selectNodes.length === 1) {
       this.width = selectNodes[0].width
       this.height = selectNodes[0].height
-      this.matrix = Matrix.fromTuple(selectNodes[0].matrix)
+      this.matrix = selectNodes[0].matrix
     }
   }
 

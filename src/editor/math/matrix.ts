@@ -9,19 +9,18 @@ export type IMatrix = [number, number, number, number, number, number]
 export class MATRIX {
   static matrix = [1, 0, 0, 1, 0, 0] as IMatrix
 
-  static from(matrix: IMatrix) {
-    this.matrix = matrix
-    return this
-  }
-
-  static of(...matrix: IMatrix) {
-    this.matrix = matrix
-    return this
-  }
-
-  static clone(matrix: IMatrix) {
+  static of(matrix: IMatrix) {
     this.matrix = [...matrix]
     return this
+  }
+
+  static from(...matrix: IMatrix) {
+    this.matrix = matrix
+    return this
+  }
+
+  static clone(matrix = this.matrix) {
+    return [...matrix] as IMatrix
   }
 
   static shift = (delta: IXY) => {
@@ -65,37 +64,29 @@ export class MATRIX {
   }
 
   static append = (matrix: IMatrix) => {
-    const a1 = this.matrix[0]
-    const b1 = this.matrix[1]
-    const c1 = this.matrix[2]
-    const d1 = this.matrix[3]
+    const [a, b, c, d, tx, ty] = this.matrix
 
-    this.matrix[0] = matrix[0] * a1 + matrix[1] * c1
-    this.matrix[1] = matrix[0] * b1 + matrix[1] * d1
-    this.matrix[2] = matrix[2] * a1 + matrix[3] * c1
-    this.matrix[3] = matrix[2] * b1 + matrix[3] * d1
+    this.matrix[0] = matrix[0] * a + matrix[1] * c
+    this.matrix[1] = matrix[0] * b + matrix[1] * d
+    this.matrix[2] = matrix[2] * a + matrix[3] * c
+    this.matrix[3] = matrix[2] * b + matrix[3] * d
 
-    this.matrix[4] = matrix[4] * a1 + matrix[5] * c1 + this.matrix[4]
-    this.matrix[5] = matrix[4] * b1 + matrix[5] * d1 + this.matrix[5]
+    this.matrix[4] = matrix[4] * a + matrix[5] * c + tx
+    this.matrix[5] = matrix[4] * b + matrix[5] * d + ty
 
     return this
   }
 
   static prepend = (matrix: IMatrix) => {
-    const tx1 = this.matrix[4]
+    const [a, b, c, d, tx] = this.matrix
 
-    if (matrix[0] !== 1 || matrix[1] !== 0 || matrix[2] !== 0 || matrix[3] !== 1) {
-      const a1 = this.matrix[0]
-      const c1 = this.matrix[2]
+    this.matrix[0] = a * matrix[0] + b * matrix[2]
+    this.matrix[1] = a * matrix[1] + b * matrix[3]
+    this.matrix[2] = c * matrix[0] + d * matrix[2]
+    this.matrix[3] = c * matrix[1] + d * matrix[3]
 
-      this.matrix[0] = a1 * matrix[0] + this.matrix[1] * matrix[2]
-      this.matrix[1] = a1 * matrix[1] + this.matrix[1] * matrix[3]
-      this.matrix[2] = c1 * matrix[0] + this.matrix[3] * matrix[2]
-      this.matrix[3] = c1 * matrix[1] + this.matrix[3] * matrix[3]
-    }
-
-    this.matrix[4] = tx1 * matrix[0] + this.matrix[5] * matrix[2] + matrix[4]
-    this.matrix[5] = tx1 * matrix[1] + this.matrix[5] * matrix[3] + matrix[5]
+    this.matrix[4] = tx * matrix[0] + this.matrix[5] * matrix[2] + matrix[4]
+    this.matrix[5] = tx * matrix[1] + this.matrix[5] * matrix[3] + matrix[5]
 
     return this
   }
@@ -153,7 +144,7 @@ export class MATRIX {
   }
 
   static fromXYR(x: number, y: number, rotation: number) {
-    return MATRIX.of(1, 0, 0, 1, 0, 0).rotate(rotation).translate(x, y)
+    return Matrix().rotate(rotation).translate(x, y).matrix
   }
 
   static isFlipped(matrix: IMatrix) {
@@ -162,5 +153,5 @@ export class MATRIX {
 }
 
 export function Matrix(matrix = MATRIX.identity()) {
-  return MATRIX.from(matrix)
+  return MATRIX.of(matrix)
 }

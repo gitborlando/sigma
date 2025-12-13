@@ -3,7 +3,7 @@ import { listen } from '@gitborlando/utils/browser'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { AABB, OBB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
-import { IMatrix, MATRIX } from 'src/editor/math/matrix'
+import { IMatrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
@@ -105,7 +105,7 @@ export class StageSurfaceService {
   }
 
   setTransform = (transform: IMatrix) => {
-    const invert = MATRIX.fromTuple(transform).invert().tuple()
+    const invert = Matrix(transform).invert()
     this.currentCtx.transform(...transform)
     return () => this.currentCtx.transform(...invert)
   }
@@ -343,16 +343,16 @@ export class StageSurfaceService {
     })
   }
 
-  private dprMatrix = MATRIX.of(dpr, 0, 0, dpr, 0, 0)
+  private dprMatrix = Matrix().scale(dpr, dpr).matrix
 
   transformCanvas = () => {
-    this.ctx.transform(...this.dprMatrix.tuple())
-    this.ctx.transform(...StageViewport.sceneMatrix.tuple())
+    this.ctx.transform(...this.dprMatrix)
+    this.ctx.transform(...StageViewport.sceneMatrix)
   }
 
   transformTopCanvas = () => {
-    this.topCtx.transform(...this.dprMatrix.tuple())
-    this.topCtx.transform(...StageViewport.sceneMatrix.tuple())
+    this.topCtx.transform(...this.dprMatrix)
+    this.topCtx.transform(...StageViewport.sceneMatrix)
   }
 
   private onZoomMove = () => {
@@ -425,7 +425,7 @@ export class StageSurfaceService {
 
   private getEventXY = (xy: IXY) => {
     xy = StageViewport.toCanvasXY(xy)
-    this.eventXY = StageViewport.sceneMatrix.invertXY(xy)
+    this.eventXY = Matrix(StageViewport.sceneMatrix).invertXY(xy)
     this.elemsFromPoint = []
   }
 
@@ -449,7 +449,7 @@ export class StageSurfaceService {
       if (this.eventXY) {
         let xy = this.eventXY
         if (elem.node?.matrix) {
-          xy = MATRIX.fromTuple(elem.node.matrix).invertXY(this.eventXY)
+          xy = Matrix(elem.node.matrix).invertXY(this.eventXY)
         } else {
           xy = XY.from(this.eventXY)
             .rotate(elem.obb.xy, -elem.obb.rotation)

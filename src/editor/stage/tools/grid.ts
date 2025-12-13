@@ -14,7 +14,7 @@ class StageToolGridService {
     if (zoom < 10.96) return
 
     StageSurface.ctxSaveRestore((ctx) => {
-      ctx.transform(...StageViewport.sceneMatrix.invert().tuple())
+      ctx.transform(...Matrix(StageViewport.sceneMatrix).invert())
       ctx.strokeStyle = '#cccccc55'
       ctx.lineWidth = 1
       this.ctx = ctx
@@ -26,7 +26,7 @@ class StageToolGridService {
   }
 
   private drawLine(type: 'horizontal' | 'vertical', start: IXY, length: number) {
-    start = StageViewport.sceneMatrix.applyXY(start)
+    start = Matrix(StageViewport.sceneMatrix).xy(start)
     length = length * getZoom()
     const startX = snapHalfPixel(start.x)
     const startY = snapHalfPixel(start.y)

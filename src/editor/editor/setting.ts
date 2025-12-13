@@ -1,5 +1,4 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
-import { MATRIX } from 'src/editor/math/matrix'
 import { defuOverrideArray } from 'src/utils/defu'
 
 const initSetting = () => {
@@ -13,7 +12,7 @@ const initSetting = () => {
     fullRender: false,
     dev: {
       fixedSceneMatrix: true,
-      sceneMatrix: MATRIX.identity().tuple(),
+      sceneMatrix: Matrix().matrix,
     },
     snapToGrid: false,
   }
