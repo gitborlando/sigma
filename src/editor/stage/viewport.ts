@@ -230,7 +230,7 @@ class StageViewportService {
     const offset = XY.from(XY.center(rect)).minus(boundCenter).xy
 
     this.sceneMatrix = Matrix.of()
-      .shift(XY.symmetric(offset))
+      .shift(XY.from(offset).multiplyNum(-1).xy)
       .scale(zoom, zoom)
       .clone()
   }
