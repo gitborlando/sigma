@@ -122,7 +122,7 @@ const VertexComp: FC<{
     strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(COLOR.white)],
     radius: 2 / getZoom(),
-    matrix: Matrix().shift(XY.from(xy).plusNum(-size / 2).xy).matrix,
+    matrix: MATRIX.of().shift(XY.from(xy).plusNum(-size / 2).xy).matrix,
   })
 
   const mouseenter = (e: ElemMouseEvent) => {
@@ -308,7 +308,7 @@ const RotatePointComp: FC<{
   )
   const p1_ = XY.from(p1).rotate(xy, sweep / 2).xy
   const offset = XY.of(xy).lerp(p1_, 16 / getZoom())
-  const rotatePointMatrix = Matrix().shift(
+  const rotatePointMatrix = MATRIX.of().shift(
     XY.of(offset).plusNum(-size / 2).xy,
   ).matrix
 

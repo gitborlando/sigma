@@ -9,13 +9,13 @@ export type IMatrix = [number, number, number, number, number, number]
 export class MATRIX {
   static matrix = [1, 0, 0, 1, 0, 0] as IMatrix
 
-  static of(matrix: IMatrix) {
-    this.matrix = [...matrix]
+  static of(matrix = MATRIX.identity()) {
+    this.matrix = matrix
     return this
   }
 
-  static from(...matrix: IMatrix) {
-    this.matrix = matrix
+  static from(matrix: IMatrix) {
+    this.matrix = [...matrix]
     return this
   }
 
@@ -144,14 +144,10 @@ export class MATRIX {
   }
 
   static fromXYR(x: number, y: number, rotation: number) {
-    return Matrix().rotate(rotation).translate(x, y).matrix
+    return MATRIX.of().rotate(rotation).translate(x, y).matrix
   }
 
   static isFlipped(matrix: IMatrix) {
     return matrix[0] * matrix[3] - matrix[1] * matrix[2] < 0
   }
-}
-
-export function Matrix(matrix = MATRIX.identity()) {
-  return MATRIX.of(matrix)
 }

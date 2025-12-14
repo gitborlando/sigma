@@ -105,7 +105,7 @@ export class StageSurfaceService {
   }
 
   setTransform = (transform: IMatrix) => {
-    const invert = Matrix(transform).invert()
+    const invert = MATRIX.of(transform).invert()
     this.currentCtx.transform(...transform)
     return () => this.currentCtx.transform(...invert)
   }
@@ -343,7 +343,7 @@ export class StageSurfaceService {
     })
   }
 
-  private dprMatrix = Matrix().scale(dpr, dpr).matrix
+  private dprMatrix = MATRIX.of().scale(dpr, dpr).matrix
 
   transformCanvas = () => {
     this.ctx.transform(...this.dprMatrix)
@@ -425,7 +425,7 @@ export class StageSurfaceService {
 
   private getEventXY = (xy: IXY) => {
     xy = StageViewport.toCanvasXY(xy)
-    this.eventXY = Matrix(StageViewport.sceneMatrix).invertXY(xy)
+    this.eventXY = MATRIX.of(StageViewport.sceneMatrix).invertXY(xy)
     this.elemsFromPoint = []
   }
 
@@ -449,7 +449,7 @@ export class StageSurfaceService {
       if (this.eventXY) {
         let xy = this.eventXY
         if (elem.node?.matrix) {
-          xy = Matrix(elem.node.matrix).invertXY(this.eventXY)
+          xy = MATRIX.of(elem.node.matrix).invertXY(this.eventXY)
         } else {
           xy = XY.from(this.eventXY)
             .rotate(elem.obb.xy, -elem.obb.rotation)

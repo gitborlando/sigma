@@ -8,7 +8,7 @@ class StageTransformerService {
   obb = OBB.identity()
   width = 0
   height = 0
-  matrix = Matrix().matrix
+  matrix = MATRIX.of().matrix
 
   @observable isMoving = false
 

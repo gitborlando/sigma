@@ -23,7 +23,7 @@ class StageMoveService {
     Drag.onStart(() => StageCursor.unlock().setCursor('grab').lock())
       .onMove(({ delta }) => {
         this.isMoving = true
-        const matrix = Matrix(StageViewport.sceneMatrix).shift(delta)
+        const matrix = MATRIX.of(StageViewport.sceneMatrix).shift(delta)
         StageViewport.sceneMatrix = matrix.clone()
       })
       .onDestroy(() => {

@@ -9,7 +9,7 @@ class HandlePageService {
   pageSceneMatrix = createCache<ID, IMatrix>()
 
   subscribe() {
-    return Disposer.collect(this.memoPageSceneMatrix())
+    return Disposer.collect(this.memoPageSceneMATRIX.of())
   }
 
   addPage(page = SchemaCreator.page()) {
@@ -32,7 +32,7 @@ class HandlePageService {
     YUndo.track2('all', t('delete page'))
   }
 
-  private memoPageSceneMatrix() {
+  private memoPageSceneMATRIX.of() {
     return reaction(
       () => StageViewport.sceneMatrix,
       (matrix) => {

@@ -155,7 +155,7 @@ class StageSelectService {
     const hitTestMrect = (mrect: MRect) => {
       if (!AABB.collide(marqueeAABB, mrect.aabb)) return false
       return AABB.collide(
-        Matrix(mrect.matrix).invertAABB(marqueeAABB),
+        MATRIX.of(mrect.matrix).invertAABB(marqueeAABB),
         new AABB(0, 0, mrect.width, mrect.height),
       )
     }

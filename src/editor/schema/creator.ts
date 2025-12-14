@@ -288,7 +288,7 @@ class SchemaCreatorService {
       strokes: [],
       blurs: [],
       shadows: [],
-      matrix: Matrix().matrix,
+      matrix: MATRIX.of().matrix,
     }
   }
 

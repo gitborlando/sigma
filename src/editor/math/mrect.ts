@@ -84,20 +84,20 @@ export class MRect {
   }
 
   private calcXY() {
-    return Matrix(this.matrix).xy(XY._(0, 0))
+    return MATRIX.of(this.matrix).xy(XY._(0, 0))
   }
 
   private calcRotation() {
-    const transformedXY = Matrix(this.matrix).xy(XY.xAxis())
+    const transformedXY = MATRIX.of(this.matrix).xy(XY.xAxis())
     return Angle.sweep(transformedXY, XY.xAxis())
   }
 
   private calcCenter() {
-    return Matrix(this.matrix).xy(XY._(this.width / 2, this.height / 2))
+    return MATRIX.of(this.matrix).xy(XY._(this.width / 2, this.height / 2))
   }
 
   private calcVertexes() {
-    const matrix = Matrix(this.matrix)
+    const matrix = MATRIX.of(this.matrix)
     return [
       matrix.xy(XY._(0, 0)),
       matrix.xy(XY._(this.width, 0)),
@@ -142,7 +142,7 @@ export class MRect {
 
   set xy(xy: IXY) {
     const delta = XY.from(xy).minus(this.xy)._xy
-    Matrix(this.matrix).translate(delta.x, delta.y)
+    MATRIX.of(this.matrix).translate(delta.x, delta.y)
     this._xy = xy
     this.needReCalcCenter = true
     this.needReCalcVertexes = true
@@ -151,20 +151,20 @@ export class MRect {
 
   set rotation(rotation: number) {
     const delta = rotation - this.rotation
-    Matrix(this.matrix).rotate(delta)
+    MATRIX.of(this.matrix).rotate(delta)
     this._rotation = rotation
     this.needReCalcVertexes = true
     this.needReCalcAABB = true
   }
 
   shift(delta: IXY) {
-    Matrix(this.matrix).translate(delta.x, delta.y)
+    MATRIX.of(this.matrix).translate(delta.x, delta.y)
     this.expired()
     return this
   }
 
   scale(scale: IXY) {
-    Matrix(this.matrix).scale(scale.x, scale.y)
+    MATRIX.of(this.matrix).scale(scale.x, scale.y)
     this.expired()
     return this
   }

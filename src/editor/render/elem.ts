@@ -119,9 +119,9 @@ export class Elem {
 
       if (this.children.length) {
         if (this.clip) {
-          StageSurface.setOBBMatrix(this.obb, false)
+          StageSurface.setOBBMATRIX.of(this.obb, false)
           ctx.clip(path2d)
-          StageSurface.setOBBMatrix(this.obb, true)
+          StageSurface.setOBBMATRIX.of(this.obb, true)
         }
         this.children.forEach((child) => child.traverseDraw())
       }

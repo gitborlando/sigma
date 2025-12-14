@@ -18,7 +18,7 @@ const createInitBound = () => ({
 })
 
 class StageViewportService {
-  @observable.ref sceneMatrix = Matrix().matrix
+  @observable.ref sceneMatrix = MATRIX.of().matrix
   @observable bound = createInitBound()
 
   @observable zoom = 1
@@ -88,7 +88,7 @@ class StageViewportService {
     const deltaZoom = this.limitZoom(newZoom) / this.zoom
     center ||= XY.center(this.bound)
 
-    this.sceneMatrix = Matrix(this.sceneMatrix)
+    this.sceneMatrix = MATRIX.of(this.sceneMatrix)
       .translate(-center.x, -center.y)
       .scale(deltaZoom, deltaZoom)
       .translate(center.x, center.y)
@@ -108,12 +108,12 @@ class StageViewportService {
 
     if (!e.ctrlKey) {
       if (e.shiftKey) {
-        this.sceneMatrix = Matrix(this.sceneMatrix).translate(e.deltaY, 0).clone()
+        this.sceneMatrix = MATRIX.of(this.sceneMatrix).translate(e.deltaY, 0).clone()
       } else {
         if (e.deltaY === 0)
-          this.sceneMatrix = Matrix(this.sceneMatrix).translate(-e.deltaX, 0).clone()
+          this.sceneMatrix = MATRIX.of(this.sceneMatrix).translate(-e.deltaX, 0).clone()
         else
-          this.sceneMatrix = Matrix(this.sceneMatrix).translate(0, -e.deltaY).clone()
+          this.sceneMatrix = MATRIX.of(this.sceneMatrix).translate(0, -e.deltaY).clone()
       }
       return
     }
@@ -141,13 +141,13 @@ class StageViewportService {
     return Disposer.collect(
       reaction(
         () => this.sceneMatrix,
-        (_, prev) => (this.prevSceneMatrix = Matrix(prev).matrix),
+        (_, prev) => (this.prevSceneMatrix = MATRIX.of(prev).matrix),
       ),
       autorun(() => {
         this.zoom = this.sceneMatrix[0]
         this.offset = XY._(this.sceneMatrix[4], this.sceneMatrix[5])
-        this.sceneAABB = Matrix(this.sceneMatrix).invertAABB(this.boundAABB)
-        this.prevSceneAABB = Matrix(this.prevSceneMatrix).invertAABB(this.boundAABB)
+        this.sceneAABB = MATRIX.of(this.sceneMatrix).invertAABB(this.boundAABB)
+        this.prevSceneAABB = MATRIX.of(this.prevSceneMatrix).invertAABB(this.boundAABB)
       }),
     )
   }
@@ -166,7 +166,7 @@ class StageViewportService {
   private onObserving() {
     return Disposer.collect(
       autorun(() => {
-        YClients.client.sceneMatrix = Matrix(this.sceneMatrix).clone()
+        YClients.client.sceneMatrix = MATRIX.of(this.sceneMatrix).clone()
       }),
       autorun(() => {
         const client = YClients.observingClient
@@ -179,7 +179,7 @@ class StageViewportService {
     return reaction(
       () => YClients.client.selectPageId,
       (pageId) => {
-        const getMatrix = () => getEditorSetting().dev.sceneMatrix || Matrix().matrix
+        const getMatrix = () => getEditorSetting().dev.sceneMatrix || MATRIX.of().matrix
         const matrix = HandlePage.pageSceneMatrix.getSet(pageId, getMatrix)
         StageViewport.sceneMatrix = MATRIX.clone(matrix)
       },
@@ -187,7 +187,7 @@ class StageViewportService {
   }
 
   @action
-  private DEV_loadSceneMatrix() {
+  private DEV_loadSceneMATRIX.of() {
     const { fixedSceneMatrix, sceneMatrix } = getEditorSetting().dev
     if (fixedSceneMatrix) this.sceneMatrix = MATRIX.clone(sceneMatrix)
   }
@@ -216,7 +216,7 @@ class StageViewportService {
       XY.of(XY.center(this.bound)).divide(zoom).xy,
     ).xy
 
-    this.sceneMatrix = Matrix().shift(XY.symmetric(offset)).scale(zoom, zoom).clone()
+    this.sceneMatrix = MATRIX.of().shift(XY.symmetric(offset)).scale(zoom, zoom).clone()
   }
 }
 
