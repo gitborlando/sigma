@@ -6,10 +6,10 @@ import { XY } from 'src/editor/math/xy'
 
 export type IMatrix = [number, number, number, number, number, number]
 
-export class MATRIX {
+export class Matrix {
   static matrix = [1, 0, 0, 1, 0, 0] as IMatrix
 
-  static of(matrix = MATRIX.identity()) {
+  static of(matrix = Matrix.identity()) {
     this.matrix = matrix
     return this
   }
@@ -97,7 +97,7 @@ export class MATRIX {
     const tuple = [d, -b, -c, a, c * ty - d * tx, b * tx - a * ty].map(
       (i) => i * invDet,
     ) as IMatrix
-    return MATRIX.clone(tuple)
+    return Matrix.clone(tuple)
   }
 
   static xy = (xy: IXY, isInvert?: 'invert') => {
@@ -119,10 +119,10 @@ export class MATRIX {
 
   static aabb = (aabb: AABB, isInvert?: 'invert') => {
     const { minX, minY, maxX, maxY } = aabb
-    const xy1 = MATRIX.xy(XY._(minX, minY), isInvert)
-    const xy2 = MATRIX.xy(XY._(maxX, minY), isInvert)
-    const xy3 = MATRIX.xy(XY._(maxX, maxY), isInvert)
-    const xy4 = MATRIX.xy(XY._(minX, maxY), isInvert)
+    const xy1 = Matrix.xy(XY._(minX, minY), isInvert)
+    const xy2 = Matrix.xy(XY._(maxX, minY), isInvert)
+    const xy3 = Matrix.xy(XY._(maxX, maxY), isInvert)
+    const xy4 = Matrix.xy(XY._(minX, maxY), isInvert)
     return {
       minX: min(xy1.x, xy2.x, xy3.x, xy4.x),
       minY: min(xy1.y, xy2.y, xy3.y, xy4.y),
@@ -132,11 +132,11 @@ export class MATRIX {
   }
 
   static invertXY = (xy: IXY) => {
-    return MATRIX.xy(xy, 'invert')
+    return Matrix.xy(xy, 'invert')
   }
 
   static invertAABB = (aabb: AABB) => {
-    return MATRIX.aabb(aabb, 'invert')
+    return Matrix.aabb(aabb, 'invert')
   }
 
   static identity() {
@@ -144,7 +144,7 @@ export class MATRIX {
   }
 
   static fromXYR(x: number, y: number, rotation: number) {
-    return MATRIX.of().rotate(rotation).translate(x, y).matrix
+    return Matrix.of().rotate(rotation).translate(x, y).matrix
   }
 
   static isFlipped(matrix: IMatrix) {
