@@ -32,7 +32,7 @@ export function mock() {
     height: 40,
     // rotation: 33,
 
-    matrix: MATRIX.of([
+    matrix: Matrix.of([
       -0.9661300805096241, 0.2580555512568309, 0.6123004981473904,
       -0.7906251323911083, 0, 0,
     ]).matrix,

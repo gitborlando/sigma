@@ -21,7 +21,6 @@ export const autoImportConfig = autoImportPlugin({
         'XY',
         'Angle',
         'Matrix',
-        'MATRIX',
         'MRect',
         'max',
         'min',

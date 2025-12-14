@@ -28,7 +28,7 @@ class ElemDrawerService {
     this.path2d = path2d
     this.dirtyRects = [elem.aabb]
 
-    // StageSurface.setOBBMATRIX.of(this.elem.obb, false)
+    // StageSurface.setOBBMatrix.of(this.elem.obb, false)
     StageSurface.setTransform(this.node.matrix)
 
     this.drawShapePath()

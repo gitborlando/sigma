@@ -1,6 +1,6 @@
 import { IMatrix } from 'src/editor/math/matrix'
 
-export type IMRect = /** Serializable MRect */ {
+export type IMRect = {
   width: number
   height: number
   matrix: IMatrix
@@ -18,7 +18,7 @@ export class MRect {
 
   private _width = 0
   private _height = 0
-  private _matrix = MATRIX.identity()
+  private _matrix = Matrix.identity()
   private _xy = XY._(0, 0)
   private _rotation = 0
   private _center = XY._(0, 0)
@@ -84,20 +84,20 @@ export class MRect {
   }
 
   private calcXY() {
-    return MATRIX.of(this.matrix).xy(XY._(0, 0))
+    return Matrix.of(this.matrix).xy(XY._(0, 0))
   }
 
   private calcRotation() {
-    const transformedXY = MATRIX.of(this.matrix).xy(XY.xAxis())
+    const transformedXY = Matrix.of(this.matrix).xy(XY.xAxis())
     return Angle.sweep(transformedXY, XY.xAxis())
   }
 
   private calcCenter() {
-    return MATRIX.of(this.matrix).xy(XY._(this.width / 2, this.height / 2))
+    return Matrix.of(this.matrix).xy(XY._(this.width / 2, this.height / 2))
   }
 
   private calcVertexes() {
-    const matrix = MATRIX.of(this.matrix)
+    const matrix = Matrix.of(this.matrix)
     return [
       matrix.xy(XY._(0, 0)),
       matrix.xy(XY._(this.width, 0)),
@@ -142,7 +142,7 @@ export class MRect {
 
   set xy(xy: IXY) {
     const delta = XY.from(xy).minus(this.xy)._xy
-    MATRIX.of(this.matrix).translate(delta.x, delta.y)
+    Matrix.of(this.matrix).translate(delta.x, delta.y)
     this._xy = xy
     this.needReCalcCenter = true
     this.needReCalcVertexes = true
@@ -151,20 +151,20 @@ export class MRect {
 
   set rotation(rotation: number) {
     const delta = rotation - this.rotation
-    MATRIX.of(this.matrix).rotate(delta)
+    Matrix.of(this.matrix).rotate(delta)
     this._rotation = rotation
     this.needReCalcVertexes = true
     this.needReCalcAABB = true
   }
 
   shift(delta: IXY) {
-    MATRIX.of(this.matrix).translate(delta.x, delta.y)
+    Matrix.of(this.matrix).translate(delta.x, delta.y)
     this.expired()
     return this
   }
 
   scale(scale: IXY) {
-    MATRIX.of(this.matrix).scale(scale.x, scale.y)
+    Matrix.of(this.matrix).scale(scale.x, scale.y)
     this.expired()
     return this
   }
@@ -191,6 +191,6 @@ export class MRect {
   }
 
   static identity() {
-    return new MRect(0, 0, MATRIX.identity())
+    return new MRect(0, 0, Matrix.identity())
   }
 }

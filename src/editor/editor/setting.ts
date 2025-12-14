@@ -12,7 +12,7 @@ const initSetting = () => {
     fullRender: false,
     dev: {
       fixedSceneMatrix: true,
-      sceneMatrix: MATRIX.identity(),
+      sceneMatrix: Matrix.identity(),
     },
     snapToGrid: false,
   }
