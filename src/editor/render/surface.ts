@@ -194,8 +194,11 @@ export class StageSurfaceService {
   private fullRender = () => {
     this.transformCanvas()
 
-    if (!getEditorSetting().needSliceRender || getEditorSetting().showDirtyRect) {
+    if (
+      !getEditorSetting().needSliceRender /*  || getEditorSetting().showDirtyRect */
+    ) {
       StageScene.sceneRoot.children.forEach((elem) => elem.traverseDraw())
+      while (this.fullRenderElemsMinHeap.length) this.fullRenderElemsMinHeap.pop()
       return
     }
 
@@ -207,7 +210,7 @@ export class StageSurfaceService {
       elem?.traverseDraw()
     }
 
-    this.requestRender('nextFullRender')
+    if (this.fullRenderElemsMinHeap.length) this.requestRender('nextFullRender')
   }
 
   private patchRender = (reRenderElems: Set<Elem>) => {
