@@ -1,4 +1,4 @@
-import { createObjCache } from '@gitborlando/utils'
+import { clone, createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
@@ -113,7 +113,7 @@ class StageSceneService {
 
     const elem = this.findElem(node.id)
 
-    elem.node = node
+    elem.node = clone(node)
     elem.optimize = true
 
     if (node.type === 'frame') elem.clip = true

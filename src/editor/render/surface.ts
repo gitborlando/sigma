@@ -268,10 +268,10 @@ export class StageSurfaceService {
   collectDirty = (elem: Elem) => {
     const dirtyRect = elem.getDirtyRect()
     if (dirtyRect) {
-      this.dirtyRects.add(dirtyRect)
       if (elem.type === 'widgetElem') {
         this.requestRenderTopCanvas()
       } else {
+        this.dirtyRects.add(dirtyRect)
         this.requestRender('partialRender')
       }
     }

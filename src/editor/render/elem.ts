@@ -85,9 +85,8 @@ export class Elem {
       0,
     )
     const outlineWidth = this.node.outline?.width || 0
-    const extend = max(strokeWidth, outlineWidth)
+    const extend = max(strokeWidth, outlineWidth, 1)
 
-    if (!extend) return this.aabb
     return OBB.fromCenter(center, width + extend * 2, height + extend * 2, rotation)
       .aabb
   }

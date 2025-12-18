@@ -1,3 +1,4 @@
+import { firstOne } from '@gitborlando/utils'
 import { IRectWithCenter } from 'src/editor/math/types'
 import { OBB } from './obb'
 import { XY } from './xy'
@@ -74,13 +75,18 @@ export class AABB {
   }
 
   static merge(aabbList: AABB[] | Set<AABB>) {
-    let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
-    aabbList.forEach((aabb) => {
+    if (!firstOne(aabbList)) return new AABB(0, 0, 0, 0)
+
+    let xMin = Infinity,
+      yMin = Infinity,
+      xMax = -Infinity,
+      yMax = -Infinity
+    for (const aabb of aabbList) {
       xMin = min(xMin, aabb.minX)
       yMin = min(yMin, aabb.minY)
       xMax = max(xMax, aabb.maxX)
       yMax = max(yMax, aabb.maxY)
-    })
+    }
     return new AABB(xMin, yMin, xMax, yMax)
   }
 
