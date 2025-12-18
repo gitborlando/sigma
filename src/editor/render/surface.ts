@@ -202,7 +202,7 @@ export class StageSurfaceService {
     if (!this.fullRenderElemsMinHeap.length) return
 
     const startTime = getTime()
-    while (getTime() - startTime <= 4) {
+    while (getTime() - startTime <= 15) {
       const elem = this.fullRenderElemsMinHeap.pop()?.elem
       elem?.traverseDraw()
     }
@@ -325,6 +325,7 @@ export class StageSurfaceService {
         const path2d = new Path2D()
         const { minX, minY, maxX, maxY } = this.devDirtyArea
         path2d.rect(minX, minY, maxX - minX, maxY - minY)
+        ctx.lineWidth = 1 / dpr / getZoom()
         ctx.strokeStyle = rgba(0, 255, 100, 1)
         ctx.stroke(path2d)
       })
