@@ -2,7 +2,7 @@ import { AnyObject, objectKey } from '@gitborlando/utils'
 import { ChevronDown, ChevronUp, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
 import { YUndoInfo } from 'src/editor/y-state/y-undo'
-import { IconButton } from 'src/view/component/button'
+import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Text } from 'src/view/component/text'
 
@@ -11,7 +11,8 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
   const { next, stack } = YUndo
   return (
     <>
-      <IconButton
+      <Btn
+        size={32}
         icon={<Lucide icon={History} size={20} />}
         onClick={() => setShowHistory(!showHistory)}
       />
@@ -57,7 +58,7 @@ const HistoryItemComp: FC<{ info: YUndoInfo; active: boolean }> = observer(
       <G ref={ref} vertical='auto 1fr' className={cls('item')} data-active={active}>
         <G horizontal='1fr auto' center className={cls('item-header')}>
           <Text>{info.description}</Text>
-          <IconButton
+          <Btn
             x-if={patches}
             icon={<Lucide icon={showJson ? ChevronUp : ChevronDown} />}
             onClick={() => setShowJson(!showJson)}

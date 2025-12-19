@@ -1,10 +1,10 @@
-import { Radio } from '@arco-design/web-react'
 import { createCache, matchCase } from '@gitborlando/utils'
 import Color from 'color'
 import { OperateFill } from 'src/editor/operate/fill'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { IRGBA } from 'src/utils/color'
 import { DragPanel } from 'src/view/component/drag-panel'
+import { Segments } from 'src/view/component/segments'
 import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
 import { PickerImageComp } from 'src/view/editor/right-panel/operate/picker/image'
 import { PickerLinearGradientComp } from 'src/view/editor/right-panel/operate/picker/linear-gradient'
@@ -52,7 +52,16 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
       xy={pickerPos}
       className={cls()}>
       <G vertical className={cls('content')} gap={12}>
-        <Radio.Group
+        <Segments
+          options={[
+            { label: t('noun.solidColor'), value: 'color' },
+            { label: t('noun.linear'), value: 'linearGradient' },
+            { label: t('noun.image'), value: 'image' },
+          ]}
+          value={fillType}
+          onChange={(value) => handleChangeFill(value as V1.Fill['type'])}
+        />
+        {/* <Radio.Group
           type='button'
           value={fillType}
           size='mini'
@@ -60,7 +69,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
           <Radio value='color'>{t('noun.solidColor')}</Radio>
           <Radio value='linearGradient'>{t('noun.linear')}</Radio>
           <Radio value='image'>{t('noun.image')}</Radio>
-        </Radio.Group>
+        </Radio.Group> */}
         {fill.type === 'color' && (
           <PickerSolidComp fill={fill as V1.FillColor} index={fillIndex} />
         )}

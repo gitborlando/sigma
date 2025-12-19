@@ -1,6 +1,6 @@
 import { ChevronDown, Plus } from 'lucide-react'
 import { HandlePage } from 'src/editor/handle/page'
-import { IconButton } from 'src/view/component/button'
+import { Btn } from 'src/view/component/btn'
 import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
 
@@ -17,16 +17,16 @@ export const PageHeaderComp: FC<{}> = observer(({}) => {
       <G center horizontal className={cls('title')}>
         {selectPage.name}
       </G>
-      <IconButton onClick={addPage}>
-        <Lucide icon={Plus} />
-      </IconButton>
-      <IconButton
-        onClick={() => (EditorLPLayerState.allPageExpanded = !allPageExpanded)}>
-        <Lucide
-          icon={ChevronDown}
-          style={{ rotate: allPageExpanded ? '0deg' : '180deg' }}
-        />
-      </IconButton>
+      <Btn onClick={addPage} icon={<Lucide icon={Plus} />} />
+      <Btn
+        onClick={() => (EditorLPLayerState.allPageExpanded = !allPageExpanded)}
+        icon={
+          <Lucide
+            icon={ChevronDown}
+            style={{ rotate: allPageExpanded ? '0deg' : '180deg' }}
+          />
+        }
+      />
     </G>
   )
 })

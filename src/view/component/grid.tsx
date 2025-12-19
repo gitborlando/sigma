@@ -1,14 +1,15 @@
-import { ComponentPropsWithRef } from 'react'
+import { iife } from '@gitborlando/utils'
+import { ComponentPropsWithRef, CSSProperties } from 'react'
 
 export type GridProps = {
   horizontal?: string | true
   vertical?: string | true
   center?: boolean
-  gap?: number
-  jc?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'
-  ji?: 'start' | 'center' | 'end'
-  ac?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'
-  ai?: 'start' | 'center' | 'end'
+  gap?: CSSProperties['gap']
+  jc?: CSSProperties['justifyContent']
+  ji?: CSSProperties['justifyItems']
+  ac?: CSSProperties['alignContent']
+  ai?: CSSProperties['alignItems']
 } & ComponentPropsWithRef<'div'>
 
 export const Grid = forwardRef<HTMLDivElement, GridProps>(
@@ -44,29 +45,25 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(
       return templates
     }, [horizontal, vertical])
 
-    const layoutCss = useMemo(() => {
+    const layoutCss = iife(() => {
       if (!center) return ''
       if (horizontal && vertical) return cls('c')
       if (!horizontal && !vertical) return cls('c')
       if (horizontal) return cls('h-c')
       if (vertical) return cls('v-c')
       return ''
-    }, [horizontal, vertical, center])
-
-    const placeStyles = {
-      '--jc': jc,
-      '--ji': ji,
-      '--ac': ac,
-      '--ai': ai,
-    } as any
+    })
 
     return (
       <div
         className={cx(cls(), layoutCss, className)}
         style={{
           gap: gap,
+          justifyContent: jc,
+          justifyItems: ji,
+          alignContent: ac,
+          alignItems: ai,
           ...gridTemplates,
-          ...placeStyles,
           ...style,
         }}
         {...rest}
@@ -95,17 +92,5 @@ const cls = classes(css`
   &-v-c {
     justify-content: center;
     justify-items: center;
-  }
-  &-jc {
-    justify-content: var(--jc);
-  }
-  &-ji {
-    justify-items: var(--ji);
-  }
-  &-ac {
-    align-content: var(--ac);
-  }
-  &-ai {
-    align-items: var(--ai);
   }
 `)

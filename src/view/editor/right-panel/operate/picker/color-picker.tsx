@@ -3,7 +3,7 @@ import { PipetteIcon } from 'lucide-react'
 import { createContext, RefObject } from 'react'
 import { Drag } from 'src/global/event/drag'
 import { IRGBA } from 'src/utils/color'
-import { Button } from 'src/view/component/button'
+import { Btn } from 'src/view/component/btn'
 
 const Context = createContext({
   hue: 0,
@@ -221,10 +221,12 @@ const EyeDropperComp: FC<{}> = observer(({}) => {
     } catch (error) {}
   }
   return (
-    <Button
+    <Btn
+      size={30}
       icon={<Lucide icon={PipetteIcon} />}
       style={{ border: '1px solid var(--gray-border)' }}
-      onClick={handleEyeDropper}></Button>
+      onClick={handleEyeDropper}
+    />
   )
 })
 

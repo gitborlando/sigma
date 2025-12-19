@@ -1,7 +1,7 @@
 import { Icon } from '@gitborlando/widget'
 import { OperateAlign } from 'src/editor/operate/align'
 import { useHookSignal } from 'src/shared/signal/signal-react'
-import { IconButton } from 'src/view/component/button'
+import { Btn } from 'src/view/component/btn'
 
 export const AlignComp: FC<{}> = observer(({}) => {
   const { alignTypes, canAlign, currentAlign } = OperateAlign
@@ -10,12 +10,12 @@ export const AlignComp: FC<{}> = observer(({}) => {
   return (
     <G center horizontal className={cls()}>
       {alignTypes.map((type) => (
-        <IconButton
+        <Btn
           key={type}
           disabled={!canAlign.value}
-          onClick={() => currentAlign.dispatch(type)}>
-          <Icon url={Assets.editor.RP.operate.align[type]} />
-        </IconButton>
+          onClick={() => currentAlign.dispatch(type)}
+          icon={<Icon url={Assets.editor.RP.operate.align[type]} />}
+        />
       ))}
     </G>
   )

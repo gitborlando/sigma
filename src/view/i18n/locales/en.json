@@ -96,7 +96,7 @@
     "node": "node",
     "geometry": "geometry",
     "property": "property",
-    "multiValue": "multi",
+    "multiValue": "mixed",
     "file": "file"
   },
   "adj": {
@@ -149,5 +149,6 @@
   "created node": "created node",
   "snap to grid": "snap to grid",
   "zoom to fit all": "zoom to fit all",
-  "zoom to fit selection": "zoom to fit selection"
+  "zoom to fit selection": "zoom to fit selection",
+  "modify geometry property": "modify geometry property"
 }

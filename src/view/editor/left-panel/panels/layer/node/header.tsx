@@ -1,6 +1,6 @@
 import { ChevronsUp } from 'lucide-react'
 import { useHookSignal } from 'src/shared/signal/signal-react'
-import { IconButton } from 'src/view/component/button'
+import { Btn } from 'src/view/component/btn'
 
 import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
 
@@ -30,14 +30,18 @@ export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
         placeholder={t('search layer')}
         className={cls('search-input')}
       />
-      <IconButton onClick={handleToggleExpand} className={cls('expand-button')}>
-        <Lucide
-          icon={ChevronsUp}
-          style={{
-            transform: allNodeExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          }}
-        />
-      </IconButton>
+      <Btn
+        onClick={handleToggleExpand}
+        className={cls('expand-button')}
+        icon={
+          <Lucide
+            icon={ChevronsUp}
+            style={{
+              transform: allNodeExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
+          />
+        }
+      />
     </G>
   )
 })

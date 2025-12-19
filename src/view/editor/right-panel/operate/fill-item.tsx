@@ -4,8 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { OperateFill } from 'src/editor/operate/fill'
 import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
-import { Input } from 'src/view/component/arco/input'
-import { NumberInput } from 'src/view/component/number-input'
+import { InputNum } from 'src/view/component/input-num'
 import { suspense } from 'src/view/component/suspense'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
 import i18n from 'src/view/i18n/config'
@@ -91,35 +90,39 @@ const HexInputComp: FC<{
     image: `${t('noun.image')} ${t('noun.fill')}`,
   })
 
-  return (
-    <Input
-      className={cls('hex')}
-      noHoverFocusStyle
-      readOnly={!isSolidFill}
-      value={value}
-      onEnd={(value) => setColor(value)}
-      onFocus={(e) => isSolidFill && e.target.select()}
-      validate={validateColor}
-    />
-  )
+  return null
+  // return (
+  //   <Input
+  //     className={cls('hex')}
+  //     noHoverFocusStyle
+  //     readOnly={!isSolidFill}
+  //     value={value}
+  //     onEnd={(value) => setColor(value)}
+  //     onFocus={(e) => isSolidFill && e.target.select()}
+  //     validate={validateColor}
+  //   />
+  // )
 })
 
 const AlphaInputComp: FC<{ fill: V1.Fill; index: number }> = observer(
   ({ fill, index }) => {
     const setAlpha = (value: number) => {
+      console.log('value: ', value)
       OperateFill.setFill(index, (fill) => {
         fill.alpha = value / 100
       })
     }
     return (
-      <NumberInput
+      <InputNum
         value={fill.alpha * 100}
-        onChange={(value) => setAlpha(value ?? 0)}
+        onEnd={(value) => setAlpha(value ?? 0)}
         className={cls('alpha')}
-        onFocus={(e) => e.target.select()}
         min={0}
         max={100}
-        suffix='%'
+        formatter={(value) => `${value}%`}
+        parser={(value) => Number(value?.replace('%', ''))}
+        needAutoSelect
+        needFocusStyle={false}
       />
     )
   },
@@ -156,7 +159,7 @@ const cls = classes(css`
     width: 18px;
     height: 18px;
     overflow: hidden;
-    ${styles.borderRadius}
+    ${styles.borderRadiusSM}
     ${styles.shadow}
     cursor: pointer;
   }
@@ -169,11 +172,10 @@ const cls = classes(css`
     align-items: center;
   }
   &-alpha {
-    width: 48px;
+    width: 36px;
     height: 24px;
     ${styles.textLabel}
-    display: grid;
-    justify-items: center;
-    align-items: center;
+    padding-inline: 0;
+    gap: 0;
   }
 `)

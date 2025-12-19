@@ -7,6 +7,7 @@ export const styles = {
   textHead: `font-size: 12px;font-weight: 600;line-height: 16px;`,
 
   borderRadius: 'border-radius: var(--border-radius);',
+  borderRadiusSM: 'border-radius: var(--border-radius-sm);',
   needBorder: 'border: 1px solid transparent;',
   border: 'border: 1px solid var(--gray-border);',
   borderLeft: 'border-left: 1px solid var(--gray-border);',

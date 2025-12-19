@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react'
-import { IconButton } from 'src/view/component/button'
+import { Btn } from 'src/view/component/btn'
 import {
   OpFieldComp,
   OpFieldHeaderComp,
@@ -10,7 +10,7 @@ export const EditorRPOperateStrokeComp: FC<{}> = ({}) => {
     <OpFieldComp>
       <OpFieldHeaderComp
         title='描边'
-        headerSlot={<IconButton icon={<Lucide icon={Plus} />} onClick={() => {}} />}
+        headerSlot={<Btn icon={<Lucide icon={Plus} />} onClick={() => {}} />}
       />
     </OpFieldComp>
   )

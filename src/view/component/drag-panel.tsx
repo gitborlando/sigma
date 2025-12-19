@@ -4,7 +4,8 @@ import { createPortal } from 'react-dom'
 import { Drag } from 'src/global/event/drag'
 import { stopPropagation } from 'src/shared/utils/event'
 import { IXY } from 'src/shared/utils/normal'
-import { IconButton } from 'src/view/component/button'
+import { CommonBalanceItem } from 'src/view/component/balance-item'
+import { Btn } from 'src/view/component/btn'
 
 type DragPanelProps = {
   title: string
@@ -89,19 +90,19 @@ export const DragPanel: FC<DragPanelProps> = ({
       }}
       onMouseDown={stopPropagation()}
       onMouseDownCapture={() => panelCount > 1 && setZIndex(maxZIndex++)}>
-      <G
-        horizontal='auto 1fr auto'
-        center
+      <CommonBalanceItem
+        isHeader
+        label={title}
         className={cls('header')}
         onMouseDown={handleHeaderMouseDown}>
-        <G className={cls('header-title')}>{title}</G>
         <G className={cls('header-slot')}>{headerSlot}</G>
-        <IconButton
-          size='mini'
+        <Btn
+          size={24}
           icon={<Lucide icon={X} />}
           onMouseDown={stopPropagation()}
-          onClick={closeFunc}></IconButton>
-      </G>
+          onClick={closeFunc}
+        />
+      </CommonBalanceItem>
       <G className={cls('content')}>{children}</G>
     </G>,
     document.querySelector('#drag-panel-portal')!,
@@ -111,15 +112,15 @@ export const DragPanel: FC<DragPanelProps> = ({
 const cls = classes(css`
   width: 240px;
   height: fit-content;
-  border-radius: 2px;
   background-color: white;
   position: fixed;
   overflow: hidden;
   ${styles.shadow}
+  ${styles.borderRadius}
   &-header {
     gap: 8px;
     height: 36px;
-    padding-inline: 6px;
+    padding-inline: 12px 6px;
     ${styles.textHead}
     ${styles.borderBottom}
     &-title {

@@ -1,15 +1,10 @@
-import { Menu as ArcoMenu } from '@arco-design/web-react'
-import { RefInputType } from '@arco-design/web-react/es/Input'
-import { Check, ChevronDown } from 'lucide-react'
-import { Popover } from 'react-tiny-popover'
+import { ChevronDown } from 'lucide-react'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
-import { Divider } from 'src/view/component/arco/divider'
-import { InputNumber } from 'src/view/component/arco/input-number'
-import { MenuItem } from 'src/view/component/arco/menu'
-import { BalanceItem } from 'src/view/component/item'
-import { PopoverCard } from 'src/view/component/popover-card'
-import { Text } from 'src/view/component/text'
+import { OptionBalanceItem } from 'src/view/component/balance-item'
+import { Divider } from 'src/view/component/divider'
+import { InputNum } from 'src/view/component/input-num'
+import { Menu } from 'src/view/component/menu'
 
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
   const zoom = ~~((getZoom() || 0) * 100)
@@ -26,59 +21,46 @@ export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
   `)
 
   return (
-    <Popover
-      isOpen={show}
-      positions={['bottom']}
-      onClickOutside={() => setShow(false)}
-      content={<PanelComp />}>
-      <G center horizontal className={cls()} onClick={() => setShow(!show)}>
-        <G>{zoom}%</G>
-        <Lucide icon={ChevronDown} size={16} />
-      </G>
-    </Popover>
+    <Menu
+      positioning={{ placement: 'bottom' }}
+      trigger={
+        <G center horizontal className={cls()} onClick={() => setShow(!show)}>
+          <G>{zoom}%</G>
+          <Lucide icon={ChevronDown} size={16} />
+        </G>
+      }>
+      <PanelComp />
+    </Menu>
   )
 })
 
 const PanelComp: FC<{}> = observer(({}) => {
-  const cls = classes(css`
-    & .arco-menu-inner {
-      padding: 0;
-    }
-    & .arco-menu-item {
-      padding: 0px;
-    }
-  `)
+  const cls = classes(css``)
   return (
-    <PopoverCard style={{ padding: 6 }}>
-      <G vertical center className={cls()}>
-        <InputZoomComp />
-        <Divider style={{ margin: '6px 0' }} />
-        <ZoomingOptionsComp />
-        <Divider style={{ margin: '6px 0' }} />
-        <OtherOptionsComp />
-      </G>
-    </PopoverCard>
+    <G vertical center className={cls()}>
+      <InputZoomComp />
+      <Divider />
+      <ZoomingOptionsComp />
+      <Divider />
+      <OtherOptionsComp />
+    </G>
   )
 })
 
 const InputZoomComp: FC<{}> = observer(({}) => {
   const { updateZoom } = StageViewport
 
-  const zoom = ~~((getZoom() || 0) * 100)
-  const ref = useRef<RefInputType>(null)
-
-  useEffect(() => {
-    ref.current?.focus()
-  }, [])
-
   return (
-    <InputNumber
-      style={{ width: 160 }}
-      hideControl={false}
-      ref={ref}
-      value={zoom}
-      onChange={(value) => updateZoom((value || 0) / 100)}
-      suffix='%'
+    <InputNum
+      className={css`
+        width: 160px;
+        ${styles.borderRadiusSM}
+      `}
+      value={~~((getZoom() || 0) * 100)}
+      onEnd={(value) => updateZoom((value || 0) / 100)}
+      formatter={(value) => `${value}%`}
+      parser={(value) => Number(value?.replace('%', ''))}
+      needControls
     />
   )
 })
@@ -95,95 +77,31 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
   }
 
   return (
-    <ArcoMenu>
-      <MenuItem key='zoomTo100'>
-        <CheckableBalanceItem
-          label={t('zoom to 100')}
-          onClick={() => updateZoom(1)}
-        />
-      </MenuItem>
-      <MenuItem key='zoomToFitAll'>
-        <CheckableBalanceItem
-          label={t('zoom to fit all')}
-          onClick={handleZoomToFitAll}
-        />
-      </MenuItem>
-      <MenuItem key='zoomToFitSelection'>
-        <CheckableBalanceItem
-          label={t('zoom to fit selection')}
-          onClick={handleZoomToFitSelection}
-        />
-      </MenuItem>
-      <MenuItem key='lock'>
-        <CheckableBalanceItem
-          label={t('save current zoom and offset')}
-          checked={getEditorSetting().dev.fixedSceneMatrix}
-          onChecked={handelSaveSceneMatrix}
-        />
-      </MenuItem>
-    </ArcoMenu>
+    <>
+      <OptionBalanceItem label={t('zoom to 100')} onClick={() => updateZoom(1)} />
+      <OptionBalanceItem label={t('zoom to fit all')} onClick={handleZoomToFitAll} />
+      <OptionBalanceItem
+        label={t('zoom to fit selection')}
+        onClick={handleZoomToFitSelection}
+      />
+      <OptionBalanceItem
+        label={t('save current zoom and offset')}
+        checked={getEditorSetting().dev.fixedSceneMatrix}
+        onChecked={handelSaveSceneMatrix}
+      />
+    </>
   )
 })
 
 const OtherOptionsComp: FC<{}> = observer(({}) => {
   return (
-    <ArcoMenu>
-      <MenuItem key='snapToGrid'>
-        <CheckableBalanceItem
-          label={t('snap to grid')}
-          checked={getEditorSetting().snapToGrid}
-          onChecked={(value) => {
-            const setting = getEditorSetting()
-            setting.snapToGrid = value
-          }}
-        />
-      </MenuItem>
-    </ArcoMenu>
-  )
-})
-
-const CheckableBalanceItem = forwardRef<
-  HTMLDivElement,
-  ComponentPropsWithRef<'div'> & {
-    label: string
-    checked?: boolean
-    onChecked?: (value: boolean) => void
-  }
->(({ className, label, checked, onChecked, onClick, children, ...rest }, ref) => {
-  const cls = classes(css`
-    padding-inline: 4px 20px;
-    &-checked {
-      color: var(--color);
-    }
-  `)
-
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    onClick?.(e)
-    onChecked?.(!checked)
-  }
-
-  return (
-    <BalanceItem
-      className={cx(cls(), className)}
-      {...rest}
-      ref={ref}
-      left={
-        <G horizontal='auto 1fr' center gap={2}>
-          {onChecked && checked ? (
-            <Lucide
-              icon={Check}
-              size={16}
-              className={cls('checked')}
-              style={{ transform: 'translateY(1px)' }}
-            />
-          ) : (
-            <G style={{ width: 16 }} />
-          )}
-          <Text>{label}</Text>
-        </G>
-      }
-      right={children}
-      onClick={handleClick}
+    <OptionBalanceItem
+      label={t('snap to grid')}
+      checked={getEditorSetting().snapToGrid}
+      onChecked={(value) => {
+        const setting = getEditorSetting()
+        setting.snapToGrid = value
+      }}
     />
   )
 })

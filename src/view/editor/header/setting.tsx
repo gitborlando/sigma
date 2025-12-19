@@ -1,9 +1,9 @@
-import { Radio } from '@arco-design/web-react'
 import { Settings } from 'lucide-react'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { IconButton } from 'src/view/component/button'
+import { CommonBalanceItem } from 'src/view/component/balance-item'
+import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
-import { CommonBalanceItem } from 'src/view/component/item'
+import { Segments } from 'src/view/component/segments'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
 
 export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
@@ -11,7 +11,8 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
   const [settingType, setSettingType] = useState<'common' | 'dev'>('common')
   return (
     <>
-      <IconButton
+      <Btn
+        size={32}
         icon={<Lucide icon={Settings} size={20} />}
         onClick={() => setShowSetting(!showSetting)}
       />
@@ -51,14 +52,14 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
   return (
     <G gap={8}>
       <CommonBalanceItem label={t('noun.language')}>
-        <Radio.Group
-          type='button'
-          size='mini'
+        <Segments
+          options={[
+            { label: 'English', value: 'en' },
+            { label: '中文', value: 'zh' },
+          ]}
           value={getLanguage()}
-          onChange={(value) => setLanguage(value as 'zh' | 'en')}>
-          <Radio value='en'>English</Radio>
-          <Radio value='zh'>中文</Radio>
-        </Radio.Group>
+          onChange={(value) => setLanguage(value as 'zh' | 'en')}
+        />
       </CommonBalanceItem>
       <BooleanSettingComp
         label={t('auto save')}
@@ -119,7 +120,6 @@ const SwitchComp: FC<{
 
 export const editorSettingCls = classes(css`
   padding: 12px;
-  padding-top: 0;
   height: fit-content;
 `)
 

@@ -1,4 +1,3 @@
-import { Card } from '@arco-design/web-react'
 import { miniId } from '@gitborlando/utils'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
@@ -6,6 +5,7 @@ import Scrollbars from 'react-custom-scrollbars-2'
 import { FileService } from 'src/global/service/file'
 import { Loading } from 'src/view/component/loading'
 import { suspense } from 'src/view/component/suspense'
+import { Text } from 'src/view/component/text'
 import { Tables } from 'types/supabase'
 
 export const HomeFilesComp: FC<{}> = suspense(
@@ -35,25 +35,25 @@ const FileItemComp: FC<{ file: Tables<'files'> }> = ({ file }) => {
   const handleClick = () => navigate(`/fileId/${file.id}`)
 
   return (
-    <Card
-      onClick={() => handleClick()}
-      className={cls('item')}
-      cover={
-        <G className={cls('item-cover')}>
-          <img
-            draggable={false}
-            src={
-              'https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp'
-            }
-            alt={file.name}
-          />
-        </G>
-      }>
-      <Card.Meta
-        title={decodeURIComponent(file.name)}
-        description={dayjs(file.createdAt).format('YYYY-MM-DD HH:mm:ss')}
-      />
-    </Card>
+    <G onClick={() => handleClick()} className={cls('item')}>
+      <G className={cls('item-cover')}>
+        <img
+          draggable={false}
+          src={
+            'https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp'
+          }
+          alt={file.name}
+        />
+      </G>
+      <G className={cls('item-meta')}>
+        <Text variant='head' className='text-[14px]'>
+          {decodeURIComponent(file.name)}
+        </Text>
+        <Text variant='common'>
+          {dayjs(file.createdAt).format('YYYY-MM-DD HH:mm:ss')}
+        </Text>
+      </G>
+    </G>
   )
 }
 
@@ -61,24 +61,25 @@ const cls = classes(css`
   padding: 20px;
   gap: 20px;
   &-item {
-    width: 320px;
-    height: 257px;
-    ${styles.borderRadius}
+    width: 300px;
+    height: 240px;
+    ${styles.borderRadiusSM}
     cursor: pointer;
-    border: none;
+    background: var(--bg-content);
     &:hover {
       outline: 2px solid var(--color);
       outline-offset: 1px;
     }
     &-cover {
       width: 100%;
-      height: 200px;
+      height: 180px;
       object-fit: cover;
-      ${styles.borderRadius}
+      ${styles.borderRadiusSM}
       overflow: hidden;
     }
-    & .arco-card-body {
-      padding: 4px 0;
+    &-meta {
+      padding: 4px 4px;
+      gap: 4px;
     }
   }
 `)

@@ -1,11 +1,12 @@
-import { Button, Typography } from '@arco-design/web-react'
 import { Icon } from '@gitborlando/widget'
 import { Github, LucideLanguages } from 'lucide-react'
 import { UserService } from 'src/global/service/user'
-import { IconButton } from 'src/view/component/button'
+import { Btn } from 'src/view/component/btn'
+import { Text } from 'src/view/component/text'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
 
 export const HomeHeaderComp: FC<{}> = observer(({}) => {
+  const navigate = useNavigate()
   const handleLanguageChange = () => {
     setLanguage(getLanguage() === 'zh' ? 'en' : 'zh')
   }
@@ -19,19 +20,25 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
         <a href='https://github.com/gitborlando/editor' target='_blank'>
           <Lucide icon={Github} size={20} />
         </a>
-        <IconButton
+        <Btn
           icon={<Lucide icon={LucideLanguages} size={20} />}
           onClick={handleLanguageChange}
         />
       </G>
       <G className={cls('right')} horizontal='auto auto auto' center gap={16}>
-        <Button type='primary'>{t('file.new')}</Button>
+        <G horizontal center gap={8}>
+          <Btn variant='outline' onClick={() => navigate('/test')}>
+            测试页
+          </Btn>
+          <Btn variant='outline' onClick={() => navigate('fileId/mock')}>
+            Mock页
+          </Btn>
+          <Btn variant='solid'>{t('file.new')}</Btn>
+        </G>
         <G
           dangerouslySetInnerHTML={{ __html: UserService.avatar }}
           style={{ width: '32px', height: '32px' }}></G>
-        <Typography.Text style={{ alignSelf: 'center' }}>
-          {UserService.userName}
-        </Typography.Text>
+        <Text variant='common'>{UserService.userName}</Text>
       </G>
     </G>
   )

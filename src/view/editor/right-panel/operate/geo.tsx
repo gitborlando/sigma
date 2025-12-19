@@ -4,8 +4,8 @@ import { AllGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { getZoom } from 'src/editor/stage/viewport'
 import { MULTI_VALUE } from 'src/global/constant'
 import { twoDecimal } from 'src/utils/common'
+import { InputNum } from 'src/view/component/input-num'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
-import { SlideInput } from './components/slide-input'
 
 export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
   const { activeKeys, activeGeometry, setupActiveKeys, setupActiveGeometry } =
@@ -23,21 +23,25 @@ export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
         label={<Icon url={Assets.editor.RP.operate.geo.x} />}
         operateKey='x'
         value={activeGeometry.x}
+        slideRate={1 / getZoom()}
       />
       <GeometryItemComp
         label={<Icon url={Assets.editor.RP.operate.geo.y} />}
         operateKey='y'
         value={activeGeometry.y}
+        slideRate={1 / getZoom()}
       />
       <GeometryItemComp
         label={<Icon url={Assets.editor.RP.operate.geo.w} />}
         operateKey='width'
         value={activeGeometry.width}
+        slideRate={1 / getZoom()}
       />
       <GeometryItemComp
         label={<Icon url={Assets.editor.RP.operate.geo.h} />}
         operateKey='height'
         value={activeGeometry.height}
+        slideRate={1 / getZoom()}
       />
       <GeometryItemComp
         label={<Icon url={Assets.editor.RP.operate.geo.rotate} />}
@@ -113,51 +117,29 @@ const GeometryItemComp: FC<{
     return value === undefined ? 0 : value
   }
 
-  const handleOnBlur = () => {
-    if (T<any>(inputValue.current) === MULTI_VALUE) return
-    if (inputValue.current === correctedValue) return
+  const handleEnd = (v: number) => {
     if (operateKey === 'x' || operateKey === 'y') {
       const datum = HandleNode.datumXY[operateKey]
-      const value = inputValue.current + datum
+      const value = v + datum
       setActiveGeometry(operateKey, value, false)
     } else {
-      setActiveGeometry(operateKey, inputValue.current, false)
+      setActiveGeometry(operateKey, v, false)
     }
-    YUndo.track({
-      type: 'state',
-      description: sentence(
-        t('verb.modify'),
-        t('noun.geometry'),
-        t('noun.property'),
-        ': ',
-        operateKey,
-      ),
-    })
+    YUndo.track2('state', `${t('modify geometry property')}: ${operateKey}`)
   }
 
   const handleAfterSlide = () => {
-    YUndo.track({
-      type: 'state',
-      description: sentence(
-        t('verb.modify'),
-        t('noun.geometry'),
-        t('noun.property'),
-        ': ',
-        operateKey,
-      ),
-    })
+    YUndo.track2('state', `${t('modify geometry property')}: ${operateKey}`)
   }
 
   return (
-    <SlideInput
-      size='small'
+    <InputNum
       prefix={label}
-      value={isMultiValue ? MULTI_VALUE : twoDecimal(correctedValue)}
+      value={isMultiValue ? undefined : twoDecimal(correctedValue)}
       slideRate={slideRate}
       onSlide={(v) => setActiveGeometry(operateKey, correctSetValue(v))}
       afterSlide={handleAfterSlide}
-      onChange={(v) => (inputValue.current = correctSetValue(v))}
-      onBlur={handleOnBlur}
+      onEnd={handleEnd}
       {...(isMultiValue ? { placeholder: t('noun.multiValue') } : {})}
     />
   )

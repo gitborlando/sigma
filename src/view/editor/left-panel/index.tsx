@@ -1,7 +1,7 @@
 import { matchCase } from '@gitborlando/utils'
 import { History, Image, Layers, Settings } from 'lucide-react'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Button } from 'src/view/component/button'
+import { Btn } from 'src/view/component/btn'
 
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer'
 
@@ -43,11 +43,11 @@ export const SwitchBarComp: FC<{}> = observer(({}) => {
           setting: '设置',
         })
         return (
-          <Button
+          <Btn
             key={id}
             icon={icon}
             active={currentTabId === id}
-            onClick={() => (EditorLeftPanelState.currentTabId = id)}></Button>
+            onClick={() => (EditorLeftPanelState.currentTabId = id)}></Btn>
         )
       })}
     </G>
