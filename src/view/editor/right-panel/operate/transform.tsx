@@ -1,5 +1,5 @@
 import { getZoom } from 'src/editor/stage/viewport'
-import { SlideInput } from 'src/view/editor/right-panel/operate/components/slide-input'
+import { InputNum } from 'src/view/component/input-num'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 
 export const EditorDesignTransformComp: FC<{}> = observer(({}) => {
@@ -35,8 +35,7 @@ const TransformComp: FC<{
   }
 
   return (
-    <SlideInput
-      size='small'
+    <InputNum
       prefix={['a', 'b', 'c', 'd', 'tx', 'ty'][index]}
       slideRate={0.2 / getZoom()}
       value={node.matrix[index]}
