@@ -57,6 +57,7 @@ export interface OptionBalanceItemProps extends ComponentPropsWithRef<'div'> {
   label: string
   icon?: ReactNode
   reserveIconSpace?: boolean
+  disabled?: boolean
   checked?: boolean
   onChecked?: (value: boolean) => void
 }
@@ -68,6 +69,7 @@ export const OptionBalanceItem = forwardRef<HTMLDivElement, OptionBalanceItemPro
       label,
       icon,
       reserveIconSpace = true,
+      disabled = false,
       checked,
       onChecked,
       onClick,
@@ -83,11 +85,15 @@ export const OptionBalanceItem = forwardRef<HTMLDivElement, OptionBalanceItemPro
       &-has-icon {
         padding-inline-start: 4px;
       }
-      &:hover {
+      &-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      &:hover:not(&-disabled) {
         color: white;
         background-color: var(--color);
       }
-      &:hover &-icon-checked {
+      &:hover:not(&-disabled) &-icon-checked {
         color: white;
       }
       &-icon {
@@ -114,7 +120,12 @@ export const OptionBalanceItem = forwardRef<HTMLDivElement, OptionBalanceItemPro
     return (
       <BalanceItem
         {...rest}
-        className={cx(cls(), reserveIconSpace && cls('has-icon'), className)}
+        className={cx(
+          cls(),
+          disabled && cls('disabled'),
+          reserveIconSpace && cls('has-icon'),
+          className,
+        )}
         ref={ref}
         left={
           <G horizontal='auto 1fr' center gap={2}>

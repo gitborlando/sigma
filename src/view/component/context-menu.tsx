@@ -1,3 +1,4 @@
+import { Fragment } from 'react/jsx-runtime'
 import { ContextMenu } from 'src/global/context-menu'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Divider } from 'src/view/component/divider'
@@ -15,19 +16,25 @@ export const ContextMenuComp: FC<{}> = observer(({}) => {
       onOpenChange={({ open }) => (ContextMenu.triggered = open)}>
       {menus.map((group, groupIndex) => {
         return group.map((item, index) => {
-          if (index === group.length - 1 && groupIndex !== menus.length - 1) {
-            return <Divider key={`divider-${index}`} />
-          }
+          const disabled = item.when && !item.when()
           return (
-            <OptionBalanceItem
-              className={cls('item')}
-              key={item.name}
-              label={item.name}
-              reserveIconSpace={false}>
-              <Text x-if={!!item.shortcut} className={cls('item-shortcut')}>
-                {item.shortcut}
-              </Text>
-            </OptionBalanceItem>
+            <Fragment key={item.name}>
+              <OptionBalanceItem
+                className={cls('item')}
+                key={item.name}
+                label={item.name}
+                reserveIconSpace={false}
+                disabled={disabled}
+                onClick={() => !disabled && item.callback(ContextMenu.context)}>
+                <Text x-if={!!item.shortcut} className={cls('item-shortcut')}>
+                  {item.shortcut}
+                </Text>
+              </OptionBalanceItem>
+              <Divider
+                x-if={index === group.length - 1 && groupIndex !== menus.length - 1}
+                key={`divider-${index}`}
+              />
+            </Fragment>
           )
         })
       })}
