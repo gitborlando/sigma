@@ -215,13 +215,10 @@ class StageViewportService {
     if (!aabbList.length) return
 
     let aabb = AABB.merge(aabbList)
-    console.log('aabb: ', aabb)
     let rect = AABB.rect(aabb)
-    console.log('rect: ', rect)
 
     aabb = AABB.extend(aabb, max(rect.width / 10, rect.height / 10))
     rect = AABB.rect(aabb)
-    console.log('rect: ', rect)
 
     const zoom = this.limitZoom(
       min(this.bound.width / rect.width, this.bound.height / rect.height),
