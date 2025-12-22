@@ -9,6 +9,11 @@ export class Angle {
     return sin(Angle.radianFy(angle))
   }
 
+  static cosSin(angle: number) {
+    const radians = Angle.radianFy(angle)
+    return { cos: cos(radians), sin: sin(radians) }
+  }
+
   static tan(angle: number) {
     return tan(Angle.radianFy(angle))
   }
