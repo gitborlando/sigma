@@ -141,7 +141,7 @@ export class MRect {
   }
 
   set xy(xy: IXY) {
-    const delta = XY.from(xy).minus(this.xy)._xy
+    const delta = XY.of(xy).minus(this.xy)
     Matrix.of(this.matrix).translate(delta.x, delta.y)
     this._xy = xy
     this.needReCalcCenter = true
