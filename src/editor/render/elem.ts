@@ -119,9 +119,9 @@ export class Elem {
 
       if (this.children.length) {
         if (this.clip) {
-          StageSurface.setOBBMatrix.of(this.obb, false)
+          StageSurface.setOBBMatrix(this.obb, false)
           ctx.clip(path2d)
-          StageSurface.setOBBMatrix.of(this.obb, true)
+          StageSurface.setOBBMatrix(this.obb, true)
         }
         this.children.forEach((child) => child.traverseDraw())
       }
@@ -306,16 +306,12 @@ export class HitTest {
         return inRect
       } else {
         if (!inRect) return false
-        if (XY.of(xy).distance(XY.$(r, r)) > r && xy.x < r && xy.y < r) return false
-        if (XY.of(xy).distance(XY.$(w - r, r)) > r && xy.x > w - r && xy.y < r)
+        if (XY.distance(xy, XY.$(r, r)) > r && xy.x < r && xy.y < r) return false
+        if (XY.distance(xy, XY.$(w - r, r)) > r && xy.x > w - r && xy.y < r)
           return false
-        if (
-          XY.of(xy).distance(XY.$(w - r, h - r)) > r &&
-          xy.x > w - r &&
-          xy.y > h - r
-        )
+        if (XY.distance(xy, XY.$(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r)
           return false
-        if (XY.of(xy).distance(XY.$(r, h - r)) > r && xy.x < r && xy.y > h - r)
+        if (XY.distance(xy, XY.$(r, h - r)) > r && xy.x < r && xy.y > h - r)
           return false
         return true
       }
@@ -370,7 +366,7 @@ export class HitTest {
 
       if (startAngle === 0 && endAngle === 0) return true
 
-      const angle = Angle.sweep(XY.of(xy).vector(XY.$(cx, cy)))
+      const angle = Angle.sweep(XY.vector(xy, XY.$(cx, cy)))
 
       if (startAngle <= endAngle) {
         return angle >= startAngle && angle <= endAngle
@@ -401,8 +397,8 @@ export class HitTest {
       if (cur.y < xy.y && next.y < xy.y) return
       const small = cur.y < next.y ? cur : next
       const large = cur.y > next.y ? cur : next
-      const A = XY.of(large).minus(small).xy
-      const B = XY.of(xy).minus(small).xy
+      const A = XY.of(large).minus(small)
+      const B = XY.of(xy).minus(small)
       if (A.x * B.y - A.y * B.x > 0) inside = !inside
     })
     return inside

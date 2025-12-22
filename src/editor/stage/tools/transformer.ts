@@ -49,7 +49,7 @@ class StageTransformerService {
         )
         obb.shift(snapDelta)
 
-        const finalDeltaXY = XY.of(obb).minus(this.obb).xy
+        const finalDeltaXY = XY.of(obb).minus(this.obb)
         OperateGeometry.setActiveGeometries(finalDeltaXY)
       })
       .onDestroy(({ moved }) => {
@@ -66,12 +66,12 @@ class StageTransformerService {
 
     StageDrag.onStart()
       .onMove(({ delta }) => {
-        const deltaX = XY.of(delta).dot(XY.xAxis(rotation))
-        const deltaY = XY.of(delta).dot(XY.yAxis(rotation))
+        const deltaX = XY.dot(delta, XY.xAxis(rotation))
+        const deltaY = XY.dot(delta, XY.yAxis(rotation))
 
         if (this.isSelectOnlyLine) {
-          setActiveGeometry('x', XY.of(delta).dot(XY.xAxis(0)))
-          setActiveGeometry('y', XY.of(delta).dot(XY.yAxis(0)))
+          setActiveGeometry('x', XY.dot(delta, XY.xAxis(0)))
+          setActiveGeometry('y', XY.dot(delta, XY.yAxis(0)))
           return
         }
 

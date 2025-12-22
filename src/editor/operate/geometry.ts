@@ -179,7 +179,7 @@ class OperateGeometryService {
   ) {
     const { getNodeCenterXY } = HandleNode
     const centerXY = getNodeCenterXY(node)
-    const newXY = XY.of(node).rotate(centerXY, this.delta('rotation', node)).xy
+    const newXY = XY.of(node).rotate(centerXY, this.delta('rotation', node))
 
     YState.set(
       `${node.id}.rotation`,
@@ -197,7 +197,7 @@ class OperateGeometryService {
         ancestorCenter,
         this.delta('rotation', node),
       )
-      const centerShift = newCenter.minus(centerXY).xy
+      const centerShift = newCenter.minus(centerXY)
       YState.set(`${node.id}.x`, newXY.x + centerShift.x)
       YState.set(`${node.id}.y`, newXY.y + centerShift.y)
     }

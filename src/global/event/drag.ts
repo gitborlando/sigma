@@ -88,7 +88,7 @@ export class DragHelper {
     if (this.moveHandler) return this
 
     this.moveHandler = (e) => {
-      XY.of(this.delta).plus(XY.$(e.movementX, e.movementY))
+      this.delta = XY.of(this.delta).plus(XY.$(e.movementX, e.movementY))
 
       if (this.movePending) return
       this.movePending = true
@@ -106,8 +106,8 @@ export class DragHelper {
           this.started = true
         }
 
-        this.current = XY.from(this.current).plus(this.delta).xy
-        this.shift = XY.from(this.current).minus(this.start).xy
+        this.current = XY.of(this.current).plus(this.delta)
+        this.shift = XY.of(this.current).minus(this.start)
         this.marquee = this.calculateMarquee()
 
         callback({
