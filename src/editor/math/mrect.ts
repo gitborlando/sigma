@@ -19,10 +19,10 @@ export class MRect {
   private _width = 0
   private _height = 0
   private _matrix = Matrix.identity()
-  private _xy = XY._(0, 0)
+  private _xy = XY.$(0, 0)
   private _rotation = 0
-  private _center = XY._(0, 0)
-  private _vertexes = [XY._(0, 0), XY._(0, 0), XY._(0, 0), XY._(0, 0)]
+  private _center = XY.$(0, 0)
+  private _vertexes = [XY.$(0, 0), XY.$(0, 0), XY.$(0, 0), XY.$(0, 0)]
   private _aabb = new AABB(0, 0, 0, 0)
 
   private needReCalcXY = true
@@ -84,7 +84,7 @@ export class MRect {
   }
 
   private calcXY() {
-    return Matrix.of(this.matrix).xy(XY._(0, 0))
+    return Matrix.of(this.matrix).xy(XY.$(0, 0))
   }
 
   private calcRotation() {
@@ -93,16 +93,16 @@ export class MRect {
   }
 
   private calcCenter() {
-    return Matrix.of(this.matrix).xy(XY._(this.width / 2, this.height / 2))
+    return Matrix.of(this.matrix).xy(XY.$(this.width / 2, this.height / 2))
   }
 
   private calcVertexes() {
     const matrix = Matrix.of(this.matrix)
     return [
-      matrix.xy(XY._(0, 0)),
-      matrix.xy(XY._(this.width, 0)),
-      matrix.xy(XY._(this.width, this.height)),
-      matrix.xy(XY._(0, this.height)),
+      matrix.xy(XY.$(0, 0)),
+      matrix.xy(XY.$(this.width, 0)),
+      matrix.xy(XY.$(this.width, this.height)),
+      matrix.xy(XY.$(0, this.height)),
     ]
   }
 

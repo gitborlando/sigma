@@ -6,7 +6,7 @@ import { Schema } from '../schema/schema'
 
 class HandleNodeService {
   datumId = ''
-  @observable.ref datumXY = XY._(0, 0)
+  @observable.ref datumXY = XY.$(0, 0)
   copiedIds = <ID[]>[]
 
   subscribe() {
@@ -175,9 +175,9 @@ class HandleNodeService {
     const datum = YState.find<V1.Node>(this.datumId)
     if (datum && !SchemaHelper.isPageById(datum.id)) {
       const aabb = OBB.fromRect(datum, datum.rotation).aabb
-      this.datumXY = XY._(aabb.minX, aabb.minY)
+      this.datumXY = XY.$(aabb.minX, aabb.minY)
     } else {
-      this.datumXY = XY._(0, 0)
+      this.datumXY = XY.$(0, 0)
     }
   }
 }

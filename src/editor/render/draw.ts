@@ -230,11 +230,11 @@ class ElemDrawerService {
         break
 
       case 'linearGradient':
-        const start = XY._(
+        const start = XY.$(
           fill.start.x * this.node.width,
           fill.start.y * this.node.height,
         )
-        const end = XY._(fill.end.x * this.node.width, fill.end.y * this.node.height)
+        const end = XY.$(fill.end.x * this.node.width, fill.end.y * this.node.height)
 
         const gradient = this.ctx.createLinearGradient(
           start.x,
@@ -454,7 +454,7 @@ class ElemDrawerService {
 
     this.splitTexts.forEach(({ start, width }, i) => {
       const y = i * lineHeight + fontSize / 2
-      collideXys.push(XY._(start, y), XY._(start + width, y))
+      collideXys.push(XY.$(start, y), XY.$(start + width, y))
     })
 
     return collideXys

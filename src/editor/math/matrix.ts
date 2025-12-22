@@ -111,18 +111,18 @@ export class Matrix {
       const invD = a * invDet
       const invTx = (c * ty - d * tx) * invDet
       const invTy = (b * tx - a * ty) * invDet
-      return XY._(invA * x + invC * y + invTx, invB * x + invD * y + invTy)
+      return XY.$(invA * x + invC * y + invTx, invB * x + invD * y + invTy)
     }
     const [a, b, c, d, tx, ty] = this.matrix
-    return XY._(a * x + c * y + tx, b * x + d * y + ty)
+    return XY.$(a * x + c * y + tx, b * x + d * y + ty)
   }
 
   static aabb = (aabb: AABB, isInvert?: 'invert') => {
     const { minX, minY, maxX, maxY } = aabb
-    const xy1 = Matrix.xy(XY._(minX, minY), isInvert)
-    const xy2 = Matrix.xy(XY._(maxX, minY), isInvert)
-    const xy3 = Matrix.xy(XY._(maxX, maxY), isInvert)
-    const xy4 = Matrix.xy(XY._(minX, maxY), isInvert)
+    const xy1 = Matrix.xy(XY.$(minX, minY), isInvert)
+    const xy2 = Matrix.xy(XY.$(maxX, minY), isInvert)
+    const xy3 = Matrix.xy(XY.$(maxX, maxY), isInvert)
+    const xy4 = Matrix.xy(XY.$(minX, maxY), isInvert)
     return {
       minX: min(xy1.x, xy2.x, xy3.x, xy4.x),
       minY: min(xy1.y, xy2.y, xy3.y, xy4.y),

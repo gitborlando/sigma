@@ -9,7 +9,7 @@ export function snapGridRound(value: number) {
 }
 
 export function snapGridRoundXY(xy: IXY) {
-  return XY._(snapGridRound(xy.x), snapGridRound(xy.y))
+  return XY.$(snapGridRound(xy.x), snapGridRound(xy.y))
 }
 
 export function arrayLoopGet(arr: any[], index: number) {

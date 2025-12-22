@@ -22,7 +22,7 @@ class StageViewportService {
   @observable bound = createInitBound()
 
   @observable zoom = 1
-  @observable offset = XY._(0, 0)
+  @observable offset = XY.$(0, 0)
   @observable isZooming = false
 
   sceneAABB = new AABB(0, 0, 0, 0)
@@ -49,16 +49,16 @@ class StageViewportService {
   }
 
   toCanvasXY(xy: IXY) {
-    return XY.from(xy).minus(XY.leftTop(this.bound)).xy
+    return XY.of(xy).minus(XY.leftTop(this.bound))
   }
   toStageXY(xy: IXY) {
-    return XY.from(this.toCanvasXY(xy)).minus(this.offset).xy
+    return XY.of(this.toCanvasXY(xy)).minus(this.offset)
   }
   toSceneXY(xy: IXY) {
-    return XY.from(this.toStageXY(xy)).divide(this.zoom).xy
+    return XY.of(this.toStageXY(xy)).divide(this.zoom)
   }
   toSceneShift(xy: IXY) {
-    return XY.from(xy).divide(this.zoom).xy
+    return XY.of(xy).divide(this.zoom)
   }
   toSceneMarquee(marquee: IRect) {
     return {
@@ -68,7 +68,7 @@ class StageViewportService {
     }
   }
   sceneXYToClientXY(xy: IXY) {
-    return XY.from(xy)
+    return XY.of(xy)
       .multiply(this.zoom)
       .plus(this.offset)
       .plus(XY.leftTop(this.bound))
@@ -153,7 +153,7 @@ class StageViewportService {
       ),
       autorun(() => {
         this.zoom = this.sceneMatrix[0]
-        this.offset = XY._(this.sceneMatrix[4], this.sceneMatrix[5])
+        this.offset = XY.from(this.sceneMatrix[4], this.sceneMatrix[5])
         this.sceneAABB = Matrix.of(this.sceneMatrix).invertAABB(this.boundAABB)
         this.prevSceneAABB = Matrix.of(this.prevSceneMatrix).invertAABB(
           this.boundAABB,
@@ -223,11 +223,11 @@ class StageViewportService {
     const zoom = this.limitZoom(
       min(this.bound.width / rect.width, this.bound.height / rect.height),
     )
-    const boundCenter = XY.from(XY.center(this.bound)).divide(zoom).xy
-    const offset = XY.from(XY.center(rect)).minus(boundCenter).xy
+    const boundCenter = XY.center(this.bound).divide(zoom)
+    const offset = XY.center(rect).minus(boundCenter)
 
     this.sceneMatrix = Matrix.of()
-      .shift(XY.from(offset).multiplyNum(-1).xy)
+      .shift(offset.multiplyNum(-1))
       .scale(zoom, zoom)
       .clone()
   }

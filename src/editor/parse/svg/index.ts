@@ -72,7 +72,7 @@
 //           else viewBoxArr = [0, 0, width!, height!]
 //           node = SchemaCreator.frame({ width, height })
 //         }
-//         this.ratio = XY._(
+//         this.ratio = XY.$(
 //           properties.width! / viewBoxArr[2],
 //           properties.height! / viewBoxArr[3],
 //         )
@@ -108,7 +108,7 @@
 //           height: height * this.ratio.y,
 //         })
 //         node.points = this.parseSvgPathToPoints(d)
-//         const shift = XY._(
+//         const shift = XY.$(
 //           (parentNode as any)!.x - node.x - this.xy.x,
 //           (parentNode as any)!.y - node.y - this.xy.y,
 //         )

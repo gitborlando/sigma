@@ -24,7 +24,7 @@ export const EditorRPOperateFillItemComp: FC<{
     const outerRefBound = outerRef.current!.getBoundingClientRect()
     FillPickerState.showPicker(
       index,
-      XY.from(outerRefBound).plus(XY._(-240 - 24, 0)),
+      XY.from(outerRefBound).plus(XY.$(-240 - 24, 0)),
     )
   }
 

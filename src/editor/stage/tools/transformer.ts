@@ -43,7 +43,7 @@ class StageTransformerService {
 
         const obb = originalObb.clone().shift(shift)
         const aabb = AABB.fromOBB(obb)
-        const snapDelta = XY._(
+        const snapDelta = XY.$(
           snapGridRound(aabb.minX) - aabb.minX,
           snapGridRound(aabb.minY) - aabb.minY,
         )

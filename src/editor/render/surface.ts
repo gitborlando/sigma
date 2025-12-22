@@ -181,10 +181,10 @@ export class StageSurfaceService {
     this.fullRenderElemsMinHeap = new TinyQueue(undefined, (a, b) => {
       if (a.layerIndex !== b.layerIndex) return a.layerIndex - b.layerIndex
       const aDistance = XY.of(XY.center(AABB.rect(a.elem.aabb))).minus(
-        this.eventXY || XY._(0, 0),
+        this.eventXY || XY.$(0, 0),
       ).xy
       const bDistance = XY.of(XY.center(AABB.rect(b.elem.aabb))).minus(
-        this.eventXY || XY._(0, 0),
+        this.eventXY || XY.$(0, 0),
       ).xy
       const aLane = max(abs(aDistance.x), abs(aDistance.y))
       const bLane = max(abs(bDistance.x), abs(bDistance.y))
@@ -403,7 +403,7 @@ export class StageSurfaceService {
 
   getVisualSize = (aabb: AABB) => {
     const zoom = getZoom()
-    return XY._((aabb.maxX - aabb.minX) * zoom, (aabb.maxY - aabb.minY) * zoom)
+    return XY.$((aabb.maxX - aabb.minX) * zoom, (aabb.maxY - aabb.minY) * zoom)
   }
 
   addEvent = <K extends keyof HTMLElementEventMap>(

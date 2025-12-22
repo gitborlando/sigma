@@ -1,5 +1,5 @@
-import { IRect, IRectWithCenter } from 'src/editor/math/types'
 import { firstOne } from '@gitborlando/utils'
+import { IRect, IRectWithCenter } from 'src/editor/math/types'
 import { OBB } from './obb'
 import { XY } from './xy'
 
@@ -117,8 +117,8 @@ export class AABB {
   }
 
   static fromOBB(obb: OBB) {
-    const width = obb.projectionLengthAt(XY._(1, 0))
-    const height = obb.projectionLengthAt(XY._(0, 1))
+    const width = obb.projectionLengthAt(XY.$(1, 0))
+    const height = obb.projectionLengthAt(XY.$(0, 1))
     return new AABB(
       obb.center.x - width / 2,
       obb.center.y - height / 2,
@@ -128,8 +128,8 @@ export class AABB {
   }
 
   static updateFromOBB(aabb: AABB, obb: OBB) {
-    const width = obb.projectionLengthAt(XY._(1, 0))
-    const height = obb.projectionLengthAt(XY._(0, 1))
+    const width = obb.projectionLengthAt(XY.$(1, 0))
+    const height = obb.projectionLengthAt(XY.$(0, 1))
     aabb.minX = obb.center.x - width / 2
     aabb.minY = obb.center.y - height / 2
     aabb.maxX = obb.center.x + width / 2

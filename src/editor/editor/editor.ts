@@ -16,7 +16,6 @@ import { OperateFill } from '../operate/fill'
 import { OperateShadow } from '../operate/shadow'
 import { OperateStroke } from '../operate/stroke'
 import { OperateText } from '../operate/text'
-import { StageDrop } from '../stage/drop'
 import { StageInteract } from '../stage/interact/interact'
 import { StageViewport } from '../stage/viewport'
 
@@ -49,8 +48,6 @@ export class EditorService {
     OperateStroke.initHook()
     OperateShadow.initHook()
     OperateText.initHook()
-
-    StageDrop.initHook()
   }
 
   dispose() {

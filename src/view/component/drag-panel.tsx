@@ -38,7 +38,7 @@ export const DragPanel: FC<DragPanelProps> = ({
   onMove,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState(xy || XY._(480, 240))
+  const [position, setPosition] = useState(xy || XY.$(480, 240))
   const [zIndex, setZIndex] = useState(0)
 
   useLayoutEffect(() => {

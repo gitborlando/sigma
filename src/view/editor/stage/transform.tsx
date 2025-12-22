@@ -122,7 +122,7 @@ const VertexComp: FC<{
     strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(COLOR.white)],
     radius: 2 / getZoom(),
-    matrix: Matrix.of().shift(XY.from(xy).plusNum(-size / 2).xy).matrix,
+    matrix: Matrix.of().shift(XY.of(xy).plusNum(-size / 2)).matrix,
   })
 
   const mouseenter = (e: ElemMouseEvent) => {
@@ -148,8 +148,8 @@ const VertexComp: FC<{
 
     StageDrag.onStart()
       .onMove(({ delta, current }) => {
-        const deltaX = XY.of(delta).dot(XY.xAxis(rotation))
-        const deltaY = XY.of(delta).dot(XY.yAxis(rotation))
+        const deltaX = XY.dot(delta, XY.xAxis(rotation))
+        const deltaY = XY.dot(delta, XY.yAxis(rotation))
 
         if (isSelectOnlyLine) {
           current = StageViewport.toSceneXY(current)
@@ -158,16 +158,14 @@ const VertexComp: FC<{
           switch (type) {
             case 'topLeft':
             case 'bottomLeft': {
-              const start = XY.of(line).xy
-              const end = XY.of(XY._(line.width, 0))
-                .rotate(XY._(), rotation)
-                .plus(start).xy
+              const start = XY.of(line)
+              const end = XY.from(line.width, 0).rotate(XY.$(), rotation).plus(start)
               setActiveGeometries(
                 {
                   x: current.x,
                   y: current.y,
-                  width: XY.of(current).distance(end),
-                  rotation: Angle.sweep(XY.of(end).vector(current)),
+                  width: XY.distance(current, end),
+                  rotation: Angle.sweep(XY.vector(end, current)),
                 },
                 false,
               )
@@ -175,11 +173,11 @@ const VertexComp: FC<{
             }
             case 'topRight':
             case 'bottomRight':
-              const start = XY.of(line).xy
+              const start = XY.of(line)
               setActiveGeometries(
                 {
-                  width: XY.of(current).distance(start),
-                  rotation: Angle.sweep(XY.of(current).vector(start)),
+                  width: XY.distance(current, start),
+                  rotation: Angle.sweep(XY.vector(current, start)),
                 },
                 false,
               )
@@ -303,13 +301,11 @@ const RotatePointComp: FC<{
   if (Matrix.isFlipped(mrect.matrix)) [p1, p2] = [p2, p1]
 
   const size = 8 / getZoom()
-  const sweep = Angle.minor(
-    Angle.sweep(XY.from(xy).vector(p1), XY.from(xy).vector(p2)),
-  )
-  const p1_ = XY.from(p1).rotate(xy, sweep / 2).xy
-  const offset = XY.of(xy).lerp(p1_, 16 / getZoom())
+  const sweep = Angle.minor(Angle.sweep(XY.vector(xy, p1), XY.vector(xy, p2)))
+  const p1_ = XY.of(p1).rotate(xy, sweep / 2)
+  const offset = XY.lerp(xy, p1_, 16 / getZoom())
   const rotatePointMatrix = Matrix.of().shift(
-    XY.of(offset).plusNum(-size / 2).xy,
+    XY.of(offset).plusNum(-size / 2),
   ).matrix
 
   const rotatePoint = SchemaCreator.ellipse({
@@ -337,8 +333,8 @@ const RotatePointComp: FC<{
       .onMove(({ current, start }) => {
         if (!last) last = start
         const deltaRotation = Angle.sweep(
-          XY.from(current).vector(center),
-          XY.from(last).vector(center),
+          XY.vector(current, center),
+          XY.vector(last, center),
         )
         setActiveGeometry('rotation', deltaRotation)
         last = current

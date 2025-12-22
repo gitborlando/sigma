@@ -23,10 +23,10 @@ export type DragOptions = {
 export class DragHelper {
   private canMove = false
   private started = false
-  private current = XY._(0, 0)
-  private start = XY._(0, 0)
-  private shift = XY._(0, 0)
-  private delta = XY._(0, 0)
+  private current = XY.$(0, 0)
+  private start = XY.$(0, 0)
+  private shift = XY.$(0, 0)
+  private delta = XY.$(0, 0)
   private marquee = { x: 0, y: 0, width: 0, height: 0 }
   private startHandler?: (e: MouseEventLike) => any
   private moveHandler?: (e: MouseEvent) => any
@@ -88,7 +88,7 @@ export class DragHelper {
     if (this.moveHandler) return this
 
     this.moveHandler = (e) => {
-      XY.of(this.delta).plus(XY._(e.movementX, e.movementY))
+      XY.of(this.delta).plus(XY.$(e.movementX, e.movementY))
 
       if (this.movePending) return
       this.movePending = true
@@ -118,7 +118,7 @@ export class DragHelper {
           marquee: this.marquee,
         })
 
-        this.delta = XY._(0, 0)
+        this.delta = XY.$(0, 0)
       })
     }
 
@@ -179,8 +179,8 @@ export class DragHelper {
     const y = this.shift.y < 0 ? this.start.y + this.shift.y : this.start.y
     const width = Math.abs(this.shift.x)
     const height = Math.abs(this.shift.y)
-    const xy = this.processXY(XY._(x, y))
-    const bound = this.processShift(XY._(width, height))
+    const xy = this.processXY(XY.$(x, y))
+    const bound = this.processShift(XY.$(width, height))
     this.marquee = { ...xy, width: bound.x, height: bound.y }
     return this.marquee
   }
@@ -190,10 +190,10 @@ export class DragHelper {
     this.canMove = false
     this.movePending = false
     this.isInfinity = false
-    this.current = XY._(0, 0)
-    this.start = XY._(0, 0)
-    this.shift = XY._(0, 0)
-    this.delta = XY._(0, 0)
+    this.current = XY.$(0, 0)
+    this.start = XY.$(0, 0)
+    this.shift = XY.$(0, 0)
+    this.delta = XY.$(0, 0)
     this.marquee = { x: 0, y: 0, width: 0, height: 0 }
   }
 }

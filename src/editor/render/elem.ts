@@ -306,16 +306,16 @@ export class HitTest {
         return inRect
       } else {
         if (!inRect) return false
-        if (XY.of(xy).distance(XY._(r, r)) > r && xy.x < r && xy.y < r) return false
-        if (XY.of(xy).distance(XY._(w - r, r)) > r && xy.x > w - r && xy.y < r)
+        if (XY.of(xy).distance(XY.$(r, r)) > r && xy.x < r && xy.y < r) return false
+        if (XY.of(xy).distance(XY.$(w - r, r)) > r && xy.x > w - r && xy.y < r)
           return false
         if (
-          XY.of(xy).distance(XY._(w - r, h - r)) > r &&
+          XY.of(xy).distance(XY.$(w - r, h - r)) > r &&
           xy.x > w - r &&
           xy.y > h - r
         )
           return false
-        if (XY.of(xy).distance(XY._(r, h - r)) > r && xy.x < r && xy.y > h - r)
+        if (XY.of(xy).distance(XY.$(r, h - r)) > r && xy.x < r && xy.y > h - r)
           return false
         return true
       }
@@ -370,7 +370,7 @@ export class HitTest {
 
       if (startAngle === 0 && endAngle === 0) return true
 
-      const angle = Angle.sweep(XY.of(xy).vector(XY._(cx, cy)))
+      const angle = Angle.sweep(XY.of(xy).vector(XY.$(cx, cy)))
 
       if (startAngle <= endAngle) {
         return angle >= startAngle && angle <= endAngle
@@ -414,10 +414,10 @@ export class HitTest {
     const radian = Math.atan2(dy, dx)
     const xShift = spread * Math.sin(radian)
     const yShift = spread * Math.cos(radian)
-    const TL = XY._(p1.x - xShift, p1.y + yShift)
-    const TR = XY._(p2.x - xShift, p2.y + yShift)
-    const BR = XY._(p2.x + xShift, p2.y - yShift)
-    const BL = XY._(p1.x + xShift, p1.y - yShift)
+    const TL = XY.$(p1.x - xShift, p1.y + yShift)
+    const TR = XY.$(p2.x - xShift, p2.y + yShift)
+    const BR = XY.$(p2.x + xShift, p2.y - yShift)
+    const BL = XY.$(p1.x + xShift, p1.y - yShift)
     return [TL, TR, BR, BL]
   }
 }

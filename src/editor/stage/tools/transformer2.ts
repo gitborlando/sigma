@@ -38,7 +38,7 @@ class StageTransformerService {
         this.isMoving = true
 
         const aabb = AABB.shift(originalAABB, shift)
-        const snapDelta = XY._(
+        const snapDelta = XY.$(
           snapGridRound(aabb.minX) - aabb.minX,
           snapGridRound(aabb.minY) - aabb.minY,
         )

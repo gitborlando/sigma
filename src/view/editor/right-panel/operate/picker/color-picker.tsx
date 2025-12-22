@@ -72,7 +72,7 @@ const SquareComp: FC<{}> = observer(({}) => {
 
   const [x, setX] = useState(saturation / 100)
   const [y, setY] = useState(1 - value / 100)
-  const [lastXY] = useState(() => XY._(0, 0))
+  const [lastXY] = useState(() => XY.$(0, 0))
   const ref = useRef<HTMLDivElement>(null)
 
   const backgroundGradient = useMemo(() => {
