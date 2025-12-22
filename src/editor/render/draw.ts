@@ -426,7 +426,7 @@ class ElemDrawerService {
 
   private getPathCollideXys() {
     const points = (this.node as V1.Path).points
-    const collideXys = <IXY[]>[XY.from(points[0]).xy]
+    const collideXys = <IXY[]>[XY.of(points[0])]
 
     loopFor(points, (cur, next) => {
       if (next.startPath) return
@@ -441,7 +441,7 @@ class ElemDrawerService {
         const xys = pointsOnBezierCurves([cur, cur, next.handleL, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
       } else {
-        collideXys.push(XY.from(next).xy)
+        collideXys.push(XY.of(next))
       }
     })
 
