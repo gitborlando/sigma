@@ -44,14 +44,14 @@ export const DragPanel: FC<DragPanelProps> = ({
   useLayoutEffect(() => {
     if (!xy) return
     const bound = ref.current!.getBoundingClientRect()
-    setPosition(XY.of(xy.x, min(xy.y, innerHeight - bound.height - 12)))
+    setPosition(XY.$(xy.x, min(xy.y, innerHeight - bound.height - 12)))
   }, [xy])
 
   useLayoutEffect(() => {
     if (!center) return
     const bound = ref.current!.getBoundingClientRect()
     setPosition(
-      XY.of(innerWidth / 2 - bound.width / 2, innerHeight / 2 - bound.height / 2),
+      XY.$(innerWidth / 2 - bound.width / 2, innerHeight / 2 - bound.height / 2),
     )
   }, [center])
 
@@ -71,7 +71,7 @@ export const DragPanel: FC<DragPanelProps> = ({
     const startXY = position
     Drag.onSlide(({ current, shift }) => {
       if (current.x > innerWidth || current.y > innerHeight) return
-      setPosition(XY.from(startXY).plus(shift))
+      setPosition(XY.of(startXY).plus(shift))
       onMove?.(position)
     }, e)
   }
