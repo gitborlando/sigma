@@ -336,7 +336,7 @@ export class StageSurfaceService {
         const path2d = new Path2D()
         const { minX, minY, maxX, maxY } = this.devDirtyArea
         path2d.rect(minX, minY, maxX - minX, maxY - minY)
-        ctx.lineWidth = 1 / dpr / getZoom()
+        ctx.lineWidth = 2 / getZoom()
         ctx.strokeStyle = rgba(0, 255, 100, 1)
         ctx.stroke(path2d)
       })
