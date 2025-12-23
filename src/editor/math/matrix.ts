@@ -45,6 +45,12 @@ export class Matrix {
     return this
   }
 
+  static getScale = (matrix: IMatrix) => {
+    const scaleX = Math.sqrt(matrix[0] * matrix[0] + matrix[1] * matrix[1])
+    const scaleY = Math.sqrt(matrix[2] * matrix[2] + matrix[3] * matrix[3])
+    return { x: scaleX, y: scaleY }
+  }
+
   static rotate = (angle: number) => {
     const cos = Angle.cos(angle)
     const sin = Angle.sin(angle)

@@ -1,4 +1,8 @@
-import { IMatrix } from 'src/editor/math/matrix'
+import { AABB } from 'src/editor/math/aabb'
+import { Angle } from 'src/editor/math/angle'
+import { IMatrix, Matrix } from 'src/editor/math/matrix'
+import { IXY } from 'src/editor/math/types'
+import { XY } from 'src/editor/math/xy'
 
 export type IMRect = {
   width: number
@@ -7,132 +11,47 @@ export type IMRect = {
 }
 
 /**
- * MRect: matrix rect
+ * MRect: Matrix Rect
  */
 export class MRect {
+  private _width: number
+  private _height: number
+  private _matrix: IMatrix
+
+  private _xy?: IXY
+  private _rotation?: number
+  private _center?: IXY
+  private _vertexes?: IXY[]
+  private _aabb?: AABB
+
   constructor(width: number, height: number, matrix: IMatrix) {
     this._width = width
     this._height = height
     this._matrix = matrix
   }
 
-  private _width = 0
-  private _height = 0
-  private _matrix = Matrix.identity()
-  private _xy = XY.$(0, 0)
-  private _rotation = 0
-  private _center = XY.$(0, 0)
-  private _vertexes = [XY.$(0, 0), XY.$(0, 0), XY.$(0, 0), XY.$(0, 0)]
-  private _aabb = new AABB(0, 0, 0, 0)
-
-  private needReCalcXY = true
-  private needReCalcRotation = true
-  private needReCalcCenter = true
-  private needReCalcVertexes = true
-  private needReCalcAABB = true
-
   get width() {
     return this._width
+  }
+
+  set width(width: number) {
+    if (this._width === width) return
+    this._width = width
+    this.expired()
   }
 
   get height() {
     return this._height
   }
 
-  get matrix() {
-    return this._matrix
-  }
-
-  get xy() {
-    if (this.needReCalcXY) {
-      this._xy = this.calcXY()
-      this.needReCalcXY = false
-    }
-    return this._xy
-  }
-
-  get rotation() {
-    if (this.needReCalcRotation) {
-      this._rotation = this.calcRotation()
-      this.needReCalcRotation = false
-    }
-    return this._rotation
-  }
-
-  get center() {
-    if (this.needReCalcCenter) {
-      this._center = this.calcCenter()
-      this.needReCalcCenter = false
-    }
-    return this._center
-  }
-
-  get vertexes() {
-    if (this.needReCalcVertexes) {
-      this._vertexes = this.calcVertexes()
-      this.needReCalcVertexes = false
-    }
-    return this._vertexes
-  }
-
-  get aabb() {
-    if (this.needReCalcAABB) {
-      this._aabb = this.calcAABB()
-      this.needReCalcAABB = false
-    }
-    return this._aabb
-  }
-
-  private calcXY() {
-    return Matrix.of(this.matrix).xy(XY.$(0, 0))
-  }
-
-  private calcRotation() {
-    const transformedXY = Matrix.of(this.matrix).xy(XY.xAxis())
-    return Angle.sweep(transformedXY, XY.xAxis())
-  }
-
-  private calcCenter() {
-    return Matrix.of(this.matrix).xy(XY.$(this.width / 2, this.height / 2))
-  }
-
-  private calcVertexes() {
-    const matrix = Matrix.of(this.matrix)
-    return [
-      matrix.xy(XY.$(0, 0)),
-      matrix.xy(XY.$(this.width, 0)),
-      matrix.xy(XY.$(this.width, this.height)),
-      matrix.xy(XY.$(0, this.height)),
-    ]
-  }
-
-  private calcAABB() {
-    const [TL, TR, BR, BL] = this.vertexes
-    return AABB.update(
-      this._aabb,
-      min(TL.x, TR.x, BR.x, BL.x),
-      min(TL.y, TR.y, BR.y, BL.y),
-      max(TL.x, TR.x, BR.x, BL.x),
-      max(TL.y, TR.y, BR.y, BL.y),
-    )
-  }
-
-  private expired() {
-    this.needReCalcXY = true
-    this.needReCalcRotation = true
-    this.needReCalcCenter = true
-    this.needReCalcVertexes = true
-    this.needReCalcAABB = true
-  }
-
-  set width(width: number) {
-    this._width = width
-    this.expired()
-  }
-
   set height(height: number) {
+    if (this._height === height) return
     this._height = height
     this.expired()
+  }
+
+  get matrix() {
+    return this._matrix
   }
 
   set matrix(matrix: IMatrix) {
@@ -140,37 +59,128 @@ export class MRect {
     this.expired()
   }
 
-  set xy(xy: IXY) {
-    const delta = XY.of(xy).minus(this.xy)
-    Matrix.of(this.matrix).translate(delta.x, delta.y)
-    this._xy = xy
-    this.needReCalcCenter = true
-    this.needReCalcVertexes = true
-    this.needReCalcAABB = true
+  get xy() {
+    if (this._xy === undefined) {
+      this._xy = Matrix.of(this._matrix).xy(XY.$(0, 0))
+    }
+    return this._xy
   }
 
-  set rotation(rotation: number) {
-    const delta = rotation - this.rotation
-    Matrix.of(this.matrix).rotate(delta)
-    this._rotation = rotation
-    this.needReCalcVertexes = true
-    this.needReCalcAABB = true
+  set xy(target: IXY) {
+    const current = this.xy
+    const delta = XY.of(target).minus(current)
+    Matrix.of(this._matrix).translate(delta.x, delta.y)
+    this.expired()
+  }
+
+  get rotation() {
+    if (this._rotation === undefined) {
+      const transformedXY = Matrix.of(this._matrix).xy(XY.xAxis())
+      this._rotation = Angle.sweep(transformedXY, XY.xAxis())
+    }
+    return this._rotation
+  }
+
+  set rotation(rad: number) {
+    const current = this.rotation
+    const delta = rad - current
+    Matrix.of(this._matrix).rotate(delta)
+    this.expired()
+  }
+
+  get center() {
+    if (this._center === undefined) {
+      this._center = Matrix.of(this._matrix).xy(
+        XY.$(this._width / 2, this._height / 2),
+      )
+    }
+    return this._center
+  }
+
+  get vertexes() {
+    if (this._vertexes === undefined) {
+      this._vertexes = this.calcVertexes()
+    }
+    return this._vertexes
+  }
+
+  get aabb() {
+    if (this._aabb === undefined) {
+      this._aabb = this.calcAABB()
+    }
+    return this._aabb
+  }
+
+  get globalSize() {
+    const m = {
+      a: this._matrix[0],
+      b: this._matrix[1],
+      c: this._matrix[2],
+      d: this._matrix[3],
+    }
+    const xLen = Math.hypot(m.a, m.b)
+
+    // 2️⃣ Y 轴投影到 X 轴的比例（skew 部分）
+    const dot = m.a * m.c + m.b * m.d
+    const projScale = dot / (xLen * xLen)
+
+    // 3️⃣ 去掉 skew 后的 Y 轴向量
+    const yx = m.c - projScale * m.a
+    const yy = m.d - projScale * m.b
+
+    // 4️⃣ Y 轴长度
+    const yLen = Math.hypot(yx, yy)
+
+    // 5️⃣ 返回视觉尺寸
+    return {
+      width: this._width * xLen,
+      height: this._height * yLen,
+    }
+  }
+
+  private calcVertexes() {
+    const matrix = Matrix.of(this._matrix)
+    return [
+      matrix.xy(XY.$(0, 0)),
+      matrix.xy(XY.$(this._width, 0)),
+      matrix.xy(XY.$(this._width, this._height)),
+      matrix.xy(XY.$(0, this._height)),
+    ]
+  }
+
+  private calcAABB() {
+    const [TL, TR, BR, BL] = this.vertexes
+    return new AABB(
+      Math.min(TL.x, TR.x, BR.x, BL.x),
+      Math.min(TL.y, TR.y, BR.y, BL.y),
+      Math.max(TL.x, TR.x, BR.x, BL.x),
+      Math.max(TL.y, TR.y, BR.y, BL.y),
+    )
+  }
+
+  private expired() {
+    this._xy = undefined
+    this._rotation = undefined
+    this._center = undefined
+    this._vertexes = undefined
+    this._aabb = undefined
   }
 
   shift(delta: IXY) {
-    Matrix.of(this.matrix).translate(delta.x, delta.y)
+    Matrix.of(this._matrix).translate(delta.x, delta.y)
     this.expired()
     return this
   }
 
   scale(scale: IXY) {
-    Matrix.of(this.matrix).scale(scale.x, scale.y)
+    Matrix.of(this._matrix).scale(scale.x, scale.y)
     this.expired()
     return this
   }
 
   rotate(delta: number) {
-    this.rotation = this._rotation + delta
+    Matrix.of(this._matrix).rotate(delta)
+    this.expired()
     return this
   }
 
@@ -185,7 +195,7 @@ export class MRect {
   from(mrect: IMRect) {
     this._width = mrect.width
     this._height = mrect.height
-    this._matrix = mrect.matrix
+    this._matrix = Matrix.clone(mrect.matrix)
     this.expired()
     return this
   }
