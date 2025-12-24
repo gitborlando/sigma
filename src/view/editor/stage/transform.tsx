@@ -49,7 +49,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     }
   }
 
-  const [p0, p1, p2, p3] = mrect.vertexes
+  const [p0, p1, p2, p3] = mrect.vertices
 
   return (
     <elem
@@ -296,8 +296,8 @@ const RotatePointComp: FC<{
   xy: IXY
   index: number
 }> = observer(({ xy, index }) => {
-  let p1 = arrayLoopGet(mrect.vertexes, index + 1)
-  let p2 = arrayLoopGet(mrect.vertexes, index - 1)
+  let p1 = arrayLoopGet(mrect.vertices, index + 1)
+  let p2 = arrayLoopGet(mrect.vertices, index - 1)
   if (Matrix.isFlipped(mrect.matrix)) [p1, p2] = [p2, p1]
 
   const size = 8 / getZoom()

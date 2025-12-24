@@ -21,7 +21,7 @@ export class MRect {
   private _xy?: IXY
   private _rotation?: number
   private _center?: IXY
-  private _vertexes?: IXY[]
+  private _vertices?: IXY[]
   private _aabb?: AABB
 
   constructor(width: number, height: number, matrix: IMatrix) {
@@ -97,11 +97,11 @@ export class MRect {
     return this._center
   }
 
-  get vertexes() {
-    if (this._vertexes === undefined) {
-      this._vertexes = this.calcVertexes()
+  get vertices() {
+    if (this._vertices === undefined) {
+      this._vertices = this.calcVertices()
     }
-    return this._vertexes
+    return this._vertices
   }
 
   get aabb() {
@@ -111,7 +111,7 @@ export class MRect {
     return this._aabb
   }
 
-  private calcVertexes() {
+  private calcVertices() {
     const matrix = Matrix.of(this._matrix)
     return [
       matrix.xy(XY.$(0, 0)),
@@ -122,7 +122,7 @@ export class MRect {
   }
 
   private calcAABB() {
-    const [TL, TR, BR, BL] = this.vertexes
+    const [TL, TR, BR, BL] = this.vertices
     return new AABB(
       Math.min(TL.x, TR.x, BR.x, BL.x),
       Math.min(TL.y, TR.y, BR.y, BL.y),
@@ -135,7 +135,7 @@ export class MRect {
     this._xy = undefined
     this._rotation = undefined
     this._center = undefined
-    this._vertexes = undefined
+    this._vertices = undefined
     this._aabb = undefined
   }
 
