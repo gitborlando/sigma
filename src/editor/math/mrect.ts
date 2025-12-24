@@ -61,7 +61,7 @@ export class MRect {
 
   get xy() {
     if (this._xy === undefined) {
-      this._xy = Matrix.of(this._matrix).xy(XY.$(0, 0))
+      this._xy = Matrix.of(this._matrix).applyXY(XY.$(0, 0))
     }
     return this._xy
   }
@@ -75,7 +75,7 @@ export class MRect {
 
   get rotation() {
     if (this._rotation === undefined) {
-      const transformedXY = Matrix.of(this._matrix).xy(XY.xAxis())
+      const transformedXY = Matrix.of(this._matrix).applyXY(XY.xAxis())
       this._rotation = Angle.sweep(transformedXY, XY.xAxis())
     }
     return this._rotation
@@ -90,7 +90,7 @@ export class MRect {
 
   get center() {
     if (this._center === undefined) {
-      this._center = Matrix.of(this._matrix).xy(
+      this._center = Matrix.of(this._matrix).applyXY(
         XY.$(this._width / 2, this._height / 2),
       )
     }
@@ -114,10 +114,10 @@ export class MRect {
   private calcVertices() {
     const matrix = Matrix.of(this._matrix)
     return [
-      matrix.xy(XY.$(0, 0)),
-      matrix.xy(XY.$(this._width, 0)),
-      matrix.xy(XY.$(this._width, this._height)),
-      matrix.xy(XY.$(0, this._height)),
+      matrix.applyXY(XY.$(0, 0)),
+      matrix.applyXY(XY.$(this._width, 0)),
+      matrix.applyXY(XY.$(this._width, this._height)),
+      matrix.applyXY(XY.$(0, this._height)),
     ]
   }
 
@@ -152,7 +152,7 @@ export class MRect {
   }
 
   transform(matrix: IMatrix) {
-    const oldMatrix = Matrix.clone(this.matrix)
+    const oldMatrix = Matrix.of(this.matrix)
     Matrix.of(this._matrix).prepend(matrix)
     this.expired()
     const [p0, p1, p2] = this.vertices
@@ -160,8 +160,8 @@ export class MRect {
     const newHeight = XY.distance(p1, p2)
     const scaleX = newWidth / this.width
     const scaleY = newHeight / this.height
-    const scaleMatrix = Matrix.of().scale(scaleX, scaleY).matrix
-    const newMatrix = Matrix.of(scaleMatrix).prepend(oldMatrix).matrix
+    const scaleMatrix = Matrix.identity().scale(scaleX, scaleY)
+    const newMatrix = Matrix.of(scaleMatrix).prepend(oldMatrix)
     this.update(newWidth, newHeight, newMatrix)
     return this
   }
@@ -177,7 +177,7 @@ export class MRect {
   from(mrect: IMRect) {
     this._width = mrect.width
     this._height = mrect.height
-    this._matrix = Matrix.clone(mrect.matrix)
+    this._matrix = Matrix.of(mrect.matrix)
     this.expired()
     return this
   }

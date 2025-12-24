@@ -105,9 +105,11 @@ export class StageSurfaceService {
   }
 
   setTransform = (transform: IMatrix) => {
-    const invert = Matrix.of(transform).invert()
-    this.currentCtx.transform(...transform)
-    return () => this.currentCtx.transform(...invert)
+    const matrix = Matrix.of(transform)
+    this.currentCtx.transform(...matrix.tuple())
+    return () => {
+      this.currentCtx.transform(...matrix.invert().tuple())
+    }
   }
 
   setOBBMatrix = (obb: OBB, inverse = false) => {
@@ -343,16 +345,16 @@ export class StageSurfaceService {
     })
   }
 
-  private dprMatrix = Matrix.of().scale(dpr, dpr).matrix
+  private dprMatrix = Matrix.identity().scale(dpr, dpr)
 
   transformCanvas = () => {
-    this.ctx.transform(...this.dprMatrix)
-    this.ctx.transform(...StageViewport.sceneMatrix)
+    this.ctx.transform(...this.dprMatrix.tuple())
+    this.ctx.transform(...StageViewport.sceneMatrix.tuple())
   }
 
   transformTopCanvas = () => {
-    this.topCtx.transform(...this.dprMatrix)
-    this.topCtx.transform(...StageViewport.sceneMatrix)
+    this.topCtx.transform(...this.dprMatrix.tuple())
+    this.topCtx.transform(...StageViewport.sceneMatrix.tuple())
   }
 
   private onZoomMove = () => {
@@ -425,7 +427,7 @@ export class StageSurfaceService {
 
   private getEventXY = (xy: IXY) => {
     xy = StageViewport.toCanvasXY(xy)
-    this.eventXY = Matrix.of(StageViewport.sceneMatrix).invertXY(xy)
+    this.eventXY = StageViewport.sceneMatrix.invertXY(xy)
     this.elemsFromPoint = []
   }
 

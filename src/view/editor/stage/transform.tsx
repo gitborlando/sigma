@@ -122,7 +122,7 @@ const VertexComp: FC<{
     strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(COLOR.white)],
     radius: 2 / getZoom(),
-    matrix: Matrix.of().shift(XY.of(xy).plusNum(-size / 2)).matrix,
+    matrix: Matrix.identity().shift(XY.of(xy).plusNum(-size / 2)),
   })
 
   const mouseenter = (e: ElemMouseEvent) => {
@@ -304,9 +304,7 @@ const RotatePointComp: FC<{
   const sweep = Angle.minor(Angle.sweep(XY.vector(xy, p1), XY.vector(xy, p2)))
   const p1_ = XY.of(p1).rotate(xy, sweep / 2)
   const offset = XY.lerp(xy, p1_, 16 / getZoom())
-  const rotatePointMatrix = Matrix.of().shift(
-    XY.of(offset).plusNum(-size / 2),
-  ).matrix
+  const rotatePointMatrix = Matrix.identity().shift(XY.of(offset).plusNum(-size / 2))
 
   const rotatePoint = SchemaCreator.ellipse({
     id: `transform-rotatePoint-${index}`,

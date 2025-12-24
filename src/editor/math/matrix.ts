@@ -4,112 +4,106 @@ import { max, min } from 'src/editor/math/base'
 import { IXY } from 'src/editor/math/types'
 import { XY } from 'src/editor/math/xy'
 
-export type IMatrix = [number, number, number, number, number, number]
+export type IMatrix = {
+  a: number
+  b: number
+  c: number
+  d: number
+  tx: number
+  ty: number
+}
+
+export type IMatrixTuple = [number, number, number, number, number, number]
 
 export class Matrix {
-  static matrix = [1, 0, 0, 1, 0, 0] as IMatrix
+  constructor(
+    public a: number,
+    public b: number,
+    public c: number,
+    public d: number,
+    public tx: number,
+    public ty: number,
+  ) {}
 
-  static of(matrix = Matrix.identity()) {
-    this.matrix = matrix
+  tuple() {
+    return [this.a, this.b, this.c, this.d, this.tx, this.ty] as IMatrixTuple
+  }
+
+  shift = (delta: IXY) => {
+    this.tx += delta.x
+    this.ty += delta.y
     return this
   }
 
-  static from(matrix: IMatrix) {
-    this.matrix = [...matrix]
+  translate = (x: number, y: number) => {
+    this.tx += x
+    this.ty += y
     return this
   }
 
-  static clone(matrix = this.matrix) {
-    return [...matrix] as IMatrix
-  }
-
-  static shift = (delta: IXY) => {
-    this.matrix[4] += delta.x
-    this.matrix[5] += delta.y
+  scale = (x: number, y: number) => {
+    this.a *= x
+    this.d *= y
+    this.b *= x
+    this.c *= y
     return this
   }
 
-  static translate = (x: number, y: number) => {
-    this.matrix[4] += x
-    this.matrix[5] += y
-    return this
-  }
+  rotate = (angle: number) => {
+    const { cos, sin } = Angle.cosSin(angle)
+    const { a, b, c, d, tx, ty } = this
 
-  static scale = (x: number, y: number) => {
-    this.matrix[0] *= x
-    this.matrix[3] *= y
-    this.matrix[1] *= x
-    this.matrix[2] *= y
-    this.matrix[4] *= x
-    this.matrix[5] *= y
-    return this
-  }
-
-  static getScale = (matrix: IMatrix) => {
-    const scaleX = Math.sqrt(matrix[0] * matrix[0] + matrix[1] * matrix[1])
-    const scaleY = Math.sqrt(matrix[2] * matrix[2] + matrix[3] * matrix[3])
-    return { x: scaleX, y: scaleY }
-  }
-
-  static rotate = (angle: number) => {
-    const cos = Angle.cos(angle)
-    const sin = Angle.sin(angle)
-
-    const a1 = this.matrix[0]
-    const c1 = this.matrix[2]
-    const tx1 = this.matrix[4]
-
-    this.matrix[0] = a1 * cos - this.matrix[1] * sin
-    this.matrix[1] = a1 * sin + this.matrix[1] * cos
-    this.matrix[2] = c1 * cos - this.matrix[3] * sin
-    this.matrix[3] = c1 * sin + this.matrix[3] * cos
-    this.matrix[4] = tx1 * cos - this.matrix[5] * sin
-    this.matrix[5] = tx1 * sin + this.matrix[5] * cos
+    this.a = a * cos - b * sin
+    this.b = a * sin + b * cos
+    this.c = c * cos - d * sin
+    this.d = c * sin + d * cos
+    this.tx = tx * cos - ty * sin
+    this.ty = tx * sin + ty * cos
 
     return this
   }
 
-  static append = (matrix: IMatrix) => {
-    const [a, b, c, d, tx, ty] = this.matrix
+  append = (matrix: IMatrix) => {
+    const { a, b, c, d, tx, ty } = this
 
-    this.matrix[0] = matrix[0] * a + matrix[1] * c
-    this.matrix[1] = matrix[0] * b + matrix[1] * d
-    this.matrix[2] = matrix[2] * a + matrix[3] * c
-    this.matrix[3] = matrix[2] * b + matrix[3] * d
+    this.a = matrix.a * a + matrix.b * c
+    this.b = matrix.a * b + matrix.b * d
+    this.c = matrix.c * a + matrix.d * c
+    this.d = matrix.c * b + matrix.d * d
 
-    this.matrix[4] = matrix[4] * a + matrix[5] * c + tx
-    this.matrix[5] = matrix[4] * b + matrix[5] * d + ty
-
-    return this
-  }
-
-  static prepend = (matrix: IMatrix) => {
-    const [a, b, c, d, tx] = this.matrix
-
-    this.matrix[0] = a * matrix[0] + b * matrix[2]
-    this.matrix[1] = a * matrix[1] + b * matrix[3]
-    this.matrix[2] = c * matrix[0] + d * matrix[2]
-    this.matrix[3] = c * matrix[1] + d * matrix[3]
-
-    this.matrix[4] = tx * matrix[0] + this.matrix[5] * matrix[2] + matrix[4]
-    this.matrix[5] = tx * matrix[1] + this.matrix[5] * matrix[3] + matrix[5]
+    this.tx = matrix.tx * a + matrix.ty * c + tx
+    this.ty = matrix.tx * b + matrix.ty * d + ty
 
     return this
   }
 
-  static invert = () => {
-    const [a, b, c, d, tx, ty] = this.matrix
+  prepend = (matrix: IMatrix) => {
+    const { a, b, c, d, tx, ty } = this
+
+    this.a = a * matrix.a + b * matrix.c
+    this.b = a * matrix.b + b * matrix.d
+    this.c = c * matrix.a + d * matrix.c
+    this.d = c * matrix.b + d * matrix.d
+
+    this.tx = tx * matrix.a + ty * matrix.c + matrix.tx
+    this.ty = tx * matrix.b + ty * matrix.d + matrix.ty
+
+    return this
+  }
+
+  invert = () => {
+    const { a, b, c, d, tx, ty } = this
     const invDet = 1 / (a * d - b * c)
     const tuple = [d, -b, -c, a, c * ty - d * tx, b * tx - a * ty].map(
       (i) => i * invDet,
-    ) as IMatrix
-    return Matrix.clone(tuple)
+    ) as IMatrixTuple
+    return Matrix.from(tuple)
   }
 
-  static xy = (xy: IXY, isInvert?: 'invert') => {
+  applyXY = (xy: IXY, isInvert?: 'invert') => {
     const { x, y } = xy
     if (isInvert) {
-      const [a, b, c, d, tx, ty] = this.matrix
+      const { a, b, c, d, tx, ty } = this
       const invDet = 1 / (a * d - b * c)
       const invA = d * invDet
       const invB = -b * invDet
@@ -119,41 +113,52 @@ export class Matrix {
       const invTy = (b * tx - a * ty) * invDet
       return XY.$(invA * x + invC * y + invTx, invB * x + invD * y + invTy)
     }
-    const [a, b, c, d, tx, ty] = this.matrix
+    const { a, b, c, d, tx, ty } = this
     return XY.$(a * x + c * y + tx, b * x + d * y + ty)
   }
 
-  static aabb = (aabb: AABB, isInvert?: 'invert') => {
+  applyAABB = (aabb: AABB, isInvert?: 'invert') => {
     const { minX, minY, maxX, maxY } = aabb
-    const xy1 = Matrix.xy(XY.$(minX, minY), isInvert)
-    const xy2 = Matrix.xy(XY.$(maxX, minY), isInvert)
-    const xy3 = Matrix.xy(XY.$(maxX, maxY), isInvert)
-    const xy4 = Matrix.xy(XY.$(minX, maxY), isInvert)
-    return {
-      minX: min(xy1.x, xy2.x, xy3.x, xy4.x),
-      minY: min(xy1.y, xy2.y, xy3.y, xy4.y),
-      maxX: max(xy1.x, xy2.x, xy3.x, xy4.x),
-      maxY: max(xy1.y, xy2.y, xy3.y, xy4.y),
-    }
+    const xy1 = this.applyXY(XY.$(minX, minY), isInvert)
+    const xy2 = this.applyXY(XY.$(maxX, minY), isInvert)
+    const xy3 = this.applyXY(XY.$(maxX, maxY), isInvert)
+    const xy4 = this.applyXY(XY.$(minX, maxY), isInvert)
+    return new AABB(
+      min(xy1.x, xy2.x, xy3.x, xy4.x),
+      min(xy1.y, xy2.y, xy3.y, xy4.y),
+      max(xy1.x, xy2.x, xy3.x, xy4.x),
+      max(xy1.y, xy2.y, xy3.y, xy4.y),
+    )
   }
 
-  static invertXY = (xy: IXY) => {
-    return Matrix.xy(xy, 'invert')
+  invertXY = (xy: IXY) => {
+    return this.applyXY(xy, 'invert')
   }
 
-  static invertAABB = (aabb: AABB) => {
-    return Matrix.aabb(aabb, 'invert')
+  invertAABB = (aabb: AABB) => {
+    return this.applyAABB(aabb, 'invert')
+  }
+
+  static of(matrix: IMatrix) {
+    return new Matrix(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty)
+  }
+
+  static from(matrix: IMatrixTuple) {
+    return new Matrix(
+      matrix[0],
+      matrix[1],
+      matrix[2],
+      matrix[3],
+      matrix[4],
+      matrix[5],
+    )
   }
 
   static identity() {
-    return [1, 0, 0, 1, 0, 0] as IMatrix
-  }
-
-  static fromXYR(x: number, y: number, rotation: number) {
-    return Matrix.of().rotate(rotation).translate(x, y).matrix
+    return new Matrix(1, 0, 0, 1, 0, 0)
   }
 
   static isFlipped(matrix: IMatrix) {
-    return matrix[0] * matrix[3] - matrix[1] * matrix[2] < 0
+    return matrix.a * matrix.d - matrix.b * matrix.c < 0
   }
 }
