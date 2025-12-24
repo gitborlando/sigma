@@ -61,7 +61,8 @@ export class MRect {
 
   get xy() {
     if (this._xy === undefined) {
-      this._xy = Matrix.of(this._matrix).applyXY(XY.$(0, 0))
+      console.log('this.matrix: ', this.matrix)
+      this._xy = Matrix.of(this.matrix).applyXY(XY.$(0, 0))
     }
     return this._xy
   }
@@ -69,13 +70,13 @@ export class MRect {
   set xy(target: IXY) {
     const current = this.xy
     const delta = XY.of(target).minus(current)
-    Matrix.of(this._matrix).translate(delta.x, delta.y)
+    Matrix.of(this.matrix).translate(delta.x, delta.y)
     this.expired()
   }
 
   get rotation() {
     if (this._rotation === undefined) {
-      const transformedXY = Matrix.of(this._matrix).applyXY(XY.xAxis())
+      const transformedXY = Matrix.of(this.matrix).applyXY(XY.xAxis())
       this._rotation = Angle.sweep(transformedXY, XY.xAxis())
     }
     return this._rotation
@@ -84,13 +85,13 @@ export class MRect {
   set rotation(rad: number) {
     const current = this.rotation
     const delta = rad - current
-    Matrix.of(this._matrix).rotate(delta)
+    Matrix.of(this.matrix).rotate(delta)
     this.expired()
   }
 
   get center() {
     if (this._center === undefined) {
-      this._center = Matrix.of(this._matrix).applyXY(
+      this._center = Matrix.of(this.matrix).applyXY(
         XY.$(this._width / 2, this._height / 2),
       )
     }
@@ -112,7 +113,7 @@ export class MRect {
   }
 
   private calcVertices() {
-    const matrix = Matrix.of(this._matrix)
+    const matrix = Matrix.of(this.matrix)
     return [
       matrix.applyXY(XY.$(0, 0)),
       matrix.applyXY(XY.$(this._width, 0)),
@@ -140,20 +141,19 @@ export class MRect {
   }
 
   shift(delta: IXY) {
-    Matrix.of(this._matrix).translate(delta.x, delta.y)
+    Matrix.of(this.matrix).translate(delta.x, delta.y)
     this.expired()
     return this
   }
 
   rotate(delta: number) {
-    Matrix.of(this._matrix).rotate(delta)
+    Matrix.of(this.matrix).rotate(delta)
     this.expired()
     return this
   }
 
   transform(matrix: IMatrix) {
-    const oldMatrix = Matrix.of(this.matrix)
-    Matrix.of(this._matrix).prepend(matrix)
+    this.matrix = Matrix.of(this.matrix).prepend(matrix)
     this.expired()
     const [p0, p1, p2] = this.vertices
     const newWidth = XY.distance(p0, p1)
@@ -161,7 +161,7 @@ export class MRect {
     const scaleX = newWidth / this.width
     const scaleY = newHeight / this.height
     const scaleMatrix = Matrix.identity().scale(scaleX, scaleY)
-    const newMatrix = Matrix.of(scaleMatrix).prepend(oldMatrix)
+    const newMatrix = Matrix.of(scaleMatrix).prepend(this.matrix)
     this.update(newWidth, newHeight, newMatrix)
     return this
   }
@@ -177,12 +177,16 @@ export class MRect {
   from(mrect: IMRect) {
     this._width = mrect.width
     this._height = mrect.height
-    this._matrix = Matrix.of(mrect.matrix)
+    this.matrix = Matrix.of(mrect.matrix)
     this.expired()
     return this
   }
 
   static identity() {
     return new MRect(0, 0, Matrix.identity())
+  }
+
+  static from(mrect: IMRect) {
+    return new MRect(mrect.width, mrect.height, Matrix.of(mrect.matrix))
   }
 }

@@ -44,6 +44,11 @@ export class Matrix {
     return Matrix.of(this)
   }
 
+  set = (label: keyof IMatrix, value: number) => {
+    this[label] = value
+    return this
+  }
+
   shift = (delta: IXY) => {
     this.tx += delta.x
     this.ty += delta.y
