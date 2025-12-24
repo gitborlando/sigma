@@ -28,7 +28,6 @@ class StageCreateService {
   createTypes = createTypes
   @observable currentType: IStageCreateType = 'frame'
   private node!: V1.Node
-  private moved = false
 
   startInteract() {
     const disposer = Disposer.collect(
@@ -67,8 +66,8 @@ class StageCreateService {
       current = snapGridRoundXY(current)
       start = snapGridRoundXY(start)
 
-      const rotation = Angle.sweep(XY.vectorOf(current, start))
-      const width = XY.distanceOf(current, start)
+      const rotation = Angle.sweep(XY.vector(current, start))
+      const width = XY.distance(current, start)
 
       OperateGeometry.setActiveGeometries({ ...start, width, rotation }, false)
     } else {
