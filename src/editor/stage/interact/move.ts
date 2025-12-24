@@ -30,6 +30,7 @@ class StageMoveService {
         this.isMoving = false
         StageCursor.unlock().setCursor('hand').lock()
       })
+      .start()
   }
 }
 

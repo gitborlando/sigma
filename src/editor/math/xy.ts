@@ -11,6 +11,10 @@ export class XY {
     return { x: this.x, y: this.y }
   }
 
+  tuple() {
+    return [this.x, this.y] as const
+  }
+
   plus(...others: IXY[]) {
     this.x = others.reduce((sum, cur) => sum + cur.x, this.x)
     this.y = others.reduce((sum, cur) => sum + cur.y, this.y)

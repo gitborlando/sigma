@@ -29,11 +29,11 @@ export const PageComp: FC<{}> = observer(({}) => {
         x-if={allPageExpanded}
         onMouseDown={() => {
           let lastHeight = pagePanelHeight
-          Drag.onSlide(({ shift }) => {
+          Drag.onMove(({ shift }) => {
             let newHeight = lastHeight + shift.y
             if (newHeight <= 69 || newHeight >= 800) return
             EditorLPLayerState.pagePanelHeight = newHeight
-          })
+          }).start()
         }}></G>
     </G>
   )

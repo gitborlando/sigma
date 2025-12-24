@@ -186,14 +186,13 @@ class StageSelectService {
 
     StageSurface.disablePointEvent()
 
-    StageDrag.onStart()
-      .onMove(({ marquee }) => {
-        this.marquee = marquee
-        AABB.updateFromRect(marqueeAABB, marquee)
-        marqueeOBB = OBB.fromRect(this.marquee)
-        this.clearSelect()
-        runInAction(() => traverse())
-      })
+    StageDrag.onMove(({ marquee }) => {
+      this.marquee = marquee
+      AABB.updateFromRect(marqueeAABB, marquee)
+      marqueeOBB = OBB.fromRect(this.marquee)
+      this.clearSelect()
+      runInAction(() => traverse())
+    })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
         YClients.afterSelect.dispatch()
@@ -205,6 +204,7 @@ class StageSelectService {
           })
         }
       })
+      .start()
   }
 
   private onEditText(hoverNode: V1.Node) {

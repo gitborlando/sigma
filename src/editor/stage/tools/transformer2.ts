@@ -34,23 +34,23 @@ class StageTransformerService {
   move(e: MouseEvent) {
     const originalAABB = this.mrect.aabb
 
-    StageDrag.onStart()
-      .onMove(({ shift }) => {
-        this.isMoving = true
+    StageDrag.onMove(({ shift }) => {
+      this.isMoving = true
 
-        const aabb = AABB.shift(originalAABB, shift)
-        const snapDelta = XY.$(
-          snapGridRound(aabb.minX) - aabb.minX,
-          snapGridRound(aabb.minY) - aabb.minY,
-        )
-        this.mrect = this.mrect.shift(shift).shift(snapDelta)
-      })
+      const aabb = AABB.shift(originalAABB, shift)
+      const snapDelta = XY.$(
+        snapGridRound(aabb.minX) - aabb.minX,
+        snapGridRound(aabb.minY) - aabb.minY,
+      )
+      this.mrect = this.mrect.shift(shift).shift(snapDelta)
+    })
       .onDestroy(({ moved }) => {
         this.isMoving = false
         if (!moved) return
 
         YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
       })
+      .start()
   }
 
   private applyToNodes() {
@@ -65,72 +65,72 @@ class StageTransformerService {
       OperateGeometry
     const { rotation } = activeGeometry
 
-    StageDrag.onStart()
-      .onMove(({ delta }) => {
-        const deltaX = XY.dot(delta, XY.xAxis(rotation))
-        const deltaY = XY.dot(delta, XY.yAxis(rotation))
+    StageDrag.onMove(({ delta }) => {
+      const deltaX = XY.dot(delta, XY.xAxis(rotation))
+      const deltaY = XY.dot(delta, XY.yAxis(rotation))
 
-        if (this.isSelectOnlyLine) {
-          setActiveGeometry('x', XY.dot(delta, XY.xAxis(0)))
-          setActiveGeometry('y', XY.dot(delta, XY.yAxis(0)))
-          return
-        }
+      if (this.isSelectOnlyLine) {
+        setActiveGeometry('x', XY.dot(delta, XY.xAxis(0)))
+        setActiveGeometry('y', XY.dot(delta, XY.yAxis(0)))
+        return
+      }
 
-        if (e.shiftKey) {
-          switch (type) {
-            case 'top':
-              setActiveGeometry('x', -(deltaY / 2) * Angle.sin(rotation))
-              setActiveGeometry('y', (deltaY / 2) * Angle.cos(rotation))
-              setActiveGeometry('height', -deltaY)
-              setActiveGeometry('height', -deltaY)
-              break
-            case 'right':
-              setActiveGeometry('width', deltaX)
-              setActiveGeometry('x', (-deltaX / 2) * Angle.cos(rotation))
-              setActiveGeometry('y', (-deltaX / 2) * Angle.sin(rotation))
-              setActiveGeometry('width', -deltaX)
-              break
-            case 'bottom':
-              setActiveGeometry('height', +deltaY)
-              setActiveGeometry('x', (-deltaY / 2) * Angle.sin(rotation))
-              setActiveGeometry('y', (-deltaY / 2) * Angle.cos(rotation))
-              setActiveGeometry('height', -(-deltaY))
-              break
-            case 'left':
-              setActiveGeometry('x', (deltaX / 2) * Angle.cos(rotation))
-              setActiveGeometry('y', (deltaX / 2) * Angle.sin(rotation))
-              setActiveGeometry('width', deltaX)
-              setActiveGeometry('width', -deltaX)
-              break
-          }
-        } else {
-          switch (type) {
-            case 'top':
-              setActiveGeometry('x', -deltaY * Angle.sin(rotation))
-              setActiveGeometry('y', deltaY * Angle.cos(rotation))
-              setActiveGeometry('height', -deltaY)
-              break
-            case 'right':
-              setActiveGeometry('width', deltaX)
-              break
-            case 'bottom':
-              setActiveGeometry('height', deltaY)
-              break
-            case 'left':
-              setActiveGeometries({
-                x: deltaX * Angle.cos(rotation),
-                y: deltaX * Angle.sin(rotation),
-                width: -deltaX,
-              })
-              break
-          }
+      if (e.shiftKey) {
+        switch (type) {
+          case 'top':
+            setActiveGeometry('x', -(deltaY / 2) * Angle.sin(rotation))
+            setActiveGeometry('y', (deltaY / 2) * Angle.cos(rotation))
+            setActiveGeometry('height', -deltaY)
+            setActiveGeometry('height', -deltaY)
+            break
+          case 'right':
+            setActiveGeometry('width', deltaX)
+            setActiveGeometry('x', (-deltaX / 2) * Angle.cos(rotation))
+            setActiveGeometry('y', (-deltaX / 2) * Angle.sin(rotation))
+            setActiveGeometry('width', -deltaX)
+            break
+          case 'bottom':
+            setActiveGeometry('height', +deltaY)
+            setActiveGeometry('x', (-deltaY / 2) * Angle.sin(rotation))
+            setActiveGeometry('y', (-deltaY / 2) * Angle.cos(rotation))
+            setActiveGeometry('height', -(-deltaY))
+            break
+          case 'left':
+            setActiveGeometry('x', (deltaX / 2) * Angle.cos(rotation))
+            setActiveGeometry('y', (deltaX / 2) * Angle.sin(rotation))
+            setActiveGeometry('width', deltaX)
+            setActiveGeometry('width', -deltaX)
+            break
         }
-      })
+      } else {
+        switch (type) {
+          case 'top':
+            setActiveGeometry('x', -deltaY * Angle.sin(rotation))
+            setActiveGeometry('y', deltaY * Angle.cos(rotation))
+            setActiveGeometry('height', -deltaY)
+            break
+          case 'right':
+            setActiveGeometry('width', deltaX)
+            break
+          case 'bottom':
+            setActiveGeometry('height', deltaY)
+            break
+          case 'left':
+            setActiveGeometries({
+              x: deltaX * Angle.cos(rotation),
+              y: deltaX * Angle.sin(rotation),
+              width: -deltaX,
+            })
+            break
+        }
+      }
+    })
       .onDestroy(({ moved }) => {
         if (!moved) return
 
         YUndo.track2('state', sentence(t('verb.scale'), t('noun.node')))
       })
+      .start()
   }
 }
 

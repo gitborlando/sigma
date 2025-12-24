@@ -69,11 +69,11 @@ export const DragPanel: FC<DragPanelProps> = ({
 
   const handleHeaderMouseDown = (e: React.MouseEvent) => {
     const startXY = position
-    Drag.onSlide(({ current, shift }) => {
+    Drag.onMove(({ current, shift }) => {
       if (current.x > innerWidth || current.y > innerHeight) return
       setPosition(XY.of(startXY).plus(shift))
       onMove?.(position)
-    }, e)
+    }).start(e)
   }
 
   return createPortal(

@@ -145,18 +145,13 @@ const SliderWrapperComp: FC<
   }
 > = observer(({ children, slideRate = 1, onSlide, afterSlide }) => {
   const [drag] = useState(() => new DragHelper({}))
-  drag.setMoveCallback(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
-  const handleDragLabel = () => {
-    drag
-      .needInfinity()
-      .onStart()
-      .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
-      .onDestroy(({ moved }) => afterSlide?.(moved))
-  }
-
+  drag
+    .needInfinity()
+    .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
+    .onDestroy(({ moved }) => afterSlide?.(moved))
   return (
     <G
-      onMouseDown={handleDragLabel}
+      onMouseDown={() => drag.start()}
       className={css`
         ${styles.fitContent}
         cursor: e-resize;

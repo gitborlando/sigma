@@ -45,6 +45,7 @@ class StageCreateService {
     StageDrag.onStart(this.onCreateStart)
       .onMove(this.onCreateMove)
       .onDestroy(this.onCreateEnd)
+      .start()
   }
 
   private onCreateStart({ start }: DragData) {
