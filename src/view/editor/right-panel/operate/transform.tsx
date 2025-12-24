@@ -84,13 +84,11 @@ const TransformComp: FC<{
   value: number
   setMatrix: (label: keyof IMatrix, value: number) => void
 }> = observer(({ node, label, value, setMatrix }) => {
-  const valueRef = useRef(value)
-  valueRef.current = value
   const handleChange = (value: number) => {
     setMatrix(label, value)
   }
   const handleSlide = (delta: number) => {
-    handleChange(valueRef.current + delta)
+    handleChange(value + delta)
   }
 
   return (

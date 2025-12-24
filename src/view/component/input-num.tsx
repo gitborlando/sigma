@@ -1,5 +1,5 @@
 import RcInputNumber, { InputNumberProps } from '@rc-component/input-number'
-import { Drag } from 'src/global/event/drag'
+import { DragHelper } from 'src/global/event/drag'
 
 export interface InputNumProps extends Omit<
   InputNumberProps<number>,
@@ -144,12 +144,16 @@ const SliderWrapperComp: FC<
     children: ReactNode
   }
 > = observer(({ children, slideRate = 1, onSlide, afterSlide }) => {
+  const [drag] = useState(() => new DragHelper({}))
+  drag.setMoveCallback(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
   const handleDragLabel = () => {
-    Drag.needInfinity()
+    drag
+      .needInfinity()
       .onStart()
       .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
       .onDestroy(({ moved }) => afterSlide?.(moved))
   }
+
   return (
     <G
       onMouseDown={handleDragLabel}
