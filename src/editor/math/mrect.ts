@@ -145,15 +145,24 @@ export class MRect {
     return this
   }
 
-  scale(scale: IXY) {
-    Matrix.of(this._matrix).scale(scale.x, scale.y)
+  rotate(delta: number) {
+    Matrix.of(this._matrix).rotate(delta)
     this.expired()
     return this
   }
 
-  rotate(delta: number) {
-    Matrix.of(this._matrix).rotate(delta)
+  transform(matrix: IMatrix) {
+    const oldMatrix = Matrix.clone(this.matrix)
+    Matrix.of(this._matrix).prepend(matrix)
     this.expired()
+    const [p0, p1, p2] = this.vertices
+    const newWidth = XY.distance(p0, p1)
+    const newHeight = XY.distance(p1, p2)
+    const scaleX = newWidth / this.width
+    const scaleY = newHeight / this.height
+    const scaleMatrix = Matrix.of().scale(scaleX, scaleY).matrix
+    const newMatrix = Matrix.of(scaleMatrix).prepend(oldMatrix).matrix
+    this.update(newWidth, newHeight, newMatrix)
     return this
   }
 
