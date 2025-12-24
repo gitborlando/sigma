@@ -161,7 +161,7 @@ export class MRect {
     const scaleX = newWidth / this.width
     const scaleY = newHeight / this.height
     const scaleMatrix = Matrix.identity().scale(scaleX, scaleY)
-    const newMatrix = Matrix.of(scaleMatrix).prepend(this.matrix)
+    const newMatrix = scaleMatrix.prepend(this.matrix)
     this.update(newWidth, newHeight, newMatrix)
     return this
   }
