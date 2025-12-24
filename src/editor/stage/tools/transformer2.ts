@@ -2,6 +2,7 @@ import { AABB, OBB } from 'src/editor/math'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
 import { snapGridRound } from 'src/editor/utils'
+import { getSelectedNodes } from 'src/editor/y-state/y-state'
 import { StageDrag } from 'src/global/event/drag'
 
 class StageTransformerService {
@@ -50,6 +51,13 @@ class StageTransformerService {
 
         YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
       })
+  }
+
+  private applyToNodes() {
+    const nodes = getSelectedNodes()
+
+    for (const node of nodes) {
+    }
   }
 
   onDragLine(type: 'top' | 'bottom' | 'left' | 'right', e: MouseEvent) {
