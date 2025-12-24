@@ -3,7 +3,6 @@ import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
 import { AABB, IRect } from 'src/editor/math'
 import { minMax } from 'src/editor/math/base'
-import { Matrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
@@ -88,7 +87,7 @@ class StageViewportService {
     const deltaZoom = this.limitZoom(newZoom) / this.zoom
     center ||= XY.center(this.bound)
 
-    this.sceneMatrix = this.sceneMatrix
+    this.sceneMatrix = Matrix.of(this.sceneMatrix)
       .translate(-center.x, -center.y)
       .scale(deltaZoom, deltaZoom)
       .translate(center.x, center.y)
@@ -106,13 +105,12 @@ class StageViewportService {
     e.preventDefault()
 
     if (!e.ctrlKey) {
-      if (e.shiftKey) {
-        this.sceneMatrix = this.sceneMatrix.translate(e.deltaY, 0)
-      } else {
-        if (e.deltaY === 0)
-          this.sceneMatrix = this.sceneMatrix.translate(-e.deltaX, 0)
-        else this.sceneMatrix = this.sceneMatrix.translate(0, -e.deltaY)
-      }
+      const shift = e.shiftKey
+        ? XY.$(e.deltaY, 0)
+        : e.deltaY === 0
+          ? XY.$(-e.deltaX, 0)
+          : XY.$(0, -e.deltaY)
+      this.sceneMatrix = Matrix.of(this.sceneMatrix).shift(shift)
       return
     }
 
@@ -136,17 +134,15 @@ class StageViewportService {
   }
 
   private onMatrixChange() {
-    return Disposer.collect(
-      reaction(
-        () => this.sceneMatrix,
-        (_, prev) => (this.prevSceneMatrix = prev),
-      ),
-      autorun(() => {
+    return reaction(
+      () => this.sceneMatrix,
+      (_, prev) => {
+        this.prevSceneMatrix = prev
         this.zoom = this.sceneMatrix.a
         this.offset = XY.from(this.sceneMatrix.tx, this.sceneMatrix.ty)
         this.sceneAABB = this.sceneMatrix.invertAABB(this.boundAABB)
         this.prevSceneAABB = this.prevSceneMatrix.invertAABB(this.boundAABB)
-      }),
+      },
     )
   }
 

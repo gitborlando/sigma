@@ -25,8 +25,23 @@ export class Matrix {
     public ty: number,
   ) {}
 
+  plain() {
+    return {
+      a: this.a,
+      b: this.b,
+      c: this.c,
+      d: this.d,
+      tx: this.tx,
+      ty: this.ty,
+    }
+  }
+
   tuple() {
     return [this.a, this.b, this.c, this.d, this.tx, this.ty] as IMatrixTuple
+  }
+
+  clone() {
+    return Matrix.of(this)
   }
 
   shift = (delta: IXY) => {
