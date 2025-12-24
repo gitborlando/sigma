@@ -111,33 +111,6 @@ export class MRect {
     return this._aabb
   }
 
-  get globalSize() {
-    const m = {
-      a: this._matrix[0],
-      b: this._matrix[1],
-      c: this._matrix[2],
-      d: this._matrix[3],
-    }
-    const xLen = Math.hypot(m.a, m.b)
-
-    // 2️⃣ Y 轴投影到 X 轴的比例（skew 部分）
-    const dot = m.a * m.c + m.b * m.d
-    const projScale = dot / (xLen * xLen)
-
-    // 3️⃣ 去掉 skew 后的 Y 轴向量
-    const yx = m.c - projScale * m.a
-    const yy = m.d - projScale * m.b
-
-    // 4️⃣ Y 轴长度
-    const yLen = Math.hypot(yx, yy)
-
-    // 5️⃣ 返回视觉尺寸
-    return {
-      width: this._width * xLen,
-      height: this._height * yLen,
-    }
-  }
-
   private calcVertexes() {
     const matrix = Matrix.of(this._matrix)
     return [
