@@ -1,3 +1,4 @@
+import { IMatrix } from 'src/editor/math'
 import { getZoom } from 'src/editor/stage/viewport'
 import { InputNum } from 'src/view/component/input-num'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
@@ -8,25 +9,25 @@ export const EditorDesignTransformComp: FC<{}> = observer(({}) => {
   if (!node) return null
   return (
     <G className={cls()} horizontal='auto auto' gap={8}>
-      <TransformComp key='a' node={node} index={0} />
-      <TransformComp key='b' node={node} index={1} />
-      <TransformComp key='c' node={node} index={2} />
-      <TransformComp key='d' node={node} index={3} />
-      <TransformComp key='tx' node={node} index={4} />
-      <TransformComp key='ty' node={node} index={5} />
+      <TransformComp key='a' node={node} label='a' />
+      <TransformComp key='b' node={node} label='b' />
+      <TransformComp key='c' node={node} label='c' />
+      <TransformComp key='d' node={node} label='d' />
+      <TransformComp key='tx' node={node} label='tx' />
+      <TransformComp key='ty' node={node} label='ty' />
     </G>
   )
 })
 
 const TransformComp: FC<{
   node: V1.Node
-  index: number
-}> = observer(({ node, index }) => {
-  const oldValue = useRef(node.matrix[index])
-  oldValue.current = node.matrix[index]
+  label: keyof IMatrix
+}> = observer(({ node, label }) => {
+  const oldValue = useRef(node.matrix[label])
+  oldValue.current = node.matrix[label]
 
   const handleChange = (value: number) => {
-    YState.set(`${node.id}.matrix.${index}`, value)
+    YState.set(`${node.id}.matrix.${label}`, value)
     YState.next()
   }
   const handleSlide = (delta: number) => {
@@ -36,9 +37,9 @@ const TransformComp: FC<{
 
   return (
     <InputNum
-      prefix={['a', 'b', 'c', 'd', 'tx', 'ty'][index]}
+      prefix={label}
       slideRate={0.2 / getZoom()}
-      value={node.matrix[index]}
+      value={node.matrix[label]}
       onSlide={handleSlide}
       onChange={handleChange}
     />

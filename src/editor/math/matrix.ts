@@ -61,6 +61,8 @@ export class Matrix {
     this.d *= y
     this.b *= x
     this.c *= y
+    this.tx *= x
+    this.ty *= y
     return this
   }
 
