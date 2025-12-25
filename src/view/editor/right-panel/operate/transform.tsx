@@ -16,7 +16,6 @@ export const EditorDesignTransformComp: FC<{}> = observer(({}) => {
   const handleApplyMatrix = () => {
     const mrect = MRect.from(node)
     mrect.transform(matrix)
-    console.log('mrect: ', mrect)
     YState.set(`${node.id}.x`, mrect.xy.x)
     YState.set(`${node.id}.y`, mrect.xy.y)
     YState.set(`${node.id}.width`, mrect.width)
@@ -31,42 +30,36 @@ export const EditorDesignTransformComp: FC<{}> = observer(({}) => {
     <G className={cls()} horizontal='auto auto' gap={8}>
       <TransformComp
         key='a'
-        node={node}
         label='a'
         value={matrix.a}
         setMatrix={handleSetMatrix}
       />
       <TransformComp
         key='b'
-        node={node}
         label='b'
         value={matrix.b}
         setMatrix={handleSetMatrix}
       />
       <TransformComp
         key='c'
-        node={node}
         label='c'
         value={matrix.c}
         setMatrix={handleSetMatrix}
       />
       <TransformComp
         key='d'
-        node={node}
         label='d'
         value={matrix.d}
         setMatrix={handleSetMatrix}
       />
       <TransformComp
         key='tx'
-        node={node}
         label='tx'
         value={matrix.tx}
         setMatrix={handleSetMatrix}
       />
       <TransformComp
         key='ty'
-        node={node}
         label='ty'
         value={matrix.ty}
         setMatrix={handleSetMatrix}
@@ -79,11 +72,10 @@ export const EditorDesignTransformComp: FC<{}> = observer(({}) => {
 })
 
 const TransformComp: FC<{
-  node: V1.Node
   label: keyof IMatrix
   value: number
   setMatrix: (label: keyof IMatrix, value: number) => void
-}> = observer(({ node, label, value, setMatrix }) => {
+}> = observer(({ label, value, setMatrix }) => {
   const handleChange = (value: number) => {
     setMatrix(label, value)
   }

@@ -61,7 +61,6 @@ export class MRect {
 
   get xy() {
     if (this._xy === undefined) {
-      console.log('this.matrix: ', this.matrix)
       this._xy = Matrix.of(this.matrix).applyXY(XY.$(0, 0))
     }
     return this._xy
@@ -160,8 +159,8 @@ export class MRect {
     const newHeight = XY.distance(p1, p2)
     const scaleX = newWidth / this.width
     const scaleY = newHeight / this.height
-    const scaleMatrix = Matrix.identity().scale(scaleX, scaleY)
-    const newMatrix = scaleMatrix.prepend(this.matrix)
+    const scaleMatrix = Matrix.identity().scale(scaleX, scaleY).invert()
+    const newMatrix = Matrix.of(this.matrix).append(scaleMatrix)
     this.update(newWidth, newHeight, newMatrix)
     return this
   }
