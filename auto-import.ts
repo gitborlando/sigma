@@ -34,6 +34,7 @@ export const autoImportConfig = autoImportPlugin({
       'src/view/styles/classes': ['classes'],
       'src/utils/disposer': ['Disposer'],
       'src/view/i18n/config': ['t', 'sentence'],
+      'src/editor/editor/global-get': ['getNodeMrect'],
     },
     {
       from: 'react',

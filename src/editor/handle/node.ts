@@ -1,4 +1,5 @@
-import { firstOne, iife, stableIndex } from '@gitborlando/utils'
+import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
+import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import { SchemaCreator } from '../schema/creator'
@@ -8,6 +9,16 @@ class HandleNodeService {
   datumId = ''
   @observable.ref datumXY = XY.$(0, 0)
   copiedIds = <ID[]>[]
+
+  private mrectCache = createCache<ID, MRect>()
+
+  getMrect(node: V1.Node) {
+    return this.mrectCache.getSet(node.id, () => MRect.from(node), [
+      node.width,
+      node.height,
+      node.matrix,
+    ])
+  }
 
   subscribe() {
     return Disposer.collect(YClients.afterSelect.hook(() => this.getDatum()))

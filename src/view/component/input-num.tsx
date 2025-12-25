@@ -36,6 +36,7 @@ export const InputNum = forwardRef<
       formatter,
       parser,
       slideRate = 1,
+      beforeSlide,
       onSlide,
       afterSlide,
       ...rest
@@ -100,6 +101,7 @@ export const InputNum = forwardRef<
           onSlide ? (
             <SliderWrapperComp
               slideRate={slideRate}
+              beforeSlide={beforeSlide}
               onSlide={onSlide}
               afterSlide={afterSlide}>
               {prefix}
@@ -135,6 +137,7 @@ export const InputNum = forwardRef<
 
 interface InputNumSliderProps {
   slideRate?: number
+  beforeSlide?: () => void
   onSlide?: (value: number) => void
   afterSlide?: (changed: boolean) => void
 }
@@ -143,10 +146,11 @@ const SliderWrapperComp: FC<
   InputNumSliderProps & {
     children: ReactNode
   }
-> = observer(({ children, slideRate = 1, onSlide, afterSlide }) => {
+> = observer(({ children, slideRate = 1, beforeSlide, onSlide, afterSlide }) => {
   const [drag] = useState(() => new DragHelper({}))
   drag
     .needInfinity()
+    .onStart(() => beforeSlide?.())
     .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
     .onDestroy(({ moved }) => afterSlide?.(moved))
   return (

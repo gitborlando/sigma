@@ -152,14 +152,7 @@ export class DragHelper {
     window.removeEventListener('mousedown', this.startHandler)
     window.removeEventListener('mousemove', this.moveHandler)
     window.removeEventListener('mouseup', this.endHandler)
-    this.startHandler = this.defaultStartHandler
-    this.moveHandler = this.defaultMoveHandler
-    this.endHandler = this.defaultEndHandler
     this.setDataToDefault()
-
-    if (this.isInfinity) {
-      document.exitPointerLock()
-    }
   }
 
   private calculateMarquee = () => {
@@ -174,6 +167,9 @@ export class DragHelper {
   }
 
   private setDataToDefault = () => {
+    if (this.isInfinity) {
+      document.exitPointerLock()
+    }
     this.current = XY.$(0, 0)
     this.origin = XY.$(0, 0)
     this.shift = XY.$(0, 0)
@@ -183,6 +179,9 @@ export class DragHelper {
     this.movePending = false
     this.isInfinity = false
     this.moveCallback = undefined
+    this.startHandler = this.defaultStartHandler
+    this.moveHandler = this.defaultMoveHandler
+    this.endHandler = this.defaultEndHandler
   }
 }
 

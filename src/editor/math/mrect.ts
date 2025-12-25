@@ -59,17 +59,29 @@ export class MRect {
     this.expired()
   }
 
-  get xy() {
+  get x() {
     if (this._xy === undefined) {
       this._xy = Matrix.of(this.matrix).applyXY(XY.$(0, 0))
     }
-    return this._xy
+    return this._xy.x
   }
 
-  set xy(target: IXY) {
-    const current = this.xy
-    const delta = XY.of(target).minus(current)
-    Matrix.of(this.matrix).translate(delta.x, delta.y)
+  get y() {
+    if (this._xy === undefined) {
+      this._xy = Matrix.of(this.matrix).applyXY(XY.$(0, 0))
+    }
+    return this._xy.y
+  }
+
+  set x(x: number) {
+    const delta = x - this.x
+    Matrix.of(this.matrix).translate(delta, 0)
+    this.expired()
+  }
+
+  set y(y: number) {
+    const delta = y - this.y
+    Matrix.of(this.matrix).translate(0, delta)
     this.expired()
   }
 
@@ -81,9 +93,8 @@ export class MRect {
     return this._rotation
   }
 
-  set rotation(rad: number) {
-    const current = this.rotation
-    const delta = rad - current
+  set rotation(rotation: number) {
+    const delta = rotation - this.rotation
     Matrix.of(this.matrix).rotate(delta)
     this.expired()
   }
