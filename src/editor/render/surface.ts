@@ -1,7 +1,7 @@
 import { NoopFunc, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { AABB, OBB } from 'src/editor/math'
+import { AABB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
 import { IMatrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
@@ -107,19 +107,10 @@ export class StageSurfaceService {
   setTransform = (transform: IMatrix) => {
     const matrix = Matrix.of(transform)
     this.currentCtx.transform(...matrix.tuple())
+
+    console.log('matrix.tuple(): ', matrix.tuple())
     return () => {
       this.currentCtx.transform(...matrix.invert().tuple())
-    }
-  }
-
-  setOBBMatrix = (obb: OBB, inverse = false) => {
-    const { x, y, rotation } = obb
-    if (!inverse) {
-      this.currentCtx.translate(x, y)
-      this.currentCtx.rotate(Angle.radianFy(rotation))
-    } else {
-      this.currentCtx.rotate(-Angle.radianFy(rotation))
-      this.currentCtx.translate(-x, -y)
     }
   }
 

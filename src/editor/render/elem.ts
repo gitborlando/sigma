@@ -112,19 +112,19 @@ export class Elem {
 
     StageSurface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
+      let resetTransform = () => {}
 
-      StageSurface.ctxSaveRestore(() => {
-        this.node && ElemDrawer.draw(this, ctx, path2d)
-      })
+      if (this.node) {
+        resetTransform = StageSurface.setTransform(this.node.matrix)
+        StageSurface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d))
+      }
 
       if (this.children.length) {
-        if (this.clip) {
-          StageSurface.setOBBMatrix(this.obb, false)
-          ctx.clip(path2d)
-          StageSurface.setOBBMatrix(this.obb, true)
-        }
+        if (this.clip) ctx.clip()
         this.children.forEach((child) => child.traverseDraw())
       }
+
+      resetTransform()
     })
 
     resetCtx()

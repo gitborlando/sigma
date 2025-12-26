@@ -9,13 +9,13 @@ export function mock() {
   SchemaCreator.addToSchema(schema, page)
   meta.pageIds.push(page.id)
 
-  // const frame = SchemaCreator.frame()
-  // frame.x = 100
-  // frame.y = 100
-  // frame.width = 500
-  // frame.height = 500
-  // SchemaCreator.addToSchema(schema, frame)
-  // SchemaCreator.addChild(page, frame)
+  const frame = SchemaCreator.frame({
+    width: 500,
+    height: 500,
+    matrix: Matrix.identity().rotate(45),
+  })
+  SchemaCreator.addToSchema(schema, frame)
+  SchemaCreator.addChild(page, frame)
 
   // const line = SchemaCreator.line({
   //   x: 300,
@@ -26,19 +26,12 @@ export function mock() {
   // SchemaCreator.addChild(frame, line)
 
   const rect = SchemaCreator.rect({
-    // x: 0.5,
-    // y: -0.15,
     width: 60,
     height: 40,
-    // rotation: 33,
-
-    // matrix: Matrix.of([
-    //   -0.9661300805096241, 0.2580555512568309, 0.6123004981473904,
-    //   -0.7906251323911083, 0, 0,
-    // ]).matrix,
+    matrix: Matrix.identity().translate(200, 200).plain(),
   })
   SchemaCreator.addToSchema(schema, rect)
-  SchemaCreator.addChild(page, rect)
+  SchemaCreator.addChild(frame, rect)
 
   // const polygon = SchemaCreator.polygon({
   //   x: 300,
