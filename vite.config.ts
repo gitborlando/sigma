@@ -1,3 +1,4 @@
+import { miniId } from '@gitborlando/utils'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import wywInJs from '@wyw-in-js/vite'
@@ -10,7 +11,10 @@ export default defineConfig(() => {
   return {
     plugins: [
       autoImportConfig,
-      wywInJs({ include: 'src/**/*.tsx' }),
+      wywInJs({
+        include: 'src/**/*.tsx',
+        classNameSlug: () => miniId(5),
+      }),
       react(),
       reactXIf(),
       tailwindcss(),

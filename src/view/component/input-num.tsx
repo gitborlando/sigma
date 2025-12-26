@@ -83,16 +83,16 @@ export const InputNum = forwardRef<
           inputRef.current = r ?? undefined
         }}
         className={cx(
-          cls,
-          needFocusStyle && `${cls}-focus-style`,
-          disabled && `${cls}-disabled`,
+          cls(),
+          needFocusStyle && cls('focus-style'),
+          disabled && cls('disabled'),
           className,
         )}
-        prefixCls={cls}
+        prefixCls={cls()}
         classNames={{
-          input: `${cls}-input`,
-          prefix: `${cls}-prefix`,
-          suffix: `${cls}-addon`,
+          input: cls('input'),
+          prefix: cls('prefix'),
+          suffix: cls('addon'),
         }}
         value={value}
         disabled={disabled}
@@ -153,19 +153,19 @@ const SliderWrapperComp: FC<
     .onStart(() => beforeSlide?.())
     .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
     .onDestroy(({ moved }) => afterSlide?.(moved))
+
+  const cls = css`
+    ${styles.fitContent}
+    cursor: e-resize;
+  `
   return (
-    <G
-      onMouseDown={() => drag.start()}
-      className={css`
-        ${styles.fitContent}
-        cursor: e-resize;
-      `}>
+    <G onMouseDown={() => drag.start()} className={cls}>
       {children}
     </G>
   )
 })
 
-const cls = css`
+const cls = classes(css`
   @layer local-components {
     & {
       display: inline-flex;
@@ -222,4 +222,4 @@ const cls = css`
       color: rgba(0, 0, 0, 0.45);
     }
   }
-`
+`)
