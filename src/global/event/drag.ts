@@ -37,12 +37,10 @@ export class DragHelper {
     this.origin = XY.client(e)
   }
   private defaultMoveHandler = (e: MouseEvent) => {}
-  private defaultEndHandler = (e: MouseEventLike) => {
-    this.destroy()
-  }
-  private startHandler: (e: MouseEventLike) => void = this.defaultStartHandler
-  private moveHandler: (e: MouseEvent) => void = this.defaultMoveHandler
-  private endHandler: (e: MouseEventLike) => void = this.defaultEndHandler
+  private defaultEndHandler = (e: MouseEventLike) => this.destroy()
+  private startHandler = this.defaultStartHandler
+  private moveHandler = this.defaultMoveHandler
+  private endHandler = this.defaultEndHandler
   private moveCallback?: (data: DragData & { delta: IXY }) => void
 
   constructor(options?: DragOptions) {
