@@ -67,6 +67,18 @@ export class SchemaHelper {
     return node
   }
 
+  static getSceneMatrix(node: V1.Node) {
+    const matrix = Matrix.identity()
+    while (node.parentId) {
+      const parent = YState.find<V1.Node>(node.parentId)
+      if (parent.matrix) {
+        matrix.prepend(Matrix.of(parent.matrix))
+      }
+      node = parent
+    }
+    return matrix.plain()
+  }
+
   static createCurrentPageTraverse({
     callback,
     bubbleCallback,
