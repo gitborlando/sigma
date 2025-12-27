@@ -55,7 +55,7 @@ export class MRect {
   }
 
   set matrix(matrix: IMatrix) {
-    this._matrix = matrix
+    this._matrix = Matrix.of(matrix).plain()
     this.expired()
   }
 
@@ -75,13 +75,13 @@ export class MRect {
 
   set x(x: number) {
     const delta = x - this.x
-    Matrix.of(this.matrix).translate(delta, 0)
+    this.matrix = Matrix.of(this.matrix).translate(delta, 0).plain()
     this.expired()
   }
 
   set y(y: number) {
     const delta = y - this.y
-    Matrix.of(this.matrix).translate(0, delta)
+    this.matrix = Matrix.of(this.matrix).translate(0, delta).plain()
     this.expired()
   }
 
@@ -94,7 +94,7 @@ export class MRect {
 
   set rotation(rotation: number) {
     const delta = rotation - this.rotation
-    Matrix.of(this.matrix).rotate(delta)
+    this.matrix = Matrix.of(this.matrix).rotate(delta, this.center).plain()
     this.expired()
   }
 
@@ -157,19 +157,19 @@ export class MRect {
   }
 
   shift(delta: IXY) {
-    this.matrix = Matrix.of(this.matrix).translate(delta.x, delta.y)
+    this.matrix = Matrix.of(this.matrix).translate(delta.x, delta.y).plain()
     this.expired()
     return this
   }
 
   rotate(delta: number) {
-    this.matrix = Matrix.of(this.matrix).rotate(delta, this.center)
+    this.matrix = Matrix.of(this.matrix).rotate(delta, this.center).plain()
     this.expired()
     return this
   }
 
   transform(matrix: IMatrix) {
-    this.matrix = Matrix.of(this.matrix).prepend(matrix)
+    this.matrix = Matrix.of(this.matrix).prepend(matrix).plain()
     this.expired()
     const [p0, p1, p2] = this.vertices
     const newWidth = XY.distance(p0, p1)
@@ -177,23 +177,17 @@ export class MRect {
     const scaleX = newWidth / this.width
     const scaleY = newHeight / this.height
     const scaleMatrix = Matrix.identity().scale(scaleX, scaleY).invert()
-    const newMatrix = Matrix.of(this.matrix).append(scaleMatrix)
-    this.update(newWidth, newHeight, newMatrix)
-    return this
-  }
-
-  update(width: number, height: number, matrix: IMatrix) {
-    this._width = width
-    this._height = height
-    this._matrix = matrix
-    this.expired()
+    const newMatrix = Matrix.of(this.matrix).append(scaleMatrix).plain()
+    this.width = newWidth
+    this.height = newHeight
+    this.matrix = newMatrix
     return this
   }
 
   from(mrect: IMRect) {
     this._width = mrect.width
     this._height = mrect.height
-    this.matrix = Matrix.of(mrect.matrix)
+    this.matrix = Matrix.of(mrect.matrix).plain()
     this.expired()
     return this
   }
@@ -207,10 +201,10 @@ export class MRect {
   }
 
   static identity(width = 0, height = 0) {
-    return new MRect(width, height, Matrix.identity())
+    return new MRect(width, height, Matrix.identity().plain())
   }
 
   static from(mrect: IMRect) {
-    return new MRect(mrect.width, mrect.height, Matrix.of(mrect.matrix))
+    return new MRect(mrect.width, mrect.height, Matrix.of(mrect.matrix).plain())
   }
 }

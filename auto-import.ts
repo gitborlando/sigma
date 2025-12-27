@@ -43,7 +43,7 @@ export const autoImportConfig = autoImportPlugin({
     },
     {
       from: 'src/editor/math',
-      imports: ['IXY'],
+      imports: ['IXY', 'IMatrix'],
       type: true,
     },
   ],
