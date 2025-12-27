@@ -120,7 +120,7 @@ export class Elem {
       }
 
       if (this.children.length) {
-        if (this.clip) ctx.clip()
+        if (this.clip) ctx.clip(path2d)
         this.children.forEach((child) => child.traverseDraw())
       }
 

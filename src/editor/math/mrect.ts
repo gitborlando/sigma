@@ -87,8 +87,7 @@ export class MRect {
 
   get rotation() {
     if (this._rotation === undefined) {
-      const transformedXY = Matrix.of(this.matrix).applyXY(XY.xAxis())
-      this._rotation = Angle.sweep(transformedXY, XY.xAxis())
+      this._rotation = this.calcRotation()
     }
     return this._rotation
   }
@@ -101,9 +100,7 @@ export class MRect {
 
   get center() {
     if (this._center === undefined) {
-      this._center = Matrix.of(this.matrix).applyXY(
-        XY.$(this._width / 2, this._height / 2),
-      )
+      this._center = this.calcCenter()
     }
     return this._center
   }
@@ -120,6 +117,15 @@ export class MRect {
       this._aabb = this.calcAABB()
     }
     return this._aabb
+  }
+
+  private calcRotation() {
+    const transformedXY = Matrix.of(this.matrix).applyXY(XY.xAxis())
+    return Angle.sweep(transformedXY, XY.xAxis())
+  }
+
+  private calcCenter() {
+    return Matrix.of(this.matrix).applyXY(XY.$(this._width / 2, this._height / 2))
   }
 
   private calcVertices() {
@@ -151,13 +157,13 @@ export class MRect {
   }
 
   shift(delta: IXY) {
-    Matrix.of(this.matrix).translate(delta.x, delta.y)
+    this.matrix = Matrix.of(this.matrix).translate(delta.x, delta.y)
     this.expired()
     return this
   }
 
   rotate(delta: number) {
-    Matrix.of(this.matrix).rotate(delta)
+    this.matrix = Matrix.of(this.matrix).rotate(delta, this.center)
     this.expired()
     return this
   }
@@ -192,8 +198,16 @@ export class MRect {
     return this
   }
 
-  static identity() {
-    return new MRect(0, 0, Matrix.identity())
+  plain() {
+    return {
+      width: this.width,
+      height: this.height,
+      matrix: Matrix.of(this.matrix).plain(),
+    }
+  }
+
+  static identity(width = 0, height = 0) {
+    return new MRect(width, height, Matrix.identity())
   }
 
   static from(mrect: IMRect) {

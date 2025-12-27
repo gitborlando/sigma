@@ -10,9 +10,7 @@ export function mock() {
   meta.pageIds.push(page.id)
 
   const frame = SchemaCreator.frame({
-    width: 500,
-    height: 500,
-    matrix: Matrix.identity().rotate(45),
+    ...MRect.identity(500, 500).rotate(45).plain(),
   })
   SchemaCreator.addToSchema(schema, frame)
   SchemaCreator.addChild(page, frame)
@@ -26,9 +24,7 @@ export function mock() {
   // SchemaCreator.addChild(frame, line)
 
   const rect = SchemaCreator.rect({
-    width: 60,
-    height: 40,
-    matrix: Matrix.identity().translate(200, 200).plain(),
+    ...MRect.identity(60, 40).plain(),
   })
   SchemaCreator.addToSchema(schema, rect)
   SchemaCreator.addChild(frame, rect)

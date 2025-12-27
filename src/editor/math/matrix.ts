@@ -71,16 +71,18 @@ export class Matrix {
     return this
   }
 
-  rotate = (angle: number) => {
+  rotate = (angle: number, origin = XY.$(0, 0)) => {
     const { cos, sin } = Angle.cosSin(angle)
     const { a, b, c, d, tx, ty } = this
+    const dx = tx - origin.x
+    const dy = ty - origin.y
 
     this.a = a * cos - b * sin
     this.b = a * sin + b * cos
     this.c = c * cos - d * sin
     this.d = c * sin + d * cos
-    this.tx = tx * cos - ty * sin
-    this.ty = tx * sin + ty * cos
+    this.tx = dx * cos - dy * sin + origin.x
+    this.ty = dx * sin + dy * cos + origin.y
 
     return this
   }

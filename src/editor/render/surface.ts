@@ -107,11 +107,7 @@ export class StageSurfaceService {
   setTransform = (transform: IMatrix) => {
     const matrix = Matrix.of(transform)
     this.currentCtx.transform(...matrix.tuple())
-
-    console.log('matrix.tuple(): ', matrix.tuple())
-    return () => {
-      this.currentCtx.transform(...matrix.invert().tuple())
-    }
+    return () => this.currentCtx.transform(...matrix.invert().tuple())
   }
 
   private renderType?: SurfaceRenderType
@@ -423,48 +419,60 @@ export class StageSurfaceService {
   }
 
   private traverseLayerList = (
-    func: (
-      elem: Elem,
-      capture: boolean,
-      stopped: boolean,
-      stopPropagation: NoopFunc,
-      hitList?: Elem[],
-      xy?: IXY,
-    ) => any,
+    func: (props: {
+      elem: Elem
+      capture: boolean
+      stopped: boolean
+      stopPropagation: NoopFunc
+      hitList?: Elem[]
+      xy?: IXY
+    }) => any,
     noBubble?: boolean,
   ) => {
     let stopped = false
     const stopPropagation = () => (stopped = true)
 
-    const traverse = (layerIndex: number, elem: Elem, hitList?: Elem[]) => {
+    const traverse = (props: {
+      layerIndex: number
+      elem: Elem
+      hitList?: Elem[]
+      xy?: IXY
+    }) => {
+      const { layerIndex, elem, hitList } = props
+      let xy = props.xy
       if (!elem.visible) return
 
-      if (this.eventXY) {
-        let xy = this.eventXY
+      if (xy) {
         if (elem.node?.matrix) {
-          xy = Matrix.of(elem.node.matrix).invertXY(this.eventXY)
+          xy = Matrix.of(elem.node.matrix).invertXY(xy)
         } else {
           xy = XY.of(this.eventXY)
             .rotate(elem.obb.xy, -elem.obb.rotation)
             .minus(elem.obb.xy)
         }
 
-        func(elem, true, stopped, stopPropagation, hitList!, xy)
+        func({ elem, capture: true, stopped, stopPropagation, hitList, xy })
 
         const subHitList: Elem[] = []
-        reverseFor(elem.children, (elem) => traverse(layerIndex, elem, subHitList))
+        reverseFor(elem.children, (elem) =>
+          traverse({ layerIndex, elem, hitList: subHitList, xy }),
+        )
         this.elemsFromPoint.push(...subHitList)
 
-        !noBubble && func(elem, false, stopped, stopPropagation, undefined, xy)
+        !noBubble &&
+          func({ elem, capture: false, stopped, stopPropagation, hitList, xy })
       } else {
-        func(elem, true, stopped, stopPropagation)
+        func({ elem, capture: true, stopped, stopPropagation })
 
-        reverseFor(elem.children, (elem) => traverse(layerIndex, elem))
-        !noBubble && func(elem, false, stopped, stopPropagation)
+        reverseFor(elem.children, (elem) => traverse({ layerIndex, elem }))
+
+        !noBubble && func({ elem, capture: false, stopped, stopPropagation })
       }
     }
 
-    reverseFor(StageScene.rootElems, (elem, i) => traverse(i, elem, []))
+    reverseFor(StageScene.rootElems, (elem, layerIndex) =>
+      traverse({ layerIndex, elem, xy: this.eventXY, hitList: [] }),
+    )
   }
 
   private elemsFromPoint: Elem[] = []
@@ -473,12 +481,9 @@ export class StageSurfaceService {
     if (!e) return this.elemsFromPoint
 
     this.getEventXY(e)
-    this.traverseLayerList(
-      (elem, capture, stopped, stopPropagation, hitList, xy) => {
-        const hit = elem.hitTest(xy!)
-        if (hit) hitList?.push(elem)
-      },
-    )
+    this.traverseLayerList(({ elem, hitList, xy }) => {
+      if (elem.hitTest(xy!)) hitList?.push(elem)
+    })
 
     return this.elemsFromPoint
   }
@@ -491,7 +496,7 @@ export class StageSurfaceService {
 
       this.getEventXY(e)
       this.traverseLayerList(
-        (elem, capture, stopped, stopPropagation, hitList, xy) => {
+        ({ elem, capture, stopped, stopPropagation, hitList, xy }) => {
           const hit = elem.hitTest(xy!)
           if (hit) hitList?.push(elem)
           if (!stopped)
