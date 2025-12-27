@@ -37,7 +37,7 @@ export type AllGeometry = ReturnType<typeof createAllGeometry>
 class OperateGeometryService {
   activeGeometry = createAllGeometry()
   activeKeys = createActiveKeys(new Set())
-  operateKeys = createActiveKeys(new Set())
+  changingKeys = createActiveKeys(new Set())
   deltaKeys = createActiveKeys(new Set())
 
   setupActiveKeys(selectedNodes: V1.Node[]) {
@@ -84,7 +84,7 @@ class OperateGeometryService {
   ) {
     for (const key of objKeys(geometries)) {
       if (delta) this.deltaKeys.add(key)
-      this.operateKeys.add(key)
+      this.changingKeys.add(key)
       this.activeGeometry[key] = geometries[key] as number
     }
     const traverse = SchemaHelper.createTraverse({
@@ -93,13 +93,13 @@ class OperateGeometryService {
     traverse(getSelectIdList())
     YState.next()
 
-    this.operateKeys.clear()
+    this.changingKeys.clear()
     this.deltaKeys.clear()
   }
 
   setActiveGeometry(key: keyof AllGeometry, value: number, delta: boolean = true) {
     if (delta) this.deltaKeys.add(key)
-    this.operateKeys.add(key)
+    this.changingKeys.add(key)
     this.activeGeometry[key] = value
 
     const traverse = SchemaHelper.createTraverse({
@@ -108,7 +108,7 @@ class OperateGeometryService {
     traverse(getSelectIdList())
     YState.next()
 
-    this.operateKeys.clear()
+    this.changingKeys.clear()
     this.deltaKeys.clear()
   }
 
@@ -133,7 +133,7 @@ class OperateGeometryService {
 
     if (depth === 0) this.patchChangeToVectorPoints(node.id)
 
-    this.operateKeys.forEach((key) => {
+    this.changingKeys.forEach((key) => {
       if (key === 'width') {
         if (depth !== 0) return
         return YState.set(`${node.id}.width`, node.width + this.delta(key, node))
@@ -150,7 +150,7 @@ class OperateGeometryService {
         )
       }
       if (key === 'rotation') {
-        if (this.operateKeys.size === 1) {
+        if (this.changingKeys.size === 1) {
           return this.applyRotationToNode(traverseData, node, depth)
         }
         return YState.set(
@@ -216,7 +216,7 @@ class OperateGeometryService {
     if (!node.points) return
 
     node.points.forEach((point, i) => {
-      if (this.operateKeys.has('width')) {
+      if (this.changingKeys.has('width')) {
         const deltaRate = this.deltaRate('width', node)
         const newX = point.x * (1 + deltaRate)
         YState.set(`${node.id}.points.${i}.x`, newX)
@@ -231,7 +231,7 @@ class OperateGeometryService {
         }
       }
 
-      if (this.operateKeys.has('height')) {
+      if (this.changingKeys.has('height')) {
         const deltaRate = this.deltaRate('height', node)
         const newY = point.y * (1 + deltaRate)
         YState.set(`${node.id}.points.${i}.y`, newY)
