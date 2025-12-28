@@ -308,12 +308,12 @@ const RotatePointComp: FC<{
 
   const { setActiveGeometry } = OperateGeometry
 
-  const handleRotatePointerHover = (e: ElemMouseEvent) => {
+  const mouseenter = (e: ElemMouseEvent) => {
     if (!e.hovered) return StageCursor.setCursor('select')
     StageCursor.setCursor('rotate')
   }
 
-  const handleRotatePointerMouseDown = (e: ElemMouseEvent) => {
+  const mousedown = (e: ElemMouseEvent) => {
     e.stopPropagation()
     StageCursor.setCursor('rotate').lock().upReset()
 
@@ -339,8 +339,8 @@ const RotatePointComp: FC<{
     <elem
       node={rotatePoint}
       events={{
-        hover: handleRotatePointerHover,
-        mousedown: handleRotatePointerMouseDown,
+        hover: mouseenter,
+        mousedown,
       }}
     />
   )
