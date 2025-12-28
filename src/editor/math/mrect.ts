@@ -120,7 +120,8 @@ export class MRect {
   }
 
   private calcRotation() {
-    const transformedXY = Matrix.of(this.matrix).applyXY(XY.xAxis())
+    const { a, b, c, d } = this.matrix
+    const transformedXY = Matrix.of({ a, b, c, d, tx: 0, ty: 0 }).applyXY(XY.xAxis())
     return Angle.sweep(transformedXY, XY.xAxis())
   }
 
@@ -204,7 +205,7 @@ export class MRect {
     return new MRect(width, height, Matrix.identity().plain())
   }
 
-  static from(mrect: IMRect) {
+  static of(mrect: IMRect) {
     return new MRect(mrect.width, mrect.height, Matrix.of(mrect.matrix).plain())
   }
 }

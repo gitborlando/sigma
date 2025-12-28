@@ -115,6 +115,11 @@ export class Matrix {
     return this
   }
 
+  divide = (matrix: IMatrix) => {
+    this.append(Matrix.of(matrix).invert())
+    return this
+  }
+
   invert = () => {
     const { a, b, c, d, tx, ty } = this
     const invDet = 1 / (a * d - b * c)

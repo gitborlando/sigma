@@ -19,7 +19,7 @@ export const EditorDesignTransformComp: FC<{}> = observer(({}) => {
   }
 
   const handleApplyMatrix = () => {
-    const mrect = MRect.from(originNodeRef.current)
+    const mrect = MRect.of(originNodeRef.current)
     mrect.transform(matrix)
     YState.set(`${node.id}.x`, mrect.x)
     YState.set(`${node.id}.y`, mrect.y)

@@ -13,7 +13,7 @@ class HandleNodeService {
   private mrectCache = createCache<ID, MRect>()
 
   getMrect(node: V1.Node) {
-    return this.mrectCache.getSet(node.id, () => MRect.from(node), [
+    return this.mrectCache.getSet(node.id, () => MRect.of(node), [
       node.width,
       node.height,
       node.matrix,

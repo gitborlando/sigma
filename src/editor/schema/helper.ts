@@ -68,7 +68,7 @@ export class SchemaHelper {
   }
 
   static getSceneMatrix(node: V1.Node) {
-    const matrix = Matrix.identity()
+    const matrix = Matrix.of(node.matrix)
     while (node.parentId) {
       const parent = YState.find<V1.Node>(node.parentId)
       if (parent.matrix) {

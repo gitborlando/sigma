@@ -1,13 +1,15 @@
-import { AABB, OBB } from 'src/editor/math'
+import { AABB, IMatrix, OBB } from 'src/editor/math'
 import { OperateGeometry } from 'src/editor/operate/geometry'
+import { DesignGeometry } from 'src/editor/operate/geometry-d'
 import { StageScene } from 'src/editor/render/scene'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { snapGridRound } from 'src/editor/utils'
 import { getSelectedNodes } from 'src/editor/y-state/y-state'
 import { StageDrag } from 'src/global/event/drag'
 
 class StageTransformerService {
   obb = OBB.identity()
-  mrect = MRect.identity()
+  @observable.ref mrect = MRect.identity()
   @observable isMoving = false
 
   isSelectOnlyLine = false
@@ -26,13 +28,19 @@ class StageTransformerService {
 
   setup(selectNodes: V1.Node[]) {
     if (selectNodes.length === 1) {
-      return this.mrect.from(selectNodes[0])
+      const matrix = SchemaHelper.getSceneMatrix(selectNodes[0])
+      return this.mrect.from({
+        width: selectNodes[0].width,
+        height: selectNodes[0].height,
+        matrix,
+      })
     }
     return this.mrect
   }
 
   move(e: MouseEvent) {
     const originalAABB = this.mrect.aabb
+    let lastMatrix: IMatrix | undefined = undefined
 
     StageDrag.onMove(({ shift }) => {
       this.isMoving = true
@@ -42,7 +50,12 @@ class StageTransformerService {
         snapGridRound(aabb.minX) - aabb.minX,
         snapGridRound(aabb.minY) - aabb.minY,
       )
-      this.mrect = this.mrect.shift(shift).shift(snapDelta)
+
+      const newMatrix = Matrix.identity().shift(shift).shift(snapDelta)
+      const div = Matrix.of(newMatrix).divide(lastMatrix || Matrix.identity())
+      lastMatrix = newMatrix
+
+      DesignGeometry.setGeometries({}, { matrix: div.plain() })
     })
       .onDestroy(({ moved }) => {
         this.isMoving = false

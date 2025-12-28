@@ -35,8 +35,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const node = SchemaCreator.rect({
     id: 'transform',
     fills: [],
-    ...transformOBB,
-    ...mrect,
+    ...mrect.plain(),
   })
 
   const mousedown = (e: ElemMouseEvent) => {
@@ -45,11 +44,16 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()
-      StageTransformer.move(e.hostEvent)
+      StageTransformer2.move(e.hostEvent)
     }
   }
 
-  const [p0, p1, p2, p3] = mrect.vertices
+  const [p0, p1, p2, p3] = [
+    XY.$(0, 0),
+    XY.$(mrect.width, 0),
+    XY.$(mrect.width, mrect.height),
+    XY.$(0, mrect.height),
+  ]
 
   return (
     <elem
@@ -88,14 +92,8 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
         return StageCursor.setCursor('select')
       }
 
-      switch (type) {
-        case 'top':
-        case 'bottom':
-          return StageCursor.setCursor('resize', transformOBB.rotation + 90)
-        case 'right':
-        case 'left':
-          return StageCursor.setCursor('resize', transformOBB.rotation)
-      }
+      const extraRotation = type === 'top' || type === 'bottom' ? 90 : 0
+      StageCursor.setCursor('resize', mrect.rotation + extraRotation)
     }
 
     const mousedown = (e: ElemMouseEvent) => {
@@ -132,14 +130,8 @@ const VertexComp: FC<{
       return StageCursor.setCursor('resize', transformOBB.rotation)
     }
 
-    switch (type) {
-      case 'topLeft':
-      case 'bottomRight':
-        return StageCursor.setCursor('resize', transformOBB.rotation + 45)
-      case 'topRight':
-      case 'bottomLeft':
-        return StageCursor.setCursor('resize', transformOBB.rotation - 45)
-    }
+    const extraRotation = type === 'topLeft' || type === 'bottomRight' ? 45 : -45
+    StageCursor.setCursor('resize', mrect.rotation + extraRotation)
   }
 
   const moveVertex = (e: ElemMouseEvent) => {
