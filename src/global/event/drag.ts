@@ -144,6 +144,7 @@ export class DragHelper {
     }
     window.addEventListener('mousemove', this.moveHandler)
     window.addEventListener('mouseup', this.endHandler)
+    return this
   }
 
   private destroy = () => {

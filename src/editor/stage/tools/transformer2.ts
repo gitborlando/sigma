@@ -4,7 +4,6 @@ import { DesignGeometry } from 'src/editor/operate/geometry-d'
 import { StageScene } from 'src/editor/render/scene'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { snapGridRound } from 'src/editor/utils'
-import { getSelectedNodes } from 'src/editor/y-state/y-state'
 import { StageDrag } from 'src/global/event/drag'
 
 class StageTransformerService {
@@ -66,11 +65,27 @@ class StageTransformerService {
       .start()
   }
 
-  private applyToNodes() {
-    const nodes = getSelectedNodes()
+  onDragLine2(
+    type: 'T' | 'B' | 'L' | 'R',
+    options?: {
+      e?: MouseEvent
+    },
+  ) {
+    const rotation = this.mrect.rotation
+    const starWidth = this.mrect.width
+    const starHeight = this.mrect.height
 
-    for (const node of nodes) {
-    }
+    StageDrag.start(options?.e).onMove(({ shift }) => {
+      const shiftX = XY.dot(shift, XY.xAxis(rotation))
+      const shiftY = XY.dot(shift, XY.yAxis(rotation))
+      const scaleX = shiftX / starWidth
+      const scaleY = shiftY / starHeight
+
+      switch (type) {
+        case 'T':
+          break
+      }
+    })
   }
 
   onDragLine(type: 'top' | 'bottom' | 'left' | 'right', e: MouseEvent) {
