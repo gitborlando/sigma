@@ -1,4 +1,4 @@
-import { AABB, IMatrix, OBB } from 'src/editor/math'
+import { AABB, OBB } from 'src/editor/math'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { DesignGeometry } from 'src/editor/operate/geometry-d'
 import { StageScene } from 'src/editor/render/scene'
@@ -9,6 +9,7 @@ import { StageDrag } from 'src/global/event/drag'
 class StageTransformerService {
   obb = OBB.identity()
   @observable.ref mrect = MRect.identity()
+  @observable.ref diffMatrix = Matrix.identity()
   @observable isMoving = false
 
   isSelectOnlyLine = false
@@ -38,31 +39,30 @@ class StageTransformerService {
   }
 
   move(e: MouseEvent) {
-    const originalAABB = this.mrect.aabb
-    let lastMatrix: IMatrix | undefined = undefined
+    const startAABB = this.mrect.aabb
+    const startMatrix = this.mrect.matrix
 
-    StageDrag.onMove(({ shift }) => {
-      this.isMoving = true
+    StageDrag.start()
+      .onMove(({ shift }) => {
+        this.isMoving = true
 
-      const aabb = AABB.shift(originalAABB, shift)
-      const snapDelta = XY.$(
-        snapGridRound(aabb.minX) - aabb.minX,
-        snapGridRound(aabb.minY) - aabb.minY,
-      )
+        const aabb = AABB.shift(startAABB, shift)
+        const snapDelta = XY.$(
+          snapGridRound(aabb.minX) - aabb.minX,
+          snapGridRound(aabb.minY) - aabb.minY,
+        )
 
-      const newMatrix = Matrix.identity().shift(shift).shift(snapDelta)
-      const div = Matrix.of(newMatrix).divide(lastMatrix || Matrix.identity())
-      lastMatrix = newMatrix
+        const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)
+        this.diffMatrix = newMatrix.divide(startMatrix)
 
-      DesignGeometry.setGeometries({}, { matrix: div.plain() })
-    })
+        DesignGeometry.setGeometries({}, { matrix: this.diffMatrix.plain() })
+      })
       .onDestroy(({ moved }) => {
         this.isMoving = false
         if (!moved) return
 
         YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
       })
-      .start()
   }
 
   onDragLine2(
