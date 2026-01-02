@@ -1,4 +1,4 @@
-import { objKeys } from '@gitborlando/utils'
+import { createCache, objKeys } from '@gitborlando/utils'
 import { Matrix } from 'src/editor/math'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
@@ -6,7 +6,7 @@ import { getSelectedNodes } from 'src/editor/y-state/y-state'
 import { MULTI_VALUE } from 'src/global/constant'
 import { cleanObject, iife } from 'src/shared/utils/normal'
 
-function createAllGeometry() {
+function createDesignGeoInfos() {
   return {
     x: 0,
     y: 0,
@@ -23,8 +23,8 @@ function createAllGeometry() {
 }
 
 function createActiveKeys(
-  set: Set<keyof AllGeometry>,
-  keys: (keyof AllGeometry)[] = [],
+  set: Set<keyof DesignGeoInfo>,
+  keys: (keyof DesignGeoInfo)[] = [],
 ) {
   set.clear()
   keys.forEach((key) => set.add(key))
@@ -33,10 +33,11 @@ function createActiveKeys(
 
 const obbKeySet = new Set(['x', 'y', 'width', 'height', 'rotation'])
 
-export type AllGeometry = ReturnType<typeof createAllGeometry>
+export type DesignGeoInfo = ReturnType<typeof createDesignGeoInfos>
+export type DesignGeoInfoWithMatrix = DesignGeoInfo & { matrix: IMatrix }
 
 class DesignGeometryService {
-  currentGeometries = createAllGeometry()
+  currentGeometries = createDesignGeoInfos()
   currentKeys = createActiveKeys(new Set())
   changingKeys = createActiveKeys(new Set())
   isDelta = true
@@ -70,7 +71,7 @@ class DesignGeometryService {
     })
   }
 
-  getGeometryValue(node: V1.Node, key: keyof AllGeometry) {
+  getGeometryValue(node: V1.Node, key: keyof DesignGeoInfo) {
     if (obbKeySet.has(key)) {
       const mrect = getNodeMrect(node)
       return mrect[key as 'x' | 'y' | 'width' | 'height' | 'rotation']
@@ -78,8 +79,21 @@ class DesignGeometryService {
     return T<any>(node)[key]
   }
 
+  private nodeGeoInfoCache = createCache<ID, Partial<DesignGeoInfoWithMatrix>>()
+
+  onStartSetGeometries() {
+    getSelectedNodes().forEach((node) => {
+      const geometries = <Partial<DesignGeoInfoWithMatrix>>{}
+      this.currentKeys.forEach((key) => {
+        geometries[key] = this.getGeometryValue(node, key)
+      })
+      geometries.matrix = node.matrix
+      this.nodeGeoInfoCache.set(node.id, geometries)
+    })
+  }
+
   setGeometries(
-    geometries: Partial<Record<keyof AllGeometry, number>>,
+    geometries: Partial<Record<keyof DesignGeoInfo, number>>,
     options: {
       delta?: boolean
       matrix?: IMatrix
@@ -103,7 +117,11 @@ class DesignGeometryService {
     this.matrix = undefined
   }
 
-  private delta(key: keyof AllGeometry, node: V1.Node) {
+  onEndSetGeometries() {
+    this.nodeGeoInfoCache.clear()
+  }
+
+  private delta(key: keyof DesignGeoInfo, node: V1.Node) {
     const rawDelta = iife(() => {
       if (this.isDelta) return this.currentGeometries[key]
       return this.currentGeometries[key] - T<any>(node)[key]
@@ -115,16 +133,12 @@ class DesignGeometryService {
     return rawDelta
   }
 
-  private deltaRate(key: keyof AllGeometry, node: any) {
+  private deltaRate(key: keyof DesignGeoInfo, node: any) {
     return divide(this.delta(key, node), node[key])
   }
 
   private applyChangeToNode(node: V1.Node) {
-    if (this.matrix) {
-      const matrix = this.matrix.prepend(node.matrix)
-      getNodeMrect(node).matrix = matrix
-      YState.set(`${node.id}.matrix`, matrix.plain())
-    }
+    this.applyMatrixToNode(node)
 
     this.changingKeys.forEach((key) => {
       if (obbKeySet.has(key)) {
@@ -207,6 +221,49 @@ class DesignGeometryService {
         }
       }
     })
+  }
+
+  private applyMatrixToNode(node: V1.Node) {
+    const startMatrix = this.nodeGeoInfoCache.get(node.id)?.matrix
+    if (!this.matrix || !startMatrix) return
+
+    const parentMatrix = this.getParentAccumulatedMatrix(node)
+    // console.log(this.matrix.plain())
+    // console.log(Matrix.of(startMatrix).prepend(parentMatrix).plain())
+    // console.log(
+    //   Matrix.of(this.matrix)
+    //     .prepend(Matrix.of(startMatrix).prepend(parentMatrix))
+    //     .plain(),
+    // )
+    const selfMatrix = Matrix.of(this.matrix)
+      .prepend(Matrix.of(startMatrix).prepend(parentMatrix))
+      .divide(parentMatrix)
+    getNodeMrect(node).matrix = selfMatrix.plain()
+    YState.set(`${node.id}.matrix`, selfMatrix.plain())
+  }
+
+  private getParentAccumulatedMatrix(node: V1.Node) {
+    const matrix = Matrix.identity()
+    const parents: V1.Node[] = []
+    let parent = node
+    while (parent?.parentId) {
+      parent = YState.find<V1.Node>(parent.parentId)
+      parents.push(parent)
+    }
+    parents.reverse().forEach((parent) => {
+      if (parent?.matrix) matrix.append(parent.matrix)
+    })
+    return matrix
+  }
+
+  private getParentAccumulatedMatrix2(node: V1.Node) {
+    const matrix = Matrix.identity()
+    let parent = node
+    while (parent?.parentId) {
+      parent = YState.find<V1.Node>(parent.parentId)
+      if (parent?.matrix) matrix.prepend(parent.matrix)
+    }
+    return matrix
   }
 }
 

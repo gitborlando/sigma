@@ -42,27 +42,31 @@ class StageTransformerService {
     const startAABB = this.mrect.aabb
     const startMatrix = this.mrect.matrix
 
-    StageDrag.start()
-      .onMove(({ shift }) => {
-        this.isMoving = true
+    DesignGeometry.onStartSetGeometries()
 
-        const aabb = AABB.shift(startAABB, shift)
-        const snapDelta = XY.$(
-          snapGridRound(aabb.minX) - aabb.minX,
-          snapGridRound(aabb.minY) - aabb.minY,
-        )
+    StageDrag.onMove(({ shift }) => {
+      this.isMoving = true
 
-        const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)
-        this.diffMatrix = newMatrix.divide(startMatrix)
+      const aabb = AABB.shift(startAABB, shift)
+      const snapDelta = XY.$(
+        snapGridRound(aabb.minX) - aabb.minX,
+        snapGridRound(aabb.minY) - aabb.minY,
+      )
 
-        DesignGeometry.setGeometries({}, { matrix: this.diffMatrix.plain() })
-      })
+      const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)
+      this.diffMatrix = newMatrix.divide(startMatrix)
+
+      DesignGeometry.setGeometries({}, { matrix: this.diffMatrix.plain() })
+    })
       .onDestroy(({ moved }) => {
         this.isMoving = false
-        if (!moved) return
+        DesignGeometry.onEndSetGeometries()
 
-        YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
+        if (moved) {
+          YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
+        }
       })
+      .start()
   }
 
   onDragLine2(
