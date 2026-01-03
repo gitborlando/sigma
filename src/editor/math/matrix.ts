@@ -129,24 +129,13 @@ export class Matrix {
     return Matrix.from(tuple)
   }
 
-  applyXY = (xy: IXY, isInvert?: 'invert') => {
+  applyXY = (xy: IXY, isInvert?: boolean) => {
     const { x, y } = xy
-    if (isInvert) {
-      const { a, b, c, d, tx, ty } = this
-      const invDet = 1 / (a * d - b * c)
-      const invA = d * invDet
-      const invB = -b * invDet
-      const invC = -c * invDet
-      const invD = a * invDet
-      const invTx = (c * ty - d * tx) * invDet
-      const invTy = (b * tx - a * ty) * invDet
-      return XY.$(invA * x + invC * y + invTx, invB * x + invD * y + invTy)
-    }
-    const { a, b, c, d, tx, ty } = this
+    const { a, b, c, d, tx, ty } = isInvert ? this.invert() : this
     return XY.$(a * x + c * y + tx, b * x + d * y + ty)
   }
 
-  applyAABB = (aabb: AABB, isInvert?: 'invert') => {
+  applyAABB = (aabb: AABB, isInvert?: boolean) => {
     const { minX, minY, maxX, maxY } = aabb
     const xy1 = this.applyXY(XY.$(minX, minY), isInvert)
     const xy2 = this.applyXY(XY.$(maxX, minY), isInvert)
@@ -161,11 +150,15 @@ export class Matrix {
   }
 
   invertXY = (xy: IXY) => {
-    return this.applyXY(xy, 'invert')
+    return this.applyXY(xy, true)
   }
 
   invertAABB = (aabb: AABB) => {
-    return this.applyAABB(aabb, 'invert')
+    return this.applyAABB(aabb, true)
+  }
+
+  static identity() {
+    return new Matrix(1, 0, 0, 1, 0, 0)
   }
 
   static of(matrix: IMatrix) {
@@ -173,18 +166,8 @@ export class Matrix {
   }
 
   static from(matrix: IMatrixTuple) {
-    return new Matrix(
-      matrix[0],
-      matrix[1],
-      matrix[2],
-      matrix[3],
-      matrix[4],
-      matrix[5],
-    )
-  }
-
-  static identity() {
-    return new Matrix(1, 0, 0, 1, 0, 0)
+    const [a, b, c, d, tx, ty] = matrix
+    return new Matrix(a, b, c, d, tx, ty)
   }
 
   static isFlipped(matrix: IMatrix) {

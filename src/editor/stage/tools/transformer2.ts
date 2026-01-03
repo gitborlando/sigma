@@ -29,29 +29,16 @@ class StageTransformerService {
   setup(selectNodes: V1.Node[]) {
     if (selectNodes.length === 1) {
       const matrix = SchemaHelper.getSceneMatrix(selectNodes[0])
-      this.mrect = MRect.of({
-        width: selectNodes[0].width,
-        height: selectNodes[0].height,
-        matrix,
-      })
+      this.mrect = MRect.fromRect(selectNodes[0], matrix)
       return this.mrect
     } else {
       let aabb = new AABB(0, 0, 0, 0)
       selectNodes.forEach((node) => {
         const matrix = SchemaHelper.getSceneMatrix(node)
-        const mrect = MRect.of({
-          width: node.width,
-          height: node.height,
-          matrix,
-        })
+        const mrect = MRect.fromRect(node, matrix)
         aabb = AABB.merge([aabb, mrect.aabb])
       })
-      const rect = AABB.rect(aabb)
-      this.mrect = MRect.of({
-        width: rect.width,
-        height: rect.height,
-        matrix: Matrix.identity().plain(),
-      })
+      this.mrect = MRect.fromRect(AABB.rect(aabb), Matrix.identity())
       return this.mrect
     }
   }

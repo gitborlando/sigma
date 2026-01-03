@@ -1,7 +1,7 @@
 import { AABB } from 'src/editor/math/aabb'
 import { Angle } from 'src/editor/math/angle'
 import { IMatrix, Matrix } from 'src/editor/math/matrix'
-import { IXY } from 'src/editor/math/types'
+import { IRect, IXY } from 'src/editor/math/types'
 import { XY } from 'src/editor/math/xy'
 
 export type IMRect = {
@@ -177,8 +177,8 @@ export class MRect {
     const newHeight = XY.distance(p1, p2)
     const scaleX = newWidth / this.width
     const scaleY = newHeight / this.height
-    const scaleMatrix = Matrix.identity().scale(scaleX, scaleY).invert()
-    const newMatrix = Matrix.of(this.matrix).append(scaleMatrix).plain()
+    const scaleMatrix = Matrix.identity().scale(scaleX, scaleY)
+    const newMatrix = Matrix.of(this.matrix).divide(scaleMatrix).plain()
     this.width = newWidth
     this.height = newHeight
     this.matrix = newMatrix
@@ -209,11 +209,8 @@ export class MRect {
     return new MRect(mrect.width, mrect.height, Matrix.of(mrect.matrix).plain())
   }
 
-  static inheritMatrix(mrect: IMRect, matrix: IMatrix) {
-    return MRect.of({
-      width: mrect.width,
-      height: mrect.height,
-      matrix: Matrix.of(matrix).append(mrect.matrix).plain(),
-    })
+  static fromRect(rect: IRect, matrix: IMatrix) {
+    const { width, height } = rect
+    return new MRect(width, height, Matrix.of(matrix).plain())
   }
 }

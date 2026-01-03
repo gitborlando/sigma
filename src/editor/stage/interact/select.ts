@@ -170,7 +170,10 @@ class StageSelectService {
       }
 
       const forwardMatrix = forwardRef?.matrix ?? Matrix.identity()
-      const mrect = MRect.inheritMatrix(elem.mrect, forwardMatrix)
+      const mrect = MRect.fromRect(
+        elem.mrect,
+        Matrix.of(forwardMatrix).append(elem.mrect.matrix).plain(),
+      )
       if (hitTest(mrect)) {
         YUndo.untrack(() => YClients.select(id))
         props.matrix = Matrix.of(mrect.matrix)
