@@ -170,6 +170,11 @@ export class Matrix {
     return new Matrix(a, b, c, d, tx, ty)
   }
 
+  static plain(matrix: IMatrix) {
+    const { a, b, c, d, tx, ty } = matrix
+    return { a, b, c, d, tx, ty }
+  }
+
   static isFlipped(matrix: IMatrix) {
     return matrix.a * matrix.d - matrix.b * matrix.c < 0
   }

@@ -4,7 +4,7 @@ import { IMatrix, Matrix } from 'src/editor/math/matrix'
 import { IRect, IXY } from 'src/editor/math/types'
 import { XY } from 'src/editor/math/xy'
 
-export type IMRect = {
+export interface IMRect {
   width: number
   height: number
   matrix: IMatrix
@@ -188,17 +188,15 @@ export class MRect {
   from(mrect: IMRect) {
     this._width = mrect.width
     this._height = mrect.height
-    this.matrix = Matrix.of(mrect.matrix).plain()
+    this.matrix = Matrix.plain(mrect.matrix)
     this.expired()
     return this
   }
 
   plain() {
-    return {
-      width: this.width,
-      height: this.height,
-      matrix: Matrix.of(this.matrix).plain(),
-    }
+    const { width, height } = this
+    const matrix = Matrix.plain(this.matrix)
+    return { width, height, matrix }
   }
 
   static identity(width = 0, height = 0) {
@@ -206,11 +204,11 @@ export class MRect {
   }
 
   static of(mrect: IMRect) {
-    return new MRect(mrect.width, mrect.height, Matrix.of(mrect.matrix).plain())
+    return new MRect(mrect.width, mrect.height, Matrix.plain(mrect.matrix))
   }
 
   static fromRect(rect: IRect, matrix: IMatrix) {
     const { width, height } = rect
-    return new MRect(width, height, Matrix.of(matrix).plain())
+    return new MRect(width, height, Matrix.plain(matrix))
   }
 }
