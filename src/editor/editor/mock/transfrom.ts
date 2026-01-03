@@ -24,10 +24,16 @@ export function mock() {
   // SchemaCreator.addChild(frame, line)
 
   const rect = SchemaCreator.rect({
-    ...MRect.identity(60, 40).plain(),
+    ...MRect.identity(60, 40).shift(XY.$(100, 100)).plain(),
   })
   SchemaCreator.addToSchema(schema, rect)
   SchemaCreator.addChild(frame, rect)
+
+  const rect2 = SchemaCreator.rect({
+    ...MRect.identity(60, 40).shift(XY.$(200, 200)).plain(),
+  })
+  SchemaCreator.addToSchema(schema, rect2)
+  SchemaCreator.addChild(frame, rect2)
 
   // const polygon = SchemaCreator.polygon({
   //   x: 300,

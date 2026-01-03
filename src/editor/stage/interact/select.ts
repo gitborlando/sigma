@@ -1,26 +1,21 @@
 import { firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
-import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
-import { observable } from 'mobx'
 import { EditorCommand } from 'src/editor/editor/command'
-import { MRect, OBB } from 'src/editor/math'
+import { AABB, type IRect, MRect } from 'src/editor/math'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
-import { Schema } from 'src/editor/schema/schema'
-import { StageTransformer } from 'src/editor/stage/tools/transformer'
+import { StageTransformer2 } from 'src/editor/stage/tools/transformer2'
 import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { StageDrag } from 'src/global/event/drag'
-import { type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 
-@autobind
 class StageSelectService {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
   @observable hoverId?: string
@@ -49,7 +44,7 @@ class StageSelectService {
     if (!this.hoverId) return
 
     const hoverSelected = OperateNode.selectIds.value.has(this.hoverId)
-    const hoverNode = Schema.find(this.hoverId)
+    const hoverNode = YState.find(this.hoverId)
 
     if (hoverSelected) {
       if (hoverNode.type === 'text') {
@@ -77,7 +72,7 @@ class StageSelectService {
     }
 
     this.onMousedownSelect()
-    StageTransformer.move(e.hostEvent)
+    StageTransformer2.move(e.hostEvent)
   }
 
   private onContextMenu(e: MouseEvent) {
@@ -143,16 +138,15 @@ class StageSelectService {
   }
 
   private onDeepSelect() {
-    const hoverNode = Schema.find(this.hoverId!)
+    const hoverNode = YState.find(this.hoverId!)
     if (hoverNode?.type !== 'text') return
     OperateText.intoEditing.dispatch(hoverNode.id)
   }
 
   private onMarqueeSelect() {
-    let marqueeOBB = OBB.identity()
     const marqueeAABB = new AABB(0, 0, 0, 0)
 
-    const hitTestMrect = (mrect: MRect) => {
+    const hitTest = (mrect: MRect) => {
       if (!AABB.collide(marqueeAABB, mrect.aabb)) return false
       return AABB.collide(
         Matrix.of(mrect.matrix).invertAABB(marqueeAABB),
@@ -160,23 +154,29 @@ class StageSelectService {
       )
     }
 
-    const traverseTest = ({ id, node, childIds, depth }: SchemaUtilTraverseData) => {
+    const traverseTest = (props: SchemaUtilTraverseData) => {
+      const { id, childIds, depth, forwardRef } = props
       const elem = StageScene.findElem(id)
+
       if (!elem.visible) return false
 
       if (childIds?.length && depth === 0) {
-        if (AABB.include(marqueeOBB.aabb, elem.aabb) === 1) {
+        if (AABB.include(marqueeAABB, elem.aabb) === 1) {
           YUndo.untrack(() => YClients.select(id))
-          // UILeftPanelLayer.needExpandIds.add(id)
           return false
         }
+        props.matrix = Matrix.of(elem.mrect.matrix)
         return
       }
-      if (/* hitTest(elem.obb) */ hitTestMrect(elem.mrect)) {
+
+      const forwardMatrix = forwardRef?.matrix ?? Matrix.identity()
+      const mrect = MRect.inheritMatrix(elem.mrect, forwardMatrix)
+      if (hitTest(mrect)) {
         YUndo.untrack(() => YClients.select(id))
-        // UILeftPanelLayer.needExpandIds.add(node.parentId)
+        props.matrix = Matrix.of(mrect.matrix)
         return
       }
+
       return false
     }
 
@@ -189,7 +189,6 @@ class StageSelectService {
     StageDrag.onMove(({ marquee }) => {
       this.marquee = marquee
       AABB.updateFromRect(marqueeAABB, marquee)
-      marqueeOBB = OBB.fromRect(this.marquee)
       this.clearSelect()
       runInAction(() => traverse())
     })
@@ -198,10 +197,7 @@ class StageSelectService {
         YClients.afterSelect.dispatch()
 
         if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
-          YUndo.track({
-            type: 'client',
-            description: t('selected nodes via marquee'),
-          })
+          YUndo.track2('client', t('selected nodes via marquee'))
         }
       })
       .start()
@@ -221,4 +217,4 @@ class StageSelectService {
   }
 }
 
-export const StageSelect = makeObservable(new StageSelectService())
+export const StageSelect = autoBind(makeObservable(new StageSelectService()))

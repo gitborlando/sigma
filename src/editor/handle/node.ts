@@ -92,7 +92,7 @@ class HandleNodeService {
     const newSelectIds = <ID[]>[]
     const traverse = SchemaHelper.createTraverse({
       callback: (props) => {
-        const { node, parent, upLevelRef, depth } = props
+        const { node, parent, forwardRef: upLevelRef, depth } = props
         const newParent = upLevelRef?.newNode || parent
         const newNode = SchemaCreator.clone(node)
         newNode.name = SchemaCreator.createNodeName(node.type)

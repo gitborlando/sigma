@@ -29,13 +29,31 @@ class StageTransformerService {
   setup(selectNodes: V1.Node[]) {
     if (selectNodes.length === 1) {
       const matrix = SchemaHelper.getSceneMatrix(selectNodes[0])
-      return this.mrect.from({
+      this.mrect = MRect.of({
         width: selectNodes[0].width,
         height: selectNodes[0].height,
         matrix,
       })
+      return this.mrect
+    } else {
+      let aabb = new AABB(0, 0, 0, 0)
+      selectNodes.forEach((node) => {
+        const matrix = SchemaHelper.getSceneMatrix(node)
+        const mrect = MRect.of({
+          width: node.width,
+          height: node.height,
+          matrix,
+        })
+        aabb = AABB.merge([aabb, mrect.aabb])
+      })
+      const rect = AABB.rect(aabb)
+      this.mrect = MRect.of({
+        width: rect.width,
+        height: rect.height,
+        matrix: Matrix.identity().plain(),
+      })
+      return this.mrect
     }
-    return this.mrect
   }
 
   move(e: MouseEvent) {
@@ -66,7 +84,7 @@ class StageTransformerService {
           YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
         }
       })
-      .start()
+      .start(e)
   }
 
   onDragLine2(

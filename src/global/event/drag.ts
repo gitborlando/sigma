@@ -26,7 +26,6 @@ export class DragHelper {
   private shift = XY.$(0, 0)
   private delta = XY.$(0, 0)
   private marquee = { x: 0, y: 0, width: 0, height: 0 }
-  private moving = false
   private movePending = false
   private isInfinity = false
   private needThrottle = false
@@ -47,10 +46,6 @@ export class DragHelper {
     this.needThrottle = options?.useRafThrottle ?? true
     this.processXY = options?.processXY ?? this.processXY
     this.processShift = options?.processShift ?? this.processShift
-  }
-
-  get isMoving() {
-    return this.moving
   }
 
   needInfinity = () => {
@@ -91,15 +86,14 @@ export class DragHelper {
       if (this.movePending) return
       this.movePending = true
 
-      const throttleFunc = this.needThrottle ? requestAnimationFrame : iife
+      const throttle = this.needThrottle ? requestAnimationFrame : iife
 
-      throttleFunc(() => {
+      throttle(() => {
         this.movePending = false
 
         this.current = XY.of(this.current).plus(this.delta)
         this.shift = XY.of(this.current).minus(this.origin)
         this.marquee = this.calculateMarquee()
-        this.moving = true
 
         this.moveCallback?.({
           current: XY.of(this.processXY(this.current)).$(),
@@ -174,7 +168,6 @@ export class DragHelper {
     this.shift = XY.$(0, 0)
     this.delta = XY.$(0, 0)
     this.marquee = { x: 0, y: 0, width: 0, height: 0 }
-    this.moving = false
     this.movePending = false
     this.isInfinity = false
     this.moveCallback = undefined

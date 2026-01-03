@@ -190,8 +190,8 @@ class OperateGeometryService {
       YState.set(`${node.id}.x`, newXY.x)
       YState.set(`${node.id}.y`, newXY.y)
     } else {
-      let upLevelRef = traverseData.upLevelRef!
-      while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
+      let upLevelRef = traverseData.forwardRef!
+      while (upLevelRef.forwardRef) upLevelRef = upLevelRef.forwardRef
       const ancestorCenter = getNodeCenterXY(upLevelRef.node)
       const newCenter = XY.of(centerXY).rotate(
         ancestorCenter,

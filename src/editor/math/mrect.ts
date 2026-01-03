@@ -208,4 +208,12 @@ export class MRect {
   static of(mrect: IMRect) {
     return new MRect(mrect.width, mrect.height, Matrix.of(mrect.matrix).plain())
   }
+
+  static inheritMatrix(mrect: IMRect, matrix: IMatrix) {
+    return MRect.of({
+      width: mrect.width,
+      height: mrect.height,
+      matrix: Matrix.of(matrix).append(mrect.matrix).plain(),
+    })
+  }
 }

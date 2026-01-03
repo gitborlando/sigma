@@ -6,11 +6,11 @@ export type SchemaUtilTraverseData = {
   node: V1.Node
   index: number
   depth: number
-  childIds: string[] | undefined
+  childIds?: string[]
   parent: V1.NodeParent
   ancestors: string[]
   abort: AbortController
-  upLevelRef: SchemaUtilTraverseData | undefined
+  forwardRef?: SchemaUtilTraverseData
   [key: string & {}]: any
 }
 
@@ -102,7 +102,7 @@ export class SchemaHelper {
     const traverse = (
       ids: string[],
       depth: number,
-      upLevelRef?: SchemaUtilTraverseData,
+      forwardRef?: SchemaUtilTraverseData,
     ) => {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
@@ -112,9 +112,9 @@ export class SchemaHelper {
 
         const childIds = 'childIds' in node ? node.childIds : undefined
         const parent = T<V1.NodeParent>(
-          upLevelRef?.node || YState.find<V1.NodeParent>(node.parentId),
+          forwardRef?.node || YState.find<V1.NodeParent>(node.parentId),
         )
-        const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []
+        const ancestors = forwardRef ? [...forwardRef.ancestors, forwardRef.id] : []
         const props = {
           id,
           node,
@@ -122,7 +122,7 @@ export class SchemaHelper {
           childIds,
           depth,
           abort,
-          upLevelRef,
+          forwardRef,
           parent,
           ancestors,
         }

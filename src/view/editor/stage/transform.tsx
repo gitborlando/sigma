@@ -1,10 +1,7 @@
-import { isLeftMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
-import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
-import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageMove } from 'src/editor/stage/interact/move'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageTransformer2 } from 'src/editor/stage/tools/transformer2'
@@ -27,9 +24,10 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   StageTransformer.isSelectOnlyLine = isSelectOnlyLine
 
   transformOBB = useMemo(() => StageTransformer.calcOBB(selectNodes), [selectNodes])
+  mrect = StageTransformer2.mrect
 
-  mrect = useMemo(() => {
-    return StageTransformer2.setup(selectNodes)
+  useLayoutEffect(() => {
+    StageTransformer2.setup(selectNodes)
   }, [selectNodes])
 
   const node = SchemaCreator.rect({
@@ -39,13 +37,12 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   })
 
   const mousedown = (e: ElemMouseEvent) => {
-    if (StageInteract.interaction !== 'select') return
-    StageSurface.disablePointEvent(true)
-
-    if (isLeftMouse(e.hostEvent)) {
-      e.stopPropagation()
-      StageTransformer2.move(e.hostEvent)
-    }
+    // if (StageInteract.interaction !== 'select') return
+    // StageSurface.disablePointEvent(true)
+    // if (isLeftMouse(e.hostEvent)) {
+    //   e.stopPropagation()
+    //   StageTransformer2.move(e.hostEvent)
+    // }
   }
 
   const [p0, p1, p2, p3] = [

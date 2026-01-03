@@ -228,16 +228,19 @@ class DesignGeometryService {
     if (!this.matrix || !startMatrix) return
 
     const parentMatrix = this.getParentAccumulatedMatrix(node)
-    // console.log(this.matrix.plain())
-    // console.log(Matrix.of(startMatrix).prepend(parentMatrix).plain())
-    // console.log(
-    //   Matrix.of(this.matrix)
-    //     .prepend(Matrix.of(startMatrix).prepend(parentMatrix))
-    //     .plain(),
-    // )
-    const selfMatrix = Matrix.of(this.matrix)
-      .prepend(Matrix.of(startMatrix).prepend(parentMatrix))
-      .divide(parentMatrix)
+    const m2 = Matrix.of({
+      a: parentMatrix.a,
+      b: parentMatrix.b,
+      c: parentMatrix.c,
+      d: parentMatrix.d,
+      tx: 0,
+      ty: 0,
+    })
+    let shift = XY.$(this.matrix.tx, this.matrix.ty)
+    shift = m2.invertXY(shift)
+    const m3 = Matrix.of(this.matrix).divide(m2)
+    console.log('m3: ', m3.plain())
+    const selfMatrix = Matrix.of(startMatrix).append(m3)
     getNodeMrect(node).matrix = selfMatrix.plain()
     YState.set(`${node.id}.matrix`, selfMatrix.plain())
   }
