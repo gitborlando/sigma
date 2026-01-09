@@ -40,21 +40,6 @@ export class Elem {
     StageSurface.collectDirty(this)
   }
 
-  private _obb = OBB.identity()
-  private memoObb = memorized(() => {
-    return this._obb.updateFromRect(this.node, this.node.rotation)
-  })
-  get obb() {
-    if (!this.node) return this._obb
-    return this.memoObb([
-      this.node.x,
-      this.node.y,
-      this.node.width,
-      this.node.height,
-      this.node.rotation,
-    ])
-  }
-
   private _mrect = MRect.identity()
   private memoMRect = memorized(() => {
     return this._mrect.clone(this.node)
@@ -85,7 +70,6 @@ export class Elem {
 
   getDirtyRect() {
     if (!this.node) return null
-
     return this.aabb
   }
 

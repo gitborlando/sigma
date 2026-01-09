@@ -445,10 +445,6 @@ export class StageSurfaceService {
       if (xy) {
         if (elem.node?.matrix) {
           xy = Matrix.of(elem.node.matrix).invertXY(xy)
-        } else {
-          xy = XY.of(this.eventXY)
-            .rotate(elem.obb.xy, -elem.obb.rotation)
-            .minus(elem.obb.xy)
         }
 
         func({ elem, capture: true, stopped, stopPropagation, hitList, xy })

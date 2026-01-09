@@ -212,7 +212,7 @@ class OperateNodeService {
     }
     const elem = StageScene.findElem(this.datumId.value)
     if (!elem) return (this.datumXY = XY.$(0, 0))
-    this.datumXY = XY.$(elem.obb.aabb.minX, elem.obb.aabb.minY)
+    // this.datumXY = XY.$(elem.obb.aabb.minX, elem.obb.aabb.minY)
   }
 }
 

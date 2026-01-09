@@ -369,7 +369,7 @@ class ElemDrawerService {
   }
 
   private updateHitTest = () => {
-    const { width, height } = this.elem.obb
+    const { width, height } = this.elem.mrect
 
     switch (this.node.type) {
       case 'frame':
