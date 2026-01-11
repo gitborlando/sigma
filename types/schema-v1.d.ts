@@ -100,15 +100,16 @@ namespace V1 {
     }
 
   type Point = {
+    id: string
     type: 'point'
     symmetric: 'angle' | 'complete' | 'none'
     x: number
     y: number
     radius: number
-    handleL?: XY
-    handleR?: XY
-    endPath?: boolean
-    startPath?: boolean
+    in?: XY
+    out?: XY
+    isStart?: boolean
+    isEnd?: boolean
   }
 
   type Vector = Rectangle | Ellipse | Polygon | Star | Line | Path

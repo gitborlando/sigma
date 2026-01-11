@@ -175,42 +175,42 @@ class DesignGeometryService {
     }
   }
 
-  private patchChangeToVectorPoints(id: string) {
-    const node = YState.find<V1.Vector>(id)
-    if (!node.points) return
+  // private patchChangeToVectorPoints(id: string) {
+  //   const node = YState.find<V1.Vector>(id)
+  //   if (!node.points) return
 
-    node.points.forEach((point, i) => {
-      if (this.changingKeys.has('width')) {
-        const deltaRate = this.deltaRate('width', node)
-        const newX = point.x * (1 + deltaRate)
-        YState.set(`${node.id}.points.${i}.x`, newX)
+  //   node.points.forEach((point, i) => {
+  //     if (this.changingKeys.has('width')) {
+  //       const deltaRate = this.deltaRate('width', node)
+  //       const newX = point.x * (1 + deltaRate)
+  //       YState.set(`${node.id}.points.${i}.x`, newX)
 
-        if (point.handleL) {
-          const handleLX = point.handleL.x * (1 + deltaRate)
-          YState.set(`${node.id}.points.${i}.handleL.x`, handleLX)
-        }
-        if (point.handleR) {
-          const handleRX = point.handleR.x * (1 + deltaRate)
-          YState.set(`${node.id}.points.${i}.handleR.x`, handleRX)
-        }
-      }
+  //       if (point.handleL) {
+  //         const handleLX = point.handleL.x * (1 + deltaRate)
+  //         YState.set(`${node.id}.points.${i}.handleL.x`, handleLX)
+  //       }
+  //       if (point.handleR) {
+  //         const handleRX = point.handleR.x * (1 + deltaRate)
+  //         YState.set(`${node.id}.points.${i}.handleR.x`, handleRX)
+  //       }
+  //     }
 
-      if (this.changingKeys.has('height')) {
-        const deltaRate = this.deltaRate('height', node)
-        const newY = point.y * (1 + deltaRate)
-        YState.set(`${node.id}.points.${i}.y`, newY)
+  //     if (this.changingKeys.has('height')) {
+  //       const deltaRate = this.deltaRate('height', node)
+  //       const newY = point.y * (1 + deltaRate)
+  //       YState.set(`${node.id}.points.${i}.y`, newY)
 
-        if (point.handleL) {
-          const handleLY = point.handleL.y * (1 + deltaRate)
-          YState.set(`${node.id}.points.${i}.handleL.y`, handleLY)
-        }
-        if (point.handleR) {
-          const handleRY = point.handleR.y * (1 + deltaRate)
-          YState.set(`${node.id}.points.${i}.handleR.y`, handleRY)
-        }
-      }
-    })
-  }
+  //       if (point.handleL) {
+  //         const handleLY = point.handleL.y * (1 + deltaRate)
+  //         YState.set(`${node.id}.points.${i}.handleL.y`, handleLY)
+  //       }
+  //       if (point.handleR) {
+  //         const handleRY = point.handleR.y * (1 + deltaRate)
+  //         YState.set(`${node.id}.points.${i}.handleR.y`, handleRY)
+  //       }
+  //     }
+  //   })
+  // }
 }
 
 export const DesignGeometry = autoBind(new DesignGeometryService())
