@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
+import { YSync } from 'src/editor/y-state/y-sync'
 import Immut, { ImmutPatch } from 'src/utils/immut/immut'
 import { bind } from 'src/utils/immut/immut-y'
 import * as Y from 'yjs'
@@ -45,6 +46,8 @@ class YStateService {
 
   async initSchema(fileId: string, mockSchema?: V1.Schema) {
     this.doc = new Y.Doc()
+
+    YSync.init(fileId, this.doc)
 
     this.immut.state = mockSchema!
     bind(this.immut, this.doc.getMap('schema'))
