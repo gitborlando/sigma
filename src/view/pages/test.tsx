@@ -9,6 +9,15 @@ export const Test = () => {
   )
 }
 
+const Comp2: FC<{}> = observer(({}) => {
+  useEffect(() => {
+    return () => {
+      console.log('Comp2 unmounted')
+    }
+  }, [])
+  return <G></G>
+})
+
 const TimeRecordComp: FC<{}> = observer(({}) => {
   useEffect(() => {
     recordTime(
@@ -28,6 +37,16 @@ const TimeRecordComp: FC<{}> = observer(({}) => {
           test1_dynamic()
         })
         logTime('createRegularPolygon2')
+      },
+      10,
+    )
+    recordTime(
+      'test3',
+      (logTime, range) => {
+        range(1, () => {
+          test1_structured()
+        })
+        logTime('createRegularPolygon3')
       },
       10,
     )
@@ -74,12 +93,43 @@ function test1_dynamic() {
   const points: any[] = []
 
   for (let i = 0; i < COUNT; i++) {
-    points.push({
-      x: Math.random(),
-      y: Math.random(),
-      vx: 0.01,
-      vy: 0.01,
-    })
+    const obj = {}
+    obj.x = Math.random()
+    obj.y = Math.random()
+    obj.vx = 0.01
+    obj.vy = 0.01
+    points.push(obj)
+  }
+
+  // 2. 核心逻辑：对象 + 属性访问
+  function update() {
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i]
+      p.x += p.vx
+      p.y += p.vy
+    }
+  }
+
+  update()
+}
+
+function test1_structured() {
+  const COUNT = 1_000_000
+
+  // 1. 使用对象数组（AoS）
+  const points: any[] = []
+
+  class Point {
+    constructor(
+      public x: number,
+      public y: number,
+      public vx: number,
+      public vy: number,
+    ) {}
+  }
+
+  for (let i = 0; i < COUNT; i++) {
+    points.push(new Point(Math.random(), Math.random(), 0.01, 0.01))
   }
 
   // 2. 核心逻辑：对象 + 属性访问
