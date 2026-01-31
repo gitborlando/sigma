@@ -4,7 +4,7 @@ import { Uploader } from 'src/global/upload'
 import { suspense } from 'src/view/component/suspense'
 import { suspend } from 'suspend-react'
 
-export const PickerImageComp: FC<{ fill: V1.FillImage }> = memo(({ fill }) => {
+export const PickerImageComp: FC<{ fill: S.FillImage }> = memo(({ fill }) => {
   const uploadImage = async () => {
     const file = await Uploader.open({ accept: 'image/*' })
     const url = await ImgManager.uploadLocal(file!)

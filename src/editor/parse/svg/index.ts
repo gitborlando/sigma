@@ -51,7 +51,7 @@
 //     this.camelCaseProps(svgNode.properties)
 //     this.inheritParentProps(svgNode.properties, parentSvgNode.properties)
 
-//     let node!: V1.Node
+//     let node!: S.Node
 //     const { tagName, properties, children } = svgNode
 //     const { x, y, cx, cy, r, width, height } = properties
 

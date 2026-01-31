@@ -10,6 +10,7 @@ import {
   createTextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
+import { createTraverser } from 'src/editor/utils/traverser'
 import { Raf, getTime } from 'src/shared/utils/normal'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
@@ -51,7 +52,7 @@ export class StageSurfaceService {
         this.disposer.add(this.onResize(), this.onZoomMove(), this.onPointerEvents())
         this.requestRenderTopCanvas()
       }),
-      this.devShowDirtyRect(),
+      this.DEV_showDirtyRect(),
       this.dispose,
     )
   }
@@ -202,7 +203,7 @@ export class StageSurfaceService {
     if (!this.fullRenderElemsMinHeap.length) return
 
     const startTime = getTime()
-    while (getTime() - startTime <= 15) {
+    while (getTime() - startTime <= 4) {
       const elem = this.fullRenderElemsMinHeap.pop()?.elem
       elem?.traverseDraw()
     }
@@ -282,22 +283,23 @@ export class StageSurfaceService {
     let dirtyArea = AABB.merge(this.dirtyRects)
     let needReTest = true
 
-    const traverse = (elem: Elem) => {
-      if (!elem.visible) return
-      if (!AABB.collide(dirtyArea, elem.aabb)) return
+    const traverser = createTraverser<Elem>({
+      enter: (elem) => {
+        if (!elem.visible) return false
+        if (!AABB.collide(dirtyArea, elem.aabb)) return false
 
-      if (AABB.include(dirtyArea, elem.aabb) !== 1) {
-        dirtyArea = AABB.merge([dirtyArea, elem.aabb])
-        needReTest = true
-      }
-      reRenderElems.add(elem)
-      elem.children.forEach(traverse)
-    }
+        if (AABB.include(dirtyArea, elem.aabb) !== 1) {
+          dirtyArea = AABB.merge([dirtyArea, elem.aabb])
+          needReTest = true
+        }
+        reRenderElems.add(elem)
+      },
+    })
 
     while (needReTest) {
       needReTest = false
       reRenderElems.clear()
-      StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
+      traverser.walk(StageScene.sceneElems)
     }
 
     this.ctxSaveRestore(() => {
@@ -305,7 +307,7 @@ export class StageSurfaceService {
       const { minX, minY, maxX, maxY } = dirtyArea
       this.ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
       this.dirtyRects.clear()
-      this.devDirtyArea = dirtyArea
+      this.DEV_dirtyArea = dirtyArea
     })
 
     this.ctxSaveRestore(() => {
@@ -313,17 +315,17 @@ export class StageSurfaceService {
     })
   }
 
-  private devDirtyArea?: AABB
+  private DEV_dirtyArea?: AABB
 
-  private devShowDirtyRect() {
+  private DEV_showDirtyRect() {
     return this.onRenderTopCanvas.hook(() => {
       if (!getEditorSetting().showDirtyRect) return
 
       this.ctxSaveRestore((ctx) => {
-        if (!this.devDirtyArea) return
+        if (!this.DEV_dirtyArea) return
 
         const path2d = new Path2D()
-        const { minX, minY, maxX, maxY } = this.devDirtyArea
+        const { minX, minY, maxX, maxY } = this.DEV_dirtyArea
         path2d.rect(minX, minY, maxX - minX, maxY - minY)
         ctx.lineWidth = 2 / getZoom()
         ctx.strokeStyle = rgba(0, 255, 100, 1)
@@ -384,10 +386,6 @@ export class StageSurfaceService {
         () => this.requestRender('firstFullRender'),
       ),
     )
-  }
-
-  testVisible = (aabb: AABB) => {
-    return AABB.collide(aabb, StageViewport.sceneAABB)
   }
 
   getVisualSize = (aabb: AABB) => {

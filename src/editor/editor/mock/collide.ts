@@ -1,7 +1,7 @@
 import { SchemaCreator } from 'src/editor/schema/creator'
 
 export function mockCollide() {
-  const schema = <V1.Schema>{}
+  const schema = <S.Schema>{}
 
   const meta = SchemaCreator.meta()
   const page = SchemaCreator.page()

@@ -50,7 +50,7 @@ class EditorCommandManager {
       {
         name: sentence(t('verb.delete'), t('noun.page')),
         callback: ({ id }: { id: ID }) => {
-          HandlePage.removePage(YState.find<V1.Page>(id))
+          HandlePage.removePage(YState.find<S.Page>(id))
         },
       },
     ]
@@ -93,7 +93,7 @@ class EditorCommandManager {
           name: sentence(t('verb.print'), 'schema'),
           callback: () => {
             getSelectIdList().forEach((id) => {
-              const node = YState.find<V1.SchemaItem>(id)
+              const node = YState.find<S.SchemaItem>(id)
               console.log(node)
             })
           },

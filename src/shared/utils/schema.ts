@@ -3,11 +3,11 @@ import { getSelectPageId } from 'src/editor/y-state/y-clients'
 
 export type ITraverseData = {
   id: ID
-  node: V1.Node
+  node: S.Node
   index: number
   depth: number
   childIds: string[] | undefined
-  parent: V1.NodePareent
+  parent: S.NodePareent
   ancestors: string[]
   abort: AbortController
   upLevelRef: ITraverseData | undefined
@@ -19,13 +19,13 @@ export class SchemaUtil {
   static isPageById(id: ID) {
     return id.startsWith('page_')
   }
-  static is<T extends V1.SchemaItem>(
-    item: V1.SchemaItem,
-    type: V1.SchemaItem['type'],
+  static is<T extends S.SchemaItem>(
+    item: S.SchemaItem,
+    type: S.SchemaItem['type'],
   ): item is T {
     return item.type === type
   }
-  static isById(id: ID, type: V1.SchemaItem['type'] | 'nodeParent'): boolean {
+  static isById(id: ID, type: S.SchemaItem['type'] | 'nodeParent'): boolean {
     if (type === 'nodeParent')
       return ['page', 'frame', 'group'].includes(Schema.find(id).type)
     return Schema.find(id).type === type
@@ -62,7 +62,7 @@ export class SchemaUtil {
     callback: ITraverseCallback,
     bubbleCallback?: ITraverseCallback,
   ) {
-    const curPage = YState.find<V1.Page>(getSelectPageId())
+    const curPage = YState.find<S.Page>(getSelectPageId())
     this.traverseIds(curPage.childIds, callback, bubbleCallback)
   }
   static traverseIds(

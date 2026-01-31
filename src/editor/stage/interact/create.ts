@@ -26,8 +26,8 @@ export type IStageCreateType = (typeof createTypes)[number]
 class StageCreateService {
   createTypes = createTypes
   @observable currentType: IStageCreateType = 'frame'
-  private node!: V1.Node
-  private parent!: V1.NodeParent
+  private node!: S.Node
+  private parent!: S.NodeParent
 
   startInteract() {
     const disposer = Disposer.collect(
@@ -121,8 +121,8 @@ class StageCreateService {
     const frame = StageScene.elemsFromPoint().find((elem) =>
       SchemaUtil.isById(elem.id, 'frame'),
     )
-    if (frame) return YState.find<V1.NodeParent>(frame.id)
-    return YState.find<V1.Page>(YClients.client.selectPageId)
+    if (frame) return YState.find<S.NodeParent>(frame.id)
+    return YState.find<S.Page>(YClients.client.selectPageId)
   }
 }
 

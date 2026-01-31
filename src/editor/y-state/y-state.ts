@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
-import { YSync } from 'src/editor/y-state/y-sync'
 import Immut, { ImmutPatch } from 'src/utils/immut/immut'
 import { bind } from 'src/utils/immut/immut-y'
 import * as Y from 'yjs'
@@ -8,7 +7,7 @@ import * as Y from 'yjs'
 @autobind
 class YStateService {
   doc!: Y.Doc
-  immut = new Immut(<V1.Schema>{})
+  immut = new Immut(<S.Schema>{})
 
   inited$ = Signal.create(false)
   flushPatch$ = Signal.create<ImmutPatch>()
@@ -40,14 +39,14 @@ class YStateService {
     return this.immut.applyImmerPatches
   }
 
-  find<T extends V1.SchemaItem>(id: string): T {
+  find<T extends S.SchemaItem>(id: string): T {
     return this.state[id] as T
   }
 
-  async initSchema(fileId: string, mockSchema?: V1.Schema) {
+  async initSchema(fileId: string, mockSchema?: S.Schema) {
     this.doc = new Y.Doc()
 
-    YSync.init(fileId, this.doc)
+    // YSync.init(fileId, this.doc)
 
     this.immut.state = mockSchema!
     bind(this.immut, this.doc.getMap('schema'))
@@ -72,5 +71,5 @@ class YStateService {
 export const YState = new YStateService()
 
 export const getSelectedNodes = () => {
-  return getSelectIdList().map((id) => YState.find<V1.Node>(id))
+  return getSelectIdList().map((id) => YState.find<S.Node>(id))
 }

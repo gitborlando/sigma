@@ -4,14 +4,14 @@ import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'
 import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
 
 export const PickerLinearGradientComp: FC<{
-  fill: V1.FillLinearGradient
+  fill: S.FillLinearGradient
   index: number
 }> = memo(({ fill, index }) => {
   const [stopIndex, setStopIndex] = useState(0)
   useEffect(() => setStopIndex(0), [index])
 
   const setStopColor = (color: string) => {
-    OperateFill.setFill<V1.FillLinearGradient>(index, (draft) => {
+    OperateFill.setFill<S.FillLinearGradient>(index, (draft) => {
       draft.stops[stopIndex].color = color
     })
   }
@@ -33,7 +33,7 @@ export const PickerLinearGradientComp: FC<{
 })
 
 const StopsBar: FC<{
-  fill: V1.FillLinearGradient
+  fill: S.FillLinearGradient
   index: number
   stopIndex: number
   setStopIndex: (index: number) => void
@@ -44,7 +44,7 @@ const StopsBar: FC<{
     setStopIndex(stopIndex)
     Drag.onMove(({ delta }) => {
       const deltaOffset = delta.x / stopBarRef.current!.clientWidth
-      OperateFill.setFill<V1.FillLinearGradient>(index, (draft) => {
+      OperateFill.setFill<S.FillLinearGradient>(index, (draft) => {
         const oldOffset = draft.stops[stopIndex].offset
         draft.stops[stopIndex].offset = min(max(oldOffset + deltaOffset, 0), 1)
       })

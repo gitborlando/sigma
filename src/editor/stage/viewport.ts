@@ -1,10 +1,11 @@
-import { AABB, IRect, minMax } from '@gitborlando/geo'
+import { AABB, IRect } from '@gitborlando/geo'
 import { listen, WheelUtil } from '@gitborlando/utils/browser'
+import { clamp } from 'es-toolkit'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
+import { getSelectIdList } from 'src/editor/get'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
-import { getSelectIdList } from 'src/editor/y-state/y-clients'
 
 const createInitBound = () => ({
   left: 240,
@@ -31,6 +32,10 @@ class StageViewportService {
   private wheeler = new WheelUtil()
   private disposer = new Disposer()
 
+  get boundCenter() {
+    return XY.center(this.bound).divide(this.zoom)
+  }
+
   subscribe() {
     return Disposer.collect(
       this.onBoundChange(),
@@ -49,15 +54,19 @@ class StageViewportService {
   toCanvasXY(xy: IXY) {
     return XY.of(xy).minus(XY.leftTop(this.bound))
   }
+
   toStageXY(xy: IXY) {
     return XY.of(this.toCanvasXY(xy)).minus(this.offset)
   }
+
   toSceneXY(xy: IXY) {
     return XY.of(this.toStageXY(xy)).divide(this.zoom)
   }
+
   toSceneShift(xy: IXY) {
     return XY.of(xy).divide(this.zoom)
   }
+
   toSceneMarquee(marquee: IRect) {
     return {
       ...this.toSceneXY(marquee),
@@ -65,12 +74,14 @@ class StageViewportService {
       height: marquee.height / this.zoom,
     }
   }
+
   sceneXYToClientXY(xy: IXY) {
     return XY.of(xy)
       .multiply(this.zoom)
       .plus(this.offset)
       .plus(XY.leftTop(this.bound))
   }
+
   inViewport(xy: IXY) {
     const { left, top, right, bottom } = this.bound
     return xy.x > left && xy.x < right && xy.y > top && xy.y < bottom
@@ -93,7 +104,7 @@ class StageViewportService {
   }
 
   private limitZoom(zoom: number) {
-    return minMax(0.015625, 256, zoom)
+    return clamp(zoom, 0.015625, 256)
   }
 
   private deltaYToZoomStep(deltaY: number) {
@@ -115,7 +126,7 @@ class StageViewportService {
 
     const sign = Math.sign(e.deltaY)
     const step = this.deltaYToZoomStep(e.deltaY)
-    const newZoom = minMax(0.015625, 256, this.zoom / (1 + step) ** sign)
+    const newZoom = this.zoom / (1 + step) ** sign
 
     this.updateZoom(newZoom, this.toCanvasXY(XY.client(e)))
   }
@@ -187,7 +198,7 @@ class StageViewportService {
   }
 
   handleZoomToFitAll() {
-    this.zoomToFit(StageScene.sceneRoot.children.map((child) => child.aabb))
+    this.zoomToFit(StageScene.sceneElems.map((elem) => elem.aabb))
   }
 
   handleZoomToFitSelection() {
@@ -206,12 +217,12 @@ class StageViewportService {
     const zoom = this.limitZoom(
       min(this.bound.width / rect.width, this.bound.height / rect.height),
     )
-    const boundCenter = XY.center(this.bound).divide(zoom)
-    const offset = XY.center(rect).minus(boundCenter)
+    const offset = XY.center(rect).plus(rect).minus(this.boundCenter)
 
-    this.sceneMatrix = Matrix.identity()
-      .shift(offset.multiplyNum(-1))
-      .scale(zoom, zoom)
+    runInAction(() => {
+      this.sceneMatrix = Matrix.identity().shift(offset.multiplyNum(-1))
+      this.updateZoom(zoom, this.boundCenter)
+    })
   }
 }
 

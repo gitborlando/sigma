@@ -8,7 +8,7 @@ import { defuOverrideArray } from 'src/utils/defu'
 import { themeColor } from 'src/view/styles/color'
 
 class SchemaCreatorService {
-  schema(): V1.Schema {
+  schema(): S.Schema {
     const page = this.page()
     const meta = this.meta()
     meta.pageIds = [page.id]
@@ -18,7 +18,7 @@ class SchemaCreatorService {
     }
   }
 
-  meta(): V1.Meta {
+  meta(): S.Meta {
     return {
       type: 'meta',
       id: 'meta',
@@ -30,7 +30,7 @@ class SchemaCreatorService {
     }
   }
 
-  page(): V1.Page {
+  page(): S.Page {
     return {
       type: 'page',
       id: `page_${miniId()}`,
@@ -39,7 +39,7 @@ class SchemaCreatorService {
     }
   }
 
-  point(option?: Partial<V1.Point>): V1.Point {
+  point(option?: Partial<S.Point>): S.Point {
     return {
       type: 'point',
       symmetric: 'angle',
@@ -50,7 +50,7 @@ class SchemaCreatorService {
     }
   }
 
-  frame(option?: Partial<V1.Frame>): V1.Frame {
+  frame(option?: Partial<S.Frame>): S.Frame {
     const nodeBase = this.createNodeBase()
     return {
       type: 'frame',
@@ -62,7 +62,7 @@ class SchemaCreatorService {
     }
   }
 
-  group(option?: Partial<V1.Group>): V1.Group {
+  group(option?: Partial<S.Group>): S.Group {
     const nodeBase = this.createNodeBase()
     return {
       type: 'group',
@@ -72,7 +72,7 @@ class SchemaCreatorService {
     }
   }
 
-  rect(option?: Partial<V1.Rectangle>): V1.Rectangle {
+  rect(option?: Partial<S.Rectangle>): S.Rectangle {
     const nodeBase = this.createNodeBase()
     return {
       type: 'rect',
@@ -83,7 +83,7 @@ class SchemaCreatorService {
     }
   }
 
-  ellipse(option?: Partial<V1.Ellipse>): V1.Ellipse {
+  ellipse(option?: Partial<S.Ellipse>): S.Ellipse {
     const nodeBase = this.createNodeBase()
     return {
       type: 'ellipse',
@@ -96,7 +96,7 @@ class SchemaCreatorService {
     }
   }
 
-  polygon(option?: Partial<V1.Polygon>): V1.Polygon {
+  polygon(option?: Partial<S.Polygon>): S.Polygon {
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
     const points = createRegularPolygon(width!, height!, option?.sides || 3)
@@ -110,7 +110,7 @@ class SchemaCreatorService {
     }
   }
 
-  star(option?: Partial<V1.Star>): V1.Star {
+  star(option?: Partial<S.Star>): S.Star {
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
     const points = createStarPolygon(width!, height!, 5, 0.382)
@@ -125,7 +125,7 @@ class SchemaCreatorService {
     }
   }
 
-  line(option?: Partial<V1.Line>): V1.Line {
+  line(option?: Partial<S.Line>): S.Line {
     const nodeBase = this.createNodeBase()
     const start = XY.$(nodeBase.x, nodeBase.y)
     const length = option?.width || nodeBase.width
@@ -142,7 +142,7 @@ class SchemaCreatorService {
     }
   }
 
-  irregular(option?: Partial<V1.Path>): V1.Path {
+  irregular(option?: Partial<S.Path>): S.Path {
     const nodeBase = this.createNodeBase()
     return {
       type: 'irregular',
@@ -152,15 +152,15 @@ class SchemaCreatorService {
     }
   }
 
-  image(option?: Partial<V1.Rectangle>): V1.Rectangle {
+  image(option?: Partial<S.Rectangle>): S.Rectangle {
     const rect = this.rect(option)
     rect.fills.push(this.fillImage(''))
     return rect
   }
 
-  text(option?: NestPartial<V1.Text>): V1.Text {
+  text(option?: NestPartial<S.Text>): S.Text {
     const nodeBase = this.createNodeBase()
-    return T<V1.Text>(
+    return T<S.Text>(
       defuOverrideArray(
         {
           ...nodeBase,
@@ -184,14 +184,14 @@ class SchemaCreatorService {
     )
   }
 
-  fillColor(color = COLOR.gray, alpha = 1): V1.FillColor {
+  fillColor(color = COLOR.gray, alpha = 1): S.FillColor {
     return { type: 'color', visible: true, color, alpha }
   }
 
   fillLinearGradient(
     start: IXY = XY.$(0, 0),
     end: IXY = XY.$(1, 1),
-  ): V1.FillLinearGradient {
+  ): S.FillLinearGradient {
     return {
       type: 'linearGradient',
       visible: true,
@@ -207,7 +207,7 @@ class SchemaCreatorService {
 
   fillImage(
     url: string = Assets.editor.RP.operate.picker.defaultImage,
-  ): V1.FillImage {
+  ): S.FillImage {
     return {
       type: 'image',
       visible: true,
@@ -217,8 +217,8 @@ class SchemaCreatorService {
     }
   }
 
-  stroke(option?: Partial<V1.Stroke>) {
-    return <V1.Stroke>{
+  stroke(option?: Partial<S.Stroke>) {
+    return <S.Stroke>{
       visible: true,
       fill: this.fillColor(COLOR.black),
       align: 'center',
@@ -236,8 +236,8 @@ class SchemaCreatorService {
     })
   }
 
-  shadow(option?: Partial<V1.Shadow>): V1.Shadow {
-    return <V1.Shadow>{
+  shadow(option?: Partial<S.Shadow>): S.Shadow {
+    return <S.Shadow>{
       visible: true,
       offsetX: 5,
       offsetY: 5,
@@ -248,7 +248,7 @@ class SchemaCreatorService {
     }
   }
 
-  outline(option?: Partial<V1.Outline>): V1.Outline {
+  outline(option?: Partial<S.Outline>): S.Outline {
     return {
       color: themeColor(),
       width: 2,
@@ -256,7 +256,7 @@ class SchemaCreatorService {
     }
   }
 
-  textDecoration(option?: Partial<V1.TextDecoration>): V1.TextDecoration {
+  textDecoration(option?: Partial<S.TextDecoration>): S.TextDecoration {
     return {
       style: 'underline',
       color: themeColor(),
@@ -265,7 +265,7 @@ class SchemaCreatorService {
     }
   }
 
-  private createSchemaMeta(): V1.NodeMeta {
+  private createSchemaMeta(): S.NodeMeta {
     return {
       id: miniId(),
       name: '',
@@ -275,7 +275,7 @@ class SchemaCreatorService {
     }
   }
 
-  private createNodeBase(): V1.NodeBase {
+  private createNodeBase(): S.NodeBase {
     return {
       ...this.createSchemaMeta(),
       x: 0,
@@ -300,16 +300,16 @@ class SchemaCreatorService {
     return `${t(`noun.${type}`)} ${index + 1}`
   }
 
-  addToSchema(schema: V1.Schema, item: V1.SchemaItem) {
+  addToSchema(schema: S.Schema, item: S.SchemaItem) {
     schema[item.id] = item
   }
 
-  addChild(parent: V1.NodeParent, child: V1.Node) {
+  addChild(parent: S.NodeParent, child: S.Node) {
     parent.childIds.push(child.id)
     child.parentId = parent.id
   }
 
-  clone<T extends V1.SchemaItem>(item: T, option?: Partial<T>) {
+  clone<T extends S.SchemaItem>(item: T, option?: Partial<T>) {
     const newItem = clone(item)
     newItem.id = miniId()
     if ('childIds' in newItem) newItem.childIds = []

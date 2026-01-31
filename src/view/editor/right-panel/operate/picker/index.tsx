@@ -11,13 +11,13 @@ import { PickerLinearGradientComp } from 'src/view/editor/right-panel/operate/pi
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
 import { useUnmount } from 'src/view/hooks/common'
 
-const createFillCache = (type: V1.Fill['type']) =>
+const createFillCache = (type: S.Fill['type']) =>
   matchCase(type, {
     color: SchemaCreator.fillColor(),
     linearGradient: SchemaCreator.fillLinearGradient(),
     image: SchemaCreator.fillImage(),
   })
-const fillCache = createCache<V1.Fill['type'], V1.Fill>()
+const fillCache = createCache<S.Fill['type'], S.Fill>()
 
 export const FillPickerComp: FC<{}> = observer(({}) => {
   const { t } = useTranslation()
@@ -38,7 +38,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
   //   return () => void StageTransform.show.dispatch(true)
   // })
 
-  const handleChangeFill = (value: V1.Fill['type']) => {
+  const handleChangeFill = (value: S.Fill['type']) => {
     FillPickerState.fillType = value
     changeFill(fillCache.getSet(value, () => createFillCache(value)))
     YUndo.track({ type: 'state', description: t('change fill type') })
@@ -59,7 +59,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
             { label: t('noun.image'), value: 'image' },
           ]}
           value={fillType}
-          onChange={(value) => handleChangeFill(value as V1.Fill['type'])}
+          onChange={(value) => handleChangeFill(value as S.Fill['type'])}
         />
         {/* <Radio.Group
           type='button'
@@ -71,23 +71,23 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
           <Radio value='image'>{t('noun.image')}</Radio>
         </Radio.Group> */}
         {fill.type === 'color' && (
-          <PickerSolidComp fill={fill as V1.FillColor} index={fillIndex} />
+          <PickerSolidComp fill={fill as S.FillColor} index={fillIndex} />
         )}
         {fill.type === 'linearGradient' && (
           <PickerLinearGradientComp
-            fill={fill as V1.FillLinearGradient}
+            fill={fill as S.FillLinearGradient}
             index={fillIndex}
           />
         )}
-        {fill.type === 'image' && <PickerImageComp fill={fill as V1.FillImage} />}
+        {fill.type === 'image' && <PickerImageComp fill={fill as S.FillImage} />}
       </G>
     </DragPanel>
   )
 })
 
-export const PickerSolidComp: FC<{ fill: V1.FillColor; index: number }> = memo(
+export const PickerSolidComp: FC<{ fill: S.FillColor; index: number }> = memo(
   ({ fill, index }) => {
-    const getRgbaFromSolidFill = (fill: V1.FillColor) => {
+    const getRgbaFromSolidFill = (fill: S.FillColor) => {
       const { color, alpha } = fill
       return Color(color).alpha(alpha).toString()
     }

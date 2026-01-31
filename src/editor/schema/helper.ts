@@ -1,17 +1,36 @@
+import { isNil } from 'es-toolkit'
 import { Schema } from 'src/editor/schema/schema'
 import { getSelectPageId } from 'src/editor/y-state/y-clients'
 
 export type SchemaUtilTraverseData = {
   id: ID
-  node: V1.Node
+  node: S.Node
   index: number
   depth: number
   childIds?: string[]
-  parent: V1.NodeParent
+  parent: S.NodeParent
   ancestors: string[]
   abort: AbortController
   forwardRef?: SchemaUtilTraverseData
   [key: string & {}]: any
+}
+
+export type SchemaTraverseOptions = {
+  schema: S.Schema
+  enter?: (ctx: SchemaTraverseContext) => void
+  leave?: (ctx: SchemaTraverseContext) => void
+}
+
+export type SchemaTraverseContext = {
+  schema: S.Schema
+  item: S.SchemaItem
+  depth: number
+  index: number
+  stopped: boolean
+  stopPropagation: () => void
+  ancestors: S.NodeParent[]
+  parent?: S.NodeParent
+  forwardCtx?: SchemaTraverseContext
 }
 
 type ITraverseCallback = (arg: SchemaUtilTraverseData) => any
@@ -21,14 +40,18 @@ export class SchemaHelper {
     return id.startsWith('page_')
   }
 
-  static is<T extends V1.SchemaItem>(
-    item: V1.SchemaItem,
-    type: V1.SchemaItem['type'],
+  static is<T extends S.SchemaItem>(
+    item: S.SchemaItem,
+    type: S.SchemaItem['type'],
   ): item is T {
     return item.type === type
   }
 
-  static isById(id: ID, type: V1.SchemaItem['type'] | 'nodeParent'): boolean {
+  static isNode(item?: S.SchemaItem): item is S.Node {
+    return !isNil(item) && '__isNode' in item && item.__isNode
+  }
+
+  static isById(id: ID, type: S.SchemaItem['type'] | 'nodeParent'): boolean {
     if (type === 'nodeParent')
       return ['page', 'frame', 'group'].includes(Schema.find(id).type)
     return Schema.find(id).type === type
@@ -43,43 +66,43 @@ export class SchemaHelper {
     return node.type === 'frame' && this.isPageById(node.parentId)
   }
 
-  static getChildren(id: ID | V1.NodeParent) {
+  static getChildren(id: ID | S.NodeParent) {
     const childIds =
-      (typeof id !== 'string' ? id : Schema.find<V1.NodeParent>(id))?.childIds || []
-    return childIds.map((id) => Schema.find<V1.Node>(id))
+      (typeof id !== 'string' ? id : Schema.find<S.NodeParent>(id))?.childIds || []
+    return childIds.map((id) => Schema.find<S.Node>(id))
   }
 
-  static findAncestor(id: ID | V1.Node, utilFunc?: (node: V1.Node) => boolean) {
-    let node = typeof id === 'string' ? Schema.find<V1.Node>(id) : id
-    utilFunc ||= (node: V1.Node) => SchemaHelper.isPageById(node.parentId)
+  static findAncestor(id: ID | S.Node, utilFunc?: (node: S.Node) => boolean) {
+    let node = typeof id === 'string' ? Schema.find<S.Node>(id) : id
+    utilFunc ||= (node: S.Node) => SchemaHelper.isPageById(node.parentId)
     while (node.parentId) {
       if (utilFunc(node)) return node
-      node = Schema.find<V1.Node>(node.parentId)
+      node = Schema.find<S.Node>(node.parentId)
     }
     return node
   }
 
-  static findParent(node: V1.Node) {
+  static findParent(node: S.Node) {
     while (node.parentId) {
-      if (SchemaHelper.is<V1.Frame>(node, 'frame')) return node
-      node = Schema.find<V1.Node>(node.parentId)
+      if (SchemaHelper.is<S.Frame>(node, 'frame')) return node
+      node = Schema.find<S.Node>(node.parentId)
     }
     return node
   }
 
-  static getForwardAccumulatedMatrix(node: V1.Node) {
+  static getForwardAccumulatedMatrix(node: S.Node) {
     const matrix = Matrix.identity()
     while (node.parentId) {
-      node = YState.find<V1.Node>(node.parentId)
+      node = YState.find<S.Node>(node.parentId)
       if (node.matrix) matrix.prepend(node.matrix)
     }
     return matrix.plain()
   }
 
-  static getSceneMatrix(node: V1.Node) {
+  static getSceneMatrix(node: S.Node) {
     const matrix = Matrix.of(node.matrix)
     while (node.parentId) {
-      const parent = YState.find<V1.Node>(node.parentId)
+      const parent = YState.find<S.Node>(node.parentId)
       if (parent.matrix) {
         matrix.prepend(Matrix.of(parent.matrix))
       }
@@ -95,7 +118,7 @@ export class SchemaHelper {
     callback?: ITraverseCallback
     bubbleCallback?: ITraverseCallback
   }) {
-    const curPage = YState.find<V1.Page>(getSelectPageId())
+    const curPage = YState.find<S.Page>(getSelectPageId())
     const traverse = this.createTraverse({ callback, bubbleCallback })
     return () => traverse(curPage.childIds)
   }
@@ -103,9 +126,11 @@ export class SchemaHelper {
   static createTraverse({
     callback,
     bubbleCallback,
+    getNode = YState.find<S.Node>,
   }: {
     callback?: ITraverseCallback
     bubbleCallback?: ITraverseCallback
+    getNode?: (id: ID) => S.Node
   }) {
     const abort = new AbortController()
     const traverse = (
@@ -116,13 +141,11 @@ export class SchemaHelper {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
 
-        const node = YState.find<V1.Node>(id)
+        const node = getNode(id)
         if (node === undefined) return
 
         const childIds = 'childIds' in node ? node.childIds : undefined
-        const parent = T<V1.NodeParent>(
-          forwardRef?.node || YState.find<V1.NodeParent>(node.parentId),
-        )
+        const parent = T<S.NodeParent>(forwardRef?.node || getNode(node.parentId))
         const ancestors = forwardRef ? [...forwardRef.ancestors, forwardRef.id] : []
         const props = {
           id,
@@ -141,5 +164,50 @@ export class SchemaHelper {
       })
     }
     return (ids: string[]) => traverse(ids, 0)
+  }
+
+  static createTraverse2(options: SchemaTraverseOptions) {
+    const { schema, enter, leave } = options
+
+    const traverse = (
+      parent: S.NodeParent | undefined,
+      ids: string[],
+      depth: number,
+      forwardCtx?: SchemaTraverseContext,
+    ) => {
+      let stopped = false
+      const stopPropagation = () => (stopped = true)
+
+      ids.forEach((id, index) => {
+        if (stopped) return
+
+        const item = schema[id]
+        if (!item) return
+
+        const childIds = 'childIds' in item ? item.childIds : undefined
+        const ancestors = forwardCtx ? [...forwardCtx.ancestors] : []
+        if (parent) ancestors.push(parent)
+
+        const ctx = {
+          schema,
+          item,
+          index,
+          depth,
+          forwardCtx,
+          parent,
+          ancestors,
+          stopped,
+          stopPropagation,
+        }
+
+        enter?.(ctx)
+        if (childIds) {
+          traverse(T<S.NodeParent>(item), childIds, depth + 1, ctx)
+        }
+        leave?.(ctx)
+      })
+    }
+
+    return (ids: string[]) => traverse(undefined, ids, 0)
   }
 }

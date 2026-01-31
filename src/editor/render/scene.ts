@@ -1,18 +1,23 @@
 import { clone, createObjCache } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { ImmutPatch } from 'src/utils/immut/immut'
 import { Elem } from './elem'
 import { StageSurface } from './surface'
 
-@autobind
 class StageSceneService {
   elements = createObjCache<Elem>()
 
   sceneRoot!: Elem
   widgetRoot!: Elem
   rootElems: Elem[] = []
+
+  get sceneElems() {
+    return this.sceneRoot.children
+  }
+  get widgetElems() {
+    return this.widgetRoot.children
+  }
 
   private disposer = new Disposer()
 
@@ -61,12 +66,12 @@ class StageSceneService {
     this.sceneRoot.children = []
 
     const traverse = (id: ID) => {
-      const node = YState.find<V1.Node>(id)
+      const node = YState.find<S.Node>(id)
       this.render('add', [node.id])
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    const page = YState.find<V1.Page>(YClients.client.selectPageId)
+    const page = YState.find<S.Page>(YClients.client.selectPageId)
     page.childIds.forEach(traverse)
   }
 
@@ -82,7 +87,7 @@ class StageSceneService {
     const id = keys[0]
     if (macroMatch`'meta'|'client'`(id)) return
 
-    const node = YState.find<V1.Node>(id)
+    const node = YState.find<S.Node>(id)
 
     switch (true) {
       case op === 'add' && keys.length === 1:
@@ -98,7 +103,7 @@ class StageSceneService {
     }
   }
 
-  private mountNode(node: V1.Node) {
+  private mountNode(node: S.Node) {
     const parent = this.elements.get(node.parentId) || this.sceneRoot
 
     const elem = new Elem(node.id, 'sceneElem')
@@ -108,7 +113,7 @@ class StageSceneService {
     this.updateNode(node)
   }
 
-  private updateNode(node: V1.Node) {
+  private updateNode(node: S.Node) {
     if (!node) return
 
     const elem = this.findElem(node.id)
@@ -149,4 +154,4 @@ class StageSceneService {
   }
 }
 
-export const StageScene = new StageSceneService()
+export const StageScene = autoBind(new StageSceneService())

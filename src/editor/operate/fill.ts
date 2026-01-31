@@ -6,7 +6,7 @@ import { clone } from 'src/shared/utils/normal'
 import { SchemaCreator } from '../schema/creator'
 
 class OperateFillService {
-  @observable.ref fills = <V1.Fill[]>[]
+  @observable.ref fills = <S.Fill[]>[]
   isMultiFills = false
 
   init() {
@@ -40,13 +40,13 @@ class OperateFillService {
     return SchemaCreator.fillColor(COLOR.gray, this.fills.length ? 0.25 : 1)
   }
 
-  setFills(setter: (draft: V1.Fill[]) => any) {
+  setFills(setter: (draft: S.Fill[]) => any) {
     const [fills, patches] = produceWithPatches(this.fills, setter)
     this.fills = fills
     this.applyChangeToYState(patches)
   }
 
-  setFill<T extends V1.Fill>(index: number, setter: (fill: T) => T | void) {
+  setFill<T extends S.Fill>(index: number, setter: (fill: T) => T | void) {
     this.setFills((fills) => {
       if (fills[index]) {
         const result = setter(fills[index] as T)
@@ -68,7 +68,7 @@ class OperateFillService {
     YState.next()
   }
 
-  private isSameFills(nodes: V1.Node[]) {
+  private isSameFills(nodes: S.Node[]) {
     let isSame = true
     const firstNode = nodes[0]
 

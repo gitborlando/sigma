@@ -17,8 +17,8 @@ import autobind from 'class-autobind-decorator'
 @autobind
 export class StageDropService {
   // private sceneXY = XY.$(0, 0)
-  // private containerNode!: V1.NodeParent
-  // private node!: V1.Node
+  // private containerNode!: S.NodeParent
+  // private node!: S.Node
   // initHook() {
   //   StageSurface.addEvent('dragover', preventDefault())
   //   StageSurface.addEvent('drop', preventDefault(this.onDrop))

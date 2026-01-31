@@ -20,7 +20,7 @@ class StageTransformerService {
   private action: TransformerAction = 'move'
   isSelectOnlyLine = false
 
-  setup(selectNodes: V1.Node[]) {
+  setup(selectNodes: S.Node[]) {
     if (selectNodes.length === 1) {
       const matrix = SchemaHelper.getSceneMatrix(selectNodes[0])
       return (this.mrect = MRect.fromRect(selectNodes[0], matrix))
@@ -165,7 +165,7 @@ class StageTransformerService {
     this.diffMatrix = Matrix.identity()
   }
 
-  private applyToNode(node: V1.Node) {
+  private applyToNode(node: S.Node) {
     const mrect = this.mrectCache.get(node.id)
     if (!this.diffMatrix || !mrect) return
 

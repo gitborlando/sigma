@@ -15,7 +15,7 @@ import { Elem, HitTest } from './elem'
 
 @autoBind
 class ElemDrawerService {
-  private node!: V1.Node
+  private node!: S.Node
   private elem!: Elem
   private ctx!: CanvasRenderingContext2D
   private path2d!: Path2D
@@ -97,8 +97,7 @@ class ElemDrawerService {
   }
 
   private drawEllipse = () => {
-    const { width, height, startAngle, endAngle, innerRate } = this
-      .node as V1.Ellipse
+    const { width, height, startAngle, endAngle, innerRate } = this.node as S.Ellipse
     const [cx, cy] = [width / 2, height / 2]
     const startRadian = Angle.radianFy(startAngle)
     const endRadian = Angle.radianFy(endAngle)
@@ -141,13 +140,13 @@ class ElemDrawerService {
     this.path2d.closePath()
   }
 
-  private drawLine = (points: V1.Point[]) => {
+  private drawLine = (points: S.Point[]) => {
     this.path2d.moveTo(points[0].x, points[0].y)
     this.path2d.lineTo(points[1].x, points[1].y)
     this.path2d.closePath()
   }
 
-  private drawPath(points: V1.Point[]) {
+  private drawPath(points: S.Point[]) {
     loopFor(points, (cur, next, last, i) => {
       if (i === points.length - 1 && cur.isEnd) {
         return this.path2d.closePath()
@@ -178,7 +177,7 @@ class ElemDrawerService {
   private splitTexts!: ISplitText[]
 
   private breakText() {
-    const { content, style, width } = this.node as V1.Text
+    const { content, style, width } = this.node as S.Text
     const { fontWeight, fontSize, fontFamily, letterSpacing } = style
 
     this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`
@@ -193,7 +192,7 @@ class ElemDrawerService {
   }
 
   private fillOrStrokeText = (op: 'fillText' | 'strokeText') => {
-    const { style } = this.node as V1.Text
+    const { style } = this.node as S.Text
     const { lineHeight } = style
 
     this.splitTexts.forEach(({ text, start, width }, i) => {
@@ -210,7 +209,7 @@ class ElemDrawerService {
     })
   }
 
-  private drawFill = (fill: V1.Fill) => {
+  private drawFill = (fill: S.Fill) => {
     if (!fill.visible) {
       this.ctx.fillStyle = rgba(0, 0, 0, 0.0001)
       return this.ctx.fill(this.path2d)
@@ -285,7 +284,7 @@ class ElemDrawerService {
     }
   }
 
-  private drawStroke = (stroke: V1.Stroke) => {
+  private drawStroke = (stroke: S.Stroke) => {
     if (!stroke.visible) return
 
     this.ctx.lineWidth = stroke.width
@@ -313,7 +312,7 @@ class ElemDrawerService {
     }
   }
 
-  private drawShadow = (shadow?: V1.Shadow) => {
+  private drawShadow = (shadow?: S.Shadow) => {
     if (!shadow?.visible) return
 
     let { fill, blur, offsetX, offsetY, spread } = shadow
@@ -321,7 +320,7 @@ class ElemDrawerService {
     offsetY = offsetY * getZoom()
     blur = blur * getZoom()
 
-    this.ctx.shadowColor = (fill as V1.FillColor).color
+    this.ctx.shadowColor = (fill as S.FillColor).color
     this.ctx.shadowBlur = blur
     this.ctx.shadowOffsetX = offsetX
     this.ctx.shadowOffsetY = offsetY
@@ -358,7 +357,7 @@ class ElemDrawerService {
     if (!style || style === 'none' || width <= 0) return
 
     const collideXys = this.getTextCollideXys()
-    const { fontSize } = (this.node as V1.Text).style
+    const { fontSize } = (this.node as S.Text).style
 
     for (let i = 0; i < collideXys.length; i += 2) {
       const p1 = collideXys[i]
@@ -428,7 +427,7 @@ class ElemDrawerService {
   }
 
   private getPathCollideXys() {
-    const points = (this.node as V1.Path).points
+    const points = (this.node as S.Path).points
     const collideXys = <IXY[]>[XY.of(points[0])]
 
     loopFor(points, (cur, next) => {
@@ -453,7 +452,7 @@ class ElemDrawerService {
 
   private getTextCollideXys() {
     const collideXys = <IXY[]>[]
-    const { lineHeight, fontSize } = (this.node as V1.Text).style
+    const { lineHeight, fontSize } = (this.node as S.Text).style
 
     this.splitTexts.forEach(({ start, width }, i) => {
       const y = i * lineHeight + fontSize / 2

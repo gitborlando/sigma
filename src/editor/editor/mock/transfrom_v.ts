@@ -1,7 +1,7 @@
 import { SchemaCreator } from 'src/editor/schema/creator'
 
 export function mock_transform_v() {
-  const schema = <V1.Schema>{}
+  const schema = <S.Schema>{}
 
   const meta = SchemaCreator.meta()
   const page = SchemaCreator.page()

@@ -4,7 +4,7 @@ class FillPickerStateService {
   @observable pickerPos = XY.$()
   @observable fillIndex = -1
   @observable isShowPicker = false
-  @observable fillType: V1.Fill['type'] = 'color'
+  @observable fillType: S.Fill['type'] = 'color'
 
   @action
   showPicker(fillIndex: number, pos: IXY) {
@@ -20,11 +20,11 @@ class FillPickerStateService {
     this.isShowPicker = false
   }
 
-  changeFill(newFill: V1.Fill) {
+  changeFill(newFill: S.Fill) {
     OperateFill.setFill(this.fillIndex, () => newFill)
   }
 
-  getRgbaFromSolidFill(fill: V1.FillColor) {
+  getRgbaFromSolidFill(fill: S.FillColor) {
     const { color, alpha } = fill
     return color.replace('rgb', 'rgba').replace(')', `,${alpha})`)
   }

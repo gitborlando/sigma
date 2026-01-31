@@ -16,7 +16,7 @@ export type NeedUndoClientState = {
 class YClientsService {
   clientId!: number
 
-  @observable client: V1.Client = {
+  @observable client: S.Client = {
     selectIdMap: {},
     selectPageId: '',
     cursor: XY.$(0, 0),
@@ -26,7 +26,7 @@ class YClientsService {
     userName: '',
     userAvatar: '',
   }
-  @observable others: V1.Clients = {}
+  @observable others: S.Clients = {}
   @observable observingClientId?: number
 
   @computed get selectIdList() {
@@ -104,7 +104,7 @@ class YClientsService {
   syncSelf() {
     YSync.awareness.setLocalState(toJS(this.client))
 
-    const clientKeys = Object.keys(this.client) as (keyof V1.Client)[]
+    const clientKeys = Object.keys(this.client) as (keyof S.Client)[]
     const commonKeys = clientKeys.filter((key) => key !== 'selectIdMap')
     const disposer = new Disposer()
 
@@ -132,11 +132,11 @@ class YClientsService {
   }
 
   syncOthers() {
-    let prev: V1.Clients = this.others
+    let prev: S.Clients = this.others
     const onUpdate = () => {
       const states = YSync.awareness.getStates()
       states.delete(this.clientId)
-      const others = Object.fromEntries(states.entries()) as V1.Clients
+      const others = Object.fromEntries(states.entries()) as S.Clients
       if (!equal(prev, others)) {
         this.others = others
         prev = others

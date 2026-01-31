@@ -7,9 +7,11 @@ import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
+import { migrationSchema } from 'src/editor/schema/migration'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
 import { FileService } from 'src/global/service/file'
+import { logTime } from 'src/utils/common'
 import { Disposer } from 'src/utils/disposer'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
@@ -58,7 +60,7 @@ export class EditorService {
   }
 
   initSchema = async (fileId: string, onProgress?: (progress: number) => void) => {
-    let schema: V1.Schema | undefined
+    let schema: S.Schema | undefined
 
     if (fileId === 'mock') {
       let mockSchema = mock_transform_v()
@@ -71,7 +73,9 @@ export class EditorService {
         const fileText = await zipFiles
           .file(`${decodeURIComponent(fileMeta.name)}.json`)
           ?.async('text')
-        schema = jsonParse(fileText) as V1.Schema
+        schema = jsonParse(fileText) as S.Schema
+
+        schema = logTime('updateSchema', () => migrationSchema(schema))
       }
     }
 

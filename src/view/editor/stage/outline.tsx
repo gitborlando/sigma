@@ -60,23 +60,23 @@ export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
 const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
   ({ id, outlineInfo }) => {
     const { color, hovered, selected } = outlineInfo
-    const node = T<V1.Node>(useSchema((schema) => schema[id]))
+    const node = T<S.Node>(useSchema((schema) => schema[id]))
     const strokeColor = hovered || selected ? themeColor() : color
     const strokeWidth = selected ? 1 : 2
     const matrix = SchemaHelper.getSceneMatrix(node)
-    const outline = SchemaCreator.clone<V1.Node>(node, {
+    const outline = SchemaCreator.clone<S.Node>(node, {
       id: `${id}-outline`,
       fills: [],
       matrix: matrix,
     })
 
     if (node.type === 'text') {
-      T<V1.Text>(outline).style.decoration = SchemaCreator.textDecoration({
+      T<S.Text>(outline).style.decoration = SchemaCreator.textDecoration({
         color: strokeColor!,
         width: strokeWidth / getZoom(),
       })
     } else if (strokeWidth) {
-      T<V1.Node>(outline).strokes = [
+      T<S.Node>(outline).strokes = [
         SchemaCreator.solidStroke(strokeColor, strokeWidth / getZoom()),
       ]
     }

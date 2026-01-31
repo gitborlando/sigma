@@ -2,7 +2,7 @@ import { createCache } from '@gitborlando/utils'
 import { IMatrix } from 'src/editor/math'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { getSelectPageId } from 'src/editor/y-state/y-clients'
-import { ProdLog } from 'src/utils/global'
+import { prodLog } from 'src/utils/global'
 import { SchemaCreator } from '../schema/creator'
 
 class HandlePageService {
@@ -21,7 +21,7 @@ class HandlePageService {
     YUndo.track2('all', t('add and select page'))
   }
 
-  removePage(page: V1.Page) {
+  removePage(page: S.Page) {
     if (YState.state.meta.pageIds.length === 1) return
 
     YState.delete(`${page.id}`)
@@ -42,10 +42,10 @@ class HandlePageService {
   }
 
   DEV_logPageSchema(id: ID) {
-    const curPage = YState.find<V1.Page>(id)
-    const nodes: Record<ID, V1.SchemaItem> = {}
+    const curPage = YState.find<S.Page>(id)
+    const nodes: Record<ID, S.SchemaItem> = {}
     const findNodes = (id: string) => {
-      const node = YState.find<V1.SchemaItem>(id)
+      const node = YState.find<S.SchemaItem>(id)
       nodes[node.id] = node
       if ('childIds' in node) {
         node.childIds.map(YState.find).forEach((node) => (nodes[node.id] = node))
@@ -53,7 +53,7 @@ class HandlePageService {
     }
     curPage.childIds.forEach(findNodes)
 
-    ProdLog({
+    prodLog({
       meta: YState.state.meta,
       page: curPage,
       ...nodes,

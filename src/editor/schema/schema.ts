@@ -19,7 +19,7 @@ type ICommitOperationOption = Partial<ISchemaOperation> & {
 
 @autobind
 class SchemaService {
-  schema!: V1.Schema
+  schema!: S.Schema
   inited = Signal.create(false)
   operationList = <ISchemaOperation[]>[]
   private immui = new Immui()
@@ -31,12 +31,12 @@ class SchemaService {
     return this.find<IClient>('client')
   }
 
-  initSchema(schema: V1.Schema) {
+  initSchema(schema: S.Schema) {
     this.schema = schema
     this.inited.dispatch(true)
   }
 
-  find<T extends V1.SchemaItem>(id: ID): T {
+  find<T extends S.SchemaItem>(id: ID): T {
     return YState.find<any>(id)
     // return this.schema[id] as T
   }
@@ -49,15 +49,15 @@ class SchemaService {
     this.immui.delete(this.schema, [item.id])
   }
 
-  itemAdd(item: V1.SchemaItem, keypath: ISchemaPropKey[], value: any) {
+  itemAdd(item: S.SchemaItem, keypath: ISchemaPropKey[], value: any) {
     this.immui.add(this.schema, [item.id, ...keypath], value)
   }
 
-  itemReset(item: V1.SchemaItem, keypath: ISchemaPropKey[], value: any) {
+  itemReset(item: S.SchemaItem, keypath: ISchemaPropKey[], value: any) {
     this.immui.reset(this.schema, [item.id, ...keypath], value)
   }
 
-  itemDelete(item: V1.SchemaItem, keypath: ISchemaPropKey[]) {
+  itemDelete(item: S.SchemaItem, keypath: ISchemaPropKey[]) {
     this.immui.delete(this.schema, [item.id, ...keypath])
   }
 

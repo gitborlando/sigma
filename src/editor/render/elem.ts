@@ -1,5 +1,6 @@
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import { getEditorSetting } from 'src/editor/editor/setting'
+import { MRect } from 'src/editor/math'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -15,7 +16,7 @@ declare module 'react' {
 }
 
 export type ElemProps = {
-  node: V1.Node
+  node: S.Node
   hidden?: boolean
   events?: Partial<Record<ElemEventType, ElemEventFunc>>
   children?: ReactNode[]
@@ -30,30 +31,45 @@ export class Elem {
   hidden = false
   optimize = false
 
-  private _node!: V1.Node
+  private _node!: S.Node
   get node() {
     return this._node
   }
-  set node(node: V1.Node) {
+  set node(node: S.Node) {
     StageSurface.collectDirty(this)
     this._node = node
     StageSurface.collectDirty(this)
   }
 
   private _mrect = MRect.identity()
-  private memoMRect = memorized(() => {
-    return this._mrect.clone(this.node)
-  })
-  get mrect() {
+  private memoMRect = memorized(() => this._mrect.clone(this.node))
+  get mrect(): MRect {
     return this.memoMRect([this.node.width, this.node.height, this.node.matrix])
   }
 
+  private memoAABB = memorized(() =>
+    Matrix.of(this.globalMatrix).applyAABB({
+      minX: 0,
+      minY: 0,
+      maxX: this.node.width,
+      maxY: this.node.height,
+    }),
+  )
   get aabb() {
-    return this.mrect.aabb
+    return this.memoAABB([this.globalMatrix, this.node.width, this.node.height])
+  }
+
+  private memoGlobalMatrix = memorized(() => {
+    return Matrix.of(this.parent.globalMatrix).append(this.node.matrix)
+  })
+  get globalMatrix(): IMatrix {
+    if (!this.parent) return Matrix.identity()
+    if (!this.node) return this.parent.globalMatrix
+    return this.memoGlobalMatrix([this.node.matrix, this.parent.globalMatrix])
   }
 
   private memoVisible = memorized(() => {
-    return StageSurface.testVisible(this.aabb)
+    return AABB.collide(this.aabb, StageViewport.sceneAABB)
   })
   get visible() {
     if (this.hidden) return false

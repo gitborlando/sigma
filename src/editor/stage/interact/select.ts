@@ -10,7 +10,7 @@ import { OperateText } from 'src/editor/operate/text'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
-import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
+import { SchemaHelper, SchemaTraverseContext } from 'src/editor/schema/helper'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
@@ -51,7 +51,7 @@ class StageSelectService {
       if (hoverNode.type === 'text') {
         this.onEditText(hoverNode)
       }
-      if (SchemaUtil.is<V1.Frame>(hoverNode, 'frame')) {
+      if (SchemaUtil.is<S.Frame>(hoverNode, 'frame')) {
         this.onEditVector(hoverNode)
       }
     } else if (OperateNode.selectIds.value.size === 1) {
@@ -155,7 +155,7 @@ class StageSelectService {
       )
     }
 
-    const traverseTest = (props: SchemaUtilTraverseData) => {
+    const traverseTest = (props: SchemaTraverseContext) => {
       const { id, childIds, depth, forwardRef } = props
       const elem = StageScene.findElem(id)
 
@@ -207,11 +207,11 @@ class StageSelectService {
       .start()
   }
 
-  private onEditText(hoverNode: V1.Node) {
+  private onEditText(hoverNode: S.Node) {
     OperateText.intoEditing.dispatch(hoverNode.id)
   }
 
-  private onEditVector(hoverNode: V1.Node) {
+  private onEditVector(hoverNode: S.Node) {
     if (OperateNode.intoEditNodeId.value) {
       OperateNode.intoEditNodeId.dispatch('')
       OperateNode.clearSelect()

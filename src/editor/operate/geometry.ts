@@ -40,7 +40,7 @@ class DesignGeometryService {
   changingKeys = createActiveKeys(new Set())
   isDelta = true
 
-  setupGeometries(selectedNodes: V1.Node[]) {
+  setupGeometries(selectedNodes: S.Node[]) {
     cleanObject(this.currentGeometries)
     createActiveKeys(this.currentKeys, ['x', 'y', 'width', 'height', 'rotation'])
 
@@ -68,7 +68,7 @@ class DesignGeometryService {
     })
   }
 
-  getGeometryValue(node: V1.Node, key: keyof DesignGeoInfo) {
+  getGeometryValue(node: S.Node, key: keyof DesignGeoInfo) {
     if (obbKeySet.has(key)) {
       const mrect = getNodeMRect(node)
       return mrect[key as 'x' | 'y' | 'width' | 'height' | 'rotation']
@@ -116,7 +116,7 @@ class DesignGeometryService {
     this.nodeGeoInfoCache.clear()
   }
 
-  private delta(key: keyof DesignGeoInfo, node: V1.Node) {
+  private delta(key: keyof DesignGeoInfo, node: S.Node) {
     const rawDelta = iife(() => {
       if (this.isDelta) return this.currentGeometries[key]
       return this.currentGeometries[key] - T<any>(node)[key]
@@ -128,7 +128,7 @@ class DesignGeometryService {
     return divide(this.delta(key, node), node[key])
   }
 
-  private applyChangeToNode(node: V1.Node) {
+  private applyChangeToNode(node: S.Node) {
     this.changingKeys.forEach((key) => {
       if (obbKeySet.has(key)) {
         if (key === 'height' && node.type === 'line') return
@@ -139,13 +139,13 @@ class DesignGeometryService {
         YState.set(`${node.id}.radius`, radius)
       }
       if (key === 'sides') {
-        let { width, height, sides } = node as V1.Polygon
+        let { width, height, sides } = node as S.Polygon
         sides = max(3, sides + floor(this.delta(key, node)))
         YState.set(`${node.id}.sides`, sides)
         YState.set(`${node.id}.points`, createRegularPolygon(width, height, sides))
       }
       if (key === 'pointCount' || key === 'innerRate') {
-        let { width, height, pointCount, innerRate } = node as V1.Star
+        let { width, height, pointCount, innerRate } = node as S.Star
         pointCount = max(3, floor(pointCount))
         innerRate = min(1, max(0, innerRate))
         YState.set(`${node.id}.pointCount`, pointCount)
@@ -160,7 +160,7 @@ class DesignGeometryService {
 
   private applyChangeToMRect(
     key: 'x' | 'y' | 'width' | 'height' | 'rotation',
-    node: V1.Node,
+    node: S.Node,
   ) {
     const mrect = getNodeMRect(node)
     if (this.isDelta) {
@@ -176,7 +176,7 @@ class DesignGeometryService {
   }
 
   // private patchChangeToVectorPoints(id: string) {
-  //   const node = YState.find<V1.Vector>(id)
+  //   const node = YState.find<S.Vector>(id)
   //   if (!node.points) return
 
   //   node.points.forEach((point, i) => {

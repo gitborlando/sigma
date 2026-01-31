@@ -1,4 +1,4 @@
-namespace V1 {
+namespace S1 {
   type IXY = { x: number; y: number }
   type Matrix = import('src/editor/math/matrix').IMatrix
 
@@ -16,9 +16,9 @@ namespace V1 {
     id: 'meta'
     fileId: string
     name: string
-    version: `v${number}`
     pageIds: string[]
     userId: string
+    version: 0
   }
 
   type Client = {
@@ -68,6 +68,16 @@ namespace V1 {
     parentId: string
   }
 
+  type NodeEffect = {
+    opacity: number
+    flip?: 'x' | 'y' | 'xy'
+    fills: Fill[]
+    strokes: Stroke[]
+    blurs: any[]
+    shadows: Shadow[]
+    outline?: Outline
+  }
+
   type OBBInfo = {
     x: number
     y: number
@@ -76,17 +86,7 @@ namespace V1 {
     rotation: number
   }
 
-  type NodeBase = NodeMeta &
-    OBBInfo & {
-      matrix: Matrix
-      opacity: number
-      flip?: 'x' | 'y' | 'xy'
-      fills: Fill[]
-      strokes: Stroke[]
-      blurs: any[]
-      shadows: Shadow[]
-      outline?: Outline
-    }
+  type NodeBase = NodeMeta & NodeEffect & OBBInfo
 
   type Frame = NodeBase &
     NodeParentBase & {
@@ -106,8 +106,8 @@ namespace V1 {
     x: number
     y: number
     radius: number
-    in?: XY
-    out?: XY
+    in?: IXY
+    out?: IXY
     isStart?: boolean
     isEnd?: boolean
   }
@@ -186,8 +186,8 @@ namespace V1 {
 
   type FillLinearGradient = FillMeta & {
     type: 'linearGradient'
-    start: XY
-    end: XY
+    start: IXY
+    end: IXY
     stops: { offset: number; color: string }[]
   }
 

@@ -12,7 +12,7 @@ class HandleNodeService {
 
   private mrectCache = createCache<ID, MRect>()
 
-  getMRect(node: V1.Node) {
+  getMRect(node: S.Node) {
     return this.mrectCache.getSet(node.id, () => MRect.of(node), [
       node.width,
       node.height,
@@ -24,45 +24,45 @@ class HandleNodeService {
     return Disposer.collect(YClients.afterSelect.hook(() => this.getDatum()))
   }
 
-  addNodes(nodes: V1.Node[]) {
+  addNodes(nodes: S.Node[]) {
     nodes.forEach((node) => YState.set(`${node.id}`, node))
   }
 
-  removeNodes(nodes: V1.Node[]) {
+  removeNodes(nodes: S.Node[]) {
     nodes.forEach((node) => YState.delete(`${node.id}`))
   }
 
-  insertChildAt(parent: V1.NodeParent, node: V1.Node, index?: number) {
+  insertChildAt(parent: S.NodeParent, node: S.Node, index?: number) {
     index ??= parent.childIds.length
     YState.insert(`${parent.id}.childIds.${index}`, node.id)
     YState.set(`${node.id}.parentId`, parent.id)
   }
 
-  removeChild(parent: V1.NodeParent, node: V1.Node) {
+  removeChild(parent: S.NodeParent, node: S.Node) {
     const index = parent.childIds.indexOf(node.id)
     YState.delete(`${parent.id}.childIds.${index}`)
     YState.set(`${node.id}.parentId`, '')
   }
 
-  deleteChild(parent: V1.NodeParent, node: V1.Node) {
+  deleteChild(parent: S.NodeParent, node: S.Node) {
     const index = parent.childIds.indexOf(node.id)
     YState.delete(`${parent.id}.childIds.${index}`)
     YState.delete(`${node.id}`)
   }
 
-  reHierarchy(parent: V1.NodeParent, node: V1.Node, index: number) {
+  reHierarchy(parent: S.NodeParent, node: S.Node, index: number) {
     index = stableIndex(parent.childIds, index)
     const oldIndex = parent.childIds.indexOf(node.id)
     YState.delete(`${parent.id}.childIds.${oldIndex}`)
     YState.insert(`${parent.id}.childIds.${index}`, node.id)
   }
 
-  getNodesMergedOBB(nodes: V1.Node[]) {
+  getNodesMergedOBB(nodes: S.Node[]) {
     const aabbList = nodes.map((node) => OBB.fromRect(node, node.rotation).aabb)
     return OBB.fromAABB(AABB.merge(aabbList))
   }
 
-  getNodeCenterXY(node: V1.Node) {
+  getNodeCenterXY(node: S.Node) {
     return OBB.fromRect(node, node.rotation).center
   }
 
@@ -119,10 +119,10 @@ class HandleNodeService {
   }
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
-    const selected = getSelectIdList().map(YState.find<V1.Node>)
+    const selected = getSelectIdList().map(YState.find<S.Node>)
 
     selected.forEach((node) => {
-      const parent = YState.find<V1.NodeParent>(node.parentId)
+      const parent = YState.find<S.NodeParent>(node.parentId)
       let index = parent.childIds.indexOf(node.id)
       index = iife(() => {
         if (type === 'up') return index - 1
@@ -141,12 +141,13 @@ class HandleNodeService {
   }
 
   wrapInFrame() {
-    const selected = getSelectIdList().map(YState.find<V1.Node>)
+    throw new Error('Not implemented')
+    const selected = getSelectIdList().map(YState.find<S.Node>)
     if (selected.length === 0) return
 
     const frameOBB = this.getNodesMergedOBB(selected)
     const frameNode = SchemaCreator.frame({ ...frameOBB })
-    const oldParent = YState.find<V1.NodeParent>(selected[0].parentId)
+    const oldParent = YState.find<S.NodeParent>(selected[0].parentId)
     const index = oldParent.childIds.indexOf(selected[0].id)
 
     this.addNodes([frameNode])
@@ -174,16 +175,16 @@ class HandleNodeService {
       this.datumId = ''
     }
     if (selectIds.length === 1) {
-      this.datumId = Schema.find<V1.Node>(firstOne(selectIds)!).parentId
+      this.datumId = Schema.find<S.Node>(firstOne(selectIds)!).parentId
     }
     if (selectIds.length > 1) {
       const parentIds = new Set<string>()
-      selectIds.forEach((id) => parentIds.add(Schema.find<V1.Node>(id).parentId))
+      selectIds.forEach((id) => parentIds.add(Schema.find<S.Node>(id).parentId))
       if (parentIds.size === 1) this.datumId = firstOne(parentIds)!
       if (parentIds.size > 1) this.datumId = ''
     }
 
-    const datum = YState.find<V1.Node>(this.datumId)
+    const datum = YState.find<S.Node>(this.datumId)
     if (datum && !SchemaHelper.isPageById(datum.id)) {
       const aabb = OBB.fromRect(datum, datum.rotation).aabb
       this.datumXY = XY.$(aabb.minX, aabb.minY)

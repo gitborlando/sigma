@@ -1,4 +1,3 @@
-import { SetTimeout } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 
@@ -15,9 +14,6 @@ class EditorLPLayerNodeStateService {
   private nodeExpandedMap = observable.map<string, boolean>()
 
   init() {
-    SetTimeout(() => {
-      this.toggleAllNodeExpanded(true)
-    }, 1000)
     return this.onNodeHierarchyChange()
   }
 

@@ -11,7 +11,7 @@ import i18n from 'src/view/i18n/config'
 import { suspend } from 'suspend-react'
 
 export const EditorRPOperateFillItemComp: FC<{
-  fill: V1.Fill
+  fill: S.Fill
   index: number
 }> = ({ fill, index }) => {
   const isColorType = fill.type === 'color'
@@ -59,7 +59,7 @@ const ImgComp: FC<{ url: string }> = suspense(({ url }) => {
 })
 
 const HexInputComp: FC<{
-  fill: V1.Fill
+  fill: S.Fill
   index: number
 }> = observer(({ fill, index }) => {
   const isSolidFill = fill.type === 'color'
@@ -77,12 +77,12 @@ const HexInputComp: FC<{
       return
     }
     OperateFill.setFill(index, (fill) => {
-      T<V1.FillColor>(fill).color = Color(`#${color}`).toString()
+      T<S.FillColor>(fill).color = Color(`#${color}`).toString()
     })
   }
 
   const value = matchCase(fill.type, {
-    color: Color(T<V1.FillColor>(fill).color).hex().slice(1),
+    color: Color(T<S.FillColor>(fill).color).hex().slice(1),
     linearGradient: i18n.language === 'en' ? 'linear' : t('noun.linearGradient'),
     image: `${t('noun.image')} ${t('noun.fill')}`,
   })
@@ -101,7 +101,7 @@ const HexInputComp: FC<{
   // )
 })
 
-const AlphaInputComp: FC<{ fill: V1.Fill; index: number }> = observer(
+const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
     const setAlpha = (value: number) => {
       console.log('value: ', value)
@@ -125,7 +125,7 @@ const AlphaInputComp: FC<{ fill: V1.Fill; index: number }> = observer(
   },
 )
 
-const VisibleComp: FC<{ fill: V1.Fill; index: number }> = observer(
+const VisibleComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
     const toggleVisible = () => {
       OperateFill.setFill(index, (fill) => {

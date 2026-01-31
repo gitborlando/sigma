@@ -103,17 +103,11 @@ export class MRect {
   }
 
   get vertices() {
-    if (this._vertices === undefined) {
-      this._vertices = this.calcVertices()
-    }
-    return this._vertices
+    return this._vertices || (this._vertices = this._calcVertices(this.matrix))
   }
 
   get aabb() {
-    if (this._aabb === undefined) {
-      this._aabb = this.calcAABB()
-    }
-    return this._aabb
+    return this._aabb || (this._aabb = this._calcAABB(this.vertices))
   }
 
   private calcRotation() {
@@ -126,8 +120,8 @@ export class MRect {
     return Matrix.of(this.matrix).applyXY(XY.$(this._width / 2, this._height / 2))
   }
 
-  private calcVertices() {
-    const matrix = Matrix.of(this.matrix)
+  private _calcVertices(_matrix: IMatrix) {
+    const matrix = Matrix.of(_matrix)
     return [
       matrix.applyXY(XY.$(0, 0)),
       matrix.applyXY(XY.$(this._width, 0)),
@@ -136,8 +130,8 @@ export class MRect {
     ]
   }
 
-  private calcAABB() {
-    const [TL, TR, BR, BL] = this.vertices
+  private _calcAABB(vertices: IXY[]) {
+    const [TL, TR, BR, BL] = vertices
     return new AABB(
       Math.min(TL.x, TR.x, BR.x, BL.x),
       Math.min(TL.y, TR.y, BR.y, BL.y),
@@ -198,6 +192,14 @@ export class MRect {
     const { width, height } = this
     const matrix = Matrix.plain(this.matrix)
     return { width, height, matrix }
+  }
+
+  calcVertices(matrix: IMatrix) {
+    return this._calcVertices(matrix)
+  }
+
+  calcAABB(vertices: IXY[]) {
+    return this._calcAABB(vertices)
   }
 
   static identity(width = 0, height = 0) {

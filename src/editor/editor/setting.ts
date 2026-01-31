@@ -5,7 +5,7 @@ const initSetting = () => {
   return {
     autosave: true,
     showFPS: true,
-    devMode: false,
+    devMode: isDEV,
     ignoreUnVisible: true,
     needSliceRender: true,
     showDirtyRect: false,

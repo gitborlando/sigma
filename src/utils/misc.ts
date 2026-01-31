@@ -1,6 +1,9 @@
-export function createUrlFromSvgString(svgString: string) {
-  return URL.createObjectURL(new Blob([svgString], { type: 'image/svg+xml' }))
-}
+// export function createUrlFromSvgString(svgString: string) {
+//   return URL.createObjectURL(new Blob([svgString], { type: 'image/svg+xml' }))
+// }
+
+export const isDEV = import.meta.env.DEV
+export const isPROD = import.meta.env.PROD
 
 export const recordTime = (
   name: string,

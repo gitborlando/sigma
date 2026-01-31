@@ -19,7 +19,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
   const { id, indent, ancestors } = nodeInfo
   const { toggleNodeExpanded, getNodeExpanded } = EditorLPLayerNodeState
 
-  const node = YState.find<V1.Node>(id)
+  const node = YState.find<S.Node>(id)
   const isParent = SchemaHelper.isNodeParent(node)
   const expanded = getNodeExpanded(id)
 

@@ -1,7 +1,7 @@
 import { firstOne, lastOne, miniId, optionalSet, range } from '@gitborlando/utils'
 import { max } from 'src/editor/math/base'
 
-export function point(option?: Partial<V1.Point>): V1.Point {
+export function point(option?: Partial<S.Point>): S.Point {
   return {
     id: miniId(5),
     type: 'point',

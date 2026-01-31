@@ -24,7 +24,7 @@ class YUndoService {
 
   private stateUndo!: Y.UndoManager
 
-  initStateUndo(stateMap: Y.Map<V1.Schema>) {
+  initStateUndo(stateMap: Y.Map<S.Schema>) {
     this.stateUndo = new Y.UndoManager(stateMap)
   }
 
