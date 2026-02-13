@@ -30,3 +30,7 @@ export const expandOneStep = (
   const n = (number / step) | 0
   return direction === 'left' ? (n - 1) * step : (n + 1) * step
 }
+
+export function isNumberEqual(a: number, b: number, precision = 0.00001) {
+  return Math.abs(a - b) < precision
+}

@@ -1,4 +1,4 @@
-import { iife, memorize } from 'src/shared/utils/normal'
+import { iife, memorize } from '@gitborlando/utils'
 import { findNextGraphemeBreak, findPreviousGraphemeBreak } from './grapheme-break'
 import { LineBreaker, UnicodeTrie } from './line-break'
 import lineBreakClassesTrieUrl from './line-break/classes.trie?url'

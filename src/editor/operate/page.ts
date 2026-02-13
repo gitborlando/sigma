@@ -1,6 +1,5 @@
-import { createObjCache } from '@gitborlando/utils'
+import { createObjCache, IXY } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { IXY } from 'src/shared/utils/normal'
 import { SchemaCreator } from '../schema/creator'
 import { Schema } from '../schema/schema'
 import { ID, IPage } from '../schema/type'

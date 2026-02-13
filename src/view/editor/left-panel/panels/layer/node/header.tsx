@@ -1,5 +1,5 @@
 import { ChevronsUp } from 'lucide-react'
-import { useHookSignal } from 'src/shared/signal/signal-react'
+import { useHookSignal } from 'src/utils/signal-react'
 import { Btn } from 'src/view/component/btn'
 
 import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'

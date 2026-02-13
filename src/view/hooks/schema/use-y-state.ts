@@ -1,4 +1,4 @@
-import { getSelectIdList, getSelectPageId } from 'src/editor/y-state/y-clients'
+import { getSelectIdList, getSelectPageId } from 'src/editor/utils/get'
 import { useShallow } from 'src/view/hooks/schema/use-shallow'
 
 export function useSelectNodes() {

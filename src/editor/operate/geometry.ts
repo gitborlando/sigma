@@ -1,9 +1,8 @@
-import { createCache, objKeys } from '@gitborlando/utils'
+import { AnyObject, createCache, iife, objKeys } from '@gitborlando/utils'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
-import { getSelectedNodes } from 'src/editor/y-state/y-state'
 import { MULTI_VALUE } from 'src/global/constant'
-import { cleanObject, iife } from 'src/shared/utils/normal'
+import { getSelectedNodes } from '../utils/get'
 
 function createDesignGeoInfos() {
   return {
@@ -33,6 +32,10 @@ function createActiveKeys(
 const obbKeySet = new Set(['x', 'y', 'width', 'height', 'rotation'])
 
 export type DesignGeoInfo = ReturnType<typeof createDesignGeoInfos>
+
+export function cleanObject(object: AnyObject) {
+  for (const key in object) delete object[key]
+}
 
 class DesignGeometryService {
   currentGeometries = createDesignGeoInfos()

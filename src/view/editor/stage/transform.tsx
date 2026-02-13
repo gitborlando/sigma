@@ -8,7 +8,7 @@ import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageMove } from 'src/editor/stage/interact/move'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
-import { arrayLoopGet, TRBL } from 'src/editor/utils'
+import { arrayLoopGet, TRBL } from 'src/editor/utils/misc'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 

@@ -1,6 +1,5 @@
-import { clone, createObjCache } from '@gitborlando/utils'
-import { macroMatch } from 'src/shared/utils/normal'
-import { SchemaUtil } from 'src/shared/utils/schema'
+import { clone, createObjCache, macroMatch } from '@gitborlando/utils'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { ImmutPatch } from 'src/utils/immut/immut'
 import { Elem } from './elem'
 import { StageSurface } from './surface'
@@ -91,7 +90,7 @@ class StageSceneService {
 
     switch (true) {
       case op === 'add' && keys.length === 1:
-        if (SchemaUtil.isPageById(id)) break
+        if (SchemaHelper.isPageById(id)) break
         this.mountNode(node)
         break
       case op === 'remove' && keys.length === 1:

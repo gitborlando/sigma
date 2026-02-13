@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { StageScene } from 'src/editor/render/scene'
-import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent } from '../schema/type'
 import { OperateNode, getSelectNodes } from './node'

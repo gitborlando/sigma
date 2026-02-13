@@ -1,5 +1,5 @@
 import { AABB } from '@gitborlando/geo'
-import { NoopFunc, reverseFor } from '@gitborlando/utils'
+import { NoopFunc, Raf, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { abs, round } from 'src/editor/math/base'
@@ -11,7 +11,6 @@ import {
 } from 'src/editor/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { createTraverser } from 'src/editor/utils/traverser'
-import { Raf, getTime } from 'src/shared/utils/normal'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'
@@ -202,8 +201,8 @@ export class StageSurfaceService {
 
     if (!this.fullRenderElemsMinHeap.length) return
 
-    const startTime = getTime()
-    while (getTime() - startTime <= 4) {
+    const startTime = performance.now()
+    while (performance.now() - startTime <= 15) {
       const elem = this.fullRenderElemsMinHeap.pop()?.elem
       elem?.traverseDraw()
     }
@@ -299,7 +298,7 @@ export class StageSurfaceService {
     while (needReTest) {
       needReTest = false
       reRenderElems.clear()
-      traverser.walk(StageScene.sceneElems)
+      traverser.traverse(StageScene.sceneElems)
     }
 
     this.ctxSaveRestore(() => {
@@ -473,6 +472,7 @@ export class StageSurfaceService {
 
   getElemsFromPoint(e?: IXY) {
     if (!e) return this.elemsFromPoint
+    if (this.elemsFromPoint.length) return this.elemsFromPoint
 
     this.getEventXY(e)
     this.traverseLayerList(({ elem, hitList, xy }) => {
@@ -489,6 +489,7 @@ export class StageSurfaceService {
         return
 
       this.getEventXY(e)
+      this.elemsFromPoint.length = 0
       this.traverseLayerList(
         ({ elem, capture, stopped, stopPropagation, hitList, xy }) => {
           const hit = elem.hitTest(xy!)

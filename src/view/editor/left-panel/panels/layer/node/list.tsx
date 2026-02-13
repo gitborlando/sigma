@@ -1,6 +1,6 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { useEventSignal } from 'src/shared/signal/signal-react'
+import { useEventSignal } from 'src/utils/signal-react'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
 import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
 

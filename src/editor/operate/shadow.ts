@@ -1,7 +1,6 @@
+import { clone } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
-import Immui from 'src/shared/immui/immui'
-import { clone } from 'src/shared/utils/normal'
 import { rgb } from 'src/utils/color'
 import { UIPickerCopy } from '../handle/picker'
 import { SchemaCreator } from '../schema/creator'
@@ -15,7 +14,7 @@ class OperateShadowService {
   shadows = <IShadow[]>[]
   isMultiShadows = false
   afterOperate = Signal.create()
-  private immui = new Immui()
+  private immui = new (class {})()
   initHook() {
     OperateNode.selectedNodes$.hook(this.setupShadows)
     Schema.onMatchPatch('/?/shadows/...', this.setupShadows)

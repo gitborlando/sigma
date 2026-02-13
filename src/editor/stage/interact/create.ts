@@ -4,11 +4,11 @@ import { HandleNode } from 'src/editor/handle/node'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { getZoom } from 'src/editor/stage/viewport'
-import { snapGridRoundXY } from 'src/editor/utils'
+import { snapGridRoundXY } from 'src/editor/utils/misc'
 import { StageDrag } from 'src/global/event/drag'
-import { SchemaUtil } from 'src/shared/utils/schema'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
 
@@ -119,7 +119,7 @@ class StageCreateService {
 
   private findParent() {
     const frame = StageScene.elemsFromPoint().find((elem) =>
-      SchemaUtil.isById(elem.id, 'frame'),
+      SchemaHelper.isById(elem.id, 'frame'),
     )
     if (frame) return YState.find<S.NodeParent>(frame.id)
     return YState.find<S.Page>(YClients.client.selectPageId)

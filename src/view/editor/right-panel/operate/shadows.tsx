@@ -1,7 +1,7 @@
 // import { Flex } from '@gitborlando/widget'
 // import { FC, Fragment } from 'react'
 // import { OperateShadow } from 'src/editor/operate/shadow'
-// import { iife } from 'src/shared/utils/normal'
+// import { iife } from '@gitborlando/utils'
 // import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 // import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
 // import { Divide } from 'src/view/ui-utility/widget/divide'

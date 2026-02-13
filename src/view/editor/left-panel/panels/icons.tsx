@@ -2,8 +2,8 @@ import { createCache } from '@gitborlando/utils'
 import { Flex } from '@gitborlando/widget'
 import { FC, memo, useMemo } from 'react'
 import { InView } from 'react-intersection-observer'
-import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
+import { useAutoSignal, useHookSignal } from 'src/utils/signal-react'
 
 type IIconsComp = {}
 

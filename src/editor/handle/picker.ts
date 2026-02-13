@@ -1,7 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { IFill, IFillKeys } from 'src/editor/schema/type'
-import Immui, { ImmuiPatch } from 'src/shared/immui/immui'
-import { IXY } from 'src/shared/utils/normal'
 
 type IOperateType = 'solid-color'
 
@@ -17,7 +15,7 @@ class UIPickerService {
   from = <'fill' | 'stroke' | 'shadow'>''
   index = 0
   onChange = Signal.create<ImmuiPatch[]>()
-  private immui = new Immui()
+  private immui = new (class {})()
   initHook() {
     // this.onChange.intercept((patches) => {
     //   return patches.map((patch) => ({ ...patch, path: patch.path.slice(2) }))

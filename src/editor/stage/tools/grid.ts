@@ -1,6 +1,6 @@
 import { StageSurface } from 'src/editor/render/surface'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
-import { expandOneStep, snapHalfPixel } from 'src/editor/utils'
+import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
 
 class StageToolGridService {
   private ctx!: CanvasRenderingContext2D

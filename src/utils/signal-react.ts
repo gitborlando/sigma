@@ -1,6 +1,6 @@
 import { HookOption, Signal } from '@gitborlando/signal'
+import { NoopFunc } from '@gitborlando/utils'
 import { useEffect, useRef, useState } from 'react'
-import { INoopFunc } from '../utils/normal'
 
 export function useSignal<T extends unknown>(signal: Signal<T>) {
   return useSyncExternalStore(signal.hook, () => signal.value)
@@ -24,7 +24,7 @@ export function useAutoSignal<T extends any>(init?: T, id?: string): Signal<T> {
   return signal.current
 }
 
-type ICallback<T> = (value: T, forceUpdate: INoopFunc) => any
+type ICallback<T> = (value: T, forceUpdate: NoopFunc) => any
 export function useHookSignal<T>(signal: Signal<T>): T
 export function useHookSignal<T>(signal: Signal<T>, option: HookOption): T
 export function useHookSignal<T>(signal: Signal<T>, callback: ICallback<T>): T

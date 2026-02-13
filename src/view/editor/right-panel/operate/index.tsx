@@ -1,5 +1,5 @@
 import Scrollbars from 'react-custom-scrollbars-2'
-import { getSelectIdList } from 'src/editor/y-state/y-clients'
+import { getSelectIdList } from 'src/editor/utils/get'
 import { EditorRPOperateFillComp } from 'src/view/editor/right-panel/operate/fill'
 import { FillPickerComp } from 'src/view/editor/right-panel/operate/picker'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'

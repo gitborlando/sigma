@@ -1,21 +1,21 @@
-import { IRect } from '@gitborlando/geo'
+import { type IRect } from '@gitborlando/geo'
 import { firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { EditorCommand } from 'src/editor/editor/command'
-import { MRect } from 'src/editor/math'
+import { IMatrix, MRect } from 'src/editor/math'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
-import { SchemaHelper, SchemaTraverseContext } from 'src/editor/schema/helper'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
-import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
+import { getSelectIdMap, getSelectPageId } from 'src/editor/utils/get'
+import { YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { StageDrag } from 'src/global/event/drag'
-import { SchemaUtil } from 'src/shared/utils/schema'
 
 class StageSelectService {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
@@ -51,11 +51,11 @@ class StageSelectService {
       if (hoverNode.type === 'text') {
         this.onEditText(hoverNode)
       }
-      if (SchemaUtil.is<S.Frame>(hoverNode, 'frame')) {
+      if (SchemaHelper.is<S.Frame>(hoverNode, 'frame')) {
         this.onEditVector(hoverNode)
       }
     } else if (OperateNode.selectIds.value.size === 1) {
-      const ancestor = SchemaUtil.findAncestor(
+      const ancestor = SchemaHelper.findAncestor(
         this.hoverId,
         (node) => node.parentId === firstOne(OperateNode.selectIds.value),
       )
@@ -155,37 +155,36 @@ class StageSelectService {
       )
     }
 
-    const traverseTest = (props: SchemaTraverseContext) => {
-      const { id, childIds, depth, forwardRef } = props
-      const elem = StageScene.findElem(id)
+    const traverser = SchemaHelper.createTraverse2<{ matrix: IMatrix }>({
+      schema: YState.schema,
+      enter: (ctx) => {
+        const { item, depth, childIds, forwardCtx } = ctx
+        const elem = StageScene.findElem(item.id)
 
-      if (!elem.visible) return false
+        if (!elem.visible) return false
 
-      if (childIds?.length && depth === 0) {
-        if (AABB.include(marqueeAABB, elem.aabb) === 1) {
-          YUndo.untrack(() => YClients.select(id))
-          return false
+        if (childIds?.length && depth === 0) {
+          if (AABB.include(marqueeAABB, elem.aabb) === 1) {
+            YUndo.untrack(() => YClients.select(item.id))
+            return false
+          }
+          ctx.matrix = Matrix.of(elem.mrect.matrix)
+          return
         }
-        props.matrix = Matrix.of(elem.mrect.matrix)
-        return
-      }
 
-      const forwardMatrix = forwardRef?.matrix ?? Matrix.identity()
-      const mrect = MRect.fromRect(
-        elem.mrect,
-        Matrix.of(forwardMatrix).append(elem.mrect.matrix).plain(),
-      )
-      if (hitTest(mrect)) {
-        YUndo.untrack(() => YClients.select(id))
-        props.matrix = Matrix.of(mrect.matrix)
-        return
-      }
+        const forwardMatrix = forwardCtx?.matrix ?? Matrix.identity()
+        const mrect = MRect.fromRect(
+          elem.mrect,
+          Matrix.of(forwardMatrix).append(elem.mrect.matrix).plain(),
+        )
+        if (hitTest(mrect)) {
+          YUndo.untrack(() => YClients.select(item.id))
+          ctx.matrix = Matrix.of(mrect.matrix)
+          return
+        }
 
-      return false
-    }
-
-    const traverse = SchemaHelper.createCurrentPageTraverse({
-      callback: traverseTest,
+        return false
+      },
     })
 
     StageSurface.disablePointEvent()
@@ -194,7 +193,7 @@ class StageSelectService {
       this.marquee = marquee
       AABB.updateFromRect(marqueeAABB, marquee)
       this.clearSelect()
-      runInAction(() => traverse())
+      runInAction(() => traverser(SchemaHelper.getPageChildIds(getSelectPageId())))
     })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }

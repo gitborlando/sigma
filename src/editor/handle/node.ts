@@ -1,9 +1,9 @@
 import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import { SchemaCreator } from '../schema/creator'
 import { Schema } from '../schema/schema'
+import { getSelectIdList } from '../utils/get'
 
 class HandleNodeService {
   datumId = ''

@@ -96,7 +96,7 @@ export class Traverser<TNode extends BaseNode, TCtx = TraverseBaseContext<TNode>
     return this.use<Extension>(plugin)
   }
 
-  walk(tree: TNode | TNode[], initialContext: Partial<TCtx> = {}) {
+  traverse(tree: TNode | TNode[], initialContext: Partial<TCtx> = {}) {
     const nodes = Array.isArray(tree) ? tree : [tree]
 
     let finalOptions: TraverseOptions<TNode, any> = this.options

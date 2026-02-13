@@ -1,9 +1,9 @@
 import { createCache } from '@gitborlando/utils'
 import { IMatrix } from 'src/editor/math'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { getSelectPageId } from 'src/editor/y-state/y-clients'
 import { prodLog } from 'src/utils/global'
 import { SchemaCreator } from '../schema/creator'
+import { getSelectPageId } from '../utils/get'
 
 class HandlePageService {
   pageSceneMatrix = createCache<ID, IMatrix>()

@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import Immui from 'src/shared/immui/immui'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ID, IText } from '../schema/type'
@@ -41,7 +40,7 @@ class OperateTextService {
   intoEditing = Signal.create<ID>()
   textNodes = <IText[]>[]
   textStyleOptions = createTextStyleOptions()
-  private immui = new Immui()
+  private immui = new (class {})()
   initHook() {
     OperateNode.selectedNodes.hook(() => {
       this.textNodes = OperateNode.selectedNodes.value.filter((node) => {

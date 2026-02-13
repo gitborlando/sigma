@@ -1,9 +1,8 @@
 import { createCache, iife } from '@gitborlando/utils'
 import { IMRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { snapGridRound, TRBL } from 'src/editor/utils'
-import { getSelectIdList } from 'src/editor/y-state/y-clients'
-import { getSelectedNodes } from 'src/editor/y-state/y-state'
+import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
+import { snapGridRound, TRBL } from 'src/editor/utils/misc'
 import { StageDrag } from 'src/global/event/drag'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
@@ -101,7 +100,7 @@ class StageTransformerService {
         return { tx, ty, scaleX, scaleY }
       })
 
-      endMatrix.set({ a: scaleX, d: scaleY, tx: tx, ty: ty })
+      endMatrix.set({ a: scaleX, d: scaleY, tx, ty })
       this.diffMatrix = Matrix.of(endMatrix).divide(startMatrix)
 
       this.transform()
@@ -155,14 +154,14 @@ class StageTransformerService {
     return { startMRect, startMatrix }
   }
 
-  private transform() {
-    getSelectedNodes().forEach(this.applyToNode)
-    YState.next()
-  }
-
   private onEndTransform() {
     this.mrectCache.clear()
     this.diffMatrix = Matrix.identity()
+  }
+
+  private transform() {
+    getSelectedNodes().forEach(this.applyToNode)
+    YState.next()
   }
 
   private applyToNode(node: S.Node) {
@@ -182,9 +181,11 @@ class StageTransformerService {
       startMRect.transform(localDiff)
     }
 
-    YState.set(`${node.id}.width`, startMRect.width)
-    YState.set(`${node.id}.height`, startMRect.height)
-    YState.set(`${node.id}.matrix`, startMRect.matrix)
+    YState.setProp(node.id, {
+      width: startMRect.width,
+      height: startMRect.height,
+      matrix: startMRect.matrix,
+    })
   }
 }
 

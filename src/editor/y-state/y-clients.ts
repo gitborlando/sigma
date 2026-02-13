@@ -154,19 +154,3 @@ class YClientsService {
 }
 
 export const YClients = makeObservable(new YClientsService())
-
-export function getSelectIdMap() {
-  return YClients.client.selectIdMap
-}
-
-export function getSelectIdList() {
-  return YClients.selectIdList
-}
-
-export function getAllSelectIdMap() {
-  return YClients.allSelectIdMap
-}
-
-export function getSelectPageId() {
-  return YClients.client.selectPageId
-}

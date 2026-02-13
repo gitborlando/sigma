@@ -1,10 +1,9 @@
-import { createObjCache, loopFor } from '@gitborlando/utils'
+import { createObjCache, INoopFunc, IXY, loopFor } from '@gitborlando/utils'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { MRect } from 'src/editor/math'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { INoopFunc, IXY } from 'src/shared/utils/normal'
 import { memorized } from 'src/utils/common'
 
 declare module 'react' {
@@ -59,11 +58,12 @@ export class Elem {
     return this.memoAABB([this.globalMatrix, this.node.width, this.node.height])
   }
 
+  private _globalMatrix = Matrix.identity()
   private memoGlobalMatrix = memorized(() => {
     return Matrix.of(this.parent.globalMatrix).append(this.node.matrix)
   })
   get globalMatrix(): IMatrix {
-    if (!this.parent) return Matrix.identity()
+    if (!this.parent) return this._globalMatrix
     if (!this.node) return this.parent.globalMatrix
     return this.memoGlobalMatrix([this.node.matrix, this.parent.globalMatrix])
   }

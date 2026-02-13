@@ -2,10 +2,10 @@ import { AABB, IRect } from '@gitborlando/geo'
 import { listen, WheelUtil } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
-import { getSelectIdList } from 'src/editor/get'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
+import { getSelectIdList } from '../utils/get'
 
 const createInitBound = () => ({
   left: 240,

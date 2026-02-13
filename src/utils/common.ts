@@ -15,13 +15,11 @@ export const memorized = <F extends (deps: any[]) => any>(func: F) => {
   let lastDeps: any[] | undefined
 
   return (deps: any[]) => {
-    try {
-      if (!lastDeps) return (value = func(deps))
-      if (!foreachEqual(lastDeps, deps)) return (value = func(deps))
-      return value
-    } finally {
-      lastDeps = deps
-    }
+    using _ = final(() => (lastDeps = deps))
+
+    if (!lastDeps) return (value = func(deps))
+    if (!foreachEqual(lastDeps, deps)) return (value = func(deps))
+    return value
   }
 }
 
@@ -40,4 +38,8 @@ export function logTime<T>(name: string, func: () => T) {
   const result = func()
   console.log(`${name}: ${performance.now() - start}ms`)
   return result
+}
+
+export function final(func: () => void) {
+  return { [Symbol.dispose]: () => func() }
 }

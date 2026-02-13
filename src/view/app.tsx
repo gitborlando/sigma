@@ -1,9 +1,9 @@
 import './app.css'
 
+import { preventDefault } from '@gitborlando/utils/browser'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router'
 import { Query } from 'src/global/sdk/query'
-import { preventDefault } from 'src/shared/utils/event'
 import { ContextMenuComp } from 'src/view/component/context-menu'
 import { UploaderComp } from 'src/view/component/uploader'
 import router from 'src/view/router'

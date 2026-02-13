@@ -1,8 +1,8 @@
+import { IXY } from '@gitborlando/utils'
 import { Graphics } from '@pixi/react'
 import { FC, memo, useState } from 'react'
 import { PIXI } from 'src/editor/stage/pixi'
 import { Drag } from 'src/global/event/drag'
-import { IXY } from 'src/shared/utils/normal'
 
 type IPointComp = {
   select: () => any

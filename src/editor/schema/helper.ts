@@ -1,6 +1,7 @@
+import { AnyObject } from '@gitborlando/utils'
 import { isNil } from 'es-toolkit'
 import { Schema } from 'src/editor/schema/schema'
-import { getSelectPageId } from 'src/editor/y-state/y-clients'
+import { getSelectPageId } from '../utils/get'
 
 export type SchemaUtilTraverseData = {
   id: ID
@@ -15,13 +16,13 @@ export type SchemaUtilTraverseData = {
   [key: string & {}]: any
 }
 
-export type SchemaTraverseOptions = {
+export type SchemaTraverseOptions<ExtendCtx extends AnyObject = {}> = {
   schema: S.Schema
-  enter?: (ctx: SchemaTraverseContext) => void
-  leave?: (ctx: SchemaTraverseContext) => void
+  enter?: (ctx: SchemaTraverseContext<ExtendCtx>) => boolean | void
+  leave?: (ctx: SchemaTraverseContext<ExtendCtx>) => void
 }
 
-export type SchemaTraverseContext = {
+export type SchemaTraverseContext<ExtendCtx extends AnyObject = {}> = {
   schema: S.Schema
   item: S.SchemaItem
   depth: number
@@ -29,9 +30,10 @@ export type SchemaTraverseContext = {
   stopped: boolean
   stopPropagation: () => void
   ancestors: S.NodeParent[]
+  childIds?: string[]
   parent?: S.NodeParent
-  forwardCtx?: SchemaTraverseContext
-}
+  forwardCtx?: SchemaTraverseContext<ExtendCtx>
+} & ExtendCtx
 
 type ITraverseCallback = (arg: SchemaUtilTraverseData) => any
 
@@ -111,6 +113,10 @@ export class SchemaHelper {
     return matrix.plain()
   }
 
+  static getPageChildIds(pageId: ID) {
+    return YState.find<S.Page>(pageId).childIds
+  }
+
   static createCurrentPageTraverse({
     callback,
     bubbleCallback,
@@ -166,14 +172,16 @@ export class SchemaHelper {
     return (ids: string[]) => traverse(ids, 0)
   }
 
-  static createTraverse2(options: SchemaTraverseOptions) {
+  static createTraverse2<ExtendCtx extends AnyObject = {}>(
+    options: SchemaTraverseOptions<ExtendCtx>,
+  ) {
     const { schema, enter, leave } = options
 
     const traverse = (
       parent: S.NodeParent | undefined,
       ids: string[],
       depth: number,
-      forwardCtx?: SchemaTraverseContext,
+      forwardCtx?: SchemaTraverseContext<ExtendCtx>,
     ) => {
       let stopped = false
       const stopPropagation = () => (stopped = true)
@@ -188,7 +196,8 @@ export class SchemaHelper {
         const ancestors = forwardCtx ? [...forwardCtx.ancestors] : []
         if (parent) ancestors.push(parent)
 
-        const ctx = {
+        const ctx: SchemaTraverseContext<ExtendCtx> = {
+          ...({} as ExtendCtx),
           schema,
           item,
           index,
@@ -200,10 +209,13 @@ export class SchemaHelper {
           stopPropagation,
         }
 
-        enter?.(ctx)
-        if (childIds) {
+        let isContinue = true
+        isContinue = enter?.(ctx) ?? true
+
+        if (isContinue && childIds) {
           traverse(T<S.NodeParent>(item), childIds, depth + 1, ctx)
         }
+
         leave?.(ctx)
       })
     }

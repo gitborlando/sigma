@@ -1,8 +1,6 @@
-import { flushFuncs } from '@gitborlando/utils'
+import { flushFuncs, INoopFunc } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { EditorSetting } from 'src/editor/editor/setting'
-import { INoopFunc } from 'src/shared/utils/normal'
-import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
 import { SchemaHistory } from './history'
 import {
   IClient,
@@ -22,7 +20,7 @@ class SchemaService {
   schema!: S.Schema
   inited = Signal.create(false)
   operationList = <ISchemaOperation[]>[]
-  private immui = new Immui()
+  private immui = new (class {})()
 
   get meta() {
     return this.find<IMeta>('meta')

@@ -1,9 +1,7 @@
-import { firstOne, reverseFor, stableIndex } from '@gitborlando/utils'
+import { clone, firstOne, reverseFor, stableIndex } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { StageScene } from 'src/editor/render/scene'
-import { clone } from 'src/shared/utils/normal'
-import { SchemaUtil } from 'src/shared/utils/schema'
 import { SchemaCreator } from '../schema/creator'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
@@ -139,15 +137,15 @@ class OperateNodeService {
       if ('childIds' in newNode) newNode.childIds = []
       return newNode
     }
-    SchemaUtil.traverseIds(this.copyIds, (props) => {
-      const { node, parent, depth, upLevelRef } = props
-      const newNode = cloneNodes(node)
-      const newParent = upLevelRef?.newNode || parent
-      this.addNodes([newNode])
-      this.insertAt(newParent, newNode)
-      props.newNode = newNode
-      if (depth === 0) newSelectIds.push(newNode.id)
-    })
+    // SchemaUtil.traverseIds(this.copyIds, (props) => {
+    //   const { node, parent, depth, upLevelRef } = props
+    //   const newNode = cloneNodes(node)
+    //   const newParent = upLevelRef?.newNode || parent
+    //   this.addNodes([newNode])
+    //   this.insertAt(newParent, newNode)
+    //   props.newNode = newNode
+    //   if (depth === 0) newSelectIds.push(newNode.id)
+    // })
     setTimeout(() => {
       this.selectIds.dispatch(new Set(newSelectIds))
       this.commitSelect()

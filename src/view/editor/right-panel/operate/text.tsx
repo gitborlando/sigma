@@ -1,12 +1,11 @@
+import { iife } from '@gitborlando/utils'
 import { Flex } from '@gitborlando/widget'
 import { FC, useRef } from 'react'
 import { ITextStyleKey, OperateText } from 'src/editor/operate/text'
 import { Schema } from 'src/editor/schema/schema'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { useHookSignal } from 'src/shared/signal/signal-react'
-import { useDownUpTracker } from 'src/shared/utils/event'
-import { iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
+import { useHookSignal } from 'src/utils/signal-react'
 import { DraggableComp } from 'src/view/component/drag-panel'
 
 export const TextComp: FC<{}> = ({}) => {
@@ -22,7 +21,7 @@ export const TextComp: FC<{}> = ({}) => {
     elFunc: () => HTMLElement | null,
     key: ITextStyleKey,
   ) => {
-    useDownUpTracker(elFunc, () => {}, afterOperate.dispatch)
+    // useDownUpTracker(elFunc, () => {}, afterOperate.dispatch)
   }
 
   useHookSignal(intoEditing)

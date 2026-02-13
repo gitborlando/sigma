@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import Immut, { ImmutPatch } from 'src/utils/immut/immut'
 import { bind } from 'src/utils/immut/immut-y'
 import * as Y from 'yjs'
@@ -14,6 +13,9 @@ class YStateService {
 
   private unSub?: () => void
 
+  get schema() {
+    return this.immut.state
+  }
   get state() {
     return this.immut.state
   }
@@ -43,6 +45,12 @@ class YStateService {
     return this.state[id] as T
   }
 
+  setProp(path: string, payload: Record<string, any>) {
+    Object.entries(payload).forEach(([key, value]) => {
+      this.set(`${path}.${key}`, value)
+    })
+  }
+
   async initSchema(fileId: string, mockSchema?: S.Schema) {
     this.doc = new Y.Doc()
 
@@ -69,7 +77,3 @@ class YStateService {
 }
 
 export const YState = new YStateService()
-
-export const getSelectedNodes = () => {
-  return getSelectIdList().map((id) => YState.find<S.Node>(id))
-}

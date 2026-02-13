@@ -1,9 +1,9 @@
+import { clone } from '@gitborlando/utils'
 import autoBind from 'auto-bind'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
-import { getSelectedNodes } from 'src/editor/y-state/y-state'
-import { clone } from 'src/shared/utils/normal'
 import { SchemaCreator } from '../schema/creator'
+import { getSelectedNodes } from '../utils/get'
 
 class OperateFillService {
   @observable.ref fills = <S.Fill[]>[]

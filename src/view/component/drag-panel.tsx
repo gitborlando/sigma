@@ -1,9 +1,8 @@
-import { listen } from '@gitborlando/utils/browser'
+import { IXY } from '@gitborlando/utils'
+import { listen, stopPropagation } from '@gitborlando/utils/browser'
 import { X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Drag } from 'src/global/event/drag'
-import { stopPropagation } from 'src/shared/utils/event'
-import { IXY } from 'src/shared/utils/normal'
 import { CommonBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 

@@ -1,3 +1,4 @@
+import { IXY, iife } from '@gitborlando/utils'
 import { Container, Graphics } from '@pixi/react'
 import { FC, Fragment, memo } from 'react'
 import { OperateNode } from 'src/editor/operate/node'
@@ -5,9 +6,8 @@ import { Schema } from 'src/editor/schema/schema'
 import { StageDraw } from 'src/editor/stage/draw/draw'
 import { PIXI } from 'src/editor/stage/pixi'
 import { getZoom } from 'src/editor/stage/viewport'
-import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
-import { IXY, iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
+import { useAutoSignal, useHookSignal } from 'src/utils/signal-react'
 import {
   xy_getRotation,
   xy_minus,
