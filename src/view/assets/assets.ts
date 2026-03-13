@@ -28,6 +28,7 @@ import editorRpOperatePickerDefaultImage from './editor/RP/operate/picker/defaul
 import favIconShiyangyang from './fav-icon/shiyangyang.png'
 import favIconSigma2 from './fav-icon/sigma-2.svg'
 import favIconSigma4 from './fav-icon/sigma-4.svg'
+import favIconSigmaLogoText from './fav-icon/sigma-logo-text.svg'
 import favIconSigma from './fav-icon/sigma.svg'
 
 export const Assets = {
@@ -83,6 +84,7 @@ export const Assets = {
     shiyangyang: favIconShiyangyang,
     sigma2: favIconSigma2,
     sigma4: favIconSigma4,
+    sigmaLogoText: favIconSigmaLogoText,
     sigma: favIconSigma,
   },
 } as const
