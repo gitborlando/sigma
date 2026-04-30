@@ -28,7 +28,11 @@ import editorRpOperatePickerDefaultImage from './editor/RP/operate/picker/defaul
 import favIconShiyangyang from './fav-icon/shiyangyang.png'
 import favIconSigma2 from './fav-icon/sigma-2.svg'
 import favIconSigma4 from './fav-icon/sigma-4.svg'
+import favIconSigmaLoading2 from './fav-icon/sigma-loading-2.svg'
+import favIconSigmaLoading from './fav-icon/sigma-loading.svg'
+import favIconSigmaLogoText2 from './fav-icon/sigma-logo-text-2.svg'
 import favIconSigmaLogoText from './fav-icon/sigma-logo-text.svg'
+import favIconSigmaLogo from './fav-icon/sigma-logo.jpg'
 import favIconSigma from './fav-icon/sigma.svg'
 
 export const Assets = {
@@ -84,7 +88,11 @@ export const Assets = {
     shiyangyang: favIconShiyangyang,
     sigma2: favIconSigma2,
     sigma4: favIconSigma4,
+    sigmaLoading2: favIconSigmaLoading2,
+    sigmaLoading: favIconSigmaLoading,
+    sigmaLogoText2: favIconSigmaLogoText2,
     sigmaLogoText: favIconSigmaLogoText,
+    sigmaLogo: favIconSigmaLogo,
     sigma: favIconSigma,
   },
 } as const

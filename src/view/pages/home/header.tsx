@@ -12,7 +12,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
   return (
     <G className={cls()} horizontal='auto auto 1fr' center gap={16}>
       <G horizontal center gap={8} className={cls('title')}>
-        <img width={80} src={Assets.favIcon.sigmaLogoText} alt='Sigma Editor' />
+        <img width={80} src={Assets.favIcon.sigmaLogoText2} alt='Sigma Editor' />
         {/* <Icon url={Assets.favIcon.sigma4} className={cls('title-icon')} />
         <h4>Sigma Editor</h4> */}
       </G>
