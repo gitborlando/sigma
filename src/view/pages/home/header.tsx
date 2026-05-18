@@ -1,3 +1,4 @@
+import { Icon } from '@gitborlando/widget'
 import { Github, LucideLanguages } from 'lucide-react'
 import { UserService } from 'src/global/service/user'
 import { Btn } from 'src/view/component/btn'
@@ -12,9 +13,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
   return (
     <G className={cls()} horizontal='auto auto 1fr' center gap={16}>
       <G horizontal center gap={8} className={cls('title')}>
-        <img width={80} src={Assets.favIcon.sigmaLogoText2} alt='Sigma Editor' />
-        {/* <Icon url={Assets.favIcon.sigma4} className={cls('title-icon')} />
-        <h4>Sigma Editor</h4> */}
+        <Icon url={Assets.favIcon.sigmaLogoText2} className={cls('title-icon')} />
       </G>
       <G horizontal center gap={8}>
         <a href='https://github.com/gitborlando/editor' target='_blank'>
@@ -54,8 +53,9 @@ const cls = classes(css`
     font-size: 18px;
     color: var(--color);
     &-icon {
-      width: 24px;
-      height: 24px;
+      width: 80px;
+      height: 40px;
+      ${styles.textPrimary}
     }
   }
   &-right {
