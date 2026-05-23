@@ -21,7 +21,14 @@
     "jsx": "react-jsx",
     "paths": {
       "src/*": ["src/*"],
-      "types/*": ["types/*"]
+      "types/*": ["../../types/*"]
     }
-  }
+  },
+  "include": [
+    "src",
+    "../../types",
+    "auto-import.ts",
+    "auto-imports.d.ts",
+    "vite.config.ts"
+  ]
 }

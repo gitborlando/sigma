@@ -22,7 +22,7 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         src: path.resolve(__dirname, 'src'),
-        types: path.resolve(__dirname, 'types'),
+        types: path.resolve(__dirname, '../../types'),
       },
     },
     build: {
