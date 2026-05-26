@@ -205,3 +205,317 @@ Sigma 自己：
 这样白板可以复用更多 Sigma 编辑器能力；WebGL 地图则主要复用 math 和 operation/history 模式。
 
 最终目标是让 Sigma 里的好东西能被新项目带走，而不是提前把它包装成一个稳定、沉重、难以魔改的 SDK。
+
+## 后续修正：不是所有能力都适合源码复制
+
+继续讨论后，判断变得更细：不应该在 SDK 和源码复制之间二选一，而应该按“魔改概率”和“通用程度”分层。
+
+如果某段能力大概率原样复用，适合做 package。
+
+如果某段能力有复用价值，但不同项目大概率要改，适合做 shadcn 式源码级复用。
+
+如果某段能力只服务 Sigma 产品，就留在 app 或 Sigma 内部包里。
+
+可以按这个规则判断：
+
+```txt
+新项目大概率只是用，不改：
+  package
+
+新项目大概率要改：
+  registry source copy
+
+只服务当前产品：
+  app / Sigma private package
+```
+
+## shadcn 式源码级复用
+
+这里的 shadcn 模式不是安装 SDK，而是把可复用源码作为 registry item 管理。项目需要什么，就把对应源码复制到本地，之后由项目自己拥有和魔改。
+
+例如：
+
+```bash
+pnpm sigma add editor/history
+pnpm sigma add editor/selection
+pnpm sigma add geometry/hit-test
+```
+
+生成到项目里：
+
+```txt
+src/sigma/
+  editor/
+    history.ts
+    selection.ts
+  geometry/
+    hit-test.ts
+```
+
+这种模式适合 selection、schema node、transform、command、工具状态机这类“能复用但很可能要改”的代码。
+
+它的更新方式不是 `pnpm update`，而是源码 diff / patch / 三方合并。项目中需要记录一个 manifest，例如：
+
+```json
+{
+  "items": {
+    "editor/history": {
+      "version": "0.1.0",
+      "hash": "5f2a9c",
+      "files": ["src/sigma/editor/history.ts"]
+    }
+  }
+}
+```
+
+推荐命令形态：
+
+```bash
+pnpm sigma list
+pnpm sigma check
+pnpm sigma diff editor/history
+pnpm sigma update editor/history
+pnpm sigma eject editor/history
+```
+
+默认策略应该是先 diff，不自动覆盖；只有本地没有改过时才自动 update。
+
+## 对 math 的判断收敛
+
+一开始认为 `math` 最值得优先拆，但后续判断是：暂时不优先拆独立 math 包。
+
+原因是 `matrix` / `mrect` 看起来通用，但真实跨项目复用概率可能不高。不要因为代码“看起来通用”就抽包，应该等第二个真实项目需要时再抽。
+
+当前更合理的路线是：
+
+```txt
+不优先创建 @gitborlando/math
+matrix / mrect 暂留 Sigma 内部
+hit-test / polyline 等如果被新项目真实需要，可以先做 registry item
+多项目稳定复用后，再考虑升成 package
+```
+
+也就是：
+
+```txt
+源码级复用优先
+真实复用后再抽包
+多项目稳定复用后再发 package
+```
+
+## 以当前项目看，哪些更适合通用 package
+
+结合当前代码状态，真正更像通用底座的不是 `matrix/mrect`，而是这些：
+
+```txt
+Immut / patch store
+Immut <-> Yjs plain object binding
+tree traverser
+browser text layout
+viewport-core 的纯逻辑
+hit-test，如果第二个项目真实需要
+```
+
+其中 `StageViewport` 的判断需要特别说明：视口逻辑值得复用，但当前 `StageViewportService` 不适合原样做 SDK。
+
+当前 `StageViewport` 混合了：
+
+```txt
+纯视口数学：
+  zoom / offset / sceneMatrix / 坐标转换 / zoomToFit
+
+浏览器事件：
+  window resize / wheel / ctrl wheel zoom
+
+Sigma renderer：
+  StageSurface / StageScene
+
+Sigma 协同客户端：
+  YClients.client.sceneMatrix / selectPageId
+
+产品设置：
+  EditorSetting / dev.sceneMatrix
+
+运行时机制：
+  MobX observable / reaction / autorun / 全局单例
+```
+
+所以更好的拆法是：
+
+```txt
+viewport-core:
+  只保留 bound、matrix、zoom、pan、坐标转换、zoomToFit
+  可作为通用 package
+
+viewport-browser-adapter:
+  处理 wheel / resize / DOM event
+  可选
+
+sigma-viewport-runtime:
+  绑定 StageSurface、StageScene、YClients、EditorSetting
+  Sigma 专属，不做通用 SDK
+```
+
+## 目录分层
+
+为了避免通用包和 Sigma 包混在一起，可以按所有权和体量分目录。
+
+最终倾向的结构是：
+
+```txt
+nano/
+  data/
+    tree-traverser/
+  object/
+    path-accessor/
+    object-patch/
+  lifecycle/
+    disposable/
+  event/
+    emitter/
+
+toolkit/
+  state/
+    patch-store/
+    yjs-object-bind/
+    history/
+  spatial/
+    viewport-core/
+    viewport-browser-adapter/
+  text/
+    browser-text-layout/
+
+packages/
+  sigma-schema-core/
+  sigma-editor-core/
+  sigma-renderer/
+  sigma-viewport-runtime/
+
+registry/
+  items/
+
+apps/
+  web/
+```
+
+这里的含义是：
+
+```txt
+nano:
+  极小工具，单点能力，最好零依赖
+
+toolkit:
+  成套能力，有状态、有生命周期、有较完整 API
+
+packages/sigma-*:
+  Sigma 专属内部模块
+
+registry:
+  shadcn 式源码复制模板
+
+apps:
+  产品应用
+```
+
+依赖方向：
+
+```txt
+nano
+  -> 外部极少依赖，最好零依赖
+
+toolkit
+  -> nano
+  -> 外部依赖
+
+packages/sigma-*
+  -> toolkit
+  -> nano
+
+apps/web
+  -> packages/sigma-*
+  -> toolkit
+  -> nano
+```
+
+`traverser` 这类更 tiny / nano，适合放在 `nano/data/tree-traverser`。
+
+`viewport-core` 是一组状态和空间能力，不是单点小工具，适合放在 `toolkit/spatial/viewport-core`。
+
+## 发包 scope
+
+如果要发包，通用能力使用个人 scope，Sigma 专属能力使用 Sigma scope。
+
+```txt
+通用 package：
+  @gitborlando/*
+
+Sigma 专属 package：
+  @sigma/*
+```
+
+例如：
+
+```txt
+nano/data/tree-traverser
+  -> @gitborlando/tree-traverser
+
+toolkit/state/patch-store
+  -> @gitborlando/patch-store
+
+toolkit/state/yjs-object-bind
+  -> @gitborlando/yjs-object-bind
+
+toolkit/spatial/viewport-core
+  -> @gitborlando/viewport-core
+
+toolkit/text/browser-text-layout
+  -> @gitborlando/browser-text-layout
+
+packages/sigma-schema-core
+  -> @sigma/schema-core
+
+packages/sigma-editor-core
+  -> @sigma/editor-core
+```
+
+判断标准：
+
+```txt
+完全不认识 Sigma，只处理 plain data / generic types：
+  @gitborlando/*
+
+出现 S.*、Sigma schema、Sigma 节点类型、Sigma 产品概念：
+  @sigma/*
+```
+
+但继续讨论后，`@sigma/*` 其实大概率没必要发布。它们更适合做 monorepo 内部 private workspace package。
+
+```json
+{
+  "name": "@sigma/editor-core",
+  "private": true
+}
+```
+
+因此最终发布策略是：
+
+```txt
+@gitborlando/*:
+  可以考虑发布
+  因为它们是通用工具
+
+@sigma/*:
+  先不发布
+  只是 monorepo 内部包
+
+registry/items:
+  用于源码级复用和魔改
+```
+
+这样能把三件事分清：
+
+```txt
+发包只发真正通用的
+Sigma 拆包只是为了工程结构
+registry 是为了魔改复制
+```
