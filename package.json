@@ -1,11 +1,17 @@
 {
   "name": "sigma",
   "private": true,
+  "packageManager": "pnpm@9.12.2",
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @sigma/web dev",
+    "dev:web": "pnpm --filter @sigma/web dev",
     "build": "pnpm --filter @sigma/web build",
+    "build:web": "pnpm --filter @sigma/web build",
     "preview": "pnpm --filter @sigma/web preview",
+    "preview:web": "pnpm --filter @sigma/web preview",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "typecheck:web": "pnpm --filter @sigma/web typecheck",
     "edgeone": "pnpm --filter @sigma/web edgeone",
     "bench:traverser": "pnpm --filter @sigma/web bench:traverser",
     "gen:assets": "pnpm --filter @sigma/web gen:assets",

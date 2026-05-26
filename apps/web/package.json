@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
     "bench:traverser": "tsx ../../scripts/traverser-bench.ts",
     "gen:supabase-types": "supabase gen types typescript --project-id sucnlytjgnhjgvwykfbg > ../../types/supabase.ts",
     "gen:assets": "tsx ../../scripts/gen-assets.ts"
