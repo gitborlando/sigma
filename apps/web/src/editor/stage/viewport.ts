@@ -37,7 +37,7 @@ class StageViewportService {
   }
 
   subscribe() {
-    return Disposer.collect(
+    return Disposer.combine(
       this.onBoundChange(),
       this.onMatrixChange(),
       this.onCurrentPageChange(),
@@ -168,7 +168,7 @@ class StageViewportService {
   }
 
   private onObserving() {
-    return Disposer.collect(
+    return Disposer.combine(
       autorun(() => {
         YClients.client.sceneMatrix = Matrix.of(this.sceneMatrix)
       }),

@@ -1,10 +1,10 @@
 import { createObjCache, INoopFunc, IXY, loopFor } from '@gitborlando/utils'
+import { memorized } from '@sigma/utils/common'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { MRect } from 'src/editor/math'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { memorized } from 'src/utils/common'
 
 declare module 'react' {
   namespace JSX {

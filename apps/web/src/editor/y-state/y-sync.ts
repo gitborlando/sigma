@@ -16,7 +16,7 @@ class YSyncService {
     })
     this.awareness = this.provider.awareness!
 
-    const disposer = Disposer.collect(YClients.syncSelf(), YClients.syncOthers())
+    const disposer = Disposer.combine(YClients.syncSelf(), YClients.syncOthers())
     return disposer
   }
 }

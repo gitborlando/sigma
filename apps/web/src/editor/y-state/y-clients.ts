@@ -1,3 +1,4 @@
+import { Disposer } from '@gitborlando/toolkit/disposer'
 import { Is } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
@@ -5,7 +6,6 @@ import equal from 'fast-deep-equal'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
-import { Disposer } from 'src/utils/disposer'
 
 export type NeedUndoClientState = {
   selectIds: Record<string, boolean>
@@ -56,7 +56,7 @@ class YClientsService {
       this.client.userAvatar = UserService.avatar
     })
     YUndo.initClientUndo()
-    return Disposer.collect(this.onMouseMove())
+    return Disposer.combine(this.onMouseMove())
   }
 
   select(id: string) {

@@ -9,7 +9,7 @@ class HandlePageService {
   pageSceneMatrix = createCache<ID, IMatrix>()
 
   subscribe() {
-    return Disposer.collect(this.memoPageSceneMatrix())
+    return Disposer.combine(this.memoPageSceneMatrix())
   }
 
   addPage(page = SchemaCreator.page()) {

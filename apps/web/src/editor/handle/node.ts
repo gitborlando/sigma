@@ -21,7 +21,7 @@ class HandleNodeService {
   }
 
   subscribe() {
-    return Disposer.collect(YClients.afterSelect.hook(() => this.getDatum()))
+    return Disposer.combine(YClients.afterSelect.hook(() => this.getDatum()))
   }
 
   addNodes(nodes: S.Node[]) {

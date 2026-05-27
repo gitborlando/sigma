@@ -46,7 +46,7 @@ export class StageSurfaceService {
   private disposer = new Disposer()
 
   subscribe() {
-    return Disposer.collect(
+    return Disposer.combine(
       this.inited.hook(() => {
         this.disposer.add(this.onResize(), this.onZoomMove(), this.onPointerEvents())
         this.requestRenderTopCanvas()
@@ -346,7 +346,7 @@ export class StageSurfaceService {
   }
 
   private onZoomMove = () => {
-    return Disposer.collect(
+    return Disposer.combine(
       reaction(
         () => StageViewport.zoom,
         () => {
@@ -365,7 +365,7 @@ export class StageSurfaceService {
   }
 
   private onResize() {
-    return Disposer.collect(
+    return Disposer.combine(
       reaction(
         () => ({ ...StageViewport.bound }),
         ({ width, height }) => {
@@ -500,7 +500,7 @@ export class StageSurfaceService {
       )
     }
 
-    return Disposer.collect(
+    return Disposer.combine(
       this.addEvent('mousedown', onMouseEvent, { capture: true }),
       this.addEvent('mousemove', onMouseEvent, { capture: true }),
     )

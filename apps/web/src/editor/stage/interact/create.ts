@@ -30,7 +30,7 @@ class StageCreateService {
   private parent!: S.NodeParent
 
   startInteract() {
-    const disposer = Disposer.collect(
+    const disposer = Disposer.combine(
       StageScene.sceneRoot.addEvent('mousedown', this.create, { capture: true }),
     )
     StageCursor.setCursor('add').lock()

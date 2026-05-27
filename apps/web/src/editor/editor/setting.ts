@@ -1,5 +1,5 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
-import { defuOverrideArray } from 'src/utils/defu'
+import { defuOverrideArray } from '@sigma/utils/defu'
 
 const initSetting = () => {
   return {

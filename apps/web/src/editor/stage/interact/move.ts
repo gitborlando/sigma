@@ -7,7 +7,7 @@ class StageMoveService {
   @observable isMoving = false
 
   startInteract() {
-    const disposer = Disposer.collect(
+    const disposer = Disposer.combine(
       StageSurface.addEvent('mousedown', this.onMoveStage),
       StageSurface.disablePointEvent(false),
     )

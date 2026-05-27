@@ -1,10 +1,10 @@
 import { clone, createCache, miniId } from '@gitborlando/utils'
+import { defuOverrideArray } from '@sigma/utils/defu'
 import {
   createLine,
   createRegularPolygon,
   createStarPolygon,
 } from 'src/editor/math/point'
-import { defuOverrideArray } from 'src/utils/defu'
 import { themeColor } from 'src/view/styles/color'
 
 class SchemaCreatorService {

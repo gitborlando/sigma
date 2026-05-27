@@ -1,4 +1,6 @@
+import { Disposer } from '@gitborlando/toolkit/disposer'
 import { jsonParse } from '@gitborlando/utils'
+import { logTime } from '@sigma/utils/common'
 import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
 import { mock_transform_v } from 'src/editor/editor/mock/transfrom_v'
@@ -11,8 +13,6 @@ import { migrationSchema } from 'src/editor/schema/migration'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
 import { FileService } from 'src/global/service/file'
-import { logTime } from 'src/utils/common'
-import { Disposer } from 'src/utils/disposer'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { OperateShadow } from '../operate/shadow'
@@ -28,7 +28,7 @@ export class EditorService {
   private disposer = new Disposer()
 
   private subscribe() {
-    return Disposer.collect(
+    return Disposer.combine(
       HandleNode.subscribe(),
       HandlePage.subscribe(),
 

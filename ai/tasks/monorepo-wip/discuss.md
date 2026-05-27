@@ -60,9 +60,10 @@
    - web 侧依赖 `@sigma/api-types`。
    - 迁移期保留旧 `types/supabase.ts` re-export。
 
-2. `@sigma/shared-utils`
-   - 优先迁 `disposer.ts`、`defu.ts`、`common.ts` 中无 DOM / 无业务状态的部分、`immut/*`。
-   - `signal-react.ts`、`global.ts`、和 UI 主题耦合的 `color.ts` 先暂缓。
+2. `@sigma/utils`
+   - 只作为 Sigma 内部过渡包，放项目策略或暂时无法判断公共归属的工具。
+   - 不把跨项目通用能力长期塞进 `@sigma/utils`，避免形成新的大杂烩。
+   - `defuOverrideArray` 这类项目配置策略可以先留在 Sigma 侧；`signal-react.ts`、`global.ts`、和 UI 主题耦合的 `color.ts` 先暂缓。
    - 每次只迁一个文件或小目录，旧位置保留 shim。
 
 验收重点：
@@ -175,6 +176,50 @@ apps/
 - 明确 `exports`，可设置 `sideEffects: false`。
 - 不依赖 Sigma schema、`apps/web`、DOM、React、MobX、i18n、产品资源。
 - 只处理 plain data / generic types。
+
+### 通用小能力的现实策略
+
+最新讨论进一步收敛为：当前已经有跨项目复用需要，但这些通用能力主要还要靠 Sigma 编辑器验证和迭代；放到外部仓库会增加协作成本，放在 `@sigma/*` 又会误导语义。
+
+因此不在“全部塞进 `@gitborlando/utils`”和“每个十几行工具单独发包”之间二选一。更合理的折中是：
+
+```txt
+packages/
+  toolkit/
+    package.json   # name: @gitborlando/toolkit
+    src/
+      disposer.ts
+      traverser.ts
+      browser/
+      number/
+      object/
+      state/
+```
+
+原则：
+
+- Sigma 仓库暂时作为 `@gitborlando/toolkit` 的孵化和验证场。
+- `@gitborlando/toolkit` 可以是一个 workspace source package，必要时以 `0.x` 形式发布给其他项目使用。
+- 包内部按领域或能力用 subpath exports 拆边界，例如 `@gitborlando/toolkit/disposer`、`@gitborlando/toolkit/traverser`、`@gitborlando/toolkit/browser`。
+- 只有当上层领域能承载多个稳定能力时才加上层；当前 `disposer` 和 `traverser` 都不需要额外的 `lifecycle` / `tree` 上层。
+- 不为十几行小工具单独发 npm 包；等某个领域稳定、变大、跨项目验证充分后，再考虑从 toolkit 拆成独立包。
+- `@gitborlando/utils` 继续适合放低层纯函数和历史兼容，不再无限吸收所有领域能力。
+- `@sigma/utils` 不作为跨项目通用能力的长期归宿。
+
+当前归属判断：
+
+- `Disposer`：生命周期清理能力，但当前不需要 `lifecycle` 上层，适合 `@gitborlando/toolkit/disposer`。
+- `tree traverser`：树遍历能力，但当前不需要 `tree` 上层，适合 `@gitborlando/toolkit/traverser`；发布前需要先明确 stop / skip / bubble 等遍历语义。
+- `DragHelper`：浏览器交互领域，适合 `@gitborlando/toolkit/browser`；`StageDrag` 依赖 Sigma viewport，必须留在 Sigma app/runtime。
+- `twoDecimal` / `omitMut` / `memorized`：按 number / object / function 归入 toolkit 或保留在低层 utils，不能整体当作 `common` 大桶继续扩张。
+- `defuOverrideArray`：偏项目配置策略，先留 Sigma 侧，不急着公共化。
+
+边界约束：
+
+- `toolkit/*` 不能 import `apps/web`、`src/*`、Sigma schema、StageViewport、文件服务、Supabase、COS。
+- `browser/*` 可以依赖 DOM / browser API；`tree`、`lifecycle`、`number`、`object` 等纯领域不依赖 DOM / React。
+- React 绑定必须单独隔离，避免污染纯工具包。
+- Sigma 适配层保留在 app 或 Sigma runtime 包中。
 
 ## 阶段 6：拆 Sigma 专属核心包
 

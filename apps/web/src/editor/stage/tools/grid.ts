@@ -6,7 +6,7 @@ class StageToolGridService {
   private ctx!: CanvasRenderingContext2D
 
   subscribe() {
-    return Disposer.collect(StageSurface.onRenderTopCanvas.hook(this.draw))
+    return Disposer.combine(StageSurface.onRenderTopCanvas.hook(this.draw))
   }
 
   private draw() {

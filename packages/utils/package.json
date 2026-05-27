@@ -1,0 +1,21 @@
+{
+  "name": "@sigma/utils",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./common": "./src/common.ts",
+    "./defu": "./src/defu.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "defu": "^6.1.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

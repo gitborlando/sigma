@@ -25,7 +25,7 @@ class StageSelectService {
   private isPointerDown = false
 
   startInteract() {
-    return Disposer.collect(
+    return Disposer.combine(
       StageScene.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
       StageSurface.addEvent('dblclick', this.onDoubleClick),
       StageSurface.addEvent('mousemove', this.onHover),

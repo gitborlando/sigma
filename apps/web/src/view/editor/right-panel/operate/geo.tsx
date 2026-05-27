@@ -1,9 +1,9 @@
 import { Icon } from '@gitborlando/widget'
+import { twoDecimal } from '@sigma/utils/common'
 import { HandleNode } from 'src/editor/handle/node'
 import { DesignGeoInfo, DesignGeometry } from 'src/editor/operate/geometry'
 import { getZoom } from 'src/editor/stage/viewport'
 import { MULTI_VALUE } from 'src/global/constant'
-import { twoDecimal } from 'src/utils/common'
 import { InputNum } from 'src/view/component/input-num'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 

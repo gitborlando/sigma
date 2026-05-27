@@ -21,7 +21,7 @@ class StageSceneService {
   private disposer = new Disposer()
 
   subscribe() {
-    return Disposer.collect(this.setupElems(), this.hookRenderNode())
+    return Disposer.combine(this.setupElems(), this.hookRenderNode())
   }
 
   findElem(id: string) {

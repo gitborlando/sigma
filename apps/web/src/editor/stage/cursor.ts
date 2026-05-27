@@ -19,7 +19,7 @@ class StageCursorService {
   private locked = false
 
   subscribe() {
-    return Disposer.collect(
+    return Disposer.combine(
       StageSurface.inited.hook(() => this.setCursor('select')),
       listen('mouseup', () => (this.locked = false)),
     )
