@@ -6,7 +6,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./disposer": "./src/disposer.ts"
+    "./disposer": "./src/disposer.ts",
+    "./traverser": "./src/traverser.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

@@ -131,6 +131,26 @@
   - `pnpm --filter @sigma/web build`：通过，仍有既有 baseline-browser-mapping、字体解析、大 chunk 警告。
   - `pnpm -r --if-present typecheck`：约 120 秒超时，无诊断输出。
 
+### 阶段 2 / `@gitborlando/toolkit/traverser` 已完成
+
+- 将 `apps/web/src/editor/utils/traverser.ts` 实现迁到 `packages/toolkit/src/traverser.ts`。
+- `@gitborlando/toolkit` 新增显式 `exports`：
+  - `./traverser`
+- `packages/toolkit/src/index.ts` 转发 `traverser`。
+- 旧 `apps/web/src/editor/utils/traverser.ts` 入口已删除，不再保留 shim。
+- 当前唯一业务引用 `apps/web/src/editor/render/surface.ts` 改为直接引用 `@gitborlando/toolkit/traverser`。
+- 本次不修改 traverser 的 stop / skip / bubble 等语义，只做低风险目录归属迁移；发布前仍需单独明确遍历控制语义。
+
+### 阶段 2 / `@gitborlando/toolkit/traverser` 验证记录
+
+- `pnpm exec prettier --write packages/toolkit/package.json packages/toolkit/src/index.ts packages/toolkit/src/traverser.ts apps/web/src/editor/render/surface.ts ai/tasks/monorepo-wip/log.md`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `pnpm --filter @gitborlando/toolkit typecheck`：通过。
+- `pnpm --filter @sigma/utils typecheck`：通过。
+- `pnpm --filter @sigma/api-types typecheck`：通过。
+- `pnpm --filter @sigma/web build`：通过。
+  - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
+
 ### 最新讨论收敛
 
 - 当前有跨项目复用需要，但这些通用能力主要仍靠 Sigma 编辑器验证和迭代；立即搬到外部仓库会增加成本。
