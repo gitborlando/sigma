@@ -1,6 +1,6 @@
 import axios from 'axios'
 import autobind from 'class-autobind-decorator'
-import { Database } from 'types/supabase'
+import type { Database } from '@sigma/api-types/supabase'
 import { supabase } from '../sdk/supabase'
 
 @autobind

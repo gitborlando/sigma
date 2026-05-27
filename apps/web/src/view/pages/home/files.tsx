@@ -6,7 +6,7 @@ import { FileService } from 'src/global/service/file'
 import { Loading } from 'src/view/component/loading'
 import { suspense } from 'src/view/component/suspense'
 import { Text } from 'src/view/component/text'
-import { Tables } from 'types/supabase'
+import type { Tables } from '@sigma/api-types/supabase'
 
 export const HomeFilesComp: FC<{}> = suspense(
   observer(({}) => {
