@@ -11,6 +11,7 @@ class YStateService {
   inited$ = Signal.create(false)
   flushPatch$ = Signal.create<ImmutPatch>()
 
+  private unbind?: () => void
   private unSub?: () => void
 
   get schema() {
@@ -52,20 +53,28 @@ class YStateService {
   }
 
   async initSchema(fileId: string, mockSchema?: S.Schema) {
+    this.dispose()
     this.doc = new Y.Doc()
 
     // YSync.init(fileId, this.doc)
 
     this.immut.state = mockSchema!
-    bind(this.immut, this.doc.getMap('schema'))
-
-    this.unSub?.()
+    this.unbind = bind(this.immut, this.doc.getMap('schema'))
     this.unSub = this.flushPatch()
 
     YClients.clientId = this.doc.clientID
     YUndo.initStateUndo(this.doc.getMap('schema'))
 
     this.inited$.dispatch(true)
+  }
+
+  dispose() {
+    this.inited$.value = false
+    this.unbind?.()
+    this.unbind = undefined
+    this.unSub?.()
+    this.unSub = undefined
+    this.doc?.destroy()
   }
 
   private flushPatch() {

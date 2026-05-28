@@ -173,3 +173,35 @@
   - `DragHelper`：归入 browser 领域；`StageDrag` 依赖 Sigma viewport，继续留在 Sigma。
   - `twoDecimal` / `omitMut` / `memorized`：按 number / object / function 归属，避免继续扩张 `common` 大桶。
   - `defuOverrideArray`：偏项目配置策略，暂留 Sigma 侧。
+
+## 2026-05-28
+
+### 范围
+
+- 开始阶段 3 的 Yjs / Immut 状态源收敛，先处理低风险、可单独验证的问题。
+- 本轮只修正现有绑定生命周期和数组同步语义，不做目录迁移，不拆 `immut-y.ts`。
+
+### 阶段 3 / Yjs-Immut 小步修正已完成
+
+- `YState.initSchema()` 在新建 `Y.Doc` 前先释放上一轮状态绑定和订阅，避免重复打开文件或重新初始化时遗留旧 `observeDeep` / Immut 订阅。
+- `YState` 新增 `dispose()`，统一释放：
+  - `bind()` 返回的 disposer。
+  - `flushPatch()` 的 Immut 订阅。
+  - 当前 `Y.Doc`。
+- `Editor.dispose()` 改为调用 `YState.dispose()`，避免只重置 `inited$` 但不释放 Yjs / Immut 绑定。
+- 修正 `immut-y.ts` 中普通数组转 `Y.Array` 时过滤 `null` 的问题；现在只过滤 `undefined`，保留 `null` 下标语义。
+- 修正 Immut -> Yjs 的数组 add / replace 分支，使 `Y.Array.insert` 写入前走 `toYValue()`，支持对象和数组嵌套值，而不是直接插入普通对象。
+
+### 阶段 3 / Yjs-Immut 小步修正验证记录
+
+- `pnpm exec prettier --write apps/web/src/editor/y-state/y-state.ts apps/web/src/editor/editor/editor.ts apps/web/src/utils/immut/immut-y.ts`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `pnpm --filter @sigma/web build`：通过。
+  - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
+- `pnpm --filter @sigma/web typecheck`：约 120 秒超时，无诊断输出，延续既有 typecheck 长耗时问题。
+
+### 暂不处理
+
+- 本轮不启用或恢复 `YSync.init()`。
+- 本轮不拆分 `immut-y.ts` 为 `json-to-y.ts` / `y-to-immut.ts`。
+- 本轮不修改 `Immut -> Yjs` 订阅链路整体策略；后续仍需继续向“业务写入统一走 `YState.set/insert/delete`，`Immut` 只做渲染投影”的目标收敛。

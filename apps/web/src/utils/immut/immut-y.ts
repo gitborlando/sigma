@@ -81,7 +81,7 @@ const toYValue = (val: any) => {
     const arr = new Y.Array()
     arr.insert(
       0,
-      val.map(toYValue).filter((v) => v !== undefined && v !== null),
+      val.map(toYValue).filter((v) => v !== undefined),
     )
     return arr
   }
@@ -217,10 +217,10 @@ function subscribeI<T>(i: Immut, y: Y.Map<T>, opts: Options) {
           if (type === 'remove') {
             parent.y.delete(Number(k), 1)
           } else if (type === 'add') {
-            parent.y.insert(Number(k), [value])
+            insertIValueToY(value, parent.y, Number(k))
           } else {
             parent.y.delete(Number(k), 1)
-            parent.y.insert(Number(k), [value])
+            insertIValueToY(value, parent.y, Number(k))
           }
         }
       })

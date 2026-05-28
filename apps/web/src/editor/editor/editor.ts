@@ -54,7 +54,7 @@ export class EditorService {
 
   dispose() {
     Editor.inited.value = false
-    YState.inited$.value = false
+    YState.dispose()
 
     this.disposer.dispose()
   }
