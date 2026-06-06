@@ -236,18 +236,22 @@
   - 这一步先收口提交边界，尚未改成直接写 Yjs。
 - 以下简单写入点已从手动 `YState.next()` 迁到 `YState.transact()`：
   - `HandlePage.addPage()` / `HandlePage.removePage()`
+  - `HandleNode.deleteSelectedNodes()` / `HandleNode.pasteNodes()` / `HandleNode.reHierarchySelectedNode()`
   - `OperateFill.applyChangeToYState()`
   - `DesignGeometry.setGeometries()`
   - `StageTransformer.transform()`
   - `StageCreate.onCreateMove()` / `StageCreate.onCreateEnd()`
 - `StageCreate.onCreateMove()` 保留线段创建时的空提交语义，确保 `onCreateStart()` 中已加入的节点仍会被 flush。
-- `handle/node.ts` 中剩余的 `YState.next()` 暂未迁移，因为这些调用和选择态、`afterSelect` 顺序耦合更明显，应单独处理。
+- `HandleNode.deleteSelectedNodes()` 保留原有顺序：删除节点、清空选择、派发 `afterSelect`，最后由 `YState.transact()` 统一 flush。
+- `handle/node.ts` 中只剩 `wrapInFrame()` 的 `YState.next()` 暂未迁移；该方法当前开头直接 `throw new Error('Not implemented')`，属于不可达路径。
 
 ### 验证记录
 
 - `pnpm exec prettier --write apps/web/src/utils/immut/immut-y.ts apps/web/src/utils/immut/json-to-y.ts apps/web/src/utils/immut/y-to-immut.ts`：通过。
   - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
 - `pnpm exec prettier --write apps/web/src/editor/y-state/y-state.ts apps/web/src/editor/handle/page.ts apps/web/src/editor/operate/fill.ts apps/web/src/editor/operate/geometry.ts apps/web/src/editor/stage/tools/transformer.ts apps/web/src/editor/stage/interact/create.ts`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `pnpm exec prettier --write apps/web/src/editor/handle/node.ts`：通过。
   - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
 - `pnpm exec tsc --noEmit --pretty false --target ESNext --module ESNext --moduleResolution bundler --skipLibCheck --strict --isolatedModules apps/web/src/utils/immut/immut-y.ts apps/web/src/utils/immut/json-to-y.ts apps/web/src/utils/immut/y-to-immut.ts`：通过。
 - 针对编辑器文件的 root-files 局部 `tsc` 未作为有效验证记录：这类指定文件编译会拉入编辑器依赖图并长时间无输出，和既有 web typecheck 长耗时问题一致。

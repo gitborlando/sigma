@@ -67,15 +67,15 @@ class HandleNodeService {
   }
 
   deleteSelectedNodes() {
-    const traverse = SchemaHelper.createTraverse({
-      bubbleCallback: ({ node, parent }) => this.deleteChild(parent, node),
+    YState.transact(() => {
+      const traverse = SchemaHelper.createTraverse({
+        bubbleCallback: ({ node, parent }) => this.deleteChild(parent, node),
+      })
+      traverse(getSelectIdList())
+
+      YClients.clearSelect()
+      YClients.afterSelect.dispatch()
     })
-    traverse(getSelectIdList())
-
-    YClients.clearSelect()
-    YClients.afterSelect.dispatch()
-
-    YState.next()
     YUndo.track({
       type: 'all',
       description: sentence(t('verb.delete'), t('noun.node')),
@@ -90,22 +90,22 @@ class HandleNodeService {
     if (!this.copiedIds.length) return
 
     const newSelectIds = <ID[]>[]
-    const traverse = SchemaHelper.createTraverse({
-      callback: (props) => {
-        const { node, parent, forwardRef: upLevelRef, depth } = props
-        const newParent = upLevelRef?.newNode || parent
-        const newNode = SchemaCreator.clone(node)
-        newNode.name = SchemaCreator.createNodeName(node.type)
-        this.addNodes([newNode])
-        this.insertChildAt(newParent, newNode)
-        props.newNode = newNode
-        if (depth === 0) newSelectIds.push(newNode.id)
-      },
+    YState.transact(() => {
+      const traverse = SchemaHelper.createTraverse({
+        callback: (props) => {
+          const { node, parent, forwardRef: upLevelRef, depth } = props
+          const newParent = upLevelRef?.newNode || parent
+          const newNode = SchemaCreator.clone(node)
+          newNode.name = SchemaCreator.createNodeName(node.type)
+          this.addNodes([newNode])
+          this.insertChildAt(newParent, newNode)
+          props.newNode = newNode
+          if (depth === 0) newSelectIds.push(newNode.id)
+        },
+      })
+      traverse(this.copiedIds)
+      this.copiedIds = []
     })
-    traverse(this.copiedIds)
-    this.copiedIds = []
-
-    YState.next()
     YUndo.untrack(() => newSelectIds.forEach((id) => YClients.select(id)))
     YUndo.track({
       type: 'all',
@@ -121,19 +121,20 @@ class HandleNodeService {
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
     const selected = getSelectIdList().map(YState.find<S.Node>)
 
-    selected.forEach((node) => {
-      const parent = YState.find<S.NodeParent>(node.parentId)
-      let index = parent.childIds.indexOf(node.id)
-      index = iife(() => {
-        if (type === 'up') return index - 1
-        if (type === 'down') return index + 1
-        if (type === 'top') return 0
-        return parent.childIds.length - 1
+    YState.transact(() => {
+      selected.forEach((node) => {
+        const parent = YState.find<S.NodeParent>(node.parentId)
+        let index = parent.childIds.indexOf(node.id)
+        index = iife(() => {
+          if (type === 'up') return index - 1
+          if (type === 'down') return index + 1
+          if (type === 'top') return 0
+          return parent.childIds.length - 1
+        })
+        this.reHierarchy(parent, node, index)
       })
-      this.reHierarchy(parent, node, index)
     })
 
-    YState.next()
     YUndo.track({
       type: 'all',
       description: sentence(t('verb.reorder'), t('noun.node')),
