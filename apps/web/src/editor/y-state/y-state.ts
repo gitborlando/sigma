@@ -42,6 +42,20 @@ class YStateService {
     return this.immut.applyImmerPatches
   }
 
+  transact(callback: () => void, origin?: unknown) {
+    const run = () => {
+      callback()
+      this.immut.next()
+    }
+
+    if (!this.doc) {
+      run()
+      return
+    }
+
+    this.doc.transact(run, origin)
+  }
+
   find<T extends S.SchemaItem>(id: string): T {
     return this.state[id] as T
   }

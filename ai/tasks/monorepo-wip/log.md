@@ -205,3 +205,79 @@
 - 本轮不启用或恢复 `YSync.init()`。
 - 本轮不拆分 `immut-y.ts` 为 `json-to-y.ts` / `y-to-immut.ts`。
 - 本轮不修改 `Immut -> Yjs` 订阅链路整体策略；后续仍需继续向“业务写入统一走 `YState.set/insert/delete`，`Immut` 只做渲染投影”的目标收敛。
+
+## 2026-06-06
+
+### 范围
+
+- 继续阶段 3 的 Yjs / Immut 状态源收敛。
+- 本轮先做 `immut-y.ts` 的职责拆分，再新增 `YState.transact()` 作为后续统一写入入口。
+- 本轮不改变现有双向同步策略。
+
+### 阶段 3 / `immut-y.ts` 拆分已完成
+
+- 新增 `apps/web/src/utils/immut/json-to-y.ts`。
+  - 承担 Immut / JSON 写入 Yjs 的转换、初始化和订阅逻辑。
+  - 保留原有 `toYValue()`、`initializeYFromI()`、`subscribeI()` 等行为。
+- 新增 `apps/web/src/utils/immut/y-to-immut.ts`。
+  - 承担 Yjs 内容和 `observeDeep` 事件投影回 Immut 的逻辑。
+  - 保留原有 `initializeIFromY()`、`subscribeY()` 行为。
+- `apps/web/src/utils/immut/immut-y.ts` 缩小为 `bind()` 编排入口，只负责初始化顺序和 disposer 聚合。
+- 同步顺序保持为：
+  - 先 `Y -> Immut`
+  - 再 `Immut -> Y`
+  - 然后同时订阅 `Immut -> Y` 与 `Y -> Immut`
+
+### 阶段 3 / `YState.transact()` 小步接入已完成
+
+- `YState` 新增 `transact(callback, origin?)`。
+  - 当前实现仍执行既有 Immut 写入，再统一调用 `immut.next()` flush patch。
+  - 如果 `Y.Doc` 已存在，外层通过 `doc.transact()` 包裹提交。
+  - 这一步先收口提交边界，尚未改成直接写 Yjs。
+- 以下简单写入点已从手动 `YState.next()` 迁到 `YState.transact()`：
+  - `HandlePage.addPage()` / `HandlePage.removePage()`
+  - `OperateFill.applyChangeToYState()`
+  - `DesignGeometry.setGeometries()`
+  - `StageTransformer.transform()`
+  - `StageCreate.onCreateMove()` / `StageCreate.onCreateEnd()`
+- `StageCreate.onCreateMove()` 保留线段创建时的空提交语义，确保 `onCreateStart()` 中已加入的节点仍会被 flush。
+- `handle/node.ts` 中剩余的 `YState.next()` 暂未迁移，因为这些调用和选择态、`afterSelect` 顺序耦合更明显，应单独处理。
+
+### 验证记录
+
+- `pnpm exec prettier --write apps/web/src/utils/immut/immut-y.ts apps/web/src/utils/immut/json-to-y.ts apps/web/src/utils/immut/y-to-immut.ts`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `pnpm exec prettier --write apps/web/src/editor/y-state/y-state.ts apps/web/src/editor/handle/page.ts apps/web/src/editor/operate/fill.ts apps/web/src/editor/operate/geometry.ts apps/web/src/editor/stage/tools/transformer.ts apps/web/src/editor/stage/interact/create.ts`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `pnpm exec tsc --noEmit --pretty false --target ESNext --module ESNext --moduleResolution bundler --skipLibCheck --strict --isolatedModules apps/web/src/utils/immut/immut-y.ts apps/web/src/utils/immut/json-to-y.ts apps/web/src/utils/immut/y-to-immut.ts`：通过。
+- 针对编辑器文件的 root-files 局部 `tsc` 未作为有效验证记录：这类指定文件编译会拉入编辑器依赖图并长时间无输出，和既有 web typecheck 长耗时问题一致。
+- 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
+  - 原因：本次是低风险拆分和提交入口收口；且 `@sigma/web typecheck` 已记录存在长耗时超时问题。
+
+### 控制台错误补充排查
+
+- 页面控制台报多个模块 500，build 复现为 `@gitborlando/toolkit/disposer` 无法解析。
+- 根因是当前 `node_modules` 缺少 `@sigma/web -> @gitborlando/toolkit` workspace link；`package.json` 和 `pnpm-lock.yaml` 已有依赖记录。
+- 执行 `pnpm install --frozen-lockfile` 后，`apps/web/node_modules/@gitborlando/toolkit` 正确链接到 `packages/toolkit`。
+- 重新验证：
+  - `http://localhost:5173/src/editor/editor/editor.ts`：从 500 恢复为 200。
+  - `http://localhost:5173/src/editor/stage/interact/create.ts`：返回 200。
+  - `pnpm --filter @sigma/web build`：通过。
+- 当前运行中的旧 Vite 进程仍对根路径返回 500，需要用户重启本地 dev server 以加载新的 workspace link。
+
+### auto-import 声明问题补充修正
+
+- 发现仓库根目录误生成过一份旧的 `auto-imports.d.ts`。
+  - 其中 `Disposer` 仍指向 `src/utils/disposer`。
+  - 其中还保留过期的 `getNodeMrect` 声明。
+- `apps/web/auto-import.ts` 显式设置 `dts: path.resolve(dirname, 'auto-imports.d.ts')`，确保无论从根目录还是 `apps/web` 启动 Vite，声明文件都只生成到 `apps/web/auto-imports.d.ts`。
+- `.gitignore` 从忽略所有 `auto-imports.d.ts` 改为只忽略根目录 `/auto-imports.d.ts`，让 `apps/web/auto-imports.d.ts` 可以纳入版本控制，避免新环境或 TS Server 没有全局声明。
+- 删除根目录错误生成的 `auto-imports.d.ts`。
+- Vite transform 已确认会为使用 `YState` 的模块注入 `import { YState } from "/src/editor/y-state/y-state.ts"`。
+- `pnpm --filter @sigma/web build`：通过。
+
+### 暂不处理
+
+- 本轮不移除 `Immut -> Yjs` 订阅链路。
+- 本轮不改 `YState.set/insert/delete` 的写入实现。
+- 本轮不启用或恢复 `YSync.init()`。

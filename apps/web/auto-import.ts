@@ -1,6 +1,11 @@
 import autoImportPlugin from 'unplugin-auto-import/vite'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export const autoImportConfig = autoImportPlugin({
+  dts: path.resolve(dirname, 'auto-imports.d.ts'),
   imports: [
     'react',
     'react-router',

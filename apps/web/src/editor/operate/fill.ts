@@ -61,11 +61,12 @@ class OperateFillService {
 
   applyChangeToYState(patches: Patch[]) {
     const nodes = getSelectedNodes()
-    nodes.forEach((node) => {
-      if (this.isMultiFills) YState.set(`${node.id}.fills`, [])
-      YState.applyImmerPatches(patches, `${node.id}.fills`)
+    YState.transact(() => {
+      nodes.forEach((node) => {
+        if (this.isMultiFills) YState.set(`${node.id}.fills`, [])
+        YState.applyImmerPatches(patches, `${node.id}.fills`)
+      })
     })
-    YState.next()
   }
 
   private isSameFills(nodes: S.Node[]) {

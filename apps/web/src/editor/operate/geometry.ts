@@ -106,10 +106,11 @@ class DesignGeometryService {
       this.currentGeometries[key] = geometries[key] as number
     }
 
-    getSelectedNodes().forEach((node) => {
-      this.applyChangeToNode(node)
+    YState.transact(() => {
+      getSelectedNodes().forEach((node) => {
+        this.applyChangeToNode(node)
+      })
     })
-    YState.next()
 
     this.changingKeys.clear()
     this.isDelta = true

@@ -160,8 +160,9 @@ class StageTransformerService {
   }
 
   private transform() {
-    getSelectedNodes().forEach(this.applyToNode)
-    YState.next()
+    YState.transact(() => {
+      getSelectedNodes().forEach(this.applyToNode)
+    })
   }
 
   private applyToNode(node: S.Node) {

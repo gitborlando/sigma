@@ -65,31 +65,33 @@ class StageCreateService {
   }
 
   private onCreateMove({ marquee, current, start }: DragData) {
-    if (this.node.type === 'line') {
-      current = snapGridRoundXY(current)
-      start = snapGridRoundXY(start)
+    YState.transact(() => {
+      if (this.node.type === 'line') {
+        current = snapGridRoundXY(current)
+        start = snapGridRoundXY(start)
 
-      const rotation = Angle.sweep(XY.vector(current, start))
-      const width = XY.distance(current, start)
+        const rotation = Angle.sweep(XY.vector(current, start))
+        const width = XY.distance(current, start)
 
-      // OperateGeometry.setActiveGeometries({ ...start, width, rotation }, false)
-    } else {
-      const mrect = this.calcNodeMRect(marquee)
+        // OperateGeometry.setActiveGeometries({ ...start, width, rotation }, false)
+      } else {
+        const mrect = this.calcNodeMRect(marquee)
 
-      YState.set(`${this.node.id}.width`, mrect.width)
-      YState.set(`${this.node.id}.height`, mrect.height)
-      YState.set(`${this.node.id}.matrix`, mrect.matrix)
-    }
-    YState.next()
+        YState.set(`${this.node.id}.width`, mrect.width)
+        YState.set(`${this.node.id}.height`, mrect.height)
+        YState.set(`${this.node.id}.matrix`, mrect.matrix)
+      }
+    })
   }
 
   private onCreateEnd({ moved }: DragData & { moved: boolean }) {
     if (!moved) {
-      YState.set(`${this.node.id}.width`, 100)
-      if (this.node.type !== 'line') {
-        YState.set(`${this.node.id}.height`, 100)
-      }
-      YState.next()
+      YState.transact(() => {
+        YState.set(`${this.node.id}.width`, 100)
+        if (this.node.type !== 'line') {
+          YState.set(`${this.node.id}.height`, 100)
+        }
+      })
     }
 
     StageInteract.interaction = 'select'

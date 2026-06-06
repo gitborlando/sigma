@@ -13,9 +13,10 @@ class HandlePageService {
   }
 
   addPage(page = SchemaCreator.page()) {
-    YState.set(`${page.id}`, page)
-    YState.insert('meta.pageIds', page.id)
-    YState.next()
+    YState.transact(() => {
+      YState.set(`${page.id}`, page)
+      YState.insert('meta.pageIds', page.id)
+    })
 
     YUndo.untrack(() => YClients.selectPage(page.id))
     YUndo.track2('all', t('add and select page'))
@@ -24,9 +25,10 @@ class HandlePageService {
   removePage(page: S.Page) {
     if (YState.state.meta.pageIds.length === 1) return
 
-    YState.delete(`${page.id}`)
-    YState.delete(`meta.pageIds.${YState.state.meta.pageIds.indexOf(page.id)}`)
-    YState.next()
+    YState.transact(() => {
+      YState.delete(`${page.id}`)
+      YState.delete(`meta.pageIds.${YState.state.meta.pageIds.indexOf(page.id)}`)
+    })
 
     YUndo.untrack(() => YClients.selectPage(YState.state.meta.pageIds[0]))
     YUndo.track2('all', t('delete page'))
