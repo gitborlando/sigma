@@ -5,7 +5,7 @@ import { deepEqual, getNestedValues, toJSON } from './json-to-y'
 export function initializeIFromY(i: Immut, y: Y.Map<any>) {
   y.forEach((yv, k) => {
     if (!deepEqual(i.state[k], toJSON(yv))) {
-      i.set(k, toJSON(yv))
+      i.state[k] = toJSON(yv)
     }
   })
 }

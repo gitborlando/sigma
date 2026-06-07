@@ -227,6 +227,7 @@
   - 先 `Y -> Immut`
   - 再 `Immut -> Y`
   - 然后同时订阅 `Immut -> Y` 与 `Y -> Immut`
+- `initializeIFromY()` 初始化投影改为直接写入 `i.state`，不再使用 `i.set()` 产生 Immut patch，避免远端 Yjs 内容初始化时的 patch 混入后续业务提交。
 
 ### 阶段 3 / `YState.transact()` 小步接入已完成
 
@@ -254,6 +255,7 @@
 - `pnpm exec prettier --write apps/web/src/editor/handle/node.ts`：通过。
   - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
 - `pnpm exec tsc --noEmit --pretty false --target ESNext --module ESNext --moduleResolution bundler --skipLibCheck --strict --isolatedModules apps/web/src/utils/immut/immut-y.ts apps/web/src/utils/immut/json-to-y.ts apps/web/src/utils/immut/y-to-immut.ts`：通过。
+- `apps/web` 目录下执行 `pnpm exec tsc --noEmit --pretty false --target ESNext --module ESNext --moduleResolution bundler --skipLibCheck --strict --isolatedModules src/utils/immut/immut-y.ts src/utils/immut/json-to-y.ts src/utils/immut/y-to-immut.ts`：通过。
 - 针对编辑器文件的 root-files 局部 `tsc` 未作为有效验证记录：这类指定文件编译会拉入编辑器依赖图并长时间无输出，和既有 web typecheck 长耗时问题一致。
 - 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
   - 原因：本次是低风险拆分和提交入口收口；且 `@sigma/web typecheck` 已记录存在长耗时超时问题。
