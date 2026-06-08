@@ -4,10 +4,8 @@ import equal from 'fast-deep-equal'
 import { rgb } from 'src/utils/color'
 import { UIPickerCopy } from '../handle/picker'
 import { SchemaCreator } from '../schema/creator'
-import { SchemaHistory } from '../schema/history'
-import { Schema } from '../schema/schema'
 import { INode, IShadow } from '../schema/type'
-import { OperateNode } from './node'
+import { getSelectedNodes } from '../utils/get'
 
 @autobind
 class OperateShadowService {
@@ -16,17 +14,20 @@ class OperateShadowService {
   afterOperate = Signal.create()
   private immui = new (class {})()
   initHook() {
-    OperateNode.selectedNodes$.hook(this.setupShadows)
-    Schema.onMatchPatch('/?/shadows/...', this.setupShadows)
+    YClients.afterSelect.hook(this.setupShadows)
+    YState.subscribe((patches) => {
+      if (!patches.some((patch) => patch.keys[1] === 'shadows')) return
+      this.setupShadows()
+    })
     this.onUiPickerSetShadow()
     this.afterOperate.hook(() => {
-      SchemaHistory.commit('改变 shadows')
+      YUndo.track({ type: 'state', description: '改变 shadows' })
     })
   }
   setupShadows() {
     this.shadows = []
     this.isMultiShadows = false
-    const nodes = OperateNode.selectingNodes
+    const nodes = getSelectedNodes()
     if (nodes.length === 1) return (this.shadows = clone(nodes[0].shadows))
     if (nodes.length > 1) {
       if (this.isSameShadows(nodes)) return (this.shadows = clone(nodes[0].shadows))
@@ -39,37 +40,35 @@ class OperateShadowService {
       fill: SchemaCreator.fillColor(rgb(0, 0, 0), shadowsLength ? 0.25 : 1),
     })
     this.immui.add(this.shadows, [shadowsLength], shadow)
-    this.applyChangeToSchema()
-    SchemaHistory.commit('添加 shadow')
+    this.applyChangeToYState()
+    YUndo.track({ type: 'state', description: '添加 shadow' })
   }
   deleteShadow(index: number) {
     this.immui.delete(this.shadows, [index])
-    this.applyChangeToSchema()
-    SchemaHistory.commit('删除 shadow')
+    this.applyChangeToYState()
+    YUndo.track({ type: 'state', description: '删除 shadow' })
   }
   setShadow(index: number, keys: string[], value: any) {
     this.immui.reset(this.shadows, [index, ...keys], value)
-    this.applyChangeToSchema()
+    this.applyChangeToYState()
   }
   toggleShadow(index: number, keys: string[], value: any) {
     this.immui.reset(this.shadows, [index, ...keys], value)
-    this.applyChangeToSchema()
-    SchemaHistory.commit('改变 shadow')
+    this.applyChangeToYState()
+    YUndo.track({ type: 'state', description: '改变 shadow' })
   }
   changeShadow(index: number, newShadow: IShadow) {
     this.immui.reset(this.shadows, [index], newShadow)
-    this.applyChangeToSchema()
-    SchemaHistory.commit('改变 shadows')
+    this.applyChangeToYState()
+    YUndo.track({ type: 'state', description: '改变 shadows' })
   }
-  applyChangeToSchema() {
-    const nodes = OperateNode.selectedNodes.value
-    const patches = this.immui.next(this.shadows)[1]
-    nodes.forEach((node) => {
-      if (this.isMultiShadows) Schema.itemReset(node, ['shadows'], [])
-      Schema.applyPatches(patches, { prefix: `/${node.id}/shadows` })
+  applyChangeToYState() {
+    this.shadows = this.immui.next(this.shadows)[0]
+    YState.transact(() => {
+      getSelectedNodes().forEach((node) => {
+        YState.set(`${node.id}.shadows`, clone(this.shadows))
+      })
     })
-    Schema.commitOperation('改变 shadows')
-    Schema.nextSchema()
   }
   private onUiPickerSetShadow() {
     UIPickerCopy.onChange.hook((patches) => {
@@ -77,11 +76,11 @@ class OperateShadowService {
       this.immui.applyPatches(this.shadows, patches, {
         prefix: `/${UIPickerCopy.index}/fill`,
       })
-      this.applyChangeToSchema()
+      this.applyChangeToYState()
     })
     UIPickerCopy.afterOperate.hook(() => {
       if (UIPickerCopy.from !== 'shadow') return
-      SchemaHistory.commit('改变 shadows')
+      YUndo.track({ type: 'state', description: '改变 shadows' })
     })
   }
   private isSameShadows(nodes: INode[]) {

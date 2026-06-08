@@ -287,3 +287,39 @@
 - 本轮不移除 `Immut -> Yjs` 订阅链路。
 - 本轮不改 `YState.set/insert/delete` 的写入实现。
 - 本轮不启用或恢复 `YSync.init()`。
+
+## 2026-06-08
+
+### 范围
+
+- 继续阶段 3 的 Yjs / Immut 状态源收敛。
+- 本轮按“一次做 3 小步”推进，集中迁移右侧属性操作里仍走旧 `Schema.nextSchema()` 的相邻写入点。
+- 本轮不改旧 `Schema` 服务本身，不移除 `Immut -> Yjs` 订阅链路。
+
+### 阶段 3 / 属性操作写入收口已完成
+
+- `OperateStroke` 从旧 `OperateNode` / `Schema.onMatchPatch()` / `Schema.applyPatches()` 迁到：
+  - 选区来源：`YClients.afterSelect` 与 `getSelectedNodes()`。
+  - 状态变更监听：`YState.subscribe()` 中匹配 `strokes` patch。
+  - 写入入口：`YState.transact()` + `YState.set()`。
+  - 历史记录：`YUndo.track()`。
+- `OperateShadow` 按同样模式从旧 `Schema` 写入迁到 `YState.transact()`。
+- `OperateText` 的文本样式和内容写入迁到 `YState.transact()`：
+  - `setTextStyle()` / `toggleTextStyle()` 只写入变更的 style key，避免多选混合值覆盖其他样式字段。
+  - `setTextContent()` 直接写入 `${textNode.id}.content`。
+  - 文本操作监听改为 `YClients.afterSelect` 与 `YState.subscribe()`。
+- `stroke` / `shadow` 多选写入时为每个节点单独 `clone()` 当前属性数组，避免多个节点共享同一个数组引用。
+
+### 验证记录
+
+- `pnpm exec prettier --write apps/web/src/editor/operate/stroke.ts apps/web/src/editor/operate/shadow.ts apps/web/src/editor/operate/text.ts`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `git diff` 已复核，本轮只涉及上述 3 个 operate 文件和本日志。
+- 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
+  - 原因：本次是局部写入入口迁移；仓库指示默认不要频繁 build/test，且既有记录中 `@sigma/web typecheck` 存在长耗时问题。
+
+### 暂不处理
+
+- 本轮不迁移 `OperateAlign` / `OperatePage` / 旧 `OperateNode`。
+- 本轮不改 `YState.set/insert/delete` 为直接写 Yjs。
+- 本轮不启用或恢复 `YSync.init()`。

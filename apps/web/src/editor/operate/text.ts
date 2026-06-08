@@ -1,8 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { SchemaHistory } from '../schema/history'
-import { Schema } from '../schema/schema'
 import { ID, IText } from '../schema/type'
-import { OperateNode } from './node'
+import { getSelectedNodes } from '../utils/get'
 
 type ITextStyle = IText['style']
 export type ITextStyleKey = keyof ITextStyle
@@ -42,30 +40,37 @@ class OperateTextService {
   textStyleOptions = createTextStyleOptions()
   private immui = new (class {})()
   initHook() {
-    OperateNode.selectedNodes.hook(() => {
-      this.textNodes = OperateNode.selectedNodes.value.filter((node) => {
-        return node.type === 'text'
-      }) as IText[]
-      if (!this.textNodes.length) return
-      this.setupTextStyle()
+    YClients.afterSelect.hook(this.setupTextNodes)
+    YState.subscribe((patches) => {
+      const changed = patches.some((patch) => {
+        return patch.keys[1] === 'content' || patch.keys[1] === 'style'
+      })
+      if (changed) this.setupTextNodes()
     })
     this.afterOperate.hook(() => {
-      SchemaHistory.commit('改变 text')
+      YUndo.track({ type: 'state', description: '改变 text' })
     })
   }
   setTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
     this.immui.reset(this.textStyle, [key], value)
-    this.applyChangeToSchema()
+    this.applyChangeToYState(key, value)
   }
   toggleTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
     this.immui.reset(this.textStyle, [key], value)
-    this.applyChangeToSchema()
-    SchemaHistory.commit('改变 text style')
+    this.applyChangeToYState(key, value)
+    YUndo.track({ type: 'state', description: '改变 text style' })
   }
   setTextContent(textNode: IText, content: string) {
-    Schema.itemReset(textNode, ['content'], content)
-    Schema.commitOperation('改变 text content')
-    Schema.nextSchema()
+    YState.transact(() => {
+      YState.set(`${textNode.id}.content`, content)
+    })
+  }
+  private setupTextNodes() {
+    this.textNodes = getSelectedNodes().filter((node) => {
+      return node.type === 'text'
+    }) as IText[]
+    if (!this.textNodes.length) return
+    this.setupTextStyle()
   }
   private setupTextStyle() {
     const newTextStyle = <IBaseStyle>{}
@@ -83,14 +88,13 @@ class OperateTextService {
     })
     this.textStyle = newTextStyle
   }
-  private applyChangeToSchema() {
-    const nodes = OperateNode.selectedNodes.value
-    const patches = this.immui.next(this.textStyle)[1]
-    nodes.forEach((node) =>
-      Schema.applyPatches(patches, { prefix: `/${node.id}/style` }),
-    )
-    Schema.commitOperation('改变 text styles')
-    Schema.nextSchema()
+  private applyChangeToYState(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
+    this.textStyle = this.immui.next(this.textStyle)[0]
+    YState.transact(() => {
+      this.textNodes.forEach((node) => {
+        YState.set(`${node.id}.style.${key}`, value)
+      })
+    })
   }
 }
 
