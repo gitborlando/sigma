@@ -1,6 +1,5 @@
 import { AnyObject } from '@gitborlando/utils'
 import { isNil } from 'es-toolkit'
-import { Schema } from 'src/editor/schema/schema'
 import { getSelectPageId } from '../utils/get'
 
 export type SchemaUtilTraverseData = {
@@ -55,8 +54,8 @@ export class SchemaHelper {
 
   static isById(id: ID, type: S.SchemaItem['type'] | 'nodeParent'): boolean {
     if (type === 'nodeParent')
-      return ['page', 'frame', 'group'].includes(Schema.find(id).type)
-    return Schema.find(id).type === type
+      return ['page', 'frame', 'group'].includes(YState.find(id).type)
+    return YState.find(id).type === type
   }
 
   static isNodeParent<T extends { childIds: string[] }>(node: any): node is T {
@@ -70,16 +69,16 @@ export class SchemaHelper {
 
   static getChildren(id: ID | S.NodeParent) {
     const childIds =
-      (typeof id !== 'string' ? id : Schema.find<S.NodeParent>(id))?.childIds || []
-    return childIds.map((id) => Schema.find<S.Node>(id))
+      (typeof id !== 'string' ? id : YState.find<S.NodeParent>(id))?.childIds || []
+    return childIds.map((id) => YState.find<S.Node>(id))
   }
 
   static findAncestor(id: ID | S.Node, utilFunc?: (node: S.Node) => boolean) {
-    let node = typeof id === 'string' ? Schema.find<S.Node>(id) : id
+    let node = typeof id === 'string' ? YState.find<S.Node>(id) : id
     utilFunc ||= (node: S.Node) => SchemaHelper.isPageById(node.parentId)
     while (node.parentId) {
       if (utilFunc(node)) return node
-      node = Schema.find<S.Node>(node.parentId)
+      node = YState.find<S.Node>(node.parentId)
     }
     return node
   }
@@ -87,7 +86,7 @@ export class SchemaHelper {
   static findParent(node: S.Node) {
     while (node.parentId) {
       if (SchemaHelper.is<S.Frame>(node, 'frame')) return node
-      node = Schema.find<S.Node>(node.parentId)
+      node = YState.find<S.Node>(node.parentId)
     }
     return node
   }

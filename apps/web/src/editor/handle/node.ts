@@ -2,7 +2,6 @@ import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { SchemaCreator } from '../schema/creator'
-import { Schema } from '../schema/schema'
 import { getSelectIdList } from '../utils/get'
 
 class HandleNodeService {
@@ -176,11 +175,11 @@ class HandleNodeService {
       this.datumId = ''
     }
     if (selectIds.length === 1) {
-      this.datumId = Schema.find<S.Node>(firstOne(selectIds)!).parentId
+      this.datumId = YState.find<S.Node>(firstOne(selectIds)!).parentId
     }
     if (selectIds.length > 1) {
       const parentIds = new Set<string>()
-      selectIds.forEach((id) => parentIds.add(Schema.find<S.Node>(id).parentId))
+      selectIds.forEach((id) => parentIds.add(YState.find<S.Node>(id).parentId))
       if (parentIds.size === 1) this.datumId = firstOne(parentIds)!
       if (parentIds.size > 1) this.datumId = ''
     }

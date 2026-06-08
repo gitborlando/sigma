@@ -353,3 +353,27 @@
 - 本轮不迁移 `OperateNode` 的旧增删节点 / paste / wrapInFrame 写入方法。
 - 本轮不迁移 `Schema` 服务本身。
 - 本轮不改 `YState.set/insert/delete` 为直接写 Yjs。
+
+### 阶段 3 / 实际使用读路径收口已完成
+
+- 继续按“迁移前先确认实际使用”推进。
+- 复核发现 `apps/web/src/view/editor/stage/vector-edit.tsx` 虽然仍有旧 `Schema` 写入，但当前没有被 `StageComp` 或其他运行入口实际渲染，本轮不迁移、不删除。
+- 复核确认 `SchemaHelper.isById()` / `getChildren()` / `findAncestor()` / `findParent()` 被当前舞台选择、创建和右侧对齐面板实际使用：
+  - 这些 helper 内部读源从 `Schema.find()` 改为 `YState.find()`。
+  - 清理 `SchemaHelper` 中不再使用的 `Schema` import。
+- 复核确认 `HandleNode.getDatum()` 通过 `HandleNode.subscribe()` 实际接入编辑器订阅：
+  - 基准父节点读取从 `Schema.find()` 改为 `YState.find()`。
+
+### 验证记录
+
+- `pnpm exec prettier --write apps/web/src/editor/schema/helper.ts apps/web/src/editor/handle/node.ts ai/tasks/monorepo-wip/log.md`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `git diff --check`：通过。
+- 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
+  - 原因：本次是实际使用读路径的局部迁移；仓库指示默认不要频繁 build/test，且既有记录中 `@sigma/web typecheck` 存在长耗时问题。
+
+### 暂不处理
+
+- 本轮不迁移 `vector-edit.tsx`，因为未发现实际运行入口渲染它。
+- 本轮不迁移 `operate/page.ts`，因为未发现实际运行引用。
+- 本轮不迁移 `OperateNode` 的旧增删节点 / paste / wrapInFrame 写入方法，后续需先确认具体方法是否仍由实际入口调用。
