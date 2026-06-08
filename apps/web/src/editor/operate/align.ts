@@ -1,8 +1,8 @@
 import autobind from 'class-autobind-decorator'
 import { StageScene } from 'src/editor/render/scene'
-import { Schema } from '../schema/schema'
+import { SchemaHelper } from '../schema/helper'
 import { INode, INodeParent } from '../schema/type'
-import { OperateNode, getSelectNodes } from './node'
+import { getSelectedNodes } from '../utils/get'
 
 const alignTypes = <const>[
   'alignLeft',
@@ -25,12 +25,12 @@ class OperateAlignService {
   private toAlignNodes = <INode[]>[]
 
   initHook() {
-    OperateNode.selectedNodes$.hook(this.setupAlign)
+    YClients.afterSelect.hook(this.setupAlign)
     this.currentAlign.hook(this.autoAlign)
   }
 
   private setupAlign() {
-    const selectNodes = getSelectNodes()
+    const selectNodes = getSelectedNodes()
     if (selectNodes.length === 0) {
       this.canAlign.dispatch(false)
     }
@@ -40,17 +40,19 @@ class OperateAlignService {
     }
     if (
       selectNodes.length === 1 &&
-      SchemaUtil.isById(selectNodes[0].id, 'nodeParent')
+      SchemaHelper.isById(selectNodes[0].id, 'nodeParent')
     ) {
-      this.toAlignNodes = SchemaUtil.getChildren(<INodeParent>selectNodes[0])
+      this.toAlignNodes = SchemaHelper.getChildren(<INodeParent>selectNodes[0])
       this.canAlign.dispatch(true)
     }
   }
 
   private autoAlign() {
-    this[this.currentAlign.value]()
+    YState.transact(() => {
+      this[this.currentAlign.value]()
+    })
     if (this.needAlign) {
-      Schema.finalOperation('设置对齐')
+      YUndo.track({ type: 'state', description: '设置对齐' })
       this.needAlign = false
     }
   }
@@ -116,27 +118,22 @@ class OperateAlignService {
   private horizontalAlign(node: INode, shift: number) {
     if (shift === 0) return
     this.needAlign = true
-    SchemaUtil.traverseIds([node.id], ({ node }) => {
-      Schema.itemReset(node, ['x'], node.x + shift)
-      return false
-    })
+    YState.set(`${node.id}.x`, node.x + shift)
   }
 
   private verticalAlign(node: INode, shift: number) {
     if (shift === 0) return
     this.needAlign = true
-    SchemaUtil.traverseIds([node.id], ({ node }) => {
-      Schema.itemReset(node, ['y'], node.y + shift)
-      return false
-    })
+    YState.set(`${node.id}.y`, node.y + shift)
   }
 
   private getAlignBound() {
-    if (getSelectNodes().length > 1) {
-      // return StageTransform.transformOBB.aabb
-    } else {
-      return StageScene.findElem(getSelectNodes()[0].id).obb.aabb
+    if (getSelectedNodes().length > 1) {
+      const aabbList = this.toAlignNodes.map((node) => this.getOBBAndBound(node))
+      return AABB.merge(aabbList)
     }
+
+    return StageScene.findElem(getSelectedNodes()[0].id).obb.aabb
   }
 
   private getOBBAndBound(node: INode) {

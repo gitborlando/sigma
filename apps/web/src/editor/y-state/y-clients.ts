@@ -89,6 +89,7 @@ class YClientsService {
   selectPage(id: string) {
     this.client.selectPageId = id
     this.clearSelect()
+    this.afterSelect.dispatch()
 
     YUndo.track({
       type: 'client',

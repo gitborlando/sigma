@@ -23,23 +23,8 @@ class OperateNodeService {
     this.afterRemoveNodes.hook((ids) => {
       this.selectIds.dispatch((ids) => ids.clear())
     })
-    Schema.onMatchPatch('/client/selectIds', () => {
-      this.selectIds.dispatch(new Set(Schema.client.selectIds))
-      this.selectedNodes$.dispatch(Schema.client.selectIds.map(Schema.find<INode>))
-    })
-    Schema.schemaChanged.hook(() => {
-      const selectedNodes = Schema.client.selectIds.map(Schema.find<INode>)
-      const selectionChange = () => {
-        this.lastSelectedNodeSet = new Set(selectedNodes)
-        this.selectedNodes.dispatch(selectedNodes)
-      }
-      if (this.lastSelectedNodeSet.size !== selectedNodes.length) {
-        return selectionChange()
-      }
-      for (const node of selectedNodes) {
-        if (!this.lastSelectedNodeSet.has(node)) return selectionChange()
-      }
-    })
+    YClients.afterSelect.hook(this.syncSelection)
+    YState.subscribe(this.syncSelectedNodes)
     // this.intoEditNodeId.intercept((id) => {
     //   if (!id) return ''
     //   const node = Schema.find(id)
@@ -49,7 +34,7 @@ class OperateNodeService {
   }
   get selectingNodes() {
     const nodes = <INode[]>[]
-    this.selectIds.value.forEach((id) => nodes.push(Schema.find(id)))
+    this.selectIds.value.forEach((id) => nodes.push(YState.find(id)))
     return nodes
   }
   select(id: ID) {
@@ -67,7 +52,6 @@ class OperateNodeService {
     this.selectIds.dispatch(new Set())
   }
   commitSelect() {
-    const selectIdArr = [...this.selectIds.value]
     this.autoGetDatumId(this.selectIds.value)
     // Schema.itemReset(Schema.client, ['selectIds'], selectIdArr)
     Schema.commitOperation(`选择节点`)
@@ -200,17 +184,40 @@ class OperateNodeService {
       this.datumId.dispatch('')
     }
     if (selectIds.size === 1) {
-      this.datumId.dispatch(Schema.find<INode>(firstOne(selectIds)).parentId)
+      this.datumId.dispatch(YState.find<INode>(firstOne(selectIds)).parentId)
     }
     if (selectIds.size > 1) {
       const parentIds = new Set<string>()
-      selectIds.forEach((id) => parentIds.add(Schema.find<INode>(id).parentId))
+      selectIds.forEach((id) => parentIds.add(YState.find<INode>(id).parentId))
       if (parentIds.size === 1) this.datumId.dispatch(firstOne(parentIds))
       if (parentIds.size > 1) this.datumId.dispatch('')
     }
     const elem = StageScene.findElem(this.datumId.value)
     if (!elem) return (this.datumXY = XY.$(0, 0))
     // this.datumXY = XY.$(elem.obb.aabb.minX, elem.obb.aabb.minY)
+  }
+
+  private syncSelection() {
+    const selectIds = new Set<ID>(YClients.selectIdList)
+    this.selectIds.dispatch(selectIds)
+    this.autoGetDatumId(selectIds)
+    this.syncSelectedNodes()
+  }
+
+  private syncSelectedNodes() {
+    const selectedNodes = YClients.selectIdList.map(YState.find<INode>)
+    this.selectedNodes$.dispatch(selectedNodes)
+
+    const selectionChange = () => {
+      this.lastSelectedNodeSet = new Set(selectedNodes)
+      this.selectedNodes.dispatch(selectedNodes)
+    }
+    if (this.lastSelectedNodeSet.size !== selectedNodes.length) {
+      return selectionChange()
+    }
+    for (const node of selectedNodes) {
+      if (!this.lastSelectedNodeSet.has(node)) return selectionChange()
+    }
   }
 }
 
@@ -229,5 +236,5 @@ export function getSelectNodes() {
 
 OperateNode.selectIds.hook({ beforeAll: true }, (selectIds) => {
   selectIdList = [...selectIds]
-  selectedNodes = selectIdList.map(Schema.find<INode>)
+  selectedNodes = selectIdList.map(YState.find<INode>)
 })

@@ -323,3 +323,33 @@
 - 本轮不迁移 `OperateAlign` / `OperatePage` / 旧 `OperateNode`。
 - 本轮不改 `YState.set/insert/delete` 为直接写 Yjs。
 - 本轮不启用或恢复 `YSync.init()`。
+
+### 阶段 3 / 实际使用优先规则补充
+
+- `discuss.md` 补充规则：迁移某个文件或模块前，先确认是否被实际运行路径引用。
+- 只有注释引用、仅自身导出、或没有被入口链路导入的旧文件，当前不迁移、不删除，直接跳过。
+- 本轮复核发现 `apps/web/src/editor/operate/page.ts` 只有注释引用和自身导出，没有实际导入使用，因此本轮不迁移它。
+
+### 阶段 3 / 操作层选择与对齐写入收口已完成
+
+- 按“一次做 3 小步”继续推进，并只处理已确认实际使用的入口：
+  - `OperateNode` 被 `StageSelect`、`OperateAlign`、`vector-edit` 等实际引用，本轮将选择状态桥接从旧 `Schema.onMatchPatch()` / `Schema.schemaChanged` 改为跟随 `YClients.afterSelect` 和 `YState.subscribe()`。
+  - `OperateAlign` 被 editor 初始化和右侧对齐面板实际引用，本轮将对齐写入从 `Schema.itemReset()` / `Schema.finalOperation()` 改为 `YState.transact()` / `YState.set()` / `YUndo.track()`。
+  - `YClients.selectPage()` 被 `HandlePage` 实际使用，本轮在清空选择后派发 `afterSelect`，确保页面切换时 `OperateNode` 的选择缓存同步清空。
+- `OperateAlign` 的多选对齐边界从原先注释掉的旧路径改为使用当前待对齐节点的合并 AABB。
+- `OperateNode` 本轮只迁选择缓存与选中节点派发；旧增删节点方法仍保留旧 `Schema` 写入，后续必须先确认具体方法是否仍被实际入口调用。
+
+### 验证记录
+
+- `pnpm exec prettier --write ai/tasks/monorepo-wip/discuss.md ai/tasks/monorepo-wip/log.md apps/web/src/editor/operate/node.ts apps/web/src/editor/operate/align.ts apps/web/src/editor/y-state/y-clients.ts`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `git diff --check`：通过。
+- 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
+  - 原因：本次仍是局部写入入口迁移；仓库指示默认不要频繁 build/test，且既有记录中 `@sigma/web typecheck` 存在长耗时问题。
+
+### 暂不处理
+
+- 本轮不迁移 `OperatePage`，因为未发现实际运行引用。
+- 本轮不迁移 `OperateNode` 的旧增删节点 / paste / wrapInFrame 写入方法。
+- 本轮不迁移 `Schema` 服务本身。
+- 本轮不改 `YState.set/insert/delete` 为直接写 Yjs。
