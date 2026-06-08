@@ -2,7 +2,6 @@ import { iife } from '@gitborlando/utils'
 import { Flex } from '@gitborlando/widget'
 import { FC, useRef } from 'react'
 import { ITextStyleKey, OperateText } from 'src/editor/operate/text'
-import { Schema } from 'src/editor/schema/schema'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { useHookSignal } from 'src/utils/signal-react'
@@ -40,7 +39,7 @@ export const TextComp: FC<{}> = ({}) => {
 
   const TextEditComp = useMemoComp([], ({}) => {
     const { setTextContent } = OperateText
-    const textNode = Schema.find<IText>(intoEditing.value)
+    const textNode = YState.find<IText>(intoEditing.value)
     const xy = iife(() => {
       const { x, y, width } = textNode
       return StageViewport.sceneXYToClientXY({ x: x + width, y })

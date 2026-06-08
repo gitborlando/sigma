@@ -377,3 +377,49 @@
 - 本轮不迁移 `vector-edit.tsx`，因为未发现实际运行入口渲染它。
 - 本轮不迁移 `operate/page.ts`，因为未发现实际运行引用。
 - 本轮不迁移 `OperateNode` 的旧增删节点 / paste / wrapInFrame 写入方法，后续需先确认具体方法是否仍由实际入口调用。
+
+### 阶段 3 / YState 直写与 Immut 写回链路收口已完成
+
+- 按“后续 5 步”继续推进，并先复核真实调用链：
+  - `HandleNode` 是当前复制、粘贴、删除、层级调整和包裹画板的命令入口。
+  - 旧 `OperateNode.addNodes()` / `removeNodes()` / `insertAt()` / `splice()` / `reHierarchy()` / `paste()` / `wrapInFrame()` 未发现真实调用，只剩注释引用或未接入旧模块调用，本轮不迁移、不删除。
+  - `OperateNode.clearSelect()` 仍被实际路径调用，但只桥接选择状态，不涉及旧 `Schema` 写入。
+- `HandleNode.wrapInFrame()` 从不可达实现恢复为 `YState.transact()` 写入：
+  - 新增 frame 节点。
+  - 在原父级当前位置插入 frame。
+  - 将原选中节点从旧父级移入 frame。
+  - 更新选择到新 frame，并派发 `YClients.afterSelect`。
+  - 保留 `YUndo.track({ type: 'all' })` 记录。
+- `YState.set()` / `insert()` / `delete()` 改为有 `Y.Doc` 时先直接写 `doc.getMap('schema')`，再同步更新本地 `Immut` 镜像：
+  - 支持顶层 map set/delete。
+  - 支持嵌套 map set/delete。
+  - 支持数组 insert/delete/replace，并对数组索引做边界保护。
+  - 保留本地 Immut 同步更新，避免同一 transaction 内依赖刚写入的 `childIds` / `parentId` 读写顺序被破坏。
+- `YState.applyImmerPatches()` 不再直接调用 `Immut.applyImmerPatches()`，改为逐条转发到新的 `YState.set()` / `insert()` / `delete()`，确保 fill 等 Immer patch 写入也走 Yjs。
+- `immut-y.bind()` 禁用 `subscribeI()`，不再让 Immut patch 订阅链路写回 Yjs：
+  - 初始化仍保留 `initializeIFromY()` 与 `initializeYFromI()`。
+  - 运行期保留 `subscribeY()`，让 Yjs 变更投影回 Immut。
+- `json-to-y.ts` 导出 `toYValue()`，供 `YState` 直接写 Yjs 时复用原 plain JSON -> Yjs 转换语义。
+- 实际使用读路径继续收口：
+  - `StageWidgetAdsorption` 中 datum 节点读取从 `Schema.find()` 改为 `YState.find()`。
+  - 右侧文本编辑浮层中当前文本节点读取从 `Schema.find()` 改为 `YState.find()`。
+- 剩余旧 `Schema` 调用复核：
+  - `vector-edit.tsx` 仍未发现实际运行入口渲染，本轮继续跳过。
+  - `operate/page.ts` 仍未发现实际运行引用，本轮继续跳过。
+  - `SchemaHistory.replay()` 中旧 `Schema.applyPatches()` / `Schema.nextSchema()` 位于 `undo()` / `redo()` 早返回之后，当前不可达，本轮不迁移。
+  - 旧 `OperateNode` 写入方法未发现真实调用，本轮只记录判断，不迁移、不删除。
+
+### 验证记录
+
+- `pnpm exec prettier --write apps/web/src/editor/y-state/y-state.ts apps/web/src/utils/immut/json-to-y.ts apps/web/src/utils/immut/immut-y.ts apps/web/src/editor/handle/node.ts apps/web/src/editor/render/widget/adsorption.ts apps/web/src/view/editor/right-panel/operate/text.tsx`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `git diff --check`：通过。
+- 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
+  - 原因：仓库指示默认不要频繁 build/test；本轮以 diff check 和调用链复核为主。
+
+### 暂不处理
+
+- 本轮不删除旧 `OperateNode` 写入方法，避免把未接入口判断和清理重构混在一起。
+- 本轮不迁移未实际接入的 `vector-edit.tsx` / `operate/page.ts`。
+- 本轮不恢复 `YSync.init()`。
+- 本轮不做完整 `Schema` 服务删除或目录迁移。

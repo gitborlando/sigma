@@ -141,7 +141,6 @@ class HandleNodeService {
   }
 
   wrapInFrame() {
-    throw new Error('Not implemented')
     const selected = getSelectIdList().map(YState.find<S.Node>)
     if (selected.length === 0) return
 
@@ -150,16 +149,17 @@ class HandleNodeService {
     const oldParent = YState.find<S.NodeParent>(selected[0].parentId)
     const index = oldParent.childIds.indexOf(selected[0].id)
 
-    this.addNodes([frameNode])
-    this.insertChildAt(oldParent, frameNode, index)
-    selected.forEach((node) => this.removeChild(oldParent, node))
-    selected.forEach((node) => this.insertChildAt(frameNode, node))
-
-    YState.next()
+    YState.transact(() => {
+      this.addNodes([frameNode])
+      this.insertChildAt(oldParent, frameNode, index)
+      selected.forEach((node) => this.removeChild(oldParent, node))
+      selected.forEach((node) => this.insertChildAt(frameNode, node))
+    })
     YUndo.untrack(
       action(() => {
         selected.forEach((node) => YClients.unSelect(node.id))
         YClients.select(frameNode.id)
+        YClients.afterSelect.dispatch()
       }),
     )
     YUndo.track({

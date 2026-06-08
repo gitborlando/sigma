@@ -73,7 +73,7 @@ export const transact = (doc: Y.Doc | null, opts: Options, fn: () => void) => {
   }
 }
 
-const toYValue = (val: any) => {
+export const toYValue = (val: any) => {
   if (val === undefined) {
     return undefined
   }

@@ -7,7 +7,6 @@ import { OBB } from 'src/editor/math/obb'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateMeta } from 'src/editor/operate/meta'
 import { OperateNode } from 'src/editor/operate/node'
-import { Schema } from 'src/editor/schema/schema'
 import { isNumberEqual } from 'src/editor/utils/misc'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { Pixi } from '../pixi'
@@ -47,7 +46,7 @@ class StageWidgetAdsorptionService {
         this.collectAdsorption(OperateNode.getNodeRuntime(id))
       })
     } else {
-      const node = Schema.find(OperateNode.datumId.value) as IFrame
+      const node = YState.find<IFrame>(OperateNode.datumId.value)
       ;[node.id, ...node.childIds].forEach((id) => {
         if (OperateNode.selectIds.value.has(id)) return
         this.collectAdsorption(OperateNode.getNodeRuntime(id))
