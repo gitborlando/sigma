@@ -24,8 +24,6 @@ test-html
 *.sln
 *.sw?
 
-/auto-imports.d.ts
-
 # Tencent Cloud EdgeOne
 .env
 .edgeone/*
