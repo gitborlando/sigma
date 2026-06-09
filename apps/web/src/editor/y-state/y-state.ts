@@ -51,18 +51,29 @@ class YStateService {
   }
 
   insert<T>(keyPath: string, value: T) {
-    if (this.doc) this.insertYValue(keyPath, value)
-    this.immut.insert(keyPath, value)
+    const nextKeyPath = this.normalizeInsertPath(keyPath)
+    if (!nextKeyPath) return
+
+    if (this.doc) this.insertYValue(nextKeyPath, value)
+    this.immut.insert(nextKeyPath, value)
   }
 
   set<T>(keyPath: string, value: T) {
-    if (this.doc) this.setYValue(keyPath, value)
-    this.immut.set(keyPath, value)
+    if (value === undefined) return this.delete(keyPath)
+
+    const nextKeyPath = this.normalizeSetPath(keyPath)
+    if (!nextKeyPath) return
+
+    if (this.doc) this.setYValue(nextKeyPath, value)
+    this.immut.set(nextKeyPath, value)
   }
 
   delete(keyPath: string) {
-    if (this.doc) this.deleteYValue(keyPath)
-    this.immut.delete(keyPath)
+    const nextKeyPath = this.normalizeDeletePath(keyPath)
+    if (!nextKeyPath) return
+
+    if (this.doc) this.deleteYValue(nextKeyPath)
+    this.immut.delete(nextKeyPath)
   }
 
   setProp(path: string, payload: Record<string, any>) {
@@ -130,6 +141,74 @@ class YStateService {
     return this.doc!.getMap('schema')
   }
 
+  private parseKeyPath(keyPath: string) {
+    return keyPath.split(/\.|\//) as (string | number)[]
+  }
+
+  private joinKeyPath(keys: (string | number)[]) {
+    return keys.join('.')
+  }
+
+  private getLocalValue(keys: (string | number)[]) {
+    let current: any = this.immut.state
+    for (const key of keys) {
+      if (current === undefined || current === null) return undefined
+      current = current[key]
+    }
+    return current
+  }
+
+  private getLocalParent(keyPath: string) {
+    const keys = this.parseKeyPath(keyPath)
+    const lastKey = keys[keys.length - 1]
+    return {
+      keys,
+      parent: this.getLocalValue(keys.slice(0, -1)),
+      lastKey,
+    }
+  }
+
+  private normalizeInsertPath(keyPath: string) {
+    const keys = this.parseKeyPath(keyPath)
+    const lastIndex = Number(keys[keys.length - 1])
+
+    if (Number.isNaN(lastIndex)) {
+      const target = this.getLocalValue(keys)
+      return Array.isArray(target) ? keyPath : undefined
+    }
+
+    const parent = this.getLocalValue(keys.slice(0, -1))
+    if (!Array.isArray(parent)) return
+
+    const index = Math.min(Math.max(lastIndex, 0), parent.length)
+    return this.joinKeyPath([...keys.slice(0, -1), index])
+  }
+
+  private normalizeSetPath(keyPath: string) {
+    const { keys, parent, lastKey } = this.getLocalParent(keyPath)
+
+    if (Array.isArray(parent)) {
+      const index = Number(lastKey)
+      if (Number.isNaN(index) || index < 0 || index >= parent.length) return
+      return this.joinKeyPath([...keys.slice(0, -1), index])
+    }
+
+    return parent && typeof parent === 'object' ? keyPath : undefined
+  }
+
+  private normalizeDeletePath(keyPath: string) {
+    const { keys, parent, lastKey } = this.getLocalParent(keyPath)
+
+    if (Array.isArray(parent)) {
+      const index = Number(lastKey)
+      if (Number.isNaN(index) || index < 0 || index >= parent.length) return
+      return this.joinKeyPath([...keys.slice(0, -1), index])
+    }
+
+    if (!parent || typeof parent !== 'object') return
+    return lastKey in parent ? keyPath : undefined
+  }
+
   private getYValue(keys: (string | number)[]) {
     let current: unknown = this.ySchema
     keys.forEach((key) => {
@@ -141,7 +220,7 @@ class YStateService {
   }
 
   private getYParent(keyPath: string) {
-    const keys = keyPath.split(/\.|\//) as (string | number)[]
+    const keys = this.parseKeyPath(keyPath)
     const lastKey = keys[keys.length - 1]
     return {
       parent: this.getYValue(keys.slice(0, -1)),
@@ -150,7 +229,7 @@ class YStateService {
   }
 
   private insertYValue<T>(keyPath: string, value: T) {
-    const keys = keyPath.split(/\.|\//) as (string | number)[]
+    const keys = this.parseKeyPath(keyPath)
     const lastIndex = Number(keys[keys.length - 1])
     const isIndexPath = !Number.isNaN(lastIndex)
     const target = isIndexPath

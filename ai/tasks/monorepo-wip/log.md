@@ -423,3 +423,43 @@
 - 本轮不迁移未实际接入的 `vector-edit.tsx` / `operate/page.ts`。
 - 本轮不恢复 `YSync.init()`。
 - 本轮不做完整 `Schema` 服务删除或目录迁移。
+
+## 2026-06-09
+
+### 范围
+
+- 继续阶段 3 的 Yjs / Immut 状态源收敛。
+- 按“接下来 5 步”复核剩余旧 `Schema` 调用、`YState` 写入边界和撤销/重做链路。
+- 本轮只修状态入口边界问题，不迁移旧未接入文件，不做完整 `Schema` 清理。
+
+### 阶段 3 / 状态写入边界复核已完成
+
+- 复核剩余旧 `Schema` 调用：
+  - `vector-edit.tsx` 仍未发现被 `StageComp` 或其他运行入口渲染，本轮继续跳过。
+  - `operate/page.ts` 仍未发现实际运行引用，本轮继续跳过。
+  - 旧 `OperateNode.addNodes()` / `removeNodes()` / `insertAt()` / `splice()` / `reHierarchy()` / `deleteSelectNodes()` / `pasteNodes()` / `paste()` / `wrapInFrame()` 未发现真实运行调用，只剩注释引用、未接入旧模块或未渲染的 `vector-edit.tsx` 引用。
+  - `OperateNode.clearSelect()` 仍由舞台选择路径调用，但只桥接选择状态，不涉及旧 `Schema` 写入。
+  - 当前真实节点命令入口继续确认为 `HandleNode.deleteSelectedNodes()` / `pasteNodes()` / `reHierarchySelectedNode()` / `wrapInFrame()`。
+- `YState.insert()` / `set()` / `delete()` 新增本地路径校验和数组索引归一化：
+  - 非法数组删除路径直接跳过，避免 Yjs 侧忽略非法索引但 Immut 侧 `splice(-1, 1)` 删除最后一项。
+  - 数组插入路径先归一化到 `0..length`，确保 Yjs 和 Immut 使用同一索引。
+  - 数组 set 只允许替换已存在下标，避免 Yjs 插入尾部而 Immut 产生稀疏数组。
+  - 对象 delete 只在 key 存在时执行，避免产生无意义 remove patch。
+  - `set(..., undefined)` 收敛为 `delete()`，保持和 Yjs 不存储 `undefined` 的语义一致。
+- `YUndo.initStateUndo()` 在新 `Y.Doc` 初始化时重置本地 undo stack 和指针，避免跨文件残留撤销记录。
+- `YUndo.undo()` / `redo()` 增加 `canUndo` / `canRedo` guard，避免快捷键或直接调用在空栈时读取不存在的历史项。
+
+### 验证记录
+
+- `pnpm exec prettier --write apps/web/src/editor/y-state/y-state.ts apps/web/src/editor/y-state/y-undo.ts`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `git diff --check`：通过。
+- 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
+  - 原因：仓库指示默认不要频繁 build/test；本轮是状态入口边界修正和调用链复核，以 diff check 为主。
+
+### 暂不处理
+
+- 本轮不删除旧 `OperateNode` 写入方法。
+- 本轮不迁移未实际接入的 `vector-edit.tsx` / `operate/page.ts`。
+- 本轮不恢复 `YSync.init()`。
+- 本轮不做完整 `Schema` 服务删除或目录迁移。

@@ -25,6 +25,8 @@ class YUndoService {
   private stateUndo!: Y.UndoManager
 
   initStateUndo(stateMap: Y.Map<S.Schema>) {
+    this.stack = []
+    this.next = 0
     this.stateUndo = new Y.UndoManager(stateMap)
   }
 
@@ -50,6 +52,8 @@ class YUndoService {
   }
 
   undo() {
+    if (!this.canUndo) return
+
     this.next = Math.max(this.next - 1, 0)
     const { type } = this.stack[this.next]
     if (type === 'state') this.stateUndo.undo()
@@ -61,6 +65,8 @@ class YUndoService {
   }
 
   redo() {
+    if (!this.canRedo) return
+
     this.next = Math.min(this.next + 1, this.stack.length)
     const { type } = this.stack[this.next - 1]
     if (type === 'state') this.stateUndo.redo()
