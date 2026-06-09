@@ -5,14 +5,17 @@ import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { EditorCommand } from 'src/editor/editor/command'
 import { IMatrix, MRect } from 'src/editor/math'
-import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
-import { getSelectIdMap, getSelectPageId } from 'src/editor/utils/get'
+import {
+  getSelectIdList,
+  getSelectIdMap,
+  getSelectPageId,
+} from 'src/editor/utils/get'
 import { YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { StageDrag } from 'src/global/event/drag'
@@ -44,20 +47,18 @@ class StageSelectService {
   private onDoubleClick(e: Event) {
     if (!this.hoverId) return
 
-    const hoverSelected = OperateNode.selectIds.value.has(this.hoverId)
+    const selectIdList = getSelectIdList()
+    const hoverSelected = !!getSelectIdMap()[this.hoverId]
     const hoverNode = YState.find(this.hoverId)
 
     if (hoverSelected) {
       if (hoverNode.type === 'text') {
         this.onEditText(hoverNode)
       }
-      if (SchemaHelper.is<S.Frame>(hoverNode, 'frame')) {
-        this.onEditVector(hoverNode)
-      }
-    } else if (OperateNode.selectIds.value.size === 1) {
+    } else if (selectIdList.length === 1) {
       const ancestor = SchemaHelper.findAncestor(
         this.hoverId,
-        (node) => node.parentId === firstOne(OperateNode.selectIds.value),
+        (node) => node.parentId === firstOne(selectIdList),
       )
       this.onSelect(ancestor.id)
     }
@@ -83,7 +84,7 @@ class StageSelectService {
       EditorCommand
     const baseMenu = [copyPasteGroup, undoRedoGroup]
 
-    if (getSelectIdMap().length || this.hoverId) {
+    if (getSelectIdList().length || this.hoverId) {
       const menuOptions = [...baseMenu, nodeGroup, nodeReHierarchyGroup]
       ContextMenu.menus = menuOptions
       ContextMenu.openMenu(e as any)
@@ -208,15 +209,6 @@ class StageSelectService {
 
   private onEditText(hoverNode: S.Node) {
     OperateText.intoEditing.dispatch(hoverNode.id)
-  }
-
-  private onEditVector(hoverNode: S.Node) {
-    if (OperateNode.intoEditNodeId.value) {
-      OperateNode.intoEditNodeId.dispatch('')
-      OperateNode.clearSelect()
-      return
-    }
-    hoverNode && OperateNode.intoEditNodeId.dispatch(hoverNode.id)
   }
 }
 

@@ -495,3 +495,87 @@
 - 本轮不迁移未实际接入的 `vector-edit.tsx` / `operate/page.ts`。
 - 本轮不恢复 `YSync.init()`。
 - 本轮不做完整 `Schema` 服务删除或目录迁移。
+
+### 阶段 3 / 主题 A：旧运行残留清理已完成
+
+- 本轮按主题推进阶段 3 收口清理，不再拆成零散小步。
+- 主题目标：
+  - 清掉真实运行路径里仍可见的旧 `Schema` 写入残留。
+  - 明确未接入旧模块策略。
+  - 补充 `YState` 写入 API 语义，作为后续调用约束。
+- 再次复核真实引用：
+  - `OperateNode.clearSelect()` 仍由 `StageSelect` 的 vector edit 退出路径调用。
+  - 旧 `OperateNode.addNodes()` / `removeNodes()` / `insertAt()` / `splice()` / `reHierarchy()` / `deleteSelectNodes()` / `pasteNodes()` / `paste()` / `wrapInFrame()` 未发现真实运行入口调用。
+  - `operate/page.ts` 未发现真实运行引用。
+  - `vector-edit.tsx` 未发现被 `StageComp` 或其他运行入口渲染。
+- `OperateNode` 收口：
+  - 移除对旧 `Schema` / `SchemaHistory` 的依赖。
+  - 保留旧方法名，避免未接入模块或后续恢复功能时直接断类型。
+  - 方法内部改为使用 `YState.set()` / `insert()` / `delete()` / `transact()` 和 `YUndo.track()`。
+  - `pasteNodes()` 改为通过 `SchemaHelper.createTraverse()` 克隆子树并写入 `YState`，批量选择新节点后统一派发 `YClients.afterSelect`。
+  - `wrapInFrame()` 改为通过 `YState.transact()` 新增 frame、移动原选中节点、更新选择并记录 `YUndo`。
+- `SchemaHistory` 收口：
+  - 移除 `undo()` / `redo()` 中早返回之后不可达的旧 `Schema.applyPatches()` / `Schema.nextSchema()` replay 分支。
+  - `SchemaHistory.undo()` / `redo()` 现在只作为旧入口转发到 `YUndo`。
+- `YState` 写入 API 语义记录：
+  - `YState.transact(callback, origin?)` 是业务写入提交边界；有 `Y.Doc` 时外层用 `doc.transact()` 包裹，并在 callback 后 flush Immut patch。
+  - `YState.set(path, value)` 用于对象字段写入和数组已存在下标替换；`value === undefined` 等价于 `delete(path)`。
+  - `YState.insert(path, value)` 用于数组插入；如果 path 结尾不是数字，则表示追加到目标数组。
+  - `YState.delete(path)` 用于对象 key 删除和数组合法下标删除。
+  - 非法路径、数组越界 set/delete、非数组 insert 都直接跳过，避免 Yjs 和 Immut 镜像行为分叉。
+  - 写入入口会先写 Yjs，再同步本地 Immut 镜像；运行期不再依赖 `Immut -> Yjs` 订阅链路。
+- 未接入模块策略：
+  - `operate/page.ts` 和 `vector-edit.tsx` 当前不作为阶段 3 阻塞项。
+  - 本轮不迁移、不删除它们；后续如果重新接入真实运行入口，再按入口链路单独迁移。
+  - 它们保留旧 `Schema` 调用不代表运行时状态源仍依赖旧 `Schema`。
+
+### 验证记录
+
+- `pnpm exec prettier --write apps/web/src/editor/operate/node.ts apps/web/src/editor/schema/history.ts ai/tasks/monorepo-wip/log.md`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `git diff --check`：通过。
+- 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
+  - 原因：仓库指示默认不要频繁 build/test；主题 A 聚焦旧运行残留清理和日志语义记录。后续主题 B 再做编辑器状态链路验收。
+
+### 暂不处理
+
+- 本轮不迁移未实际接入的 `vector-edit.tsx` / `operate/page.ts`。
+- 本轮不恢复 `YSync.init()`。
+- 本轮不做完整 `Schema` 服务删除或目录迁移。
+
+### 阶段 3 / 策略切换：旧模块直接清理已完成
+
+- 用户调整策略：对已经确认没有真实 UI / 运行入口引用的旧模块，不再保留兼容壳或反复记录“暂不迁移”，直接删除或迁走真实引用。
+- 本轮按实际 UI 引用重新复核：
+  - `StageComp` 没有渲染 `VectorEditComp`。
+  - `operate/page.ts` 没有实际 import。
+  - `StageWidgetAdsorption` 没有实际 import / 初始化，并且内部引用了不存在的旧 `operate/meta`。
+  - `StageDrop` 和 `parse/svg` 当前是全注释旧模块，没有实际运行入口。
+  - `OperateNode.initHook()` 没有被 editor 调用；真实运行路径只在 `StageSelect` 中使用它的选择桥接字段。
+- 清理结果：
+  - `StageSelect` 直接改用 `YClients.selectIdList` / `getSelectIdMap()`，不再依赖 `OperateNode`。
+  - 删除 `apps/web/src/editor/operate/node.ts`。
+  - 删除 `apps/web/src/editor/operate/page.ts`。
+  - 删除 `apps/web/src/editor/schema/schema.ts`。
+  - 删除 `apps/web/src/editor/schema/history.ts`。
+  - 删除 `apps/web/src/view/editor/stage/vector-edit.tsx`。
+  - 删除 `apps/web/src/editor/render/widget/adsorption.ts`。
+  - 删除 `apps/web/src/editor/stage/drop.ts`。
+  - 删除 `apps/web/src/editor/parse/svg/index.ts` 和 `apps/web/src/editor/parse/svg/irregular.ts`。
+  - 清理页面列表里旧 `Schema.commitHistory` 注释。
+- 当前全局复核：
+  - 不再存在 `OperateNode` / `OperatePage` / `VectorEditComp` / `SchemaHistory` / `SchemaService` / `Schema.` 旧运行引用。
+  - 剩余 `SchemaCreator` 和 `schema/migration.ts` 属于 schema 数据创建 / migration，不是旧运行时写入服务。
+- 后续策略：
+  - 继续以“真实入口是否引用”为准；未接入旧模块不再作为迁移对象保留。
+  - 如果后续需要恢复 SVG drop、vector edit 或吸附能力，应按当前 `YState` / `YClients` / `YUndo` 入口重新实现，而不是恢复旧 `Schema` 服务。
+
+### 验证记录
+
+- `pnpm exec prettier --write apps/web/src/editor/stage/interact/select.ts apps/web/src/view/editor/left-panel/panels/layer/page/item.tsx ai/tasks/monorepo-wip/log.md`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `git diff --check`：通过。
+- `pnpm --filter @sigma/web build`：通过。
+  - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
+- 本轮未运行 `@sigma/web typecheck`。
+  - 原因：既有记录中 `@sigma/web typecheck` 存在长耗时问题；本轮用 build 验证删除范围内的 import / 打包入口。

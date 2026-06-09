@@ -16,9 +16,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
   }
   const selectPage = () => {
     YClients.selectPage(id)
-    // Schema.commitHistory('选择页面 ' + id)
   }
-  // useMatchPatch(`/client/selectPageId`)
 
   const selectPageId = useSelectPageId()
   const selected = selectPageId === id
