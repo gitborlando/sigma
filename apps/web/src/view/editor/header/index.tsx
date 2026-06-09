@@ -5,6 +5,7 @@ import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Btn } from 'src/view/component/btn'
 import { CooperateComp } from 'src/view/editor/header/cooperate'
+import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot'
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
@@ -18,14 +19,17 @@ export const HeaderComp: FC<{}> = observer(({}) => {
       horizontal='auto 1fr auto'
       className={cls()}
       style={{ height: StageViewport.bound.top }}>
-      <Btn
-        size={32}
-        onClick={() => navigate('/')}
-        variant='ghost'
-        style={{ paddingLeft: 6, gap: 4 }}>
-        <Lucide size={20} icon={ChevronLeft} />
-        {t('file list')}
-      </Btn>
+      <G center horizontal gap={4}>
+        <Btn
+          size={32}
+          onClick={() => navigate('/')}
+          variant='ghost'
+          style={{ paddingLeft: 6, gap: 4 }}>
+          <Lucide size={20} icon={ChevronLeft} />
+          {t('file list')}
+        </Btn>
+        {isDEV && <EditorHeaderDevSnapshotComp />}
+      </G>
       <G center horizontal gap={0} className={cls('centerGroup')}>
         <UndoGroup />
         <G center gap={4} horizontal>
