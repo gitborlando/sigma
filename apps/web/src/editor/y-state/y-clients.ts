@@ -7,7 +7,7 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
 
-export type NeedUndoClientState = {
+export type UndoClientState = {
   selectIds: Record<string, boolean>
   selectPageId: string
 }

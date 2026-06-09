@@ -1,13 +1,13 @@
 import { clone } from '@gitborlando/utils'
 import { computed, observable } from 'mobx'
-import { NeedUndoClientState, YClients } from 'src/editor/y-state/y-clients'
+import { type UndoClientState, YClients } from 'src/editor/y-state/y-clients'
 import { ImmutPatch } from 'src/utils/immut/immut'
 import * as Y from 'yjs'
 
 export type YUndoInfo = {
   type: 'state' | 'client' | 'all'
   description: string
-  clientState?: NeedUndoClientState
+  clientState?: UndoClientState
   statePatches?: ImmutPatch[]
 }
 
@@ -34,7 +34,7 @@ class YUndoService {
     this.initClientState = this.getClientState()
   }
 
-  private initClientState!: NeedUndoClientState
+  private initClientState!: UndoClientState
 
   private getClientState() {
     return clone({
@@ -44,38 +44,48 @@ class YUndoService {
   }
 
   @action
-  private applyClientState() {
-    const clientState =
-      this.stack[this.next - 1]?.clientState || this.initClientState
+  private applyClientState(clientState: UndoClientState) {
     YClients.client.selectIdMap = clone(clientState.selectIds)
     YClients.client.selectPageId = clientState.selectPageId
     YClients.afterSelect.dispatch()
   }
 
+  private clientStateExists(clientState: UndoClientState) {
+    return Object.keys(clientState.selectIds).every((id) => YState.state[id])
+  }
+
+  private replayInfo(info: YUndoInfo, replayState: () => void) {
+    const clientState = info.clientState || this.initClientState
+    switch (info.type) {
+      case 'state':
+        replayState()
+        return
+      case 'client':
+        this.applyClientState(clientState)
+        return
+      case 'all':
+        if (this.clientStateExists(clientState)) {
+          this.applyClientState(clientState)
+          replayState()
+        } else {
+          replayState()
+          this.applyClientState(clientState)
+        }
+    }
+  }
+
   undo() {
     if (!this.canUndo) return
 
-    this.next = Math.max(this.next - 1, 0)
-    const { type } = this.stack[this.next]
-    if (type === 'state') this.stateUndo.undo()
-    if (type === 'client') this.applyClientState()
-    if (type === 'all') {
-      this.stateUndo.undo()
-      this.applyClientState()
-    }
+    const info = this.stack[this.next-- - 1]
+    this.replayInfo(info, () => this.stateUndo.undo())
   }
 
   redo() {
     if (!this.canRedo) return
 
-    this.next = Math.min(this.next + 1, this.stack.length)
-    const { type } = this.stack[this.next - 1]
-    if (type === 'state') this.stateUndo.redo()
-    if (type === 'client') this.applyClientState()
-    if (type === 'all') {
-      this.stateUndo.redo()
-      this.applyClientState()
-    }
+    const info = this.stack[this.next++]
+    this.replayInfo(info, () => this.stateUndo.redo())
   }
 
   private shouldTrack = true

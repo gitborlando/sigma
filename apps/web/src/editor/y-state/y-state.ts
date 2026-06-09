@@ -16,6 +16,7 @@ class YStateService {
 
   private unbind?: () => void
   private unSub?: () => void
+  private transactionDepth = 0
 
   get schema() {
     return this.immut.state
@@ -34,7 +35,12 @@ class YStateService {
   }
   transact(callback: () => void, origin?: unknown) {
     const run = () => {
-      callback()
+      this.transactionDepth += 1
+      try {
+        callback()
+      } finally {
+        this.transactionDepth -= 1
+      }
       this.immut.next()
     }
 
@@ -55,7 +61,9 @@ class YStateService {
     if (!nextKeyPath) return
 
     if (this.doc) this.insertYValue(nextKeyPath, value)
-    this.immut.insert(nextKeyPath, value)
+    if (!this.doc || this.transactionDepth > 0) {
+      this.immut.insert(nextKeyPath, value)
+    }
   }
 
   set<T>(keyPath: string, value: T) {
@@ -65,7 +73,9 @@ class YStateService {
     if (!nextKeyPath) return
 
     if (this.doc) this.setYValue(nextKeyPath, value)
-    this.immut.set(nextKeyPath, value)
+    if (!this.doc || this.transactionDepth > 0) {
+      this.immut.set(nextKeyPath, value)
+    }
   }
 
   delete(keyPath: string) {
@@ -73,7 +83,9 @@ class YStateService {
     if (!nextKeyPath) return
 
     if (this.doc) this.deleteYValue(nextKeyPath)
-    this.immut.delete(nextKeyPath)
+    if (!this.doc || this.transactionDepth > 0) {
+      this.immut.delete(nextKeyPath)
+    }
   }
 
   setProp(path: string, payload: Record<string, any>) {

@@ -579,3 +579,32 @@
   - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
 - 本轮未运行 `@sigma/web typecheck`。
   - 原因：既有记录中 `@sigma/web typecheck` 存在长耗时问题；本轮用 build 验证删除范围内的 import / 打包入口。
+
+### 阶段 3 / 主题 B：删除 undo/redo 问题修正
+
+- 用户在步骤 3 验收中发现删除后的 undo / redo 有问题。
+- 复现结果：
+  - 删除节点后 undo / redo 会在某些顺序下让 UI 在节点不存在时仍读取选区节点，触发 `undefined.type` / `undefined.matrix` 运行错误。
+- 根因：
+  - `YUndo` 的 `all` 历史同时包含 Yjs state 和 client selection。
+  - 创建 undo 需要先清选区再删除 state。
+  - 删除 undo 需要先恢复 state 再恢复选区。
+  - 删除 redo 又需要先清选区再删除 state。
+  - 固定一种顺序无法同时满足这些场景。
+- 修正：
+  - `YUndo` 新增目标 client state 判断。
+  - 对 `all` 类型 undo / redo，按目标选区是否已存在于当前 `YState.state` 动态决定顺序：
+    - 目标选区当前都存在：先恢复 client，再执行 state undo / redo。
+    - 目标选区当前有不存在节点：先执行 state undo / redo，再恢复 client。
+- 补充修正：
+  - `StageCreate.onCreateStart()` 的初始新增节点和插入父级改为包在 `YState.transact()` 中，避免创建开始阶段非 transaction 写入。
+  - `StageSelect.onCreateSelect()` 改为 `YUndo.untrack()` 选择新建节点，避免创建操作额外产生一条纯 client 历史。
+  - `YState` 非 transaction 写入有 `Y.Doc` 时不再立即同步本地 Immut，交由 Yjs observer 投影，避免数组 insert 被 Yjs observer 和本地 Immut 双写导致重复 childIds。
+- 验证记录：
+  - 浏览器 mock 页运行时 API 复测步骤 3：通过。
+    - 删除后：节点从 `childIds` 移除，选区清空。
+    - undo 删除：节点恢复，选区恢复到该节点。
+    - redo 删除：节点再次移除，选区清空。
+  - 控制台只剩既有字体 warning，无 `undefined.type` / `undefined.matrix` 错误。
+  - `pnpm --filter @sigma/web build`：通过。
+    - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。

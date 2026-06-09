@@ -113,7 +113,7 @@ class StageSelectService {
 
   onCreateSelect(id: string) {
     this.clearSelect()
-    YClients.select(id)
+    YUndo.untrack(() => YClients.select(id))
     // UILeftPanelLayer.expandAncestor(id)
     YClients.afterSelect.dispatch()
   }

@@ -53,8 +53,10 @@ class StageCreateService {
     this.parent = this.findParent()
     this.node = this.createNode({ ...start, width: size, height: size })
 
-    HandleNode.addNodes([this.node])
-    HandleNode.insertChildAt(this.findParent(), this.node)
+    YState.transact(() => {
+      HandleNode.addNodes([this.node])
+      HandleNode.insertChildAt(this.parent, this.node)
+    })
 
     StageSelect.onCreateSelect(this.node.id)
     StageSurface.disablePointEvent()
