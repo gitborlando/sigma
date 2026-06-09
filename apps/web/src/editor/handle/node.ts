@@ -105,7 +105,10 @@ class HandleNodeService {
       traverse(this.copiedIds)
       this.copiedIds = []
     })
-    YUndo.untrack(() => newSelectIds.forEach((id) => YClients.select(id)))
+    YUndo.untrack(() => {
+      newSelectIds.forEach((id) => YClients.select(id))
+      YClients.afterSelect.dispatch()
+    })
     YUndo.track({
       type: 'all',
       description: sentence(

@@ -463,3 +463,35 @@
 - 本轮不迁移未实际接入的 `vector-edit.tsx` / `operate/page.ts`。
 - 本轮不恢复 `YSync.init()`。
 - 本轮不做完整 `Schema` 服务删除或目录迁移。
+
+### 阶段 3 / 选择状态与 undo client 边界收口已完成
+
+- 继续按“5 小步”复核选择状态派发和撤销/重做 client 状态恢复链路。
+- 保留当前选择 API 的批量语义：
+  - `YClients.select()` / `unSelect()` / `clearSelect()` 仍只修改 client selection。
+  - 调用方在一次批量选择完成后统一派发 `YClients.afterSelect`，避免 marquee 这类路径在循环中频繁触发订阅者。
+- 修正 `HandleNode.pasteNodes()`：
+  - 批量选中新复制节点后派发一次 `YClients.afterSelect`。
+  - 确保粘贴后 `OperateNode.selectedNodes$`、右侧面板和吸附等订阅者能同步到新选区。
+- 修正 `YUndo.applyClientState()`：
+  - 恢复 client selection / page 后派发 `YClients.afterSelect`。
+  - 恢复 selection map 时 clone 历史快照，避免后续选择操作原地修改 undo 栈里的旧快照。
+- 修正 `YUndo.redo()` 的 `all` 类型顺序：
+  - 先 redo Yjs state，再恢复 client selection。
+  - 避免订阅者在节点尚未由 state redo 恢复时读取新选区。
+- `YUndo.untrack()` 增加 `try/finally`，避免 callback 异常导致后续 undo track 永久关闭。
+
+### 验证记录
+
+- `pnpm exec prettier --write apps/web/src/editor/handle/node.ts apps/web/src/editor/y-state/y-undo.ts ai/tasks/monorepo-wip/log.md`：通过。
+  - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+- `git diff --check`：通过。
+- 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
+  - 原因：仓库指示默认不要频繁 build/test；本轮是选择状态和 undo client 边界的小范围修正。
+
+### 暂不处理
+
+- 本轮不把 `YClients.afterSelect` 自动塞入每个 `select()` / `unSelect()` / `clearSelect()`。
+- 本轮不迁移未实际接入的 `vector-edit.tsx` / `operate/page.ts`。
+- 本轮不恢复 `YSync.init()`。
+- 本轮不做完整 `Schema` 服务删除或目录迁移。

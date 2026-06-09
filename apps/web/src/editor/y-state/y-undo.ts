@@ -47,8 +47,9 @@ class YUndoService {
   private applyClientState() {
     const clientState =
       this.stack[this.next - 1]?.clientState || this.initClientState
-    YClients.client.selectIdMap = clientState.selectIds
+    YClients.client.selectIdMap = clone(clientState.selectIds)
     YClients.client.selectPageId = clientState.selectPageId
+    YClients.afterSelect.dispatch()
   }
 
   undo() {
@@ -72,8 +73,8 @@ class YUndoService {
     if (type === 'state') this.stateUndo.redo()
     if (type === 'client') this.applyClientState()
     if (type === 'all') {
-      this.applyClientState()
       this.stateUndo.redo()
+      this.applyClientState()
     }
   }
 
@@ -115,8 +116,11 @@ class YUndoService {
 
   untrack(callback: () => void) {
     this.shouldTrack = false
-    runInAction(() => callback())
-    this.shouldTrack = true
+    try {
+      runInAction(() => callback())
+    } finally {
+      this.shouldTrack = true
+    }
   }
 }
 
