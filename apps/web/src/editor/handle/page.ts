@@ -1,7 +1,7 @@
 import { createCache } from '@gitborlando/utils'
 import { IMatrix } from 'src/editor/math'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { prodLog } from 'src/utils/global'
+import { devLog } from 'src/utils/global'
 import { SchemaCreator } from '../schema/creator'
 import { getSelectPageId } from '../utils/get'
 
@@ -55,7 +55,7 @@ class HandlePageService {
     }
     curPage.childIds.forEach(findNodes)
 
-    prodLog({
+    devLog({
       meta: YState.state.meta,
       page: curPage,
       ...nodes,
