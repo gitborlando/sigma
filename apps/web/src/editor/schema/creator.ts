@@ -312,6 +312,7 @@ class SchemaCreatorService {
   clone<T extends S.SchemaItem>(item: T, option?: Partial<T>) {
     const newItem = clone(item)
     newItem.id = miniId()
+    newItem.name = this.createNodeName(item.type)
     if ('childIds' in newItem) newItem.childIds = []
     return defuOverrideArray(option || {}, newItem) as T
   }

@@ -92,7 +92,6 @@ class HandleNodeService {
           const { node, parent, forwardRef: upLevelRef, depth } = props
           const newParent = upLevelRef?.newNode || parent
           const newNode = SchemaCreator.clone(node)
-          newNode.name = SchemaCreator.createNodeName(node.type)
           this.addNodes([newNode])
           this.insertChildAt(newParent, newNode)
           props.newNode = newNode
@@ -103,6 +102,7 @@ class HandleNodeService {
       this.copiedIds = []
     })
     YUndo.untrack(() => {
+      YClients.clearSelect()
       newSelectIds.forEach((id) => YClients.select(id))
       YClients.afterSelect.dispatch()
     })

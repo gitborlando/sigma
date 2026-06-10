@@ -1,5 +1,4 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { Is } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
@@ -76,7 +75,6 @@ class YClientsService {
   }
 
   clearSelect() {
-    if (Is.empty(this.client.selectIdMap)) return
     this.client.selectIdMap = {}
   }
 
