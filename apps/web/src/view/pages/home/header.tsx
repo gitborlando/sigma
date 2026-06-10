@@ -29,7 +29,9 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
           <Btn variant='outline' onClick={() => navigate('/test')}>
             测试页
           </Btn>
-          <Btn variant='outline' onClick={() => navigate('fileId/mock')}>
+          <Btn
+            variant='outline'
+            onClick={() => navigate('fileId/mock?applyRecord=true')}>
             Mock页
           </Btn>
           <Btn variant='solid'>{t('file.new')}</Btn>

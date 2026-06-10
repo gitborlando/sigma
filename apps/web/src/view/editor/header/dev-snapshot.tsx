@@ -1,4 +1,5 @@
-import { Circle, Play } from 'lucide-react'
+import { Circle, Play, Square } from 'lucide-react'
+import { useSearchParams } from 'react-router'
 import { StageViewport } from 'src/editor/stage/viewport'
 import type { YUndoInfo } from 'src/editor/y-state/y-undo'
 import { Btn } from 'src/view/component/btn'
@@ -21,13 +22,18 @@ const STORAGE_KEY_PREFIX = 'sigma:dev-snapshot'
 
 export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
   const { fileId } = useParams<{ fileId: string }>()
+  const [searchParams] = useSearchParams()
+  const applyRecord = searchParams.get('applyRecord') === 'true'
   const storageKey = getStorageKey(fileId)
   const baseSnapshotRef = useRef<SnapshotState>()
+  const appliedRecordKeyRef = useRef<string>()
   const [recording, setRecording] = useState(false)
+  const [appliedRecord, setAppliedRecord] = useState(false)
   const [hasSnapshot, setHasSnapshot] = useState(() => hasStoredSnapshot(storageKey))
 
   useEffect(() => {
     setRecording(false)
+    setAppliedRecord(false)
     baseSnapshotRef.current = undefined
     setHasSnapshot(hasStoredSnapshot(storageKey))
   }, [storageKey])
@@ -50,14 +56,23 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
 
   const restoreSnapshot = useCallback(() => {
     const snapshot = readSnapshot(storageKey)
-    if (!snapshot) return
+    if (!snapshot) return false
 
     if (snapshot.base) {
       restoreReplayableSnapshot(snapshot)
     } else {
       restoreFinalSnapshot(snapshot)
     }
+    return true
   }, [storageKey])
+
+  useEffect(() => {
+    if (!applyRecord || !storageKey) return
+    if (appliedRecordKeyRef.current === storageKey) return
+
+    appliedRecordKeyRef.current = storageKey
+    if (restoreSnapshot()) setAppliedRecord(true)
+  }, [applyRecord, restoreSnapshot, storageKey])
 
   const deleteSnapshot = useCallback(() => {
     if (!storageKey) return
@@ -65,12 +80,14 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
     localStorage.removeItem(storageKey)
     setHasSnapshot(false)
     setRecording(false)
+    setAppliedRecord(false)
   }, [storageKey])
 
   const startRecording = useCallback(() => {
     const base = createSnapshotState()
     baseSnapshotRef.current = base
     saveSnapshot(base)
+    setAppliedRecord(false)
     setRecording(true)
   }, [saveSnapshot])
 
@@ -112,7 +129,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
       }
       if (key === 'p') {
         e.preventDefault()
-        restoreSnapshot()
+        if (!appliedRecord && restoreSnapshot()) setAppliedRecord(true)
       }
       if (key === 'd') {
         e.preventDefault()
@@ -122,19 +139,26 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [deleteSnapshot, recording, restoreSnapshot, startRecording, stopRecording])
+  }, [
+    appliedRecord,
+    deleteSnapshot,
+    recording,
+    restoreSnapshot,
+    startRecording,
+    stopRecording,
+  ])
 
   if (!isDEV) return null
 
-  const icon = recording || !hasSnapshot ? Circle : Play
+  const icon = appliedRecord ? Square : recording || !hasSnapshot ? Circle : Play
   const active = recording
-  const title = getButtonTitle(recording, hasSnapshot)
+  const title = getButtonTitle(recording, hasSnapshot, appliedRecord)
 
   return (
     <Btn
       size={32}
       active={active}
-      className={recording ? cls('recording') : undefined}
+      className={cx(recording && cls('recording'), appliedRecord && cls('applied'))}
       title={title}
       icon={<Lucide icon={icon} size={18} />}
       onContextMenu={(e) => {
@@ -142,9 +166,10 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
         deleteSnapshot()
       }}
       onClick={(e) => {
+        if (appliedRecord) return
         if (recording) return stopRecording()
         if (e.altKey) return startRecording()
-        if (hasSnapshot) return restoreSnapshot()
+        if (hasSnapshot && restoreSnapshot()) return setAppliedRecord(true)
         startRecording()
       }}
     />
@@ -327,13 +352,22 @@ function toPlain<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
 
-function getButtonTitle(recording: boolean, hasSnapshot: boolean) {
+function getButtonTitle(
+  recording: boolean,
+  hasSnapshot: boolean,
+  appliedRecord: boolean,
+) {
+  if (appliedRecord) return '已应用调试快照，右键删除'
   if (recording) return '停止录制调试快照 Alt+Shift+R'
   if (hasSnapshot) return '恢复调试快照 Alt+Shift+P，Alt+点击重新录制，右键删除'
   return '开始录制调试快照 Alt+Shift+R'
 }
 
 const cls = classes(css`
+  &-applied {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
   &-recording {
     color: white !important;
     background-color: #e5484d !important;
