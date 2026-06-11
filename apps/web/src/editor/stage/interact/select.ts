@@ -1,5 +1,5 @@
 ﻿import { type IRect } from '@gitborlando/geo'
-import { firstOne } from '@gitborlando/utils'
+import { clone, firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
@@ -60,12 +60,12 @@ class StageSelectService {
         this.hoverId,
         (node) => node.parentId === firstOne(selectIdList),
       )
-      this.onSelect(ancestor.id)
+      this.onSingleSelect(ancestor.id, t('select nodes by clicking'))
     }
   }
 
   private onSceneRootMouseDown(e: ElemMouseEvent) {
-    this.lastSelectIdMap = getSelectIdMap()
+    this.lastSelectIdMap = clone(getSelectIdMap())
 
     if (!this.hoverId || SchemaHelper.isFirstLayerFrame(this.hoverId)) {
       this.clearSelect()
@@ -73,12 +73,12 @@ class StageSelectService {
       return
     }
 
-    this.onMousedownSelect()
+    this.onStageSelect()
     StageTransformer.move(e.hostEvent)
   }
 
   private onContextMenu(e: MouseEvent) {
-    if (this.hoverId) this.onMousedownSelect()
+    if (this.hoverId) this.onStageSelect()
 
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
       EditorCommand
@@ -99,38 +99,27 @@ class StageSelectService {
     YClients.clearSelect()
   }
 
-  onPanelSelect(id: string) {
-    if (getSelectIdMap()[id]) return
+  private onStageSelect() {
+    if (SchemaHelper.isFirstLayerFrame(this.hoverId!)) return
+    this.onSingleSelect(this.hoverId!, t('select nodes by clicking'))
+  }
 
-    this.clearSelect()
-    YUndo.untrack(() => YClients.select(id))
-    YUndo.track('client', t('select nodes from panel'))
-    YClients.afterSelect.dispatch()
+  onPanelSelect(id: string) {
+    this.onSingleSelect(id, t('select nodes from panel'))
   }
 
   onCreateSelect(id: string) {
+    this.onSingleSelect(id)
+  }
+
+  private onSingleSelect(id: ID, trackMsg?: string) {
+    if (getSelectIdMap()[id]) return
+
     this.clearSelect()
     YUndo.untrack(() => YClients.select(id))
-    // UILeftPanelLayer.expandAncestor(id)
+
+    trackMsg && YUndo.track('client', trackMsg)
     YClients.afterSelect.dispatch()
-  }
-
-  private onMousedownSelect() {
-    this.onSelect(this.hoverId!)
-    YClients.afterSelect.dispatch()
-  }
-
-  private onSelect(id: ID) {
-    if (getSelectIdMap()[id]) return
-    if (SchemaHelper.isFirstLayerFrame(id)) return
-
-    this.clearSelect()
-    YClients.select(id)
-
-    if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
-      YUndo.track('client', t('select nodes by clicking'))
-      // UILeftPanelLayer.expandAncestor(id)
-    }
   }
 
   private onDeepSelect() {
