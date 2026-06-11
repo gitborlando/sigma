@@ -54,7 +54,9 @@ class YUndoService {
     return Object.keys(clientState.selectIds).every((id) => YState.state[id])
   }
 
-  private replayInfo(info: YUndoInfo, replayState: () => void) {
+  private replayInfo(info: YUndoInfo | undefined, replayState: () => void) {
+    if (!info) return
+
     const clientState = info.clientState || this.initClientState
     switch (info.type) {
       case 'state':
@@ -77,7 +79,7 @@ class YUndoService {
   undo() {
     if (!this.canUndo) return
 
-    const info = this.stack[this.next-- - 1]
+    const info = this.stack[--this.next - 1]
     this.replayInfo(info, () => this.stateUndo.undo())
   }
 
