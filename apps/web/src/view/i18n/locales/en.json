@@ -57,6 +57,7 @@
   "file list": "file list",
   "search layer": "search layer",
   "auto save": "auto save",
+  "auto popup": "auto popup",
   "dev mode": "dev mode",
   "show dirty rect": "show dirty rect",
   "skip render unrecognizable node": "skip render unrecognizable node",

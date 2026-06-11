@@ -17,10 +17,11 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
         onClick={() => setShowHistory(!showHistory)}
       />
       <DragPanel
+        id='history'
+        show={showHistory}
         center
-        x-if={showHistory}
         title={t('history')}
-        closeFunc={() => setShowHistory(false)}
+        showFunc={setShowHistory}
         height={innerHeight * 0.8}>
         <Scrollbars>
           {stack.map((info, i) => (

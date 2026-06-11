@@ -58,6 +58,7 @@
   "search layer": "搜索图层",
   "show FPS": "显示 FPS",
   "auto save": "自动保存",
+  "auto popup": "自动弹出",
   "dev mode": "开发模式",
   "show dirty rect": "显示脏矩形",
   "skip render unrecognizable node": "跳过渲染不可辨认节点",

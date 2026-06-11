@@ -47,10 +47,10 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
   return (
     <DragPanel
       title={t('color picker')}
-      closeFunc={() => FillPickerState.hidePicker()}
-      clickAwayClose={() => FillPickerState.isShowPicker}
+      clickAwayClose={true}
       xy={pickerPos}
-      className={cls()}>
+      className={cls()}
+      showFunc={(show) => !show && FillPickerState.hidePicker()}>
       <G vertical className={cls('content')} gap={12}>
         <Segments
           options={[

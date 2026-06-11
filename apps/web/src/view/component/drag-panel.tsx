@@ -1,12 +1,18 @@
-import { IXY } from '@gitborlando/utils'
 import { listen, stopPropagation } from '@gitborlando/utils/browser'
-import { X } from 'lucide-react'
+import { createZodStorage, z } from '@sigma/utils'
+import { EllipsisVertical, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Drag } from 'src/global/event/drag'
-import { CommonBalanceItem } from 'src/view/component/balance-item'
+import {
+  CommonBalanceItem,
+  OptionBalanceItem,
+} from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
+import { Menu } from 'src/view/component/menu'
 
 type DragPanelProps = {
+  id?: string
+  show?: boolean
   title: string
   children: ReactNode
   xy?: IXY
@@ -15,17 +21,36 @@ type DragPanelProps = {
   height?: number
   center?: boolean
   className?: string
-  closeFunc: () => void
-  clickAwayClose?: () => boolean
+  clickAwayClose?: boolean
+  showFunc: (show: boolean) => void
   onMove?(newXY: IXY): void
 }
 
 let panelCount = 0
 let maxZIndex = 0
 
+const dragPanelInfoSchema = z.object({
+  xy: z
+    .object({
+      x: z.number(),
+      y: z.number(),
+    })
+    .optional(),
+  autoPopup: z.boolean().optional(),
+})
+
+const dragPanelInfosKey = 'dragPanelInfos'
+const dragPanelInfosSchema = z.record(dragPanelInfoSchema)
+const dragPanelInfosStorage = createZodStorage(
+  dragPanelInfosKey,
+  dragPanelInfosSchema,
+)
+
 export const DragPanel: FC<DragPanelProps> = ({
+  id,
+  show = true,
   title,
-  closeFunc,
+  showFunc,
   clickAwayClose,
   children,
   xy,
@@ -37,18 +62,41 @@ export const DragPanel: FC<DragPanelProps> = ({
   onMove,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState(xy || XY.$(480, 240))
-  const [zIndex, setZIndex] = useState(0)
+  const dragPanelInfo = id ? dragPanelInfosStorage.read()?.[id] : undefined
+
+  const [zIndex, setZIndex] = useState(maxZIndex)
+  const [autoPopup, setAutoPopup] = useState(() => dragPanelInfo?.autoPopup ?? false)
+  const [position, setPosition] = useState(
+    () => dragPanelInfo?.xy || xy || XY.$(480, 240),
+  )
+
+  const handleHeaderMouseDown = (e: React.MouseEvent) => {
+    const startXY = position
+    Drag.onMove(({ shift }) => {
+      const newPosition = XY.of(startXY).plus(shift)
+      setPosition(newPosition)
+      onMove?.(newPosition)
+      if (!id) return
+      dragPanelInfosStorage.savePartial({ [id]: { xy: newPosition } })
+    }).start(e)
+  }
+
+  const handleAutoPopupChange = (value: boolean) => {
+    setAutoPopup(value)
+    if (!id) return
+    dragPanelInfosStorage.savePartial({ [id]: { autoPopup: value } })
+  }
 
   useLayoutEffect(() => {
-    if (!xy) return
-    const bound = ref.current!.getBoundingClientRect()
-    setPosition(XY.$(xy.x, min(xy.y, innerHeight - bound.height - 12)))
-  }, [xy])
+    if (!show) return
+    if (xy) setPosition(xy)
+  }, [xy, show])
 
   useLayoutEffect(() => {
+    if (!ref.current) return
     if (!center) return
-    const bound = ref.current!.getBoundingClientRect()
+    if (dragPanelInfo?.xy) return
+    const bound = ref.current.getBoundingClientRect()
     setPosition(
       XY.$(innerWidth / 2 - bound.width / 2, innerHeight / 2 - bound.height / 2),
     )
@@ -62,20 +110,21 @@ export const DragPanel: FC<DragPanelProps> = ({
 
   useEffect(() => {
     return listen('mousedown', () => {
-      if (clickAwayClose?.()) closeFunc()
+      if (show && clickAwayClose) showFunc(false)
     })
+  }, [show, clickAwayClose])
+
+  const isFirstShow = useRef(false)
+  const needFirstPopup = autoPopup && !isFirstShow.current
+
+  useEffect(() => {
+    needFirstPopup && showFunc(true)
+    isFirstShow.current = true
   }, [])
 
-  const handleHeaderMouseDown = (e: React.MouseEvent) => {
-    const startXY = position
-    Drag.onMove(({ current, shift }) => {
-      if (current.x > innerWidth || current.y > innerHeight) return
-      setPosition(XY.of(startXY).plus(shift))
-      onMove?.(position)
-    }).start(e)
-  }
+  if (!show) return null
 
-  return createPortal(
+  const panel = (
     <G
       vertical='auto 1fr'
       className={cx(cls(), className)}
@@ -94,18 +143,38 @@ export const DragPanel: FC<DragPanelProps> = ({
         label={title}
         className={cls('header')}
         onMouseDown={handleHeaderMouseDown}>
-        <G className={cls('header-slot')}>{headerSlot}</G>
-        <Btn
-          size={24}
-          icon={<Lucide icon={X} />}
-          onMouseDown={stopPropagation()}
-          onClick={closeFunc}
-        />
+        <G horizontal center className={cls('header-actions')}>
+          <G className={cls('header-slot')}>{headerSlot}</G>
+          <Menu
+            x-if={!!id}
+            className={cls('menu')}
+            trigger={
+              <Btn
+                size={24}
+                icon={<Lucide icon={EllipsisVertical} />}
+                onMouseDown={stopPropagation()}
+              />
+            }>
+            <OptionBalanceItem
+              label={t('auto popup')}
+              checked={autoPopup}
+              onChecked={handleAutoPopupChange}
+              onMouseDown={stopPropagation()}
+            />
+          </Menu>
+          <Btn
+            size={24}
+            icon={<Lucide icon={X} />}
+            onMouseDown={stopPropagation()}
+            onClick={() => showFunc(false)}
+          />
+        </G>
       </CommonBalanceItem>
       <G className={cls('content')}>{children}</G>
-    </G>,
-    document.querySelector('#drag-panel-portal')!,
+    </G>
   )
+
+  return createPortal(panel, document.querySelector('#drag-panel-portal')!)
 }
 
 const cls = classes(css`
@@ -129,8 +198,18 @@ const cls = classes(css`
     &-slot {
       justify-content: end;
     }
+    &-actions {
+      align-items: center;
+      gap: 2px;
+      height: 24px;
+    }
   }
   &-content {
     height: 100%;
+  }
+  &-menu {
+    width: 160px;
+    position: relative;
+    z-index: 10000;
   }
 `)

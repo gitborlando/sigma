@@ -17,11 +17,12 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
         onClick={() => setShowSetting(!showSetting)}
       />
       <DragPanel
+        id='setting'
+        show={showSetting}
         width={400}
         center
-        x-if={showSetting}
         title={t('settings')}
-        closeFunc={() => setShowSetting(false)}>
+        showFunc={setShowSetting}>
         {/* <SwitchBar
           options={[
             { label: t('general settings'), value: 'common' },
