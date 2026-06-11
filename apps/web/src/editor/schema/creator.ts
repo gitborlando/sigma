@@ -51,7 +51,7 @@ class SchemaCreatorService {
   }
 
   frame(option?: Partial<S.Frame>): S.Frame {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('frame')
     return {
       type: 'frame',
       radius: 0,
@@ -63,7 +63,7 @@ class SchemaCreatorService {
   }
 
   group(option?: Partial<S.Group>): S.Group {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('group')
     return {
       type: 'group',
       childIds: [],
@@ -73,7 +73,7 @@ class SchemaCreatorService {
   }
 
   rect(option?: Partial<S.Rectangle>): S.Rectangle {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('rect')
     return {
       type: 'rect',
       points: [],
@@ -84,7 +84,7 @@ class SchemaCreatorService {
   }
 
   ellipse(option?: Partial<S.Ellipse>): S.Ellipse {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('ellipse')
     return {
       type: 'ellipse',
       points: [],
@@ -97,7 +97,7 @@ class SchemaCreatorService {
   }
 
   polygon(option?: Partial<S.Polygon>): S.Polygon {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('polygon')
     const { width, height } = option || nodeBase
     const points = createRegularPolygon(width!, height!, option?.sides || 3)
     return {
@@ -111,7 +111,7 @@ class SchemaCreatorService {
   }
 
   star(option?: Partial<S.Star>): S.Star {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('star')
     const { width, height } = option || nodeBase
     const points = createStarPolygon(width!, height!, 5, 0.382)
     return {
@@ -126,7 +126,7 @@ class SchemaCreatorService {
   }
 
   line(option?: Partial<S.Line>): S.Line {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('line')
     const start = XY.$(nodeBase.x, nodeBase.y)
     const length = option?.width || nodeBase.width
     const rotation = option?.rotation || nodeBase.rotation
@@ -143,7 +143,7 @@ class SchemaCreatorService {
   }
 
   irregular(option?: Partial<S.Path>): S.Path {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('irregular')
     return {
       type: 'irregular',
       points: [],
@@ -159,7 +159,7 @@ class SchemaCreatorService {
   }
 
   text(option?: NestPartial<S.Text>): S.Text {
-    const nodeBase = this.createNodeBase()
+    const nodeBase = this.createNodeBase('text')
     return T<S.Text>(
       defuOverrideArray(
         {
@@ -265,19 +265,19 @@ class SchemaCreatorService {
     }
   }
 
-  private createSchemaMeta(): S.NodeMeta {
+  private createSchemaMeta(type: S.Node['type']): S.NodeMeta {
     return {
       id: miniId(),
-      name: '',
+      name: this.createNodeName(type),
       lock: false,
       visible: true,
       parentId: '',
     }
   }
 
-  private createNodeBase(): S.NodeBase {
+  private createNodeBase(type: S.Node['type']): S.NodeBase {
     return {
-      ...this.createSchemaMeta(),
+      ...this.createSchemaMeta(type),
       x: 0,
       y: 0,
       width: 100,
