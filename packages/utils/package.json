@@ -7,13 +7,16 @@
   "exports": {
     ".": "./src/index.ts",
     "./common": "./src/common.ts",
-    "./defu": "./src/defu.ts"
+    "./defu": "./src/defu.ts",
+    "./storage": "./src/storage.ts",
+    "./zod": "./src/zod.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "defu": "^6.1.4"
+    "defu": "^6.1.4",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
