@@ -121,11 +121,11 @@ const GeometryItemComp: FC<{
     } else {
       setGeometries({ [operateKey]: v }, { delta: false })
     }
-    YUndo.track2('state', `${t('modify geometry property')}: ${operateKey}`)
+    YUndo.track('state', `${t('modify geometry property')}: ${operateKey}`)
   }
 
   const handleAfterSlide = () => {
-    YUndo.track2('state', `${t('modify geometry property')}: ${operateKey}`)
+    YUndo.track('state', `${t('modify geometry property')}: ${operateKey}`)
   }
 
   return (
@@ -136,7 +136,7 @@ const GeometryItemComp: FC<{
       onSlide={(v) => setGeometries({ [operateKey]: correctSetValue(v) })}
       afterSlide={handleAfterSlide}
       onEnd={handleEnd}
-      {...(isMultiValue ? { placeholder: t('noun.multiValue') } : {})}
+      {...(isMultiValue ? { placeholder: t('mixed') } : {})}
     />
   )
 })

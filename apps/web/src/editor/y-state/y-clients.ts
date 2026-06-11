@@ -64,10 +64,7 @@ class YClientsService {
     this.client.selectIdMap[id] = true
 
     const name = YState.state[id].name
-    YUndo.track({
-      type: 'client',
-      description: sentence(t('verb.select'), t('noun.node'), ': ', name),
-    })
+    YUndo.track('client', `${t('select node')}: ${name}`)
   }
 
   unSelect(id: string) {
@@ -75,10 +72,7 @@ class YClientsService {
     delete this.client.selectIdMap[id]
 
     const name = YState.state[id].name
-    YUndo.track({
-      type: 'client',
-      description: sentence(t('verb.unselect'), t('noun.node'), ': ', name),
-    })
+    YUndo.track('client', `${t('unselect node')}: ${name}`)
   }
 
   clearSelect() {
@@ -91,15 +85,7 @@ class YClientsService {
     this.clearSelect()
     this.afterSelect.dispatch()
 
-    YUndo.track({
-      type: 'client',
-      description: sentence(
-        t('verb.select'),
-        t('noun.page'),
-        ': ',
-        YState.state[id].name,
-      ),
-    })
+    YUndo.track('client', `${t('select page')}: ${YState.state[id].name}`)
   }
 
   syncSelf() {

@@ -1,4 +1,4 @@
-import equal from 'fast-deep-equal'
+﻿import equal from 'fast-deep-equal'
 import { PipetteIcon } from 'lucide-react'
 import { createContext, RefObject } from 'react'
 import { Drag } from 'src/global/event/drag'
@@ -105,7 +105,7 @@ const SquareComp: FC<{}> = observer(({}) => {
         if (equal(lastXY, current) && !moved) return
         lastXY.x = current.x
         lastXY.y = current.y
-        YUndo.track({ type: 'state', description: t('adjust color') })
+        YUndo.track('state', t('adjust color'))
       })
       .start(e)
   }
@@ -156,7 +156,7 @@ function useSlider(
       .onDestroy(({ current }) => {
         if (lastValue.current === current.x) return
         lastValue.current = current.x
-        YUndo.track({ type: 'state', description: t('adjust color') })
+        YUndo.track('state', t('adjust color'))
       })
       .start(e)
   }

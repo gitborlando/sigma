@@ -1,4 +1,4 @@
-import { clone } from '@gitborlando/utils'
+﻿import { clone } from '@gitborlando/utils'
 import autoBind from 'auto-bind'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
@@ -56,7 +56,7 @@ class OperateFillService {
   }
 
   onAfterSetFills() {
-    YUndo.track({ type: 'state', description: '改变 fill' })
+    YUndo.track('state', t('change fill'))
   }
 
   applyChangeToYState(patches: Patch[]) {

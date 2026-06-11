@@ -1,4 +1,4 @@
-import { OperateFill } from 'src/editor/operate/fill'
+﻿import { OperateFill } from 'src/editor/operate/fill'
 import { Drag } from 'src/global/event/drag'
 import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'
 import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
@@ -51,7 +51,7 @@ const StopsBar: FC<{
     })
       .onDestroy(({ moved }) => {
         if (!moved) return
-        YUndo.track({ type: 'state', description: t('move gradient point') })
+        YUndo.track('state', t('move gradient point'))
       })
       .start(e)
   }

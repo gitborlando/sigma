@@ -34,7 +34,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
             onClick={() => navigate('fileId/mock?applyRecord=true')}>
             Mock页
           </Btn>
-          <Btn variant='solid'>{t('file.new')}</Btn>
+          <Btn variant='solid'>{t('new file')}</Btn>
         </G>
         <G
           dangerouslySetInnerHTML={{ __html: UserService.avatar }}

@@ -294,14 +294,14 @@ function replayHistoryFromBase(snapshot: DevSnapshot, base: SnapshotState) {
 function replayHistoryInfo(info: YUndoInfo) {
   if (info.type === 'client') {
     applyClientState(info.clientState)
-    YUndo.track({ type: info.type, description: info.description })
+    YUndo.track(info.type, info.description)
     return
   }
 
   YState.transact(() => applyStatePatches(info.statePatches))
   if (info.type === 'all') applyClientState(info.clientState)
 
-  YUndo.track({ type: info.type, description: info.description })
+  YUndo.track(info.type, info.description)
 }
 
 function applyClientState(clientState: YUndoInfo['clientState']) {

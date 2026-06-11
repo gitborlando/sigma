@@ -7,7 +7,6 @@ import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
 import { InputNum } from 'src/view/component/input-num'
 import { suspense } from 'src/view/component/suspense'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
-import i18n from 'src/view/i18n/config'
 import { suspend } from 'suspend-react'
 
 export const EditorRPOperateFillItemComp: FC<{
@@ -83,8 +82,8 @@ const HexInputComp: FC<{
 
   const value = matchCase(fill.type, {
     color: Color(T<S.FillColor>(fill).color).hex().slice(1),
-    linearGradient: i18n.language === 'en' ? 'linear' : t('noun.linearGradient'),
-    image: `${t('noun.image')} ${t('noun.fill')}`,
+    linearGradient: t('linear gradient'),
+    image: t('image fill'),
   })
 
   return null

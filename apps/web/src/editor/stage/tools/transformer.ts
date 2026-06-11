@@ -1,4 +1,4 @@
-import { createCache, iife } from '@gitborlando/utils'
+﻿import { createCache, iife } from '@gitborlando/utils'
 import { IMRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
@@ -57,7 +57,7 @@ class StageTransformerService {
         this.isMoving = false
         this.onEndTransform()
         if (moved) {
-          YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
+          YUndo.track('state', t('move nodes'))
         }
       })
       .start(e)
@@ -108,7 +108,7 @@ class StageTransformerService {
       .onDestroy(({ moved }) => {
         this.onEndTransform()
         if (moved) {
-          YUndo.track2('state', sentence(t('verb.move'), t('noun.node')))
+          YUndo.track('state', t('resize nodes'))
         }
       })
       .start(options?.e)
@@ -135,7 +135,7 @@ class StageTransformerService {
       .onDestroy(({ moved }) => {
         this.onEndTransform()
         if (moved) {
-          YUndo.track2('state', sentence(t('verb.rotate'), t('noun.node')))
+          YUndo.track('state', t('rotate nodes'))
         }
       })
       .start()

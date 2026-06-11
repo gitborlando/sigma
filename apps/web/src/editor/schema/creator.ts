@@ -23,7 +23,7 @@ class SchemaCreatorService {
       type: 'meta',
       id: 'meta',
       fileId: '',
-      name: t('special.untitled'),
+      name: t('untitled'),
       version: 'v0',
       pageIds: [],
       userId: '',
@@ -297,7 +297,7 @@ class SchemaCreatorService {
   createNodeName(type: string) {
     const index = this.nodeNameCache.getSet(type, () => 0)
     this.nodeNameCache.set(type, index + 1)
-    return `${t(`noun.${type}`)} ${index + 1}`
+    return `${t(type)} ${index + 1}`
   }
 
   addToSchema(schema: S.Schema, item: S.SchemaItem) {

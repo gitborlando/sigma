@@ -1,4 +1,4 @@
-import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
+﻿import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { SchemaCreator } from '../schema/creator'
@@ -75,10 +75,7 @@ class HandleNodeService {
       YClients.clearSelect()
       YClients.afterSelect.dispatch()
     })
-    YUndo.track({
-      type: 'all',
-      description: sentence(t('verb.delete'), t('noun.node')),
-    })
+    YUndo.track('all', t('delete nodes'))
   }
 
   copySelectedNodes() {
@@ -109,15 +106,7 @@ class HandleNodeService {
       newSelectIds.forEach((id) => YClients.select(id))
       YClients.afterSelect.dispatch()
     })
-    YUndo.track({
-      type: 'all',
-      description: sentence(
-        t('verb.paste'),
-        t('noun.node'),
-        ': ',
-        newSelectIds.length.toString(),
-      ),
-    })
+    YUndo.track('all', `${t('paste nodes')}: ${newSelectIds.length}`)
   }
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
@@ -137,10 +126,7 @@ class HandleNodeService {
       })
     })
 
-    YUndo.track({
-      type: 'all',
-      description: sentence(t('verb.reorder'), t('noun.node')),
-    })
+    YUndo.track('all', t('reorder nodes'))
   }
 
   wrapInFrame() {
@@ -165,10 +151,7 @@ class HandleNodeService {
         YClients.afterSelect.dispatch()
       }),
     )
-    YUndo.track({
-      type: 'all',
-      description: sentence(t('verb.create'), t('noun.frame')),
-    })
+    YUndo.track('all', t('create frame'))
   }
 
   private getDatum() {

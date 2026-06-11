@@ -1,4 +1,4 @@
-import { type IRect } from '@gitborlando/geo'
+﻿import { type IRect } from '@gitborlando/geo'
 import { firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
@@ -104,10 +104,7 @@ class StageSelectService {
 
     this.clearSelect()
     YUndo.untrack(() => YClients.select(id))
-    YUndo.track({
-      type: 'client',
-      description: t('selected nodes via panel'),
-    })
+    YUndo.track('client', t('select nodes from panel'))
     YClients.afterSelect.dispatch()
   }
 
@@ -131,10 +128,7 @@ class StageSelectService {
     YClients.select(id)
 
     if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
-      YUndo.track({
-        type: 'client',
-        description: t('selected nodes via mousedown'),
-      })
+      YUndo.track('client', t('select nodes by clicking'))
       // UILeftPanelLayer.expandAncestor(id)
     }
   }
@@ -201,7 +195,7 @@ class StageSelectService {
         YClients.afterSelect.dispatch()
 
         if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
-          YUndo.track2('client', t('selected nodes via marquee'))
+          YUndo.track('client', t('select nodes with marquee'))
         }
       })
       .start()

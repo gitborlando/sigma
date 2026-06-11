@@ -16,13 +16,13 @@ class EditorCommandManager {
   get copyPasteGroup(): Command[] {
     return [
       {
-        name: t('verb.copy'),
+        name: t('copy'),
         shortcut: 'ctrl+c',
         when: () => !!getSelectIdList().length,
         callback: () => HandleNode.copySelectedNodes(),
       },
       {
-        name: t('verb.paste'),
+        name: t('paste'),
         shortcut: 'ctrl+v',
         when: () => !!HandleNode.copiedIds.length,
         callback: () => HandleNode.pasteNodes(),
@@ -33,12 +33,12 @@ class EditorCommandManager {
   get undoRedoGroup(): Command[] {
     return [
       {
-        name: t('verb.undo'),
+        name: t('undo'),
         shortcut: 'ctrl+z',
         callback: () => YUndo.undo(),
       },
       {
-        name: t('verb.redo'),
+        name: t('redo'),
         shortcut: 'ctrl+shift+z',
         callback: () => YUndo.redo(),
       },
@@ -48,7 +48,7 @@ class EditorCommandManager {
   get pageGroup(): Command[] {
     const commands = [
       {
-        name: sentence(t('verb.delete'), t('noun.page')),
+        name: t('delete page'),
         callback: ({ id }: { id: ID }) => {
           HandlePage.removePage(YState.find<S.Page>(id))
         },
@@ -57,7 +57,7 @@ class EditorCommandManager {
 
     if (getEditorSetting().devMode) {
       commands.push({
-        name: sentence(t('verb.print'), 'schema'),
+        name: t('print schema'),
         callback: ({ id }: { id: ID }) => {
           HandlePage.DEV_logPageSchema(id)
         },
@@ -70,18 +70,18 @@ class EditorCommandManager {
   get nodeGroup(): Command[] {
     const commands = [
       {
-        name: t('verb.rename'),
+        name: t('rename'),
         callback: () => {
           const { id } = ContextMenu.context
           // UILeftPanelLayer.enterReName.dispatch(id)
         },
       },
       {
-        name: sentence(t('verb.create'), t('noun.frame')),
+        name: t('create frame'),
         callback: () => HandleNode.wrapInFrame(),
       },
       {
-        name: t('verb.delete'),
+        name: t('delete'),
         shortcut: 'del',
         callback: () => HandleNode.deleteSelectedNodes(),
       },
@@ -90,7 +90,7 @@ class EditorCommandManager {
     if (getEditorSetting().devMode) {
       commands.push(
         {
-          name: sentence(t('verb.print'), 'schema'),
+          name: t('print schema'),
           callback: () => {
             getSelectIdList().forEach((id) => {
               const node = YState.find<S.SchemaItem>(id)
@@ -99,7 +99,7 @@ class EditorCommandManager {
           },
         },
         {
-          name: sentence(t('verb.print'), 'elem'),
+          name: t('print element'),
           callback: () => {
             getSelectIdList().forEach((id) => {
               const elem = StageScene.findElem(id)
@@ -116,22 +116,22 @@ class EditorCommandManager {
   get nodeReHierarchyGroup(): Command[] {
     return [
       {
-        name: sentence(t('verb.moveTo'), 'up'),
+        name: t('move up'),
         shortcut: 'ctrl+]',
         callback: () => HandleNode.reHierarchySelectedNode('up'),
       },
       {
-        name: sentence(t('verb.moveTo'), 'down'),
+        name: t('move down'),
         shortcut: 'ctrl+[',
         callback: () => HandleNode.reHierarchySelectedNode('down'),
       },
       {
-        name: sentence(t('verb.moveTo'), 'top'),
+        name: t('move to top'),
         shortcut: 'ctrl+alt+]',
         callback: () => HandleNode.reHierarchySelectedNode('top'),
       },
       {
-        name: sentence(t('verb.moveTo'), 'bottom'),
+        name: t('move to bottom'),
         shortcut: 'ctrl+alt+[',
         callback: () => HandleNode.reHierarchySelectedNode('bottom'),
       },
@@ -141,12 +141,12 @@ class EditorCommandManager {
   get createShapeGroup(): Command[] {
     return [
       {
-        name: t('verb.select'),
+        name: t('select'),
         shortcut: 'v',
         callback: () => (StageInteract.interaction = 'select'),
       },
       {
-        name: t('verb.move'),
+        name: t('move'),
         shortcut: 'h',
         callback: () => (StageInteract.interaction = 'move'),
       },
@@ -156,13 +156,13 @@ class EditorCommandManager {
   get fileGroup(): Command[] {
     return [
       {
-        name: sentence(t('verb.delete'), t('noun.file')),
+        name: t('delete file'),
         callback: () => {
           const { id } = ContextMenu.context
         },
       },
       {
-        name: sentence(t('verb.export'), t('noun.file')),
+        name: t('export file'),
         callback: () => {
           const { id } = ContextMenu.context
         },

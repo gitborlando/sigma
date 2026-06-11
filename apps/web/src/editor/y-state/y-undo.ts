@@ -1,4 +1,4 @@
-import { clone } from '@gitborlando/utils'
+﻿import { clone } from '@gitborlando/utils'
 import { computed, observable } from 'mobx'
 import { type UndoClientState, YClients } from 'src/editor/y-state/y-clients'
 import { ImmutPatch } from 'src/utils/immut/immut'
@@ -90,24 +90,7 @@ class YUndoService {
 
   private shouldTrack = true
 
-  track(info: YUndoInfo) {
-    if (!this.shouldTrack) return
-
-    const { type } = info
-
-    if (type === 'state' || type === 'all') {
-      this.stateUndo.stopCapturing()
-      info.statePatches = YState.getPatches()
-    }
-    if (type === 'client' || type === 'all') {
-      info.clientState = this.getClientState()
-    }
-
-    this.stack.splice(this.next, this.stack.length - this.next, info)
-    this.next = this.stack.length
-  }
-
-  track2(type: YUndoInfo['type'], description: string) {
+  track(type: YUndoInfo['type'], description: string) {
     if (!this.shouldTrack) return
 
     const info: YUndoInfo = { type, description }

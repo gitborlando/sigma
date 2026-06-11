@@ -1,4 +1,4 @@
-import autobind from 'class-autobind-decorator'
+﻿import autobind from 'class-autobind-decorator'
 import { StageScene } from 'src/editor/render/scene'
 import { SchemaHelper } from '../schema/helper'
 import { INode, INodeParent } from '../schema/type'
@@ -52,7 +52,7 @@ class OperateAlignService {
       this[this.currentAlign.value]()
     })
     if (this.needAlign) {
-      YUndo.track({ type: 'state', description: '设置对齐' })
+      YUndo.track('state', t('set alignment'))
       this.needAlign = false
     }
   }

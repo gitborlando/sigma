@@ -1,4 +1,4 @@
-import { IRect } from '@gitborlando/geo'
+﻿import { IRect } from '@gitborlando/geo'
 import { DragData } from '@gitborlando/utils/browser'
 import { HandleNode } from 'src/editor/handle/node'
 import { StageScene } from 'src/editor/render/scene'
@@ -97,7 +97,7 @@ class StageCreateService {
     }
 
     StageInteract.interaction = 'select'
-    YUndo.track2('all', t('created node'))
+    YUndo.track('all', t('create node'))
   }
 
   private createNode(rect: IRect) {

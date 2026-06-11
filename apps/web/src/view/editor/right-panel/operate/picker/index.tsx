@@ -1,4 +1,4 @@
-import { createCache, matchCase } from '@gitborlando/utils'
+﻿import { createCache, matchCase } from '@gitborlando/utils'
 import Color from 'color'
 import { OperateFill } from 'src/editor/operate/fill'
 import { SchemaCreator } from 'src/editor/schema/creator'
@@ -41,12 +41,12 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
   const handleChangeFill = (value: S.Fill['type']) => {
     FillPickerState.fillType = value
     changeFill(fillCache.getSet(value, () => createFillCache(value)))
-    YUndo.track({ type: 'state', description: t('change fill type') })
+    YUndo.track('state', t('change fill type'))
   }
 
   return (
     <DragPanel
-      title={t('noun.colorPicker')}
+      title={t('color picker')}
       closeFunc={() => FillPickerState.hidePicker()}
       clickAwayClose={() => FillPickerState.isShowPicker}
       xy={pickerPos}
@@ -54,9 +54,9 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
       <G vertical className={cls('content')} gap={12}>
         <Segments
           options={[
-            { label: t('noun.solidColor'), value: 'color' },
-            { label: t('noun.linear'), value: 'linearGradient' },
-            { label: t('noun.image'), value: 'image' },
+            { label: t('solid color'), value: 'color' },
+            { label: t('linear'), value: 'linearGradient' },
+            { label: t('image'), value: 'image' },
           ]}
           value={fillType}
           onChange={(value) => handleChangeFill(value as S.Fill['type'])}
@@ -66,9 +66,9 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
           value={fillType}
           size='mini'
           onChange={handleChangeFill}>
-          <Radio value='color'>{t('noun.solidColor')}</Radio>
-          <Radio value='linearGradient'>{t('noun.linear')}</Radio>
-          <Radio value='image'>{t('noun.image')}</Radio>
+          <Radio value='color'>{t('solid color')}</Radio>
+          <Radio value='linearGradient'>{t('linear')}</Radio>
+          <Radio value='image'>{t('image')}</Radio>
         </Radio.Group> */}
         {fill.type === 'color' && (
           <PickerSolidComp fill={fill as S.FillColor} index={fillIndex} />

@@ -20,12 +20,12 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
         width={400}
         center
         x-if={showSetting}
-        title={t('common.setting')}
+        title={t('settings')}
         closeFunc={() => setShowSetting(false)}>
         {/* <SwitchBar
           options={[
-            { label: t('special.generalSetting'), value: 'common' },
-            { label: t('special.devSetting'), value: 'dev' },
+            { label: t('general settings'), value: 'common' },
+            { label: t('dev settings'), value: 'dev' },
           ]}
           value={settingType}
           onChange={(value) => setSettingType(value as 'common' | 'dev')}
@@ -52,7 +52,7 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
 
   return (
     <G gap={8}>
-      <CommonBalanceItem label={t('noun.language')}>
+      <CommonBalanceItem label={t('language')}>
         <Segments
           options={[
             { label: 'English', value: 'en' },

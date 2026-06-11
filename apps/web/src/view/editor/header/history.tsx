@@ -19,7 +19,7 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
       <DragPanel
         center
         x-if={showHistory}
-        title={t('common.history')}
+        title={t('history')}
         closeFunc={() => setShowHistory(false)}
         height={innerHeight * 0.8}>
         <Scrollbars>
