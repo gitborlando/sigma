@@ -1,6 +1,8 @@
 import { objectKey } from '@gitborlando/utils'
-import { History } from 'lucide-react'
+import { Braces, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
+import { HandlePage } from 'src/editor/handle/page'
+import { getSelectPageId } from 'src/editor/utils/get'
 import type { YUndoInfo } from 'src/editor/y-state/y-undo'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
@@ -22,6 +24,17 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
         center
         title={t('history')}
         showFunc={setShowHistory}
+        headerSlot={
+          isDEV && (
+            <Btn
+              size={24}
+              title='Print current schema'
+              icon={<Lucide icon={Braces} />}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={() => HandlePage.DEV_logPageSchema(getSelectPageId())}
+            />
+          )
+        }
         height={innerHeight * 0.8}>
         <Scrollbars>
           {stack.map((info, i) => (
