@@ -12,6 +12,7 @@ const initSetting = () => {
     fullRender: false,
     dev: {
       fixedSceneMatrix: true,
+      logUndoRedoInfo: false,
       sceneMatrix: Matrix.identity(),
     },
     snapToGrid: false,

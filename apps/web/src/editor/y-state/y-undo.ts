@@ -1,6 +1,8 @@
 ﻿import { clone } from '@gitborlando/utils'
 import { computed, observable } from 'mobx'
+import { getEditorSetting } from 'src/editor/editor/setting'
 import { type UndoClientState, YClients } from 'src/editor/y-state/y-clients'
+import { devLog } from 'src/utils/global'
 import { ImmutPatch } from 'src/utils/immut/immut'
 import * as Y from 'yjs'
 
@@ -80,6 +82,7 @@ class YUndoService {
     if (!this.canUndo) return
 
     const info = this.stack[--this.next - 1]
+    this.DEV_logUndoRedoInfo(true, info)
     this.replayInfo(info, () => this.stateUndo.undo())
   }
 
@@ -87,7 +90,13 @@ class YUndoService {
     if (!this.canRedo) return
 
     const info = this.stack[this.next++]
+    this.DEV_logUndoRedoInfo(false, info)
     this.replayInfo(info, () => this.stateUndo.redo())
+  }
+
+  private DEV_logUndoRedoInfo(isUndo: boolean, info: YUndoInfo) {
+    if (!getEditorSetting().dev.logUndoRedoInfo) return
+    devLog(isUndo ? 'undo info' : 'redo info', info)
   }
 
   private shouldTrack = true

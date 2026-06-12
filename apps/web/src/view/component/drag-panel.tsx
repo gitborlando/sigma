@@ -17,6 +17,7 @@ type DragPanelProps = {
   children: ReactNode
   xy?: IXY
   headerSlot?: ReactNode
+  menuSlot?: ReactNode
   width?: number
   height?: number
   center?: boolean
@@ -55,6 +56,7 @@ export const DragPanel: FC<DragPanelProps> = ({
   children,
   xy,
   headerSlot,
+  menuSlot,
   width,
   height,
   center,
@@ -146,7 +148,7 @@ export const DragPanel: FC<DragPanelProps> = ({
         <G horizontal center className={cls('header-actions')}>
           <G className={cls('header-slot')}>{headerSlot}</G>
           <Menu
-            x-if={!!id}
+            x-if={!!id || !!menuSlot}
             className={cls('menu')}
             trigger={
               <Btn
@@ -155,7 +157,9 @@ export const DragPanel: FC<DragPanelProps> = ({
                 onMouseDown={stopPropagation()}
               />
             }>
+            {menuSlot}
             <OptionBalanceItem
+              x-if={!!id}
               label={t('auto popup')}
               checked={autoPopup}
               onChecked={handleAutoPopupChange}

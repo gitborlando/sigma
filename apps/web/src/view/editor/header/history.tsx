@@ -1,9 +1,11 @@
 import { objectKey } from '@gitborlando/utils'
 import { Braces, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
+import { getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
 import { getSelectPageId } from 'src/editor/utils/get'
 import type { YUndoInfo } from 'src/editor/y-state/y-undo'
+import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Text } from 'src/view/component/text'
@@ -32,6 +34,15 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
               icon={<Lucide icon={Braces} />}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={() => HandlePage.DEV_logPageSchema(getSelectPageId())}
+            />
+          )
+        }
+        menuSlot={
+          isDEV && (
+            <OptionBalanceItem
+              label='Log undo/redo info'
+              checked={getEditorSetting().dev.logUndoRedoInfo}
+              onChecked={(value) => (getEditorSetting().dev.logUndoRedoInfo = value)}
             />
           )
         }
