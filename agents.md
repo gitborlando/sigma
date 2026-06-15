@@ -40,6 +40,9 @@
 - 优先使用 @gitborlando/utils 中的工具函数
 - 优先使用 @gitborlando/geo 中的类型以及几何计算
 
-## 其他
+## 提交信息
 
-- 用英文提交
+- 使用英文提交信息
+- 优先沿用项目现有风格：祈使句、首字母大写、简洁描述，例如 `Add ...`、`Fix ...`、`Update ...`、`Refactor ...`
+- 不要默认使用 `feat:`、`fix:`、`chore:` 等 Conventional Commit 前缀，除非上下文已有明确要求
+- 避免使用纯数字或临时占位信息作为正式提交；临时实验类提交才考虑使用 `unimportant:` 前缀
