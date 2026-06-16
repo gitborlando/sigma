@@ -1,4 +1,4 @@
-﻿import { type IRect } from '@gitborlando/geo'
+import { type IRect } from '@gitborlando/geo'
 import { clone, firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
@@ -118,7 +118,7 @@ class StageSelectService {
     this.clearSelect()
     YClients.select(id)
 
-    if (trackMsg) YUndo.track('client', trackMsg)
+    if (trackMsg) Undo.track('client', trackMsg)
   }
 
   private onDeepSelect() {
@@ -182,7 +182,7 @@ class StageSelectService {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
 
         if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
-          YUndo.track('client', t('select nodes with marquee'))
+          Undo.track('client', t('select nodes with marquee'))
         }
       })
       .start()

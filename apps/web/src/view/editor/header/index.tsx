@@ -1,5 +1,5 @@
 import { Icon } from '@gitborlando/widget'
-import { ChevronLeft, Redo, Undo } from 'lucide-react'
+import { ChevronLeft, Redo, Undo as UndoIcon } from 'lucide-react'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -87,15 +87,15 @@ const UndoGroup: FC<{}> = observer(() => {
     <G horizontal gap={4}>
       <Btn
         size={32}
-        icon={<Lucide icon={Undo} />}
-        disabled={!YUndo.canUndo}
-        onClick={YUndo.undo}
+        icon={<Lucide icon={UndoIcon} />}
+        disabled={!Undo.canUndo}
+        onClick={Undo.undo}
       />
       <Btn
         size={32}
         icon={<Lucide icon={Redo} />}
-        disabled={!YUndo.canRedo}
-        onClick={YUndo.redo}
+        disabled={!Undo.canRedo}
+        onClick={Undo.redo}
       />
     </G>
   )

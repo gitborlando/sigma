@@ -3,7 +3,7 @@ import Scrollbars from 'react-custom-scrollbars-2'
 import { Text } from 'src/view/component/text'
 
 export const UndoComp: FC<{}> = observer(({}) => {
-  const { next, stack } = YUndo
+  const { next, stack } = Undo
 
   return (
     <Scrollbars>

@@ -167,7 +167,7 @@
 - React: `useState`, `useEffect`, `useMemo`, `useRef` 等
 - MobX: `observer`, `runInAction`, `autorun` 等
 - 自研库: `Signal`, `Elem`, `G`, `C`, `Schema` 等
-- Yjs: `YState`, `YClients`, `YUndo`
+- Yjs: `YState`, `YClients`, `Undo`
 
 **好处**：减少样板代码。**代价**：
 

@@ -1,12 +1,12 @@
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import { ClientUndo, type ClientUndoState } from 'src/editor/editor/client-undo'
-import type { YUndoInfo } from 'src/editor/y-state/y-undo'
+import type { UndoInfo } from 'src/editor/editor/undo-service'
 import { Btn } from 'src/view/component/btn'
 
 type SnapshotState = {
   schema: S.Schema
-  undoStack: YUndoInfo[]
+  undoStack: UndoInfo[]
   undoNext: number
   savedAt: number
 }
@@ -103,7 +103,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
     }
     const unSub = YState.flushPatch$.hook(scheduleSave)
     const disposeHistoryReaction = reaction(
-      () => [YUndo.next, YUndo.stack.length],
+      () => [Undo.next, Undo.stack.length],
       scheduleSave,
     )
 
@@ -198,8 +198,8 @@ function readSnapshot(storageKey: string) {
 function createSnapshotState(): SnapshotState {
   return {
     schema: toPlain(YState.schema),
-    undoStack: toPlain(YUndo.stack),
-    undoNext: YUndo.next,
+    undoStack: toPlain(Undo.stack),
+    undoNext: Undo.next,
     savedAt: Date.now(),
   }
 }
@@ -235,17 +235,17 @@ function replaceSchema(schema: S.Schema) {
 function restoreUndo(snapshot: SnapshotState) {
   if (!resetUndo()) return
 
-  runInAction(() => {
-    YUndo.stack = toPlain(snapshot.undoStack || [])
-    YUndo.next = Math.min(snapshot.undoNext || 0, YUndo.stack.length)
-  })
+  Undo.restoreHistory(toPlain(snapshot.undoStack || []), snapshot.undoNext || 0)
 }
 
 function resetUndo() {
   const ySchema = YState.doc?.getMap<S.Schema>('schema')
   if (!ySchema) return false
 
-  YUndo.initStateUndo(ySchema)
+  Undo.initStateUndo({
+    stateMap: ySchema,
+    getPatches: YState.getPatches,
+  })
   return true
 }
 
@@ -256,26 +256,23 @@ function replayHistoryFromBase(snapshot: DevSnapshot, base: SnapshotState) {
 
   stack.slice(start, end).forEach(replayHistoryInfo)
 
-  runInAction(() => {
-    YUndo.stack = toPlain(stack)
-    YUndo.next = end
-  })
+  Undo.restoreHistory(toPlain(stack), end)
 }
 
-function replayHistoryInfo(info: YUndoInfo) {
+function replayHistoryInfo(info: UndoInfo) {
   if (info.type === 'client') {
     applyReplayLocalState(info)
-    YUndo.track(info.type, info.description)
+    Undo.track(info.type, info.description)
     return
   }
 
   YState.transact(() => applyStatePatches(info.statePatches))
   if (info.type === 'all') applyReplayLocalState(info)
 
-  YUndo.track(info.type, info.description)
+  Undo.track(info.type, info.description)
 }
 
-function applyReplayLocalState(info: YUndoInfo) {
+function applyReplayLocalState(info: UndoInfo) {
   const localState = info.clientState
   if (localState) {
     ClientUndo.applyState(normalizeLocalState(localState))
@@ -317,7 +314,7 @@ function getValidPageId(pageId: string) {
   return YState.state.meta?.pageIds[0] || ''
 }
 
-function applyStatePatches(patches: YUndoInfo['statePatches']) {
+function applyStatePatches(patches: UndoInfo['statePatches']) {
   patches?.forEach((patch) => {
     const keyPath = patch.keys.join('.')
 

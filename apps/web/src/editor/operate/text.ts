@@ -1,4 +1,4 @@
-﻿import autobind from 'class-autobind-decorator'
+import autobind from 'class-autobind-decorator'
 import { ID, IText } from '../schema/type'
 import { getSelectedNodes } from '../utils/get'
 
@@ -48,7 +48,7 @@ class OperateTextService {
       if (changed) this.setupTextNodes()
     })
     this.afterOperate.hook(() => {
-      YUndo.track('state', t('change text'))
+      Undo.track('state', t('change text'))
     })
   }
   setTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
@@ -58,7 +58,7 @@ class OperateTextService {
   toggleTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
     this.immui.reset(this.textStyle, [key], value)
     this.applyChangeToYState(key, value)
-    YUndo.track('state', t('change text style'))
+    Undo.track('state', t('change text style'))
   }
   setTextContent(textNode: IText, content: string) {
     YState.transact(() => {

@@ -12,7 +12,7 @@
 - 删除 undo 需要先恢复 state 再恢复选区。
 - 删除 redo 又需要先清选区再删 state。
 
-所以当前只能靠 `YUndo` 的组合历史和动态回放顺序兜底。
+所以当前只能靠 `Undo` 的组合历史和动态回放顺序兜底。
 
 ## 当前结论
 
@@ -22,7 +22,7 @@
 
 - schema 继续走 `YState` / `Y.Doc`。
 - selection 继续保留为 client state。
-- `YUndo` 用 `all` 历史把两者拼成一个可回放单元。
+- `Undo` 用 `all` 历史把两者拼成一个可回放单元。
 - 回放时按目标选区节点是否已存在，动态决定先回放 state 还是先回放 selection。
 
 这个策略可以先保证行为正确，但它不是最终形态。
@@ -58,9 +58,9 @@
 现在还不适合直接做这件事，原因很简单：
 
 - 当前阶段的主目标还是清理旧 `Schema` 运行残留和收敛状态入口。
-- selection 进入统一回放源，会牵动 `YClients`、`YUndo`、创建/删除/粘贴等交互链路。
+- selection 进入统一回放源，会牵动 `YClients`、`Undo`、创建/删除/粘贴等交互链路。
 - 这类改造更适合在现有阶段稳定后，再单独开题处理。
 
 ## 一句话结论
 
-后续真正更优雅的方向，不是继续给 `YUndo all` 补更多顺序判断，而是让 selection 和 schema 至少共享同一套 transaction / history / replay 边界。
+后续真正更优雅的方向，不是继续给 `Undo all` 补更多顺序判断，而是让 selection 和 schema 至少共享同一套 transaction / history / replay 边界。

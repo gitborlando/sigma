@@ -302,7 +302,7 @@
   - 选区来源：`YClients.afterSelect` 与 `getSelectedNodes()`。
   - 状态变更监听：`YState.subscribe()` 中匹配 `strokes` patch。
   - 写入入口：`YState.transact()` + `YState.set()`。
-  - 历史记录：`YUndo.track()`。
+  - 历史记录：`Undo.track()`。
 - `OperateShadow` 按同样模式从旧 `Schema` 写入迁到 `YState.transact()`。
 - `OperateText` 的文本样式和内容写入迁到 `YState.transact()`：
   - `setTextStyle()` / `toggleTextStyle()` 只写入变更的 style key，避免多选混合值覆盖其他样式字段。
@@ -334,7 +334,7 @@
 
 - 按“一次做 3 小步”继续推进，并只处理已确认实际使用的入口：
   - `OperateNode` 被 `StageSelect`、`OperateAlign`、`vector-edit` 等实际引用，本轮将选择状态桥接从旧 `Schema.onMatchPatch()` / `Schema.schemaChanged` 改为跟随 `YClients.afterSelect` 和 `YState.subscribe()`。
-  - `OperateAlign` 被 editor 初始化和右侧对齐面板实际引用，本轮将对齐写入从 `Schema.itemReset()` / `Schema.finalOperation()` 改为 `YState.transact()` / `YState.set()` / `YUndo.track()`。
+  - `OperateAlign` 被 editor 初始化和右侧对齐面板实际引用，本轮将对齐写入从 `Schema.itemReset()` / `Schema.finalOperation()` 改为 `YState.transact()` / `YState.set()` / `Undo.track()`。
   - `YClients.selectPage()` 被 `HandlePage` 实际使用，本轮在清空选择后派发 `afterSelect`，确保页面切换时 `OperateNode` 的选择缓存同步清空。
 - `OperateAlign` 的多选对齐边界从原先注释掉的旧路径改为使用当前待对齐节点的合并 AABB。
 - `OperateNode` 本轮只迁选择缓存与选中节点派发；旧增删节点方法仍保留旧 `Schema` 写入，后续必须先确认具体方法是否仍被实际入口调用。
@@ -389,7 +389,7 @@
   - 在原父级当前位置插入 frame。
   - 将原选中节点从旧父级移入 frame。
   - 更新选择到新 frame，并派发 `YClients.afterSelect`。
-  - 保留 `YUndo.track({ type: 'all' })` 记录。
+  - 保留 `Undo.track({ type: 'all' })` 记录。
 - `YState.set()` / `insert()` / `delete()` 改为有 `Y.Doc` 时先直接写 `doc.getMap('schema')`，再同步更新本地 `Immut` 镜像：
   - 支持顶层 map set/delete。
   - 支持嵌套 map set/delete。
@@ -446,12 +446,12 @@
   - 数组 set 只允许替换已存在下标，避免 Yjs 插入尾部而 Immut 产生稀疏数组。
   - 对象 delete 只在 key 存在时执行，避免产生无意义 remove patch。
   - `set(..., undefined)` 收敛为 `delete()`，保持和 Yjs 不存储 `undefined` 的语义一致。
-- `YUndo.initStateUndo()` 在新 `Y.Doc` 初始化时重置本地 undo stack 和指针，避免跨文件残留撤销记录。
-- `YUndo.undo()` / `redo()` 增加 `canUndo` / `canRedo` guard，避免快捷键或直接调用在空栈时读取不存在的历史项。
+- `Undo.initStateUndo()` 在新 `Y.Doc` 初始化时重置本地 undo stack 和指针，避免跨文件残留撤销记录。
+- `Undo.undo()` / `redo()` 增加 `canUndo` / `canRedo` guard，避免快捷键或直接调用在空栈时读取不存在的历史项。
 
 ### 验证记录
 
-- `pnpm exec prettier --write apps/web/src/editor/y-state/y-state.ts apps/web/src/editor/y-state/y-undo.ts`：通过。
+- `pnpm exec prettier --write apps/web/src/editor/y-state/y-state.ts apps/web/src/editor/editor/undo-service.ts`：通过。
   - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
 - `git diff --check`：通过。
 - 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
@@ -473,17 +473,17 @@
 - 修正 `HandleNode.pasteNodes()`：
   - 批量选中新复制节点后派发一次 `YClients.afterSelect`。
   - 确保粘贴后 `OperateNode.selectedNodes$`、右侧面板和吸附等订阅者能同步到新选区。
-- 修正 `YUndo.applyClientState()`：
+- 修正 `Undo.applyClientState()`：
   - 恢复 client selection / page 后派发 `YClients.afterSelect`。
   - 恢复 selection map 时 clone 历史快照，避免后续选择操作原地修改 undo 栈里的旧快照。
-- 修正 `YUndo.redo()` 的 `all` 类型顺序：
+- 修正 `Undo.redo()` 的 `all` 类型顺序：
   - 先 redo Yjs state，再恢复 client selection。
   - 避免订阅者在节点尚未由 state redo 恢复时读取新选区。
-- `YUndo.untrack()` 增加 `try/finally`，避免 callback 异常导致后续 undo track 永久关闭。
+- `Undo.untrack()` 增加 `try/finally`，避免 callback 异常导致后续 undo track 永久关闭。
 
 ### 验证记录
 
-- `pnpm exec prettier --write apps/web/src/editor/handle/node.ts apps/web/src/editor/y-state/y-undo.ts ai/tasks/monorepo-wip/log.md`：通过。
+- `pnpm exec prettier --write apps/web/src/editor/handle/node.ts apps/web/src/editor/editor/undo-service.ts ai/tasks/monorepo-wip/log.md`：通过。
   - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
 - `git diff --check`：通过。
 - 本轮未运行 `@sigma/web build` 或 `@sigma/web typecheck`。
@@ -511,12 +511,12 @@
 - `OperateNode` 收口：
   - 移除对旧 `Schema` / `SchemaHistory` 的依赖。
   - 保留旧方法名，避免未接入模块或后续恢复功能时直接断类型。
-  - 方法内部改为使用 `YState.set()` / `insert()` / `delete()` / `transact()` 和 `YUndo.track()`。
+  - 方法内部改为使用 `YState.set()` / `insert()` / `delete()` / `transact()` 和 `Undo.track()`。
   - `pasteNodes()` 改为通过 `SchemaHelper.createTraverse()` 克隆子树并写入 `YState`，批量选择新节点后统一派发 `YClients.afterSelect`。
-  - `wrapInFrame()` 改为通过 `YState.transact()` 新增 frame、移动原选中节点、更新选择并记录 `YUndo`。
+  - `wrapInFrame()` 改为通过 `YState.transact()` 新增 frame、移动原选中节点、更新选择并记录 `Undo`。
 - `SchemaHistory` 收口：
   - 移除 `undo()` / `redo()` 中早返回之后不可达的旧 `Schema.applyPatches()` / `Schema.nextSchema()` replay 分支。
-  - `SchemaHistory.undo()` / `redo()` 现在只作为旧入口转发到 `YUndo`。
+  - `SchemaHistory.undo()` / `redo()` 现在只作为旧入口转发到 `Undo`。
 - `YState` 写入 API 语义记录：
   - `YState.transact(callback, origin?)` 是业务写入提交边界；有 `Y.Doc` 时外层用 `doc.transact()` 包裹，并在 callback 后 flush Immut patch。
   - `YState.set(path, value)` 用于对象字段写入和数组已存在下标替换；`value === undefined` 等价于 `delete(path)`。
@@ -568,7 +568,7 @@
   - 剩余 `SchemaCreator` 和 `schema/migration.ts` 属于 schema 数据创建 / migration，不是旧运行时写入服务。
 - 后续策略：
   - 继续以“真实入口是否引用”为准；未接入旧模块不再作为迁移对象保留。
-  - 如果后续需要恢复 SVG drop、vector edit 或吸附能力，应按当前 `YState` / `YClients` / `YUndo` 入口重新实现，而不是恢复旧 `Schema` 服务。
+  - 如果后续需要恢复 SVG drop、vector edit 或吸附能力，应按当前 `YState` / `YClients` / `Undo` 入口重新实现，而不是恢复旧 `Schema` 服务。
 
 ### 验证记录
 
@@ -586,19 +586,19 @@
 - 复现结果：
   - 删除节点后 undo / redo 会在某些顺序下让 UI 在节点不存在时仍读取选区节点，触发 `undefined.type` / `undefined.matrix` 运行错误。
 - 根因：
-  - `YUndo` 的 `all` 历史同时包含 Yjs state 和 client selection。
+  - `Undo` 的 `all` 历史同时包含 Yjs state 和 client selection。
   - 创建 undo 需要先清选区再删除 state。
   - 删除 undo 需要先恢复 state 再恢复选区。
   - 删除 redo 又需要先清选区再删除 state。
   - 固定一种顺序无法同时满足这些场景。
 - 修正：
-  - `YUndo` 新增目标 client state 判断。
+  - `Undo` 新增目标 client state 判断。
   - 对 `all` 类型 undo / redo，按目标选区是否已存在于当前 `YState.state` 动态决定顺序：
     - 目标选区当前都存在：先恢复 client，再执行 state undo / redo。
     - 目标选区当前有不存在节点：先执行 state undo / redo，再恢复 client。
 - 补充修正：
   - `StageCreate.onCreateStart()` 的初始新增节点和插入父级改为包在 `YState.transact()` 中，避免创建开始阶段非 transaction 写入。
-  - `StageSelect.onCreateSelect()` 改为 `YUndo.untrack()` 选择新建节点，避免创建操作额外产生一条纯 client 历史。
+  - `StageSelect.onCreateSelect()` 改为 `Undo.untrack()` 选择新建节点，避免创建操作额外产生一条纯 client 历史。
   - `YState` 非 transaction 写入有 `Y.Doc` 时不再立即同步本地 Immut，交由 Yjs observer 投影，避免数组 insert 被 Yjs observer 和本地 Immut 双写导致重复 childIds。
 - 验证记录：
   - 浏览器 mock 页运行时 API 复测步骤 3：通过。

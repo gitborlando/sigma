@@ -35,12 +35,12 @@ class EditorCommandManager {
       {
         name: t('undo'),
         shortcut: 'ctrl+z',
-        callback: () => YUndo.undo(),
+        callback: () => Undo.undo(),
       },
       {
         name: t('redo'),
         shortcut: 'ctrl+shift+z',
-        callback: () => YUndo.redo(),
+        callback: () => Undo.redo(),
       },
     ]
   }

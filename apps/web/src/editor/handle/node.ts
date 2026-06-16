@@ -1,4 +1,4 @@
-﻿import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
+import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { SchemaCreator } from '../schema/creator'
@@ -75,7 +75,7 @@ class HandleNodeService {
       YClients.clearSelect()
       YClients.afterSelect.dispatch()
     })
-    YUndo.track('all', t('delete nodes'))
+    Undo.track('all', t('delete nodes'))
   }
 
   copySelectedNodes() {
@@ -101,12 +101,12 @@ class HandleNodeService {
       traverse(this.copiedIds)
       this.copiedIds = []
     })
-    YUndo.untrack(() => {
+    Undo.untrack(() => {
       YClients.clearSelect()
       newSelectIds.forEach((id) => YClients.select(id))
       YClients.afterSelect.dispatch()
     })
-    YUndo.track('all', `${t('paste nodes')}: ${newSelectIds.length}`)
+    Undo.track('all', `${t('paste nodes')}: ${newSelectIds.length}`)
   }
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
@@ -126,7 +126,7 @@ class HandleNodeService {
       })
     })
 
-    YUndo.track('all', t('reorder nodes'))
+    Undo.track('all', t('reorder nodes'))
   }
 
   wrapInFrame() {
@@ -144,14 +144,14 @@ class HandleNodeService {
       selected.forEach((node) => this.removeChild(oldParent, node))
       selected.forEach((node) => this.insertChildAt(frameNode, node))
     })
-    YUndo.untrack(
+    Undo.untrack(
       action(() => {
         selected.forEach((node) => YClients.unSelect(node.id))
         YClients.select(frameNode.id)
         YClients.afterSelect.dispatch()
       }),
     )
-    YUndo.track('all', t('create frame'))
+    Undo.track('all', t('create frame'))
   }
 
   private getDatum() {

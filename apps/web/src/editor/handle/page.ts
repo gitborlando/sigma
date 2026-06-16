@@ -1,4 +1,4 @@
-﻿import { createCache } from '@gitborlando/utils'
+import { createCache } from '@gitborlando/utils'
 import { IMatrix } from 'src/editor/math'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { SchemaCreator } from '../schema/creator'
@@ -17,8 +17,8 @@ class HandlePageService {
       YState.insert('meta.pageIds', page.id)
     })
 
-    YUndo.untrack(() => YClients.selectPage(page.id))
-    YUndo.track('all', t('add and select page'))
+    Undo.untrack(() => YClients.selectPage(page.id))
+    Undo.track('all', t('add and select page'))
   }
 
   removePage(page: S.Page) {
@@ -29,8 +29,8 @@ class HandlePageService {
       YState.delete(`meta.pageIds.${YState.state.meta.pageIds.indexOf(page.id)}`)
     })
 
-    YUndo.untrack(() => YClients.selectPage(YState.state.meta.pageIds[0]))
-    YUndo.track('all', t('delete page'))
+    Undo.untrack(() => YClients.selectPage(YState.state.meta.pageIds[0]))
+    Undo.track('all', t('delete page'))
   }
 
   private memoPageSceneMatrix() {

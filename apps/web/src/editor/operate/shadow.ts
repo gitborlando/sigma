@@ -1,4 +1,4 @@
-﻿import { clone } from '@gitborlando/utils'
+import { clone } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import { rgb } from 'src/utils/color'
@@ -21,7 +21,7 @@ class OperateShadowService {
     })
     this.onUiPickerSetShadow()
     this.afterOperate.hook(() => {
-      YUndo.track('state', t('change shadows'))
+      Undo.track('state', t('change shadows'))
     })
   }
   setupShadows() {
@@ -41,12 +41,12 @@ class OperateShadowService {
     })
     this.immui.add(this.shadows, [shadowsLength], shadow)
     this.applyChangeToYState()
-    YUndo.track('state', t('add shadow'))
+    Undo.track('state', t('add shadow'))
   }
   deleteShadow(index: number) {
     this.immui.delete(this.shadows, [index])
     this.applyChangeToYState()
-    YUndo.track('state', t('delete shadow'))
+    Undo.track('state', t('delete shadow'))
   }
   setShadow(index: number, keys: string[], value: any) {
     this.immui.reset(this.shadows, [index, ...keys], value)
@@ -55,12 +55,12 @@ class OperateShadowService {
   toggleShadow(index: number, keys: string[], value: any) {
     this.immui.reset(this.shadows, [index, ...keys], value)
     this.applyChangeToYState()
-    YUndo.track('state', t('change shadow'))
+    Undo.track('state', t('change shadow'))
   }
   changeShadow(index: number, newShadow: IShadow) {
     this.immui.reset(this.shadows, [index], newShadow)
     this.applyChangeToYState()
-    YUndo.track('state', t('change shadows'))
+    Undo.track('state', t('change shadows'))
   }
   applyChangeToYState() {
     this.shadows = this.immui.next(this.shadows)[0]
@@ -80,7 +80,7 @@ class OperateShadowService {
     })
     UIPickerCopy.afterOperate.hook(() => {
       if (UIPickerCopy.from !== 'shadow') return
-      YUndo.track('state', t('change shadows'))
+      Undo.track('state', t('change shadows'))
     })
   }
   private isSameShadows(nodes: INode[]) {

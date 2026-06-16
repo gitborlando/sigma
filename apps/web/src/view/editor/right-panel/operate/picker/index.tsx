@@ -1,4 +1,4 @@
-﻿import { createCache, matchCase } from '@gitborlando/utils'
+import { createCache, matchCase } from '@gitborlando/utils'
 import Color from 'color'
 import { OperateFill } from 'src/editor/operate/fill'
 import { SchemaCreator } from 'src/editor/schema/creator'
@@ -41,7 +41,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
   const handleChangeFill = (value: S.Fill['type']) => {
     FillPickerState.fillType = value
     changeFill(fillCache.getSet(value, () => createFillCache(value)))
-    YUndo.track('state', t('change fill type'))
+    Undo.track('state', t('change fill type'))
   }
 
   return (

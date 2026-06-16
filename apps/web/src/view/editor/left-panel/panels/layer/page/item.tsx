@@ -16,7 +16,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
   }
   const selectPage = () => {
     YClients.selectPage(id)
-    YUndo.track('client', t('select page'))
+    Undo.track('client', t('select page'))
   }
 
   const selectPageId = useSelectPageId()

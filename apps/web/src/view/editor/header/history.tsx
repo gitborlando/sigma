@@ -1,10 +1,10 @@
 import { objectKey } from '@gitborlando/utils'
 import { Braces, Copy, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
+import type { UndoInfo } from 'src/editor/editor/undo-service'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
 import { getSelectPageId } from 'src/editor/utils/get'
-import type { YUndoInfo } from 'src/editor/y-state/y-undo'
 import { BalanceItem, OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
@@ -12,7 +12,7 @@ import { Text } from 'src/view/component/text'
 
 export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
   const [showHistory, setShowHistory] = useState(false)
-  const { next, stack } = YUndo
+  const { next, stack } = Undo
   return (
     <>
       <Btn
@@ -61,7 +61,7 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
   )
 })
 
-const HistoryItemComp: FC<{ info: YUndoInfo; active: boolean }> = observer(
+const HistoryItemComp: FC<{ info: UndoInfo; active: boolean }> = observer(
   ({ info, active }) => {
     const ref = useRef<HTMLDivElement>(null)
 

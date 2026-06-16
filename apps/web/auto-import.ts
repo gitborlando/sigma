@@ -25,7 +25,7 @@ export const autoImportConfig = autoImportPlugin({
       'src/editor/math': ['Matrix', 'MRect', 'max', 'min'],
       'src/editor/y-state/y-state': ['YState'],
       'src/editor/y-state/y-clients': ['YClients'],
-      'src/editor/y-state/y-undo': ['YUndo'],
+      'src/editor/editor/undo-service': ['Undo'],
       'src/utils/global': ['T', 'isDEV', 'isPROD'],
       'src/utils/color': ['COLOR'],
       'src/view/styles/styles': ['styles'],

@@ -121,11 +121,11 @@ const GeometryItemComp: FC<{
     } else {
       setGeometries({ [operateKey]: v }, { delta: false })
     }
-    YUndo.track('state', `${t('modify geometry property')}: ${operateKey}`)
+    Undo.track('state', `${t('modify geometry property')}: ${operateKey}`)
   }
 
   const handleAfterSlide = () => {
-    YUndo.track('state', `${t('modify geometry property')}: ${operateKey}`)
+    Undo.track('state', `${t('modify geometry property')}: ${operateKey}`)
   }
 
   return (

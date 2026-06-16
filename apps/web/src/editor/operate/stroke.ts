@@ -1,4 +1,4 @@
-﻿import { clone } from '@gitborlando/utils'
+import { clone } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import { rgb } from 'src/utils/color'
@@ -21,7 +21,7 @@ class OperateStrokeService {
     })
     this.onUiPickerSetStroke()
     this.afterOperate.hook(() => {
-      YUndo.track('state', t('change strokes'))
+      Undo.track('state', t('change strokes'))
     })
   }
   setupStrokes() {
@@ -41,12 +41,12 @@ class OperateStrokeService {
     })
     this.immui.add(this.strokes, [strokesLength], stroke)
     this.applyChangeToYState()
-    YUndo.track('state', t('add stroke'))
+    Undo.track('state', t('add stroke'))
   }
   deleteStroke(index: number) {
     this.immui.delete(this.strokes, [index])
     this.applyChangeToYState()
-    YUndo.track('state', t('delete stroke'))
+    Undo.track('state', t('delete stroke'))
   }
   setStroke(index: number, keys: string[], value: any) {
     this.immui.reset(this.strokes, [index, ...keys], value)
@@ -55,12 +55,12 @@ class OperateStrokeService {
   toggleStroke(index: number, keys: string[], value: any) {
     this.immui.reset(this.strokes, [index, ...keys], value)
     this.applyChangeToYState()
-    YUndo.track('state', t('change stroke'))
+    Undo.track('state', t('change stroke'))
   }
   changeStroke(index: number, newStroke: IStroke) {
     this.immui.reset(this.strokes, [index], newStroke)
     this.applyChangeToYState()
-    YUndo.track('state', t('change strokes'))
+    Undo.track('state', t('change strokes'))
   }
   applyChangeToYState() {
     this.strokes = this.immui.next(this.strokes)[0]
@@ -80,7 +80,7 @@ class OperateStrokeService {
     })
     UIPickerCopy.afterOperate.hook(() => {
       if (UIPickerCopy.from !== 'stroke') return
-      YUndo.track('state', t('change strokes'))
+      Undo.track('state', t('change strokes'))
     })
   }
   private isSameStrokes(nodes: INode[]) {
