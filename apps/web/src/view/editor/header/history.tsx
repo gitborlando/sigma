@@ -1,11 +1,11 @@
 import { objectKey } from '@gitborlando/utils'
-import { Braces, History } from 'lucide-react'
+import { Braces, Copy, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
 import { getSelectPageId } from 'src/editor/utils/get'
 import type { YUndoInfo } from 'src/editor/y-state/y-undo'
-import { OptionBalanceItem } from 'src/view/component/balance-item'
+import { BalanceItem, OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Text } from 'src/view/component/text'
@@ -70,14 +70,28 @@ const HistoryItemComp: FC<{ info: YUndoInfo; active: boolean }> = observer(
       ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }, [active])
 
+    const copyDescription = (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation()
+      navigator.clipboard.writeText(info.description)
+    }
+
     return (
-      <G
+      <BalanceItem
         ref={ref}
         className={cls('item')}
         data-active={active}
-        onClick={() => console.log('undoInfo', info)}>
-        <Text>{info.description}</Text>
-      </G>
+        left={<Text>{info.description}</Text>}
+        right={
+          <Btn
+            className={cls('copy')}
+            size={24}
+            title={t('copy')}
+            icon={<Lucide icon={Copy} size={14} />}
+            onClick={copyDescription}
+          />
+        }
+        onClick={() => console.log('undoInfo', info)}
+      />
     )
   },
 )
@@ -86,15 +100,21 @@ const cls = classes(css`
   &-item {
     width: 100%;
     height: 36px;
-    padding-inline: 12px;
+    padding-inline: 12px 8px;
     border-bottom: 1px solid var(--gray-border);
     ${styles.textLabel}
-    align-content: center;
-    justify-items: start;
     cursor: pointer;
     &[data-active='true'] {
       background-color: var(--color-bg-half);
       color: var(--color);
     }
+  }
+  &-copy {
+    opacity: 0;
+    pointer-events: none;
+  }
+  &-item:hover &-copy {
+    opacity: 1;
+    pointer-events: auto;
   }
 `)
