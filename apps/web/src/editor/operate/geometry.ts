@@ -1,4 +1,5 @@
 import { AnyObject, createCache, iife, objKeys } from '@gitborlando/utils'
+import { HandleNode } from 'src/editor/handle/node'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { MULTI_VALUE } from 'src/global/constant'
@@ -73,7 +74,7 @@ class DesignGeometryService {
 
   getGeometryValue(node: S.Node, key: keyof DesignGeoInfo) {
     if (obbKeySet.has(key)) {
-      const mrect = getNodeMRect(node)
+      const mrect = HandleNode.getMRect(node)
       return mrect[key as 'x' | 'y' | 'width' | 'height' | 'rotation']
     }
     return T<any>(node)[key]
@@ -166,7 +167,7 @@ class DesignGeometryService {
     key: 'x' | 'y' | 'width' | 'height' | 'rotation',
     node: S.Node,
   ) {
-    const mrect = getNodeMRect(node)
+    const mrect = HandleNode.getMRect(node)
     if (this.isDelta) {
       mrect[key] = mrect[key] + this.currentGeometries[key]
     } else {

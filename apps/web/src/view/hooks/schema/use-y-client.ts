@@ -1,12 +1,16 @@
-import { HandleSelect } from 'src/editor/handle/select'
-import { getAllSelectIdMap } from 'src/editor/utils/get'
+import {
+  getAllSelectIdMap,
+  getSelectIdList,
+  getSelectIdMap,
+  getSelectPageId,
+} from 'src/editor/utils/get'
 
 export function useSelectIds() {
-  return HandleSelect.selectIdList
+  return getSelectIdList()
 }
 
 export function useSelectIdMap() {
-  return HandleSelect.state.selectIdMap
+  return getSelectIdMap()
 }
 
 export function useAllSelectIdMap() {
@@ -14,5 +18,5 @@ export function useAllSelectIdMap() {
 }
 
 export function useSelectPageId() {
-  return HandleSelect.selectPageId
+  return getSelectPageId()
 }

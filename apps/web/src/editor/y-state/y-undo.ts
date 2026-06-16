@@ -1,15 +1,15 @@
-﻿import { clone } from '@gitborlando/utils'
+﻿import { matchCase } from '@gitborlando/utils'
 import { computed, observable } from 'mobx'
-import { getEditorSetting } from 'src/editor/editor/setting'
-import { type UndoClientState, YClients } from 'src/editor/y-state/y-clients'
-import { devLog } from 'src/utils/global'
+import { ClientUndo, type ClientUndoState } from 'src/editor/editor/client-undo'
 import { ImmutPatch } from 'src/utils/immut/immut'
 import * as Y from 'yjs'
+
+export type UndoType = 'undo' | 'redo'
 
 export type YUndoInfo = {
   type: 'state' | 'client' | 'all'
   description: string
-  clientState?: UndoClientState
+  clientState?: ClientUndoState
   statePatches?: ImmutPatch[]
 }
 
@@ -32,71 +32,39 @@ class YUndoService {
     this.stateUndo = new Y.UndoManager(stateMap)
   }
 
-  initClientUndo() {
-    this.initClientState = this.getClientState()
-  }
-
-  private initClientState!: UndoClientState
-
-  private getClientState() {
-    return clone({
-      selectIds: YClients.client.selectIdMap,
-      selectPageId: YClients.client.selectPageId,
-    })
-  }
-
-  @action
-  private applyClientState(clientState: UndoClientState) {
-    YClients.client.selectIdMap = clone(clientState.selectIds)
-    YClients.client.selectPageId = clientState.selectPageId
-    YClients.afterSelect.dispatch()
-  }
-
-  private clientStateExists(clientState: UndoClientState) {
-    return Object.keys(clientState.selectIds).every((id) => YState.state[id])
-  }
-
-  private replayInfo(info: YUndoInfo | undefined, replayState: () => void) {
-    if (!info) return
-
-    const clientState = info.clientState || this.initClientState
-    switch (info.type) {
-      case 'state':
-        replayState()
-        return
-      case 'client':
-        this.applyClientState(clientState)
-        return
-      case 'all':
-        if (this.clientStateExists(clientState)) {
-          this.applyClientState(clientState)
-          replayState()
-        } else {
-          replayState()
-          this.applyClientState(clientState)
-        }
-    }
-  }
-
   undo() {
     if (!this.canUndo) return
 
-    const info = this.stack[--this.next - 1]
-    this.DEV_logUndoRedoInfo(true, info)
-    this.replayInfo(info, () => this.stateUndo.undo())
+    const info = this.stack[--this.next]
+    this.replayInfo('undo', info)
   }
 
   redo() {
     if (!this.canRedo) return
 
     const info = this.stack[this.next++]
-    this.DEV_logUndoRedoInfo(false, info)
-    this.replayInfo(info, () => this.stateUndo.redo())
+    this.replayInfo('redo', info)
   }
 
-  private DEV_logUndoRedoInfo(isUndo: boolean, info: YUndoInfo) {
-    if (!getEditorSetting().dev.logUndoRedoInfo) return
-    devLog(isUndo ? 'undo info' : 'redo info', info)
+  private replayInfo(type: UndoType, info: YUndoInfo | undefined) {
+    if (!info) return
+
+    const replayYState = () => this.stateUndo[type]()
+    const replayClientState = () => ClientUndo[type]()
+
+    matchCase(info.type, {
+      state: () => replayYState(),
+      client: () => replayClientState(),
+      all: () => {
+        if (type === 'undo') {
+          replayClientState()
+          replayYState()
+        } else {
+          replayYState()
+          replayClientState()
+        }
+      },
+    })()
   }
 
   private shouldTrack = true
@@ -111,7 +79,8 @@ class YUndoService {
       info.statePatches = YState.getPatches()
     }
     if (type === 'client' || type === 'all') {
-      info.clientState = this.getClientState()
+      ClientUndo.archive()
+      info.clientState = toJS(ClientUndo.state)
     }
 
     this.stack.splice(this.next, this.stack.length - this.next, info)

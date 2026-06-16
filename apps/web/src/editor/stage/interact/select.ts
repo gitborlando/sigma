@@ -116,10 +116,9 @@ class StageSelectService {
     if (getSelectIdMap()[id]) return
 
     this.clearSelect()
-    YUndo.untrack(() => YClients.select(id))
+    YClients.select(id)
 
-    trackMsg && YUndo.track('client', trackMsg)
-    YClients.afterSelect.dispatch()
+    if (trackMsg) YUndo.track('client', trackMsg)
   }
 
   private onDeepSelect() {
@@ -149,7 +148,7 @@ class StageSelectService {
 
         if (childIds?.length && depth === 0) {
           if (AABB.include(marqueeAABB, elem.aabb) === 1) {
-            YUndo.untrack(() => YClients.select(item.id))
+            YClients.select(item.id)
             return false
           }
           ctx.matrix = Matrix.of(elem.mrect.matrix)
@@ -162,7 +161,7 @@ class StageSelectService {
           Matrix.of(forwardMatrix).append(elem.mrect.matrix).plain(),
         )
         if (hitTest(mrect)) {
-          YUndo.untrack(() => YClients.select(item.id))
+          YClients.select(item.id)
           ctx.matrix = Matrix.of(mrect.matrix)
           return
         }
@@ -181,7 +180,6 @@ class StageSelectService {
     })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
-        YClients.afterSelect.dispatch()
 
         if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
           YUndo.track('client', t('select nodes with marquee'))

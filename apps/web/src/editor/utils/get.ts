@@ -3,7 +3,7 @@ import { YClients } from 'src/editor/y-state/y-clients'
 import { YState } from 'src/editor/y-state/y-state'
 
 export function getSelectIdMap() {
-  return HandleSelect.state.selectIdMap
+  return HandleSelect.selectIdMap
 }
 
 export function getSelectIdList() {
@@ -16,7 +16,7 @@ export function getSelectPageId() {
 
 export function getAllSelectIdMap() {
   return {
-    ...HandleSelect.state.selectIdMap,
+    ...HandleSelect.selectIdMap,
     ...Object.values(YClients.others).reduce((acc, client) => {
       return { ...acc, ...client.selectIdMap }
     }, {}),

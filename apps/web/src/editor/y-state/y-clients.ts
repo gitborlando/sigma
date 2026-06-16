@@ -50,7 +50,13 @@ class YClientsService {
   afterSelect = Signal.create<void>()
 
   init() {
-    const disposeSelect = HandleSelect.subscribe(() => this.syncSelectState())
+    const disposeSelect = reaction(
+      () => ({
+        selectIdMap: HandleSelect.selectIdMap,
+        selectPageId: HandleSelect.selectPageId,
+      }),
+      () => this.syncSelectState(),
+    )
     runInAction(() => {
       this.client.userId = UserService.userId
       this.client.userName = UserService.userName
@@ -79,9 +85,9 @@ class YClientsService {
   }
 
   private syncSelectState() {
-    this.client.selectIdMap = HandleSelect.state.selectIdMap
+    this.client.selectIdMap = HandleSelect.selectIdMap
     this.client.selectPageId = HandleSelect.selectPageId
-    this.afterSelect.dispatch()
+    // this.afterSelect.dispatch()
   }
 
   syncSelf() {

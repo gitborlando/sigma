@@ -1,14 +1,11 @@
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import { StageViewport } from 'src/editor/stage/viewport'
+import { ClientUndo, type ClientUndoState } from 'src/editor/editor/client-undo'
 import type { YUndoInfo } from 'src/editor/y-state/y-undo'
 import { Btn } from 'src/view/component/btn'
 
 type SnapshotState = {
   schema: S.Schema
-  selectPageId: string
-  selectIdMap: Record<string, boolean>
-  sceneMatrix: IMatrix
   undoStack: YUndoInfo[]
   undoNext: number
   savedAt: number
@@ -201,9 +198,6 @@ function readSnapshot(storageKey: string) {
 function createSnapshotState(): SnapshotState {
   return {
     schema: toPlain(YState.schema),
-    selectPageId: YClients.client.selectPageId,
-    selectIdMap: toPlain(YClients.client.selectIdMap),
-    sceneMatrix: Matrix.plain(StageViewport.sceneMatrix),
     undoStack: toPlain(YUndo.stack),
     undoNext: YUndo.next,
     savedAt: Date.now(),
@@ -212,8 +206,6 @@ function createSnapshotState(): SnapshotState {
 
 function restoreFinalSnapshot(snapshot: SnapshotState) {
   replaceSchema(snapshot.schema)
-  restoreClient(snapshot)
-  StageViewport.sceneMatrix = Matrix.of(snapshot.sceneMatrix)
   restoreUndo(snapshot)
 }
 
@@ -222,13 +214,10 @@ function restoreReplayableSnapshot(snapshot: DevSnapshot) {
   if (!base) return restoreFinalSnapshot(snapshot)
 
   replaceSchema(base.schema)
-  restoreClient(base)
-  StageViewport.sceneMatrix = Matrix.of(base.sceneMatrix)
-  resetUndo()
+  if (!resetUndo()) return
 
+  ClientUndo.rebase()
   replayHistoryFromBase(snapshot, base)
-  restoreClient(snapshot)
-  StageViewport.sceneMatrix = Matrix.of(snapshot.sceneMatrix)
 }
 
 function replaceSchema(schema: S.Schema) {
@@ -243,27 +232,9 @@ function replaceSchema(schema: S.Schema) {
   })
 }
 
-function restoreClient(snapshot: DevSnapshot) {
-  const selectPageId = snapshot.schema[snapshot.selectPageId]
-    ? snapshot.selectPageId
-    : snapshot.schema.meta.pageIds[0]
-  const selectIdMap = Object.fromEntries(
-    Object.entries(snapshot.selectIdMap).filter(([id]) => snapshot.schema[id]),
-  )
-
-  runInAction(() => {
-    YClients.client.selectPageId = selectPageId
-    YClients.client.selectIdMap = selectIdMap
-  })
-  YClients.afterSelect.dispatch()
-}
-
 function restoreUndo(snapshot: SnapshotState) {
-  const ySchema = YState.doc?.getMap<S.Schema>('schema')
-  if (!ySchema) return
+  if (!resetUndo()) return
 
-  YUndo.initStateUndo(ySchema)
-  YUndo.initClientUndo()
   runInAction(() => {
     YUndo.stack = toPlain(snapshot.undoStack || [])
     YUndo.next = Math.min(snapshot.undoNext || 0, YUndo.stack.length)
@@ -272,10 +243,10 @@ function restoreUndo(snapshot: SnapshotState) {
 
 function resetUndo() {
   const ySchema = YState.doc?.getMap<S.Schema>('schema')
-  if (!ySchema) return
+  if (!ySchema) return false
 
   YUndo.initStateUndo(ySchema)
-  YUndo.initClientUndo()
+  return true
 }
 
 function replayHistoryFromBase(snapshot: DevSnapshot, base: SnapshotState) {
@@ -293,25 +264,57 @@ function replayHistoryFromBase(snapshot: DevSnapshot, base: SnapshotState) {
 
 function replayHistoryInfo(info: YUndoInfo) {
   if (info.type === 'client') {
-    applyClientState(info.clientState)
+    applyReplayLocalState(info)
     YUndo.track(info.type, info.description)
     return
   }
 
   YState.transact(() => applyStatePatches(info.statePatches))
-  if (info.type === 'all') applyClientState(info.clientState)
+  if (info.type === 'all') applyReplayLocalState(info)
 
   YUndo.track(info.type, info.description)
 }
 
-function applyClientState(clientState: YUndoInfo['clientState']) {
-  if (!clientState) return
+function applyReplayLocalState(info: YUndoInfo) {
+  const localState = info.clientState
+  if (localState) {
+    ClientUndo.applyState(normalizeLocalState(localState))
+    return
+  }
 
-  runInAction(() => {
-    YClients.client.selectPageId = clientState.selectPageId
-    YClients.client.selectIdMap = toPlain(clientState.selectIds)
-  })
-  YClients.afterSelect.dispatch()
+  if (ClientUndo.has('select')) {
+    const select = ClientUndo.get<HandleSelectState>('select')
+    ClientUndo.applyState({ select: normalizeSelectState(select) })
+  }
+}
+
+type HandleSelectState = {
+  selectIdMap: Record<string, boolean>
+  selectPageId: string
+}
+
+function normalizeLocalState(state: ClientUndoState) {
+  if (!state.select) return state
+
+  return {
+    ...state,
+    select: normalizeSelectState(state.select as HandleSelectState),
+  }
+}
+
+function normalizeSelectState(state: HandleSelectState) {
+  return {
+    ...state,
+    selectIdMap: Object.fromEntries(
+      Object.entries(state.selectIdMap || {}).filter(([id]) => YState.state[id]),
+    ),
+    selectPageId: getValidPageId(state.selectPageId),
+  }
+}
+
+function getValidPageId(pageId: string) {
+  if (pageId && YState.state[pageId]) return pageId
+  return YState.state.meta?.pageIds[0] || ''
 }
 
 function applyStatePatches(patches: YUndoInfo['statePatches']) {
