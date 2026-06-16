@@ -1,15 +1,18 @@
+import { HandleSelect } from 'src/editor/handle/select'
+import { getAllSelectIdMap } from 'src/editor/utils/get'
+
 export function useSelectIds() {
-  return YClients.selectIdList
+  return HandleSelect.selectIdList
 }
 
 export function useSelectIdMap() {
-  return YClients.client.selectIdMap
+  return HandleSelect.state.selectIdMap
 }
 
 export function useAllSelectIdMap() {
-  return YClients.allSelectIdMap
+  return getAllSelectIdMap()
 }
 
 export function useSelectPageId() {
-  return YClients.client.selectPageId
+  return HandleSelect.selectPageId
 }

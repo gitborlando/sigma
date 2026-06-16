@@ -2,6 +2,8 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
+import { ClientUndo } from 'src/editor/editor/client-undo'
+import { HandleSelect } from 'src/editor/handle/select'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
@@ -48,42 +50,38 @@ class YClientsService {
   afterSelect = Signal.create<void>()
 
   init() {
+    const disposeSelect = HandleSelect.subscribe(() => this.syncSelectState())
     runInAction(() => {
-      this.client.selectPageId = YState.state.meta.pageIds[0]
       this.client.userId = UserService.userId
       this.client.userName = UserService.userName
       this.client.userAvatar = UserService.avatar
     })
-    YUndo.initClientUndo()
-    return Disposer.combine(this.onMouseMove())
+    HandleSelect.selectPage(YState.state.meta.pageIds[0])
+    ClientUndo.rebase()
+    this.syncSelectState()
+    return Disposer.combine(this.onMouseMove(), disposeSelect)
   }
 
   select(id: string) {
-    if (this.client.selectIdMap[id]) return
-    this.client.selectIdMap[id] = true
-
-    const name = YState.state[id].name
-    YUndo.track('client', `${t('select node')}: ${name}`)
+    HandleSelect.select(id)
   }
 
   unSelect(id: string) {
-    if (!this.client.selectIdMap[id]) return
-    delete this.client.selectIdMap[id]
-
-    const name = YState.state[id].name
-    YUndo.track('client', `${t('unselect node')}: ${name}`)
+    HandleSelect.unselect(id)
   }
 
   clearSelect() {
-    this.client.selectIdMap = {}
+    HandleSelect.clearSelect()
   }
 
   selectPage(id: string) {
-    this.client.selectPageId = id
-    this.clearSelect()
-    this.afterSelect.dispatch()
+    HandleSelect.selectPage(id)
+  }
 
-    YUndo.track('client', `${t('select page')}: ${YState.state[id].name}`)
+  private syncSelectState() {
+    this.client.selectIdMap = HandleSelect.state.selectIdMap
+    this.client.selectPageId = HandleSelect.selectPageId
+    this.afterSelect.dispatch()
   }
 
   syncSelf() {

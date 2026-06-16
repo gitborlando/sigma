@@ -6,6 +6,7 @@ import { StageMove } from 'src/editor/stage/interact/move'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
+import { getSelectIdList } from 'src/editor/utils/get'
 import { YClients } from 'src/editor/y-state/y-clients'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
@@ -26,7 +27,6 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
 export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
   const { hoverId } = StageSelect
   const others = YClients.others
-  const client = YClients.client
 
   const outlineInfoLMap = iife(() => {
     const map: Record<string, OutlineInfo> = {}
@@ -42,8 +42,8 @@ export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
     if (hoverId && !SchemaHelper.isFirstLayerFrame(hoverId)) {
       map[hoverId] = { hovered: true }
     }
-    for (const [id, selected] of Object.entries(client.selectIdMap)) {
-      map[id] = { hovered: hoverId === id, selected: selected as boolean }
+    for (const id of getSelectIdList()) {
+      map[id] = { hovered: hoverId === id, selected: true }
     }
     return map
   })

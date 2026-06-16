@@ -1,20 +1,26 @@
+import { HandleSelect } from 'src/editor/handle/select'
 import { YClients } from 'src/editor/y-state/y-clients'
 import { YState } from 'src/editor/y-state/y-state'
 
 export function getSelectIdMap() {
-  return YClients.client.selectIdMap
+  return HandleSelect.state.selectIdMap
 }
 
 export function getSelectIdList() {
-  return YClients.selectIdList
+  return HandleSelect.selectIdList.filter((id) => YState.state[id])
 }
 
 export function getSelectPageId() {
-  return YClients.client.selectPageId
+  return HandleSelect.selectPageId
 }
 
 export function getAllSelectIdMap() {
-  return YClients.allSelectIdMap
+  return {
+    ...HandleSelect.state.selectIdMap,
+    ...Object.values(YClients.others).reduce((acc, client) => {
+      return { ...acc, ...client.selectIdMap }
+    }, {}),
+  }
 }
 
 export const getSelectedNodes = () => {
