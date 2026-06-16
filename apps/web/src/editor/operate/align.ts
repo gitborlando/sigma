@@ -25,7 +25,7 @@ class OperateAlignService {
   private toAlignNodes = <INode[]>[]
 
   initHook() {
-    YClients.afterSelect.hook(this.setupAlign)
+    HandleSelect.afterSelect.hook(this.setupAlign)
     this.currentAlign.hook(this.autoAlign)
   }
 

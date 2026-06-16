@@ -15,7 +15,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
     ContextMenu.openMenu(e)
   }
   const selectPage = () => {
-    YClients.selectPage(id)
+    HandleSelect.selectPage(id)
     Undo.track('client', t('select page'))
   }
 

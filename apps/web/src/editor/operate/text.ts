@@ -40,7 +40,7 @@ class OperateTextService {
   textStyleOptions = createTextStyleOptions()
   private immui = new (class {})()
   initHook() {
-    YClients.afterSelect.hook(this.setupTextNodes)
+    HandleSelect.afterSelect.hook(this.setupTextNodes)
     YState.subscribe((patches) => {
       const changed = patches.some((patch) => {
         return patch.keys[1] === 'content' || patch.keys[1] === 'style'

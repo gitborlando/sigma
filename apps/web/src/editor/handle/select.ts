@@ -8,11 +8,18 @@ export type HandleSelectState = {
 class HandleSelectService {
   @observable.ref selectIdMap: Record<string, boolean> = {}
   @observable selectPageId: ID | '' = ''
+  afterSelect = Signal.create<void>()
 
   private selectUndo = ClientUndo.register<
     HandleSelectService,
     keyof HandleSelectState
   >('select', this, ['selectIdMap', 'selectPageId'])
+
+  constructor() {
+    this.selectUndo.subscribe(() => {
+      this.afterSelect.dispatch()
+    })
+  }
 
   @computed get selectIdList() {
     return Object.keys(this.selectIdMap)

@@ -20,7 +20,7 @@ class HandleNodeService {
   }
 
   subscribe() {
-    return Disposer.combine(YClients.afterSelect.hook(() => this.getDatum()))
+    return Disposer.combine(HandleSelect.afterSelect.hook(() => this.getDatum()))
   }
 
   addNodes(nodes: S.Node[]) {
@@ -72,8 +72,7 @@ class HandleNodeService {
       })
       traverse(getSelectIdList())
 
-      YClients.clearSelect()
-      YClients.afterSelect.dispatch()
+      HandleSelect.clearSelect()
     })
     Undo.track('all', t('delete nodes'))
   }
@@ -102,9 +101,8 @@ class HandleNodeService {
       this.copiedIds = []
     })
     Undo.untrack(() => {
-      YClients.clearSelect()
-      newSelectIds.forEach((id) => YClients.select(id))
-      YClients.afterSelect.dispatch()
+      HandleSelect.clearSelect()
+      newSelectIds.forEach((id) => HandleSelect.select(id))
     })
     Undo.track('all', `${t('paste nodes')}: ${newSelectIds.length}`)
   }
@@ -146,9 +144,8 @@ class HandleNodeService {
     })
     Undo.untrack(
       action(() => {
-        selected.forEach((node) => YClients.unSelect(node.id))
-        YClients.select(frameNode.id)
-        YClients.afterSelect.dispatch()
+        selected.forEach((node) => HandleSelect.unselect(node.id))
+        HandleSelect.select(frameNode.id)
       }),
     )
     Undo.track('all', t('create frame'))

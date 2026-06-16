@@ -16,7 +16,6 @@ import {
   getSelectIdMap,
   getSelectPageId,
 } from 'src/editor/utils/get'
-import { YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { StageDrag } from 'src/global/event/drag'
 
@@ -96,7 +95,7 @@ class StageSelectService {
 
   private clearSelect() {
     if (hotkeys.shift) return
-    YClients.clearSelect()
+    HandleSelect.clearSelect()
   }
 
   private onStageSelect() {
@@ -116,7 +115,7 @@ class StageSelectService {
     if (getSelectIdMap()[id]) return
 
     this.clearSelect()
-    YClients.select(id)
+    HandleSelect.select(id)
 
     if (trackMsg) Undo.track('client', trackMsg)
   }
@@ -148,7 +147,7 @@ class StageSelectService {
 
         if (childIds?.length && depth === 0) {
           if (AABB.include(marqueeAABB, elem.aabb) === 1) {
-            YClients.select(item.id)
+            HandleSelect.select(item.id)
             return false
           }
           ctx.matrix = Matrix.of(elem.mrect.matrix)
@@ -161,7 +160,7 @@ class StageSelectService {
           Matrix.of(forwardMatrix).append(elem.mrect.matrix).plain(),
         )
         if (hitTest(mrect)) {
-          YClients.select(item.id)
+          HandleSelect.select(item.id)
           ctx.matrix = Matrix.of(mrect.matrix)
           return
         }

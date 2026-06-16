@@ -10,7 +10,7 @@ class OperateFillService {
   isMultiFills = false
 
   init() {
-    YClients.afterSelect.hook(() => {
+    HandleSelect.afterSelect.hook(() => {
       this.setupFills()
     })
     YState.subscribe((patches) => {

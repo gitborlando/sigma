@@ -126,7 +126,7 @@ class StageCreateService {
       SchemaHelper.isById(elem.id, 'frame'),
     )
     if (frame) return YState.find<S.NodeParent>(frame.id)
-    return YState.find<S.Page>(YClients.client.selectPageId)
+    return YState.find<S.Page>(HandleSelect.selectPageId)
   }
 }
 

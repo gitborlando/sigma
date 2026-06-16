@@ -8,11 +8,6 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
 
-export type UndoClientState = {
-  selectIds: Record<string, boolean>
-  selectPageId: string
-}
-
 @autobind
 class YClientsService {
   clientId!: number
@@ -30,24 +25,11 @@ class YClientsService {
   @observable others: S.Clients = {}
   @observable observingClientId?: number
 
-  @computed get selectIdList() {
-    return Object.keys(this.client.selectIdMap)
-  }
-  @computed get allSelectIdMap() {
-    return {
-      ...this.client.selectIdMap,
-      ...Object.values(this.others).reduce((acc, client) => {
-        return { ...acc, ...client.selectIdMap }
-      }, {}),
-    }
-  }
   @computed get observingClient() {
     const others = this.others
     if (!this.observingClientId) return
     return others[this.observingClientId]
   }
-
-  afterSelect = Signal.create<void>()
 
   init() {
     const disposeSelect = reaction(
@@ -68,33 +50,18 @@ class YClientsService {
     return Disposer.combine(this.onMouseMove(), disposeSelect)
   }
 
-  select(id: string) {
-    HandleSelect.select(id)
-  }
-
-  unSelect(id: string) {
-    HandleSelect.unselect(id)
-  }
-
-  clearSelect() {
-    HandleSelect.clearSelect()
-  }
-
-  selectPage(id: string) {
-    HandleSelect.selectPage(id)
-  }
-
   private syncSelectState() {
     this.client.selectIdMap = HandleSelect.selectIdMap
     this.client.selectPageId = HandleSelect.selectPageId
-    // this.afterSelect.dispatch()
   }
 
   syncSelf() {
     YSync.awareness.setLocalState(toJS(this.client))
 
     const clientKeys = Object.keys(this.client) as (keyof S.Client)[]
-    const commonKeys = clientKeys.filter((key) => key !== 'selectIdMap')
+    const commonKeys = clientKeys.filter(
+      (key) => key !== 'selectIdMap' && key !== 'selectPageId',
+    )
     const disposer = new Disposer()
 
     commonKeys.map((key) => {
@@ -108,10 +75,14 @@ class YClientsService {
       )
     })
     disposer.add(
-      this.afterSelect.hook(() => {
+      HandleSelect.afterSelect.hook(() => {
         YSync.awareness.setLocalStateField(
           'selectIdMap',
-          toJS(this.client.selectIdMap),
+          toJS(HandleSelect.selectIdMap),
+        )
+        YSync.awareness.setLocalStateField(
+          'selectPageId',
+          toJS(HandleSelect.selectPageId),
         )
       }),
     )

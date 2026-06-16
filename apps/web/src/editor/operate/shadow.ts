@@ -14,7 +14,7 @@ class OperateShadowService {
   afterOperate = Signal.create()
   private immui = new (class {})()
   initHook() {
-    YClients.afterSelect.hook(this.setupShadows)
+    HandleSelect.afterSelect.hook(this.setupShadows)
     YState.subscribe((patches) => {
       if (!patches.some((patch) => patch.keys[1] === 'shadows')) return
       this.setupShadows()

@@ -14,7 +14,7 @@ class OperateStrokeService {
   afterOperate = Signal.create()
   private immui = new (class {})()
   initHook() {
-    YClients.afterSelect.hook(this.setupStrokes)
+    HandleSelect.afterSelect.hook(this.setupStrokes)
     YState.subscribe((patches) => {
       if (!patches.some((patch) => patch.keys[1] === 'strokes')) return
       this.setupStrokes()

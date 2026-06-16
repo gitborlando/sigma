@@ -17,7 +17,7 @@ class HandlePageService {
       YState.insert('meta.pageIds', page.id)
     })
 
-    Undo.untrack(() => YClients.selectPage(page.id))
+    Undo.untrack(() => HandleSelect.selectPage(page.id))
     Undo.track('all', t('add and select page'))
   }
 
@@ -29,7 +29,7 @@ class HandlePageService {
       YState.delete(`meta.pageIds.${YState.state.meta.pageIds.indexOf(page.id)}`)
     })
 
-    Undo.untrack(() => YClients.selectPage(YState.state.meta.pageIds[0]))
+    Undo.untrack(() => HandleSelect.selectPage(YState.state.meta.pageIds[0]))
     Undo.track('all', t('delete page'))
   }
 

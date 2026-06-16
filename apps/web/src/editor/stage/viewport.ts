@@ -181,7 +181,7 @@ class StageViewportService {
 
   private onCurrentPageChange() {
     return reaction(
-      () => YClients.client.selectPageId,
+      () => HandleSelect.selectPageId,
       (pageId) => {
         const getMatrix = () =>
           getEditorSetting().dev.sceneMatrix || Matrix.identity()

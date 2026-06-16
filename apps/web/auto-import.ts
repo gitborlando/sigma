@@ -23,6 +23,7 @@ export const autoImportConfig = autoImportPlugin({
       'src/view/component/grid': ['Grid', 'G', 'C'],
       'src/view/component/lucide': ['Lucide'],
       'src/editor/math': ['Matrix', 'MRect', 'max', 'min'],
+      'src/editor/handle/select': ['HandleSelect'],
       'src/editor/y-state/y-state': ['YState'],
       'src/editor/y-state/y-clients': ['YClients'],
       'src/editor/editor/undo-service': ['Undo'],

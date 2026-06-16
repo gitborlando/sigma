@@ -52,7 +52,7 @@ class StageSceneService {
     return Signal.merge(YState.inited$, StageSurface.inited).hook(() => {
       this.disposer.add(
         autorun(() => {
-          const pageId = YClients.client.selectPageId
+          const pageId = HandleSelect.selectPageId
           if (pageId) this.firstRenderPage()
         }),
         this.hookPatchRender(),
@@ -70,7 +70,7 @@ class StageSceneService {
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    const page = YState.find<S.Page>(YClients.client.selectPageId)
+    const page = YState.find<S.Page>(HandleSelect.selectPageId)
     page.childIds.forEach(traverse)
   }
 
