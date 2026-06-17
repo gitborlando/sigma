@@ -1,10 +1,16 @@
+import { XY } from '@gitborlando/geo'
 import { clone, createCache, miniId } from '@gitborlando/utils'
 import { defuOverrideArray } from '@sigma/utils/defu'
+import { Matrix } from 'src/editor/math'
 import {
   createLine,
   createRegularPolygon,
   createStarPolygon,
 } from 'src/editor/math/point'
+import { COLOR } from 'src/utils/color'
+import { T } from 'src/utils/global'
+import { Assets } from 'src/view/assets/assets'
+import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
 
 class SchemaCreatorService {

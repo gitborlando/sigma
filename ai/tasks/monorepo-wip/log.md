@@ -624,6 +624,29 @@
   - 本轮未重新运行 build / typecheck。
     - 原因：上一小步已经运行 `@sigma/web build` 验证 import 图；本轮只是显式 import 与调试输出收口。
 
+### 阶段 6 / `SchemaCreator` 显式依赖收口已完成
+
+- 继续做 defaults 注入前的低风险准备：先把 `SchemaCreator` 里依赖的运行时自动导入改为显式 import。
+- 本轮新增显式依赖：
+  - `XY`
+  - `Matrix`
+  - `COLOR`
+  - `T`
+  - `Assets`
+  - `t`
+- 本轮不改默认值策略，不改 `SchemaCreator` 方法签名，不迁移文件。
+- 当前 `SchemaCreator` 仍不能进入 core：
+  - 仍依赖产品资源 `Assets`。
+  - 仍依赖 i18n `t()`。
+  - 仍依赖产品主题色 `themeColor()`。
+  - 仍依赖 app 内 `COLOR` 常量。
+- 验证记录：
+  - `pnpm exec prettier --write apps/web/src/editor/schema/creator.ts`：通过。
+    - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+  - `git diff --check`：通过。
+  - `pnpm --filter @sigma/web build`：通过。
+    - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
+
 ### 阶段 3 / 主题 B：人工验收通过
 
 - 2026-06-17 用户按 `ai/temp/test.md` 完成人工验收，全部通过。
