@@ -609,6 +609,21 @@
   - `pnpm --filter @sigma/web build`：通过。
     - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
 
+### 阶段 6 / `migrationSchema()` 显式依赖收口已完成
+
+- 按 preflight 推荐顺序推进第三步的一部分，让 `apps/web/src/editor/schema/migration.ts` 更接近纯 schema migration。
+- 本轮改动：
+  - 显式 import `XY`、`MRect` 和 `T`，不再依赖这些符号的自动导入。
+  - `SchemaTraverseContext` 改为 type import。
+  - 移除 `console.log('newSchema:', newSchema)` 调试输出。
+- 本轮不改 migration 行为，不迁移类型，不移动文件。
+- 验证记录：
+  - `pnpm exec prettier --write apps/web/src/editor/schema/migration.ts`：通过。
+    - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+  - `git diff --check`：通过。
+  - 本轮未重新运行 build / typecheck。
+    - 原因：上一小步已经运行 `@sigma/web build` 验证 import 图；本轮只是显式 import 与调试输出收口。
+
 ### 阶段 3 / 主题 B：人工验收通过
 
 - 2026-06-17 用户按 `ai/temp/test.md` 完成人工验收，全部通过。

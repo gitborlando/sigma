@@ -1,6 +1,9 @@
+import { XY } from '@gitborlando/geo'
 import { clone } from '@gitborlando/utils'
 import { omit } from 'es-toolkit'
-import { SchemaHelper, SchemaTraverseContext } from 'src/editor/schema/helper'
+import { MRect } from 'src/editor/math'
+import { SchemaHelper, type SchemaTraverseContext } from 'src/editor/schema/helper'
+import { T } from 'src/utils/global'
 
 type Migration = {
   version: number
@@ -21,7 +24,6 @@ export function migrationSchema(schema: any) {
   traverse(newSchema.meta.pageIds)
 
   newSchema.meta.version = migrationList.length
-  console.log('newSchema: ', newSchema)
   return newSchema
 }
 
