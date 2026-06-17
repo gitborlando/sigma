@@ -1,8 +1,7 @@
 import autobind from 'class-autobind-decorator'
-import { ID, IText } from '../schema/type'
 import { getSelectedNodes } from '../utils/get'
 
-type ITextStyle = IText['style']
+type ITextStyle = S.Text['style']
 export type ITextStyleKey = keyof ITextStyle
 type IMulti = 'multi' & (string & {})
 
@@ -36,7 +35,7 @@ class OperateTextService {
   textStyle = createBaseStyle()
   afterOperate = Signal.create()
   intoEditing = Signal.create<ID>()
-  textNodes = <IText[]>[]
+  textNodes = <S.Text[]>[]
   textStyleOptions = createTextStyleOptions()
   private immui = new (class {})()
   initHook() {
@@ -60,7 +59,7 @@ class OperateTextService {
     this.applyChangeToYState(key, value)
     Undo.track('state', t('change text style'))
   }
-  setTextContent(textNode: IText, content: string) {
+  setTextContent(textNode: S.Text, content: string) {
     YState.transact(() => {
       YState.set(`${textNode.id}.content`, content)
     })
@@ -68,7 +67,7 @@ class OperateTextService {
   private setupTextNodes() {
     this.textNodes = getSelectedNodes().filter((node) => {
       return node.type === 'text'
-    }) as IText[]
+    }) as S.Text[]
     if (!this.textNodes.length) return
     this.setupTextStyle()
   }

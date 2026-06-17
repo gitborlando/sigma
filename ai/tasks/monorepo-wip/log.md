@@ -626,3 +626,88 @@
   - 未出现图层重复 key 警告。
   - 未出现 `undefined.matrix` / `undefined.type` / `undefined.width` 启动或运行错误。
   - mock 刷新可重新打开；mock 不持久化刚才操作属于预期行为。
+
+## 2026-06-17
+
+### 阶段 6 / `sigma-schema-core` preflight 已完成
+
+- 本轮只做 schema-core 拆分前置审计和记录，不迁移文件，不改运行时代码。
+- 当前 schema 相关源文件只有：
+  - `apps/web/src/editor/schema/creator.ts`
+  - `apps/web/src/editor/schema/helper.ts`
+  - `apps/web/src/editor/schema/migration.ts`
+- 当前 schema 类型位于全局声明：
+  - `types/schema/schema.d.ts`
+  - `types/schema/schema-v1.d.ts`
+  - `types/schema/schema-v2.d.ts`
+- 结论：当前不适合整文件迁移到 `@sigma/schema-core`，需要先拆出纯能力，再保留 app 适配层。
+
+### preflight 发现
+
+- `SchemaCreator` 当前不能原样进入 core：
+  - 依赖 `src/view/styles/color` 的 `themeColor()`。
+  - 依赖自动导入的 `COLOR`、`Assets`、`t()`、`Matrix`、`XY`、`T`。
+  - 默认文本包含中文产品文案 `文本1`，meta 默认名依赖 i18n `t('untitled')`。
+  - 默认图片 fill 依赖产品资源 `Assets.editor.RP.operate.picker.defaultImage`。
+  - polygon / star / line 依赖 `src/editor/math/point`，这部分可以迁，但需要先明确 math 归属。
+- `SchemaHelper` 需要拆分：
+  - 纯能力：`isPageById()`、`is()`、`isNode()`、`isNodeParent()`、`createTraverse2()`。
+  - 当前运行态适配：`isById()`、`getChildren()`、`findAncestor()`、`findParent()`、`getSceneMatrix()`、`createCurrentPageTraverse()` 等直接读取 `YState` 或 `getSelectPageId()`。
+  - 可迁能力需要改成显式接收 `schema` / `getNode` / `pageId`，不能在 core 内读取 `YState`。
+- `migrationSchema()` 相对更接近 core：
+  - 输入输出都是 schema 快照。
+  - 但当前复用 `SchemaHelper`，并依赖自动导入的 `MRect`、`XY`、`T`。
+  - 迁移前需要先把 `createTraverse2()` 和 `isNode()` 变成纯 schema helper，并显式 import math / cast helper。
+- 类型层暂不适合直接搬：
+  - `types/schema/schema-v2.d.ts` 仍通过 `import('src/editor/math/matrix')` 和 `import('src/editor/math/mrect')` 引用 app 内 math。
+  - `Stroke` 类型依赖 `CanvasRenderingContext2D['lineCap']` / `lineJoin`，会让 schema 类型需要 DOM lib。
+  - 当前类型是全局 namespace `S` / `S1` / `S2`，不是可由 package export 的模块类型。
+- 发现一个旧类型入口残留：
+  - `apps/web/src/editor/schema/type` 文件已不存在。
+  - 仍有 `handle/picker.ts`、`operate/align.ts`、`operate/stroke.ts`、`operate/shadow.ts`、`operate/text.ts` 引用该入口。
+  - 这些 import 当前大多只作为类型使用，build 不一定暴露问题，但后续 schema 拆分前应收口为 `S.*` 或正式类型入口。
+
+### 推荐拆分顺序
+
+- 第一步：先在 app 内拆 `schema/helper.ts`，新增纯 helper 和运行态 helper 边界：
+  - 纯 helper 只接收 `schema` / `getNode` / plain node，不读取 `YState`。
+  - 运行态 helper 继续留在 app，负责把 `YState.find()`、当前页面选择等注入进去。
+- 第二步：收口缺失的 `schema/type` 旧 import：
+  - 优先改为现有全局 `S.*` 类型。
+  - 本步只改 type import，不改行为。
+- 第三步：让 `migrationSchema()` 只依赖纯 helper 和显式 math import。
+  - 去掉 `console.log('newSchema:', newSchema)` 这类迁移时调试输出。
+  - 保持打开旧文件的 migration 行为不变。
+- 第四步：给 `SchemaCreator` 增加 defaults 注入设计，但先不迁移：
+  - `translate(type)` / `defaultName`。
+  - `colors`。
+  - `defaultImageUrl`。
+  - `createId`。
+  - 可选 `themeColor`。
+- 第五步：等 helper / migration / 类型边界清楚后，再新增 `packages/sigma-schema-core` 私有包。
+
+### 本轮验证
+
+- `git status --short`：在 preflight 记录前只有上一轮日志改动，已提交为 `52e6a05 Update monorepo WIP validation notes`。
+- 本轮未运行 build / typecheck / test。
+  - 原因：本轮只做审计记录；仓库指示默认不要频繁 build/test。
+
+### 阶段 6 / 旧 `schema/type` 类型入口收口已完成
+
+- 按 preflight 发现继续做一个低风险小步：删除对已不存在 `apps/web/src/editor/schema/type` 入口的引用。
+- 本轮只改类型引用，不改变运行逻辑：
+  - `apps/web/src/editor/handle/picker.ts`
+  - `apps/web/src/editor/operate/align.ts`
+  - `apps/web/src/editor/operate/stroke.ts`
+  - `apps/web/src/editor/operate/shadow.ts`
+  - `apps/web/src/editor/operate/text.ts`
+- 旧 `IText` / `INode` / `INodeParent` / `IStroke` / `IShadow` / `IFill` 等引用改为现有全局 `S.*` 类型。
+- `IFillKeys` 改为局部 `string | number` 路径 key 类型，保持当前 picker patch 路径语义。
+- 复核结果：
+  - `rg "schema/type|../schema/type|src/editor/schema/type" apps/web/src -n`：无剩余引用。
+- 补充发现：
+  - `apps/web/src/editor/handle/picker.ts` 仍有既有旧 picker 类型债：`ImmuiPatch` 未定义，且 `immui` 当前是空类实例。
+  - 本轮不扩大修复该旧 picker 链路；后续如果恢复 stroke / shadow picker，应先确认真实 UI 入口，再按当前 `OperateFill` / picker state 路径重建。
+- 验证记录：
+  - `pnpm exec prettier --write apps/web/src/editor/handle/picker.ts apps/web/src/editor/operate/align.ts apps/web/src/editor/operate/stroke.ts apps/web/src/editor/operate/shadow.ts apps/web/src/editor/operate/text.ts ai/tasks/monorepo-wip/log.md`：通过。
+    - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。

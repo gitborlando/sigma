@@ -4,12 +4,11 @@ import equal from 'fast-deep-equal'
 import { rgb } from 'src/utils/color'
 import { UIPickerCopy } from '../handle/picker'
 import { SchemaCreator } from '../schema/creator'
-import { INode, IShadow } from '../schema/type'
 import { getSelectedNodes } from '../utils/get'
 
 @autobind
 class OperateShadowService {
-  shadows = <IShadow[]>[]
+  shadows = <S.Shadow[]>[]
   isMultiShadows = false
   afterOperate = Signal.create()
   private immui = new (class {})()
@@ -57,7 +56,7 @@ class OperateShadowService {
     this.applyChangeToYState()
     Undo.track('state', t('change shadow'))
   }
-  changeShadow(index: number, newShadow: IShadow) {
+  changeShadow(index: number, newShadow: S.Shadow) {
     this.immui.reset(this.shadows, [index], newShadow)
     this.applyChangeToYState()
     Undo.track('state', t('change shadows'))
@@ -83,7 +82,7 @@ class OperateShadowService {
       Undo.track('state', t('change shadows'))
     })
   }
-  private isSameShadows(nodes: INode[]) {
+  private isSameShadows(nodes: S.Node[]) {
     let isSame = true
     const firstNode = nodes[0]
     nodes.forEach(({ shadows }) => {

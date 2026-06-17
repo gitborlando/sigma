@@ -1,11 +1,11 @@
 import autobind from 'class-autobind-decorator'
-import { IFill, IFillKeys } from 'src/editor/schema/type'
 
 type IOperateType = 'solid-color'
+type FillKey = string | number
 
 @autobind
 class UIPickerService {
-  fill!: IFill
+  fill!: S.Fill
   show = Signal.create(false)
   type = Signal.create(<'color' | 'linearGradient' | 'image'>'color')
   xy = Signal.create(<IXY>XY.$(0, 0))
@@ -21,10 +21,10 @@ class UIPickerService {
     //   return patches.map((patch) => ({ ...patch, path: patch.path.slice(2) }))
     // })
   }
-  setFill(keys: IFillKeys[], value: any) {
+  setFill(keys: FillKey[], value: any) {
     this.immui.reset([this.fill], [0, ...keys], value)
   }
-  changeFill(newFill: IFill) {
+  changeFill(newFill: S.Fill) {
     this.immui.reset([this.fill], [0], newFill)
     this.emitChange()
     this.afterOperate.dispatch()

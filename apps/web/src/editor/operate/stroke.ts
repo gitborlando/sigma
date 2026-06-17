@@ -4,12 +4,11 @@ import equal from 'fast-deep-equal'
 import { rgb } from 'src/utils/color'
 import { UIPickerCopy } from '../handle/picker'
 import { SchemaCreator } from '../schema/creator'
-import { INode, IStroke } from '../schema/type'
 import { getSelectedNodes } from '../utils/get'
 
 @autobind
 class OperateStrokeService {
-  strokes = <IStroke[]>[]
+  strokes = <S.Stroke[]>[]
   isMultiStrokes = false
   afterOperate = Signal.create()
   private immui = new (class {})()
@@ -57,7 +56,7 @@ class OperateStrokeService {
     this.applyChangeToYState()
     Undo.track('state', t('change stroke'))
   }
-  changeStroke(index: number, newStroke: IStroke) {
+  changeStroke(index: number, newStroke: S.Stroke) {
     this.immui.reset(this.strokes, [index], newStroke)
     this.applyChangeToYState()
     Undo.track('state', t('change strokes'))
@@ -83,7 +82,7 @@ class OperateStrokeService {
       Undo.track('state', t('change strokes'))
     })
   }
-  private isSameStrokes(nodes: INode[]) {
+  private isSameStrokes(nodes: S.Node[]) {
     let isSame = true
     const firstNode = nodes[0]
     nodes.forEach(({ strokes }) => {

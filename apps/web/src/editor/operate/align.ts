@@ -1,7 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { StageScene } from 'src/editor/render/scene'
 import { SchemaHelper } from '../schema/helper'
-import { INode, INodeParent } from '../schema/type'
 import { getSelectedNodes } from '../utils/get'
 
 const alignTypes = <const>[
@@ -22,7 +21,7 @@ class OperateAlignService {
   currentAlign = Signal.create<IAlignType>()
   afterAlign = Signal.create()
   private needAlign = false
-  private toAlignNodes = <INode[]>[]
+  private toAlignNodes = <S.Node[]>[]
 
   initHook() {
     HandleSelect.afterSelect.hook(this.setupAlign)
@@ -42,7 +41,7 @@ class OperateAlignService {
       selectNodes.length === 1 &&
       SchemaHelper.isById(selectNodes[0].id, 'nodeParent')
     ) {
-      this.toAlignNodes = SchemaHelper.getChildren(<INodeParent>selectNodes[0])
+      this.toAlignNodes = SchemaHelper.getChildren(<S.NodeParent>selectNodes[0])
       this.canAlign.dispatch(true)
     }
   }
@@ -115,13 +114,13 @@ class OperateAlignService {
     })
   }
 
-  private horizontalAlign(node: INode, shift: number) {
+  private horizontalAlign(node: S.Node, shift: number) {
     if (shift === 0) return
     this.needAlign = true
     YState.set(`${node.id}.x`, node.x + shift)
   }
 
-  private verticalAlign(node: INode, shift: number) {
+  private verticalAlign(node: S.Node, shift: number) {
     if (shift === 0) return
     this.needAlign = true
     YState.set(`${node.id}.y`, node.y + shift)
@@ -136,7 +135,7 @@ class OperateAlignService {
     return StageScene.findElem(getSelectedNodes()[0].id).obb.aabb
   }
 
-  private getOBBAndBound(node: INode) {
+  private getOBBAndBound(node: S.Node) {
     const nodeOBB = StageScene.findElem(node.id).obb
     return nodeOBB.aabb
   }
