@@ -1,7 +1,6 @@
 import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { SchemaRuntimeHelper } from 'src/editor/schema/runtime-helper'
 import { SchemaCreator } from '../schema/creator'
 import { getSelectIdList } from '../utils/get'
 
@@ -68,7 +67,7 @@ class HandleNodeService {
 
   deleteSelectedNodes() {
     YState.transact(() => {
-      const traverse = SchemaRuntimeHelper.createTraverse({
+      const traverse = SchemaHelper.createTraverse({
         bubbleCallback: ({ node, parent }) => this.deleteChild(parent, node),
       })
       traverse(getSelectIdList())
@@ -87,7 +86,7 @@ class HandleNodeService {
 
     const newSelectIds = <ID[]>[]
     YState.transact(() => {
-      const traverse = SchemaRuntimeHelper.createTraverse({
+      const traverse = SchemaHelper.createTraverse({
         callback: (props) => {
           const { node, parent, forwardRef: upLevelRef, depth } = props
           const newParent = upLevelRef?.newNode || parent

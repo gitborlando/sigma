@@ -4,7 +4,7 @@ import { HandleNode } from 'src/editor/handle/node'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
-import { SchemaRuntimeHelper } from 'src/editor/schema/runtime-helper'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { getZoom } from 'src/editor/stage/viewport'
 import { snapGridRoundXY } from 'src/editor/utils/misc'
@@ -123,7 +123,7 @@ class StageCreateService {
 
   private findParent() {
     const frame = StageScene.elemsFromPoint().find((elem) =>
-      SchemaRuntimeHelper.isById(elem.id, 'frame'),
+      SchemaHelper.isById(elem.id, 'frame'),
     )
     if (frame) return YState.find<S.NodeParent>(frame.id)
     return YState.find<S.Page>(HandleSelect.selectPageId)

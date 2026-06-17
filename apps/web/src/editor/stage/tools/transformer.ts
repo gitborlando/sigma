@@ -1,6 +1,6 @@
 import { createCache, iife } from '@gitborlando/utils'
 import { IMRect } from 'src/editor/math'
-import { SchemaRuntimeHelper } from 'src/editor/schema/runtime-helper'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
 import { snapGridRound, TRBL } from 'src/editor/utils/misc'
 import { StageDrag } from 'src/global/event/drag'
@@ -21,12 +21,12 @@ class StageTransformerService {
 
   setup(selectNodes: S.Node[]) {
     if (selectNodes.length === 1) {
-      const matrix = SchemaRuntimeHelper.getSceneMatrix(selectNodes[0])
+      const matrix = SchemaHelper.getSceneMatrix(selectNodes[0])
       return (this.mrect = MRect.fromRect(selectNodes[0], matrix))
     }
 
     const aabbList = selectNodes.map((node) => {
-      const matrix = SchemaRuntimeHelper.getSceneMatrix(node)
+      const matrix = SchemaHelper.getSceneMatrix(node)
       return MRect.fromRect(node, matrix).aabb
     })
     const rect = AABB.rect(AABB.merge(aabbList))
@@ -170,7 +170,7 @@ class StageTransformerService {
     if (!this.diffMatrix || !mrect) return
 
     const startMRect = MRect.of(mrect)
-    const forwardMatrix = SchemaRuntimeHelper.getForwardAccumulatedMatrix(node)
+    const forwardMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
 
     if (getSelectIdList().length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)

@@ -647,6 +647,25 @@
   - `pnpm --filter @sigma/web build`：通过。
     - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
 
+### 阶段 6 / `SchemaHelper` 策略调整
+
+- 用户明确策略：不要把现有 `SchemaHelper` 当作 core 候选整体迁移。
+- 因此撤销独立 `SchemaRuntimeHelper` 文件：
+  - 将 `isById()`、`isFirstLayerFrame()`、`getChildren()`、`findAncestor()`、`findParent()`、`getSceneMatrix()`、`getForwardAccumulatedMatrix()`、`getPageChildIds()`、`createCurrentPageTraverse()` 合回 `SchemaHelper`。
+  - 删除 `apps/web/src/editor/schema/runtime-helper.ts`。
+  - 调用点全部恢复为 `SchemaHelper.*`。
+- 新口径：
+  - `SchemaHelper` 是 app/editor 内部 helper，可以包含运行态读取。
+  - 未来 `sigma-schema-core` 不迁现有 `SchemaHelper`。
+  - 如果 core 需要能力，只按需抽小的纯函数，例如 `traverseSchema()` / `isSchemaNode()`，并显式接收 `schema` / `node` / `getNode`。
+- 验证记录：
+  - `rg "SchemaRuntimeHelper|runtime-helper" apps/web/src -n`：无结果。
+  - `pnpm exec prettier --write apps/web/src/editor/schema/helper.ts apps/web/src/editor/handle/node.ts apps/web/src/editor/operate/align.ts apps/web/src/editor/stage/interact/create.ts apps/web/src/editor/stage/interact/select.ts apps/web/src/editor/stage/tools/transformer.ts apps/web/src/view/editor/stage/outline.tsx apps/web/src/view/editor/left-panel/panels/layer/node/state.ts`：通过。
+    - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+  - `git diff --check`：通过。
+  - `pnpm --filter @sigma/web build`：通过。
+    - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
+
 ### 阶段 3 / 主题 B：人工验收通过
 
 - 2026-06-17 用户按 `ai/temp/test.md` 完成人工验收，全部通过。
