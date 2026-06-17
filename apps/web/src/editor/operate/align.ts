@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { StageScene } from 'src/editor/render/scene'
-import { SchemaHelper } from '../schema/helper'
+import { SchemaRuntimeHelper } from '../schema/runtime-helper'
 import { getSelectedNodes } from '../utils/get'
 
 const alignTypes = <const>[
@@ -39,9 +39,11 @@ class OperateAlignService {
     }
     if (
       selectNodes.length === 1 &&
-      SchemaHelper.isById(selectNodes[0].id, 'nodeParent')
+      SchemaRuntimeHelper.isById(selectNodes[0].id, 'nodeParent')
     ) {
-      this.toAlignNodes = SchemaHelper.getChildren(<S.NodeParent>selectNodes[0])
+      this.toAlignNodes = SchemaRuntimeHelper.getChildren(
+        <S.NodeParent>selectNodes[0],
+      )
       this.canAlign.dispatch(true)
     }
   }

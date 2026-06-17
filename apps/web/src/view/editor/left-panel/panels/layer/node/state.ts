@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { SchemaRuntimeHelper } from 'src/editor/schema/runtime-helper'
 
 export type EditorLPLayerNodeInfo = {
   id: string
@@ -33,14 +34,14 @@ class EditorLPLayerNodeStateService {
   }
 
   toggleAllNodeExpanded(expanded: boolean) {
-    SchemaHelper.createCurrentPageTraverse({
+    SchemaRuntimeHelper.createCurrentPageTraverse({
       callback: ({ id }) => void this.nodeExpandedMap.set(id, expanded),
     })()
   }
 
   getNodeInfoList() {
     const nodeInfoList: EditorLPLayerNodeInfo[] = []
-    SchemaHelper.createCurrentPageTraverse({
+    SchemaRuntimeHelper.createCurrentPageTraverse({
       callback: ({ id, ancestors }) => {
         nodeInfoList.push({ id, indent: ancestors.length, ancestors })
         return !!this.nodeExpandedMap.get(id)

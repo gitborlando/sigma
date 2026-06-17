@@ -1,7 +1,7 @@
 import { iife } from '@gitborlando/utils'
 import { entries } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
-import { SchemaHelper } from 'src/editor/schema/helper'
+import { SchemaRuntimeHelper } from 'src/editor/schema/runtime-helper'
 import { StageMove } from 'src/editor/stage/interact/move'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
@@ -39,7 +39,7 @@ export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
         }
       }
     }
-    if (hoverId && !SchemaHelper.isFirstLayerFrame(hoverId)) {
+    if (hoverId && !SchemaRuntimeHelper.isFirstLayerFrame(hoverId)) {
       map[hoverId] = { hovered: true }
     }
     for (const id of getSelectIdList()) {
@@ -63,7 +63,7 @@ const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer
     const node = T<S.Node>(useSchema((schema) => schema[id]))
     const strokeColor = hovered || selected ? themeColor() : color
     const strokeWidth = selected ? 1 : 2
-    const matrix = SchemaHelper.getSceneMatrix(node)
+    const matrix = SchemaRuntimeHelper.getSceneMatrix(node)
     const outline = SchemaCreator.clone<S.Node>(node, {
       id: `${id}-outline`,
       fills: [],

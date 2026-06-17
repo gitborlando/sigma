@@ -10,6 +10,7 @@ import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { SchemaRuntimeHelper } from 'src/editor/schema/runtime-helper'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import {
   getSelectIdList,
@@ -55,7 +56,7 @@ class StageSelectService {
         this.onEditText(hoverNode)
       }
     } else if (selectIdList.length === 1) {
-      const ancestor = SchemaHelper.findAncestor(
+      const ancestor = SchemaRuntimeHelper.findAncestor(
         this.hoverId,
         (node) => node.parentId === firstOne(selectIdList),
       )
@@ -66,7 +67,7 @@ class StageSelectService {
   private onSceneRootMouseDown(e: ElemMouseEvent) {
     this.lastSelectIdMap = clone(getSelectIdMap())
 
-    if (!this.hoverId || SchemaHelper.isFirstLayerFrame(this.hoverId)) {
+    if (!this.hoverId || SchemaRuntimeHelper.isFirstLayerFrame(this.hoverId)) {
       this.clearSelect()
       this.onMarqueeSelect()
       return
@@ -99,7 +100,7 @@ class StageSelectService {
   }
 
   private onStageSelect() {
-    if (SchemaHelper.isFirstLayerFrame(this.hoverId!)) return
+    if (SchemaRuntimeHelper.isFirstLayerFrame(this.hoverId!)) return
     this.onSingleSelect(this.hoverId!, t('select nodes by clicking'))
   }
 
@@ -175,7 +176,9 @@ class StageSelectService {
       this.marquee = marquee
       AABB.updateFromRect(marqueeAABB, marquee)
       this.clearSelect()
-      runInAction(() => traverser(SchemaHelper.getPageChildIds(getSelectPageId())))
+      runInAction(() =>
+        traverser(SchemaRuntimeHelper.getPageChildIds(getSelectPageId())),
+      )
     })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }

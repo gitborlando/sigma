@@ -711,3 +711,27 @@
 - 验证记录：
   - `pnpm exec prettier --write apps/web/src/editor/handle/picker.ts apps/web/src/editor/operate/align.ts apps/web/src/editor/operate/stroke.ts apps/web/src/editor/operate/shadow.ts apps/web/src/editor/operate/text.ts ai/tasks/monorepo-wip/log.md`：通过。
     - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+
+### 阶段 6 / `SchemaHelper` 纯能力与运行态适配拆分已完成
+
+- 按 preflight 推荐顺序推进第一步，在 app 内先拆边界，不迁 package。
+- 新增 `apps/web/src/editor/schema/runtime-helper.ts`：
+  - 承载依赖 `YState` / `getSelectPageId()` / 当前运行态的 helper。
+  - 包含 `isById()`、`isFirstLayerFrame()`、`getChildren()`、`findAncestor()`、`findParent()`、`getSceneMatrix()`、`getForwardAccumulatedMatrix()`、`getPageChildIds()`、`createCurrentPageTraverse()` 和带默认 `YState.find()` 的 `createTraverse()`。
+- `apps/web/src/editor/schema/helper.ts` 收口为更接近 core 的纯 helper：
+  - 保留 `isPageById()`、`is()`、`isNode()`、`isNodeParent()`、`createTraverse()`、`createTraverse2()`。
+  - 不再直接读取 `YState`。
+  - 不再依赖 `getSelectPageId()`。
+- 已更新运行态调用点：
+  - `HandleNode.deleteSelectedNodes()` / `pasteNodes()` 的树遍历改走 `SchemaRuntimeHelper.createTraverse()`。
+  - 对齐、创建、选择、变换、outline 和图层树中依赖当前状态读取的 helper 调用改走 `SchemaRuntimeHelper`。
+  - `migrationSchema()`、渲染场景页判断、图层 node parent 判断等纯逻辑继续使用 `SchemaHelper`。
+- 复核结果：
+  - `rg "SchemaHelper\\.(isById|isFirstLayerFrame|getChildren|findAncestor|findParent|getForwardAccumulatedMatrix|getSceneMatrix|getPageChildIds|createCurrentPageTraverse)" apps/web/src -n`：无剩余调用。
+  - `rg "YState|YClients|getSelectPageId|HandleSelect|Undo|Stage|Matrix" apps/web/src/editor/schema/helper.ts -n`：无结果。
+- 验证记录：
+  - `pnpm exec prettier --write apps/web/src/editor/schema/helper.ts apps/web/src/editor/schema/runtime-helper.ts apps/web/src/editor/handle/node.ts apps/web/src/editor/operate/align.ts apps/web/src/editor/stage/interact/create.ts apps/web/src/editor/stage/interact/select.ts apps/web/src/editor/stage/tools/transformer.ts apps/web/src/view/editor/stage/outline.tsx apps/web/src/view/editor/left-panel/panels/layer/node/state.ts`：通过。
+    - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
+  - `git diff --check`：通过。
+  - `pnpm --filter @sigma/web build`：通过。
+    - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
