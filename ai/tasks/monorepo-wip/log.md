@@ -608,3 +608,21 @@
   - 控制台只剩既有字体 warning，无 `undefined.type` / `undefined.matrix` 错误。
   - `pnpm --filter @sigma/web build`：通过。
     - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
+
+### 阶段 3 / 主题 B：人工验收通过
+
+- 2026-06-17 用户按 `ai/temp/test.md` 完成人工验收，全部通过。
+- 覆盖场景：
+  - 复制粘贴。
+  - 复制粘贴后的 undo / redo。
+  - 移动节点。
+  - 右侧属性编辑：x / y / width / height、fill、stroke、shadow、text 内容和样式。
+  - 多选对齐。
+  - 页面新增、切换和删除。
+  - mock 页面刷新恢复。
+- 验收结论：
+  - 画布、图层、右侧面板和选区同步符合预期。
+  - undo / redo 符合预期。
+  - 未出现图层重复 key 警告。
+  - 未出现 `undefined.matrix` / `undefined.type` / `undefined.width` 启动或运行错误。
+  - mock 刷新可重新打开；mock 不持久化刚才操作属于预期行为。
