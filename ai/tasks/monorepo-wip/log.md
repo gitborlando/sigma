@@ -697,7 +697,7 @@
   - `types/schema/schema.d.ts`
   - `types/schema/schema-v1.d.ts`
   - `types/schema/schema-v2.d.ts`
-- 结论：当前不适合整文件迁移到 `@sigma/schema-core`，需要先拆出纯能力，再保留 app 适配层。
+- 结论：当前不适合整文件迁移到 `@sigma/schema-core`；现有 `SchemaHelper` 继续作为 app/editor 内部 helper，不作为 core 候选整体迁移。未来 core 只按真实需要抽小的纯函数。
 
 ### preflight 发现
 
@@ -707,10 +707,10 @@
   - 默认文本包含中文产品文案 `文本1`，meta 默认名依赖 i18n `t('untitled')`。
   - 默认图片 fill 依赖产品资源 `Assets.editor.RP.operate.picker.defaultImage`。
   - polygon / star / line 依赖 `src/editor/math/point`，这部分可以迁，但需要先明确 math 归属。
-- `SchemaHelper` 需要拆分：
-  - 纯能力：`isPageById()`、`is()`、`isNode()`、`isNodeParent()`、`createTraverse2()`。
-  - 当前运行态适配：`isById()`、`getChildren()`、`findAncestor()`、`findParent()`、`getSceneMatrix()`、`createCurrentPageTraverse()` 等直接读取 `YState` 或 `getSelectPageId()`。
-  - 可迁能力需要改成显式接收 `schema` / `getNode` / `pageId`，不能在 core 内读取 `YState`。
+- `SchemaHelper` 当前保留 app 内部归属：
+  - 可以继续包含 `YState` / `getSelectPageId()` 等运行态读取。
+  - 不整体进入 `sigma-schema-core`。
+  - 如未来 core 需要遍历、节点判断等能力，应重新抽独立小函数，并显式接收 `schema` / `node` / `getNode`。
 - `migrationSchema()` 相对更接近 core：
   - 输入输出都是 schema 快照。
   - 但当前复用 `SchemaHelper`，并依赖自动导入的 `MRect`、`XY`、`T`。
@@ -724,24 +724,22 @@
   - 仍有 `handle/picker.ts`、`operate/align.ts`、`operate/stroke.ts`、`operate/shadow.ts`、`operate/text.ts` 引用该入口。
   - 这些 import 当前大多只作为类型使用，build 不一定暴露问题，但后续 schema 拆分前应收口为 `S.*` 或正式类型入口。
 
-### 推荐拆分顺序
+### 推荐拆分顺序（已按 2026-06-17 策略调整）
 
-- 第一步：先在 app 内拆 `schema/helper.ts`，新增纯 helper 和运行态 helper 边界：
-  - 纯 helper 只接收 `schema` / `getNode` / plain node，不读取 `YState`。
-  - 运行态 helper 继续留在 app，负责把 `YState.find()`、当前页面选择等注入进去。
-- 第二步：收口缺失的 `schema/type` 旧 import：
+- 第一步：收口缺失的 `schema/type` 旧 import：
   - 优先改为现有全局 `S.*` 类型。
   - 本步只改 type import，不改行为。
-- 第三步：让 `migrationSchema()` 只依赖纯 helper 和显式 math import。
+- 第二步：让 `migrationSchema()` 依赖显式 import，减少自动导入耦合。
   - 去掉 `console.log('newSchema:', newSchema)` 这类迁移时调试输出。
   - 保持打开旧文件的 migration 行为不变。
-- 第四步：给 `SchemaCreator` 增加 defaults 注入设计，但先不迁移：
+- 第三步：给 `SchemaCreator` 增加 defaults 注入设计，但先不迁移：
   - `translate(type)` / `defaultName`。
   - `colors`。
   - `defaultImageUrl`。
   - `createId`。
   - 可选 `themeColor`。
-- 第五步：等 helper / migration / 类型边界清楚后，再新增 `packages/sigma-schema-core` 私有包。
+- 第四步：审计 `types/schema/*.d.ts` 的模块化和 DOM / app math 耦合。
+- 第五步：等 creator defaults 和 schema 类型边界清楚后，再评估是否新增 `packages/sigma-schema-core` 私有包。
 
 ### 本轮验证
 
@@ -769,9 +767,9 @@
   - `pnpm exec prettier --write apps/web/src/editor/handle/picker.ts apps/web/src/editor/operate/align.ts apps/web/src/editor/operate/stroke.ts apps/web/src/editor/operate/shadow.ts apps/web/src/editor/operate/text.ts ai/tasks/monorepo-wip/log.md`：通过。
     - 仍有 `jsxBracketSameLine` deprecated 警告，属于当前 Prettier 配置现状。
 
-### 阶段 6 / `SchemaHelper` 纯能力与运行态适配拆分已完成
+### 阶段 6 / `SchemaHelper` 纯能力与运行态适配拆分已撤销
 
-- 按 preflight 推荐顺序推进第一步，在 app 内先拆边界，不迁 package。
+- 曾按 preflight 推荐顺序尝试在 app 内先拆边界，不迁 package。
 - 新增 `apps/web/src/editor/schema/runtime-helper.ts`：
   - 承载依赖 `YState` / `getSelectPageId()` / 当前运行态的 helper。
   - 包含 `isById()`、`isFirstLayerFrame()`、`getChildren()`、`findAncestor()`、`findParent()`、`getSceneMatrix()`、`getForwardAccumulatedMatrix()`、`getPageChildIds()`、`createCurrentPageTraverse()` 和带默认 `YState.find()` 的 `createTraverse()`。
@@ -792,3 +790,7 @@
   - `git diff --check`：通过。
   - `pnpm --filter @sigma/web build`：通过。
     - 仍有 baseline-browser-mapping 过期、字体运行时解析、大 chunk 警告。
+- 2026-06-17 已按用户策略调整撤销该方向：
+  - `SchemaRuntimeHelper` 已删除。
+  - 运行态方法已合回 `SchemaHelper`。
+  - 现有 `SchemaHelper` 明确保留为 app/editor 内部 helper，不整体迁入 core。
