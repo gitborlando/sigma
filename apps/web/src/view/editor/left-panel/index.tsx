@@ -1,11 +1,11 @@
 import { matchCase } from '@gitborlando/utils'
-import { History, Image, Layers, Settings } from 'lucide-react'
+import { Layers } from 'lucide-react'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Btn } from 'src/view/component/btn'
 
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer'
 
-export const EditorLeftPanelIds = ['layer', 'undo', 'images', 'setting'] as const
+export const EditorLeftPanelIds = ['layer'] as const
 
 export const EditorLeftPanelState = observable({
   currentTabId: T<(typeof EditorLeftPanelIds)[number]>('layer'),
@@ -32,15 +32,6 @@ export const SwitchBarComp: FC<{}> = observer(({}) => {
       {EditorLeftPanelIds.map((id) => {
         const icon = matchCase(id, {
           layer: <Lucide icon={Layers} size={17} />,
-          undo: <Lucide icon={History} />,
-          images: <Lucide icon={Image} />,
-          setting: <Lucide icon={Settings} size={19} />,
-        })
-        const toolTip = matchCase(id, {
-          layer: '图层',
-          undo: '历史',
-          images: '图片',
-          setting: '设置',
         })
         return (
           <Btn

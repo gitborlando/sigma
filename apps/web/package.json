@@ -20,7 +20,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@gitborlando/geo": "^5.2.0",
-    "@gitborlando/signal": "^1.0.1",
+    "@gitborlando/signal": "^1.0.2",
     "@gitborlando/toolkit": "workspace:*",
     "@gitborlando/utils": "^5.0.2",
     "@gitborlando/widget": "^1.0.2",

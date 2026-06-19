@@ -9,7 +9,7 @@ export type EditorLPLayerNodeInfo = {
 
 @autobind
 class EditorLPLayerNodeStateService {
-  nodeInfoChanged = Signal.create()
+  nodeInfoChanged = Signal.create<void>()
 
   private nodeExpandedMap = observable.map<string, boolean>()
 

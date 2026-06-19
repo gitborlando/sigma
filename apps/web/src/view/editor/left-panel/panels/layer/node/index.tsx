@@ -9,8 +9,8 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useEventSignal } from '@gitborlando/signal/react'
 import { useState } from 'react'
-import { useHookSignal } from 'src/utils/signal-react'
 import { EditorLeftPanelLayerNodeHeaderComp } from 'src/view/editor/left-panel/panels/layer/node/header'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
 import { EditorLeftPanelLayerNodeListComp } from 'src/view/editor/left-panel/panels/layer/node/list'
@@ -30,7 +30,7 @@ const dropAnimationConfig: DropAnimation = {
 export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
   const { nodeInfoChanged, getNodeInfoList } = EditorLPLayerNodeState
   const [activeId, setActiveId] = useState<string | null>(null)
-  useHookSignal(nodeInfoChanged)
+  useEventSignal(nodeInfoChanged)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

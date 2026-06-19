@@ -32,8 +32,8 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0
       '@gitborlando/signal':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2(react@18.3.1)
       '@gitborlando/toolkit':
         specifier: workspace:*
         version: link:../../packages/toolkit
@@ -1279,12 +1279,6 @@ packages:
     resolution:
       {
         integrity: sha512-vecmLOHEvnHyM/S7nfdYfzRcT70N6mn2Ire0lbrJF+ArVdED6ohQoPfy+Zh9D3b7wCycvXNyQlotKtXEEhx/QA==,
-      }
-
-  '@gitborlando/signal@1.0.1':
-    resolution:
-      {
-        integrity: sha512-EdKCsH5H5PF/TRUJYd7Vpp6KEg2msxS2AVxtEiQ+8VrXL33l4xYcGyyUFT1tz0mSrZYnlHkzNg0f1ekCxGaUug==,
       }
 
   '@gitborlando/signal@1.0.2':
@@ -8795,8 +8789,6 @@ snapshots:
   '@floating-ui/utils@0.2.10': {}
 
   '@gitborlando/geo@5.2.0': {}
-
-  '@gitborlando/signal@1.0.1': {}
 
   '@gitborlando/signal@1.0.2(react@18.3.1)':
     dependencies:

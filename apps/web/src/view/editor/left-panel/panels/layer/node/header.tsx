@@ -1,5 +1,5 @@
+import { useEventSignal } from '@gitborlando/signal/react'
 import { ChevronsUp } from 'lucide-react'
-import { useHookSignal } from 'src/utils/signal-react'
 import { Btn } from 'src/view/component/btn'
 
 import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
@@ -7,7 +7,7 @@ import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/
 export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
   const { nodeInfoChanged, getAllNodeExpanded, toggleAllNodeExpanded } =
     EditorLPLayerNodeState
-  useHookSignal(nodeInfoChanged)
+  useEventSignal(nodeInfoChanged)
 
   const allNodeExpanded = getAllNodeExpanded()
 
