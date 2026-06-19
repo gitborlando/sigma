@@ -21,7 +21,7 @@
     "@gitborlando/geo": "^5.2.0",
     "@gitborlando/signal": "^1.0.1",
     "@gitborlando/toolkit": "workspace:*",
-    "@gitborlando/utils": "^4.9.1",
+    "@gitborlando/utils": "^5.0.0",
     "@gitborlando/widget": "^1.0.2",
     "@hocuspocus/provider": "^3.4.0",
     "@hocuspocus/server": "^3.4.0",
