@@ -1,4 +1,5 @@
 import { getSet } from '@gitborlando/utils'
+import { useClean } from '@gitborlando/utils/react'
 import Color from 'color'
 import { OperateFill } from 'src/editor/operate/fill'
 import { SchemaCreator } from 'src/editor/schema/creator'
@@ -9,7 +10,6 @@ import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-pi
 import { PickerImageComp } from 'src/view/editor/right-panel/operate/picker/image'
 import { PickerLinearGradientComp } from 'src/view/editor/right-panel/operate/picker/linear-gradient'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
-import { useUnmount } from 'src/view/hooks/common'
 
 const createFillCache = (type: S.Fill['type']): S.Fill => {
   if (type === 'color') return SchemaCreator.fillColor()
@@ -28,7 +28,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
     fillCache.set(fill.type, fill)
   }, [fill])
 
-  useUnmount(() => {
+  useClean(() => {
     fillCache.clear()
   })
 

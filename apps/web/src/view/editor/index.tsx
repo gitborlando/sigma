@@ -1,15 +1,14 @@
+import { useClean, withSuspense } from '@gitborlando/utils/react'
 import { Editor } from 'src/editor/editor/editor'
 import { StageSurface } from 'src/editor/render/surface'
 import { Loading } from 'src/view/component/loading'
-import { suspense } from 'src/view/component/suspense'
 import { LeftPanelComp } from 'src/view/editor/left-panel'
 import { RightPanelComp } from 'src/view/editor/right-panel'
 import { StageComp } from 'src/view/editor/stage/stage'
-import { useUnmount } from 'src/view/hooks/common'
 import { clear, suspend } from 'suspend-react'
 import { HeaderComp } from './header'
 
-export const EditorComp: FC<{}> = suspense(
+export const EditorComp = withSuspense(
   ({}) => {
     const { fileId } = useParams<{ fileId: string }>()
 
@@ -17,7 +16,7 @@ export const EditorComp: FC<{}> = suspense(
     suspend(() => Editor.initSchema(fileId!), [fileId])
     suspend(() => StageSurface.initTextBreaker(), ['initTextBreaker'])
 
-    useUnmount(() => {
+    useClean(() => {
       Editor.dispose()
       clear([fileId])
     })

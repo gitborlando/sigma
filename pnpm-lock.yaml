@@ -38,8 +38,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/toolkit
       '@gitborlando/utils':
-        specifier: ^5.0.1
-        version: 5.0.1(react@18.3.1)
+        specifier: ^5.0.2
+        version: 5.0.2(react@18.3.1)
       '@gitborlando/widget':
         specifier: ^1.0.2
         version: 1.0.2(react@18.3.1)
@@ -280,7 +280,7 @@ importers:
     dependencies:
       '@gitborlando/signal':
         specifier: ^1.0.2
-        version: 1.0.2
+        version: 1.0.2(react@18.3.1)
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -1289,11 +1289,13 @@ packages:
       {
         integrity: sha512-lwWDLgeXmCGrCnV3/5x9woOv75EbUnv3qB2cajFZV6RcnCVZseo4hxO97KVeAlHY+Dj2+4sN0+rK98RLy3FgnQ==,
       }
+    peerDependencies:
+      react: '>=18.0.0'
 
-  '@gitborlando/utils@5.0.1':
+  '@gitborlando/utils@5.0.2':
     resolution:
       {
-        integrity: sha512-dePVEzeA3dkQuUcomws2mIEjNUbWUUMtSwdRnG92Ppexzdnr55Grf02AEuNn+d2GAmeKrmmiMrOvMbcTNGbLjA==,
+        integrity: sha512-bYjNMjuAvcxK+kfiXzs+RGIDvhItD4JNWgvcTYvWFzefHaAedzYc/W1Kbxlk2hxcWhRnjp7E0H8/5uaiTuwEwQ==,
       }
     peerDependencies:
       react: '>=16.8.0'
@@ -8793,9 +8795,11 @@ snapshots:
 
   '@gitborlando/signal@1.0.1': {}
 
-  '@gitborlando/signal@1.0.2': {}
+  '@gitborlando/signal@1.0.2(react@18.3.1)':
+    dependencies:
+      react: 18.3.1
 
-  '@gitborlando/utils@5.0.1(react@18.3.1)':
+  '@gitborlando/utils@5.0.2(react@18.3.1)':
     dependencies:
       camelcase: 8.0.0
       react: 18.3.1

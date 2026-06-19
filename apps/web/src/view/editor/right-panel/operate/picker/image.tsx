@@ -1,7 +1,7 @@
 import { iife } from '@gitborlando/utils'
+import { withSuspense } from '@gitborlando/utils/react'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { Uploader } from 'src/global/upload'
-import { suspense } from 'src/view/component/suspense'
 import { suspend } from 'suspend-react'
 
 export const PickerImageComp: FC<{ fill: S.FillImage }> = memo(({ fill }) => {
@@ -24,7 +24,7 @@ export const PickerImageComp: FC<{ fill: S.FillImage }> = memo(({ fill }) => {
   )
 })
 
-const ImgComp: FC<{ url: string }> = suspense(({ url }) => {
+const ImgComp = withSuspense<{ url: string }>(({ url }) => {
   const image = suspend(() => ImgManager.getImageAsync(url), [url])
   const imageBound = iife(() => {
     const { width, height } = image
