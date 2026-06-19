@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "edgeone": "edgeone pages dev",
+    "re-i": "rm -rf node_modules && pnpm i",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
