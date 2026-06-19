@@ -1,6 +1,7 @@
 import { AABB, IRect } from '@gitborlando/geo'
+import { Wheeler } from '@gitborlando/toolkit/browser'
 import { getSet } from '@gitborlando/utils'
-import { listen, WheelUtil } from '@gitborlando/utils/browser'
+import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
@@ -30,7 +31,7 @@ class StageViewportService {
 
   private prevSceneMatrix = Matrix.identity()
   private boundAABB = new AABB(0, 0, 0, 0)
-  private wheeler = new WheelUtil()
+  private wheeler = new Wheeler()
   private disposer = new Disposer()
 
   get boundCenter() {

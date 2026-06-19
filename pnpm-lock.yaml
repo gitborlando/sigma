@@ -277,6 +277,10 @@ importers:
         version: 5.9.3
 
   packages/toolkit:
+    dependencies:
+      '@gitborlando/signal':
+        specifier: ^1.0.2
+        version: 1.0.2
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -1278,6 +1282,12 @@ packages:
     resolution:
       {
         integrity: sha512-EdKCsH5H5PF/TRUJYd7Vpp6KEg2msxS2AVxtEiQ+8VrXL33l4xYcGyyUFT1tz0mSrZYnlHkzNg0f1ekCxGaUug==,
+      }
+
+  '@gitborlando/signal@1.0.2':
+    resolution:
+      {
+        integrity: sha512-lwWDLgeXmCGrCnV3/5x9woOv75EbUnv3qB2cajFZV6RcnCVZseo4hxO97KVeAlHY+Dj2+4sN0+rK98RLy3FgnQ==,
       }
 
   '@gitborlando/utils@5.0.1':
@@ -8782,6 +8792,8 @@ snapshots:
   '@gitborlando/geo@5.2.0': {}
 
   '@gitborlando/signal@1.0.1': {}
+
+  '@gitborlando/signal@1.0.2': {}
 
   '@gitborlando/utils@5.0.1(react@18.3.1)':
     dependencies:

@@ -7,10 +7,14 @@
   "exports": {
     ".": "./src/index.ts",
     "./disposer": "./src/disposer.ts",
-    "./traverser": "./src/traverser.ts"
+    "./traverser": "./src/traverser.ts",
+    "./browser": "./src/browser/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gitborlando/signal": "^1.0.2"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
