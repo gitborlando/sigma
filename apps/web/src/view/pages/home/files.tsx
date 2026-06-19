@@ -1,4 +1,3 @@
-import { miniId } from '@gitborlando/utils'
 import type { Tables } from '@sigma/api-types/supabase'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
@@ -20,7 +19,7 @@ export const HomeFilesComp: FC<{}> = suspense(
         <Scrollbars>
           <G className={cls()} horizontal='repeat(auto-fill, 320px)' gap={24}>
             {data?.map((file) => (
-              <FileItemComp key={file.id + miniId()} file={file} />
+              <FileItemComp key={file.id} file={file} />
             ))}
           </G>
         </Scrollbars>

@@ -22,6 +22,28 @@ export function arrayLoopGet(arr: any[], index: number) {
   return arr[loopIndex]
 }
 
+export function reverseFor<T>(
+  items: T[],
+  callback: (item: T, index: number) => any,
+) {
+  for (let i = items.length - 1; i >= 0; i--) callback(items[i], i)
+}
+
+export class Raf {
+  private ids: number[] = []
+
+  request(callback: (next: () => void) => void) {
+    const id = requestAnimationFrame(() => callback(() => this.request(callback)))
+    this.ids.push(id)
+    return this
+  }
+
+  cancelAll() {
+    this.ids.forEach(cancelAnimationFrame)
+    return this
+  }
+}
+
 export const expandOneStep = (
   number: number,
   step: number,

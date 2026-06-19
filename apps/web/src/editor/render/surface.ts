@@ -1,6 +1,6 @@
 import { AABB } from '@gitborlando/geo'
 import { createTraverser } from '@gitborlando/toolkit/traverser'
-import { NoopFunc, Raf, reverseFor } from '@gitborlando/utils'
+import type { NoopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { abs, round } from 'src/editor/math/base'
@@ -11,6 +11,7 @@ import {
   createTextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
+import { Raf, reverseFor } from 'src/editor/utils/misc'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'

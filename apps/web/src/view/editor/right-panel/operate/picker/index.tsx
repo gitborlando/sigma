@@ -1,4 +1,4 @@
-import { getSet, matchCase } from '@gitborlando/utils'
+import { getSet } from '@gitborlando/utils'
 import Color from 'color'
 import { OperateFill } from 'src/editor/operate/fill'
 import { SchemaCreator } from 'src/editor/schema/creator'
@@ -11,12 +11,11 @@ import { PickerLinearGradientComp } from 'src/view/editor/right-panel/operate/pi
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
 import { useUnmount } from 'src/view/hooks/common'
 
-const createFillCache = (type: S.Fill['type']) =>
-  matchCase(type, {
-    color: SchemaCreator.fillColor(),
-    linearGradient: SchemaCreator.fillLinearGradient(),
-    image: SchemaCreator.fillImage(),
-  })
+const createFillCache = (type: S.Fill['type']): S.Fill => {
+  if (type === 'color') return SchemaCreator.fillColor()
+  if (type === 'linearGradient') return SchemaCreator.fillLinearGradient()
+  return SchemaCreator.fillImage()
+}
 const fillCache = new Map<S.Fill['type'], S.Fill>()
 
 export const FillPickerComp: FC<{}> = observer(({}) => {
