@@ -1,4 +1,5 @@
 import { miniId } from '@gitborlando/utils'
+import type { Tables } from '@sigma/api-types/supabase'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import Scrollbars from 'react-custom-scrollbars-2'
@@ -6,7 +7,6 @@ import { FileService } from 'src/global/service/file'
 import { Loading } from 'src/view/component/loading'
 import { suspense } from 'src/view/component/suspense'
 import { Text } from 'src/view/component/text'
-import type { Tables } from '@sigma/api-types/supabase'
 
 export const HomeFilesComp: FC<{}> = suspense(
   observer(({}) => {

@@ -5,7 +5,7 @@ import { nickName } from 'src/utils/nick-name'
 
 @autobind
 class UserServiceClass {
-  userId = miniId()
+  userId = miniId(8)
   avatar = multiavatar(this.userId)
   userName = nickName.getNickName()
 

@@ -39,7 +39,7 @@ class SchemaCreatorService {
   page(): S.Page {
     return {
       type: 'page',
-      id: `page_${miniId()}`,
+      id: `page_${miniId(8)}`,
       childIds: [],
       name: this.createNodeName('page'),
     }
@@ -273,7 +273,7 @@ class SchemaCreatorService {
 
   private createSchemaMeta(type: S.Node['type']): S.NodeMeta {
     return {
-      id: miniId(),
+      id: miniId(8),
       name: this.createNodeName(type),
       lock: false,
       visible: true,
@@ -317,7 +317,7 @@ class SchemaCreatorService {
 
   clone<T extends S.SchemaItem>(item: T, option?: Partial<T>) {
     const newItem = clone(item)
-    newItem.id = miniId()
+    newItem.id = miniId(8)
     newItem.name = this.createNodeName(item.type)
     if ('childIds' in newItem) newItem.childIds = []
     return defuOverrideArray(option || {}, newItem) as T

@@ -27,7 +27,7 @@ class StageInteractService {
         create: () => StageCreate.startInteract(),
       })
 
-      this.offInteract = interact()
+      this.offInteract = interact?.()
     })
   }
 }

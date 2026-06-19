@@ -108,7 +108,7 @@ class UndoImpl {
           replayClientState()
         }
       },
-    })()
+    })?.()
   }
 }
 
