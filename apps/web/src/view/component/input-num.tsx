@@ -1,5 +1,5 @@
 import RcInputNumber, { InputNumberProps } from '@rc-component/input-number'
-import { DragHelper } from 'src/global/event/drag'
+import { Dragger } from '@gitborlando/toolkit/browser'
 
 export interface InputNumProps extends Omit<
   InputNumberProps<number>,
@@ -147,7 +147,7 @@ const SliderWrapperComp: FC<
     children: ReactNode
   }
 > = observer(({ children, slideRate = 1, beforeSlide, onSlide, afterSlide }) => {
-  const [drag] = useState(() => new DragHelper({}))
+  const [drag] = useState(() => new Dragger({}))
   drag
     .needInfinity()
     .onStart(() => beforeSlide?.())

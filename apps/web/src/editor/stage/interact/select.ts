@@ -17,7 +17,7 @@ import {
   getSelectPageId,
 } from 'src/editor/utils/get'
 import { ContextMenu } from 'src/global/context-menu'
-import { StageDrag } from 'src/global/event/drag'
+import { StageDrag } from 'src/editor/stage/interact/drag'
 
 class StageSelectService {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }

@@ -3,7 +3,7 @@ import { IMRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
 import { snapGridRound, TRBL } from 'src/editor/utils/misc'
-import { StageDrag } from 'src/global/event/drag'
+import { StageDrag } from 'src/editor/stage/interact/drag'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
