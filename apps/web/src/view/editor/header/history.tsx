@@ -1,4 +1,4 @@
-import { objectKey } from '@gitborlando/utils'
+import { objectId } from '@gitborlando/utils'
 import { Braces, Copy, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
 import type { UndoInfo } from 'src/editor/editor/undo-service'
@@ -50,7 +50,7 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
         <Scrollbars>
           {stack.map((info, i) => (
             <HistoryItemComp
-              key={objectKey(info)}
+              key={objectId(info)}
               info={info}
               active={next === i + 1}
             />

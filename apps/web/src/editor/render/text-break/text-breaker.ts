@@ -1,4 +1,5 @@
-import { iife, memorize } from '@gitborlando/utils'
+import { iife } from '@gitborlando/utils'
+import { memoize } from 'es-toolkit'
 import { findNextGraphemeBreak, findPreviousGraphemeBreak } from './grapheme-break'
 import { LineBreaker, UnicodeTrie } from './line-break'
 import lineBreakClassesTrieUrl from './line-break/classes.trie?url'
@@ -18,12 +19,12 @@ export type ISplitText = {
 export class TextBreaker {
   private lineBreakTrie: UnicodeTrie
 
-  private createMeasureText = memorize((fontStyle: string) => {
+  private createMeasureText = memoize((fontStyle: string) => {
     const canvas = new OffscreenCanvas(100, 100)
     const ctx = canvas.getContext('2d', { alpha: false })!
 
     ctx.font = fontStyle
-    return memorize((string: string) => ctx.measureText(string))
+    return memoize((string: string) => ctx.measureText(string))
   })
 
   constructor(lineBreakClassesBuffer: Uint8Array) {

@@ -1,5 +1,5 @@
-import { Is } from '@gitborlando/utils'
 import { ComponentPropsWithRef, forwardRef } from 'react'
+import { isNumber } from 'es-toolkit'
 import { withCssVars } from 'src/view/styles/classes'
 
 export interface DividerProps extends ComponentPropsWithRef<'div'> {
@@ -36,7 +36,7 @@ export const Divider = forwardRef<HTMLHRElement, DividerProps>(
       }
     `)
 
-    if (Is.number(length)) length = `${length}px`
+    if (isNumber(length)) length = `${length}px`
 
     return (
       <hr

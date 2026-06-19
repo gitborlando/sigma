@@ -1,4 +1,4 @@
-import { clone, macroMatch } from '@gitborlando/utils'
+import { clone } from '@gitborlando/utils'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { ImmutPatch } from 'src/utils/immut/immut'
 import { Elem } from './elem'
@@ -84,7 +84,7 @@ class StageSceneService {
 
   private render(op: ImmutPatch['type'], keys: string[]) {
     const id = keys[0]
-    if (macroMatch`'meta'|'client'`(id)) return
+    if (id === 'meta' || id === 'client') return
 
     const node = YState.find<S.Node>(id)
 

@@ -1,4 +1,4 @@
-import { firstOne, getSet, iife, stableIndex } from '@gitborlando/utils'
+import { clampIndex, firstOne, getSet, iife } from '@gitborlando/utils'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { SchemaCreator } from '../schema/creator'
@@ -50,7 +50,7 @@ class HandleNodeService {
   }
 
   reHierarchy(parent: S.NodeParent, node: S.Node, index: number) {
-    index = stableIndex(parent.childIds, index)
+    index = clampIndex(parent.childIds, index)
     const oldIndex = parent.childIds.indexOf(node.id)
     YState.delete(`${parent.id}.childIds.${oldIndex}`)
     YState.insert(`${parent.id}.childIds.${index}`, node.id)

@@ -1,4 +1,5 @@
-import { getSet, INoopFunc, IXY, loopFor } from '@gitborlando/utils'
+import { type IXY } from '@gitborlando/geo'
+import { getSet, loopFor, type NoopFunc } from '@gitborlando/utils'
 import { memorized } from '@sigma/utils/common'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { MRect } from 'src/editor/math'
@@ -252,7 +253,7 @@ class ElemEventHandler {
     xy: IXY,
     hit: boolean,
     isCapture: boolean,
-    stopPropagation: INoopFunc,
+    stopPropagation: NoopFunc,
   ) => {
     if (this.eventCount === 0) return
 

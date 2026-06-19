@@ -1,4 +1,4 @@
-import { objectKey } from '@gitborlando/utils'
+import { objectId } from '@gitborlando/utils'
 import Scrollbars from 'react-custom-scrollbars-2'
 import { Text } from 'src/view/component/text'
 
@@ -8,7 +8,7 @@ export const UndoComp: FC<{}> = observer(({}) => {
   return (
     <Scrollbars>
       {stack.map((item, i) => (
-        <G className={cls()} key={objectKey(item)} data-active={next === i + 1}>
+        <G className={cls()} key={objectId(item)} data-active={next === i + 1}>
           <Text active={next === i + 1}>{`[${item.type}] ${item.description}`}</Text>
         </G>
       ))}

@@ -1,4 +1,4 @@
-import { IXY } from '@gitborlando/utils'
+import { type IXY } from '@gitborlando/geo'
 import { Graphics } from '@pixi/react'
 import { FC, memo, useState } from 'react'
 import { PIXI } from 'src/editor/stage/pixi'

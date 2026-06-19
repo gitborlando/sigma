@@ -42,7 +42,12 @@ export const autoImportConfig = autoImportPlugin({
     },
     {
       from: 'src/editor/math',
-      imports: ['IXY', 'IMatrix'],
+      imports: ['IMatrix'],
+      type: true,
+    },
+    {
+      from: '@gitborlando/geo',
+      imports: ['IXY'],
       type: true,
     },
   ],

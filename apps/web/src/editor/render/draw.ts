@@ -1,5 +1,5 @@
-import { AABB } from '@gitborlando/geo'
-import { getSet, iife, IXY, loopFor } from '@gitborlando/utils'
+import { AABB, type IXY } from '@gitborlando/geo'
+import { getSet, iife, loopFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { EditorSetting } from 'src/editor/editor/setting'

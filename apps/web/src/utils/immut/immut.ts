@@ -1,4 +1,4 @@
-import { clone, Is } from '@gitborlando/utils'
+import { clone } from '@gitborlando/utils'
 import { Patch } from 'immer'
 
 type IKey = string | number
@@ -21,7 +21,7 @@ export default class Immut<T extends AnyObject = AnyObject> {
     let len = isParent ? keys.length - 1 : keys.length
     for (let i = 0; i < len; i++) {
       current = current[keys[i]]
-      if (Is.falsy(current) && isParent) console.log('Immut error at get function')
+      if (!current && isParent) console.log('Immut error at get function')
     }
     return current as T
   }
