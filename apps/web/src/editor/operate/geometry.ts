@@ -1,4 +1,4 @@
-import { AnyObject, createCache, iife, objKeys } from '@gitborlando/utils'
+import { AnyObject, iife, objKeys } from '@gitborlando/utils'
 import { HandleNode } from 'src/editor/handle/node'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
@@ -80,7 +80,7 @@ class DesignGeometryService {
     return T<any>(node)[key]
   }
 
-  private nodeGeoInfoCache = createCache<ID, Partial<DesignGeoInfo>>()
+  private nodeGeoInfoCache = new Map<ID, Partial<DesignGeoInfo>>()
 
   onStartSetGeometries() {
     getSelectedNodes().forEach((node) => {

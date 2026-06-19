@@ -1,4 +1,3 @@
-import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 
 export type IImage = {
@@ -11,7 +10,7 @@ export type IImage = {
 
 @autobind
 class ImgService {
-  private imageCache = createObjCache<IImage>()
+  private imageCache = new Map<string, IImage>()
 
   getImage(url: string) {
     return this.imageCache.get(url)
@@ -20,7 +19,9 @@ class ImgService {
   async getImageAsync(url: string) {
     const image = this.getImage(url)
     if (image) return await image
-    return this.imageCache.set(url, await this.loadImage(url))
+    const loadedImage = await this.loadImage(url)
+    this.imageCache.set(url, loadedImage)
+    return loadedImage
   }
 
   async uploadLocal(file: File) {

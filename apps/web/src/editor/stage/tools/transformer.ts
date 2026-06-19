@@ -1,4 +1,4 @@
-import { createCache, iife } from '@gitborlando/utils'
+import { iife } from '@gitborlando/utils'
 import { IMRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
@@ -141,7 +141,7 @@ class StageTransformerService {
       .start()
   }
 
-  private mrectCache = createCache<ID, IMRect>()
+  private mrectCache = new Map<ID, IMRect>()
 
   private onStartTransform() {
     getSelectedNodes().forEach((node) => {

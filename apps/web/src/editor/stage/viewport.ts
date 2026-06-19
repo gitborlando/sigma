@@ -1,4 +1,5 @@
 import { AABB, IRect } from '@gitborlando/geo'
+import { getSet } from '@gitborlando/utils'
 import { listen, WheelUtil } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
@@ -185,7 +186,7 @@ class StageViewportService {
       (pageId) => {
         const getMatrix = () =>
           getEditorSetting().dev.sceneMatrix || Matrix.identity()
-        const matrix = HandlePage.pageSceneMatrix.getSet(pageId, getMatrix)
+        const matrix = getSet(HandlePage.pageSceneMatrix, pageId, getMatrix)
         StageViewport.sceneMatrix = Matrix.of(matrix)
       },
     )

@@ -1,4 +1,4 @@
-import { createObjCache } from '@gitborlando/utils'
+import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { floor } from 'src/editor/math/base'
 import { StageSurface } from 'src/editor/render/surface'
@@ -51,10 +51,10 @@ class StageCursorService {
     return this
   }
 
-  private svgCache = createObjCache<string>()
+  private svgCache = new Map<string, string>()
 
   private getSvgUrl() {
-    return this.svgCache.getSet(`${this.type}-${this.rotation}`, () => {
+    return getSet(this.svgCache, `${this.type}-${this.rotation}`, () => {
       if (this.type === 'resize') {
         return `url('${URL.createObjectURL(
           new Blob([this.resizeSvg(this.rotation)], { type: 'image/svg+xml' }),

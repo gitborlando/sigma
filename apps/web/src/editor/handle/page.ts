@@ -1,11 +1,10 @@
-import { createCache } from '@gitborlando/utils'
 import { IMatrix } from 'src/editor/math'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { SchemaCreator } from '../schema/creator'
 import { getSelectPageId } from '../utils/get'
 
 class HandlePageService {
-  pageSceneMatrix = createCache<ID, IMatrix>()
+  pageSceneMatrix = new Map<ID, IMatrix>()
 
   subscribe() {
     return Disposer.combine(this.memoPageSceneMatrix())

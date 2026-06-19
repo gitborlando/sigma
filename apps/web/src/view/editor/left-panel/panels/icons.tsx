@@ -1,4 +1,4 @@
-import { createCache } from '@gitborlando/utils'
+import { getSet } from '@gitborlando/utils'
 import { Flex } from '@gitborlando/widget'
 import { FC, memo, useMemo } from 'react'
 import { InView } from 'react-intersection-observer'
@@ -7,7 +7,7 @@ import { useAutoSignal, useHookSignal } from 'src/utils/signal-react'
 
 type IIconsComp = {}
 
-const categoryLengthCache = createCache<string, number>()
+const categoryLengthCache = new Map<string, number>()
 
 export const IconsComp: FC<IIconsComp> = memo(({}) => {
   const IconsContentComp = ({}) => {
@@ -16,7 +16,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
 
     useMemo(() => {
       categories.forEach((category) =>
-        categoryLengthCache.getSet(category, () => 60),
+        getSet(categoryLengthCache, category, () => 60),
       )
     }, [])
 
@@ -47,7 +47,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
     const SvgListComp = useMemoComp([], ({}) => {
       const iconList = {} as any
       const svgSource = iconList[curCategory.value as keyof typeof iconList]
-      const length = useAutoSignal(categoryLengthCache.get(curCategory.value))
+      const length = useAutoSignal(categoryLengthCache.get(curCategory.value) ?? 60)
       const icons = Object.entries<any>(svgSource).slice(0, length.value)
 
       useHookSignal(curCategory)

@@ -1,4 +1,4 @@
-import { createObjCache, INoopFunc, IXY, loopFor } from '@gitborlando/utils'
+import { getSet, INoopFunc, IXY, loopFor } from '@gitborlando/utils'
 import { memorized } from '@sigma/utils/common'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { MRect } from 'src/editor/math'
@@ -201,10 +201,10 @@ class ElemEventHandler {
 
   constructor(private elem: Elem) {}
 
-  private hitTestCache = createObjCache<(xy: IXY) => boolean>()
+  private hitTestCache = new Map<string, (xy: IXY) => boolean>()
 
   cacheHitTest = (createHitTest: () => (xy: IXY) => boolean, deps: any[]) => {
-    this.hitTest = this.hitTestCache.getSet('hitTest', createHitTest, deps)
+    this.hitTest = getSet(this.hitTestCache, 'hitTest', createHitTest, deps)
   }
 
   addEvent = (

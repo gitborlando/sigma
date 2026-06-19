@@ -1,5 +1,5 @@
 import { XY } from '@gitborlando/geo'
-import { clone, createCache, miniId } from '@gitborlando/utils'
+import { clone, getSet, miniId } from '@gitborlando/utils'
 import { defuOverrideArray } from '@sigma/utils/defu'
 import { Matrix } from 'src/editor/math'
 import {
@@ -298,10 +298,10 @@ class SchemaCreatorService {
     }
   }
 
-  private nodeNameCache = createCache<string, number>()
+  private nodeNameCache = new Map<string, number>()
 
   createNodeName(type: string) {
-    const index = this.nodeNameCache.getSet(type, () => 0)
+    const index = getSet(this.nodeNameCache, type, () => 0)
     this.nodeNameCache.set(type, index + 1)
     return `${t(type)} ${index + 1}`
   }

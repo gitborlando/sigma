@@ -1,5 +1,5 @@
 import { AABB } from '@gitborlando/geo'
-import { createObjCache, iife, IXY, loopFor } from '@gitborlando/utils'
+import { getSet, iife, IXY, loopFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { EditorSetting } from 'src/editor/editor/setting'
@@ -172,7 +172,7 @@ class ElemDrawerService {
     })
   }
 
-  private splitTextsCache = createObjCache<ISplitText[]>()
+  private splitTextsCache = new Map<string, ISplitText[]>()
   private splitTexts!: ISplitText[]
 
   private breakText() {
@@ -183,7 +183,8 @@ class ElemDrawerService {
     this.ctx.textBaseline = 'top'
     this.ctx.letterSpacing = `${letterSpacing}px`
 
-    this.splitTexts = this.splitTextsCache.getSet(
+    this.splitTexts = getSet(
+      this.splitTextsCache,
       this.node.id,
       () => StageSurface.textBreaker.breakText(content, width, style, letterSpacing),
       [content, width, style],

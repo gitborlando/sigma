@@ -1,11 +1,11 @@
-import { clone, createObjCache, macroMatch } from '@gitborlando/utils'
+import { clone, macroMatch } from '@gitborlando/utils'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { ImmutPatch } from 'src/utils/immut/immut'
 import { Elem } from './elem'
 import { StageSurface } from './surface'
 
 class StageSceneService {
-  elements = createObjCache<Elem>()
+  elements = new Map<string, Elem>()
 
   sceneRoot!: Elem
   widgetRoot!: Elem
@@ -25,7 +25,7 @@ class StageSceneService {
   }
 
   findElem(id: string) {
-    return this.elements.get(id)
+    return this.elements.get(id)!
   }
 
   elemsFromPoint(xy?: IXY) {

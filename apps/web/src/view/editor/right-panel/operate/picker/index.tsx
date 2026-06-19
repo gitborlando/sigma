@@ -1,4 +1,4 @@
-import { createCache, matchCase } from '@gitborlando/utils'
+import { getSet, matchCase } from '@gitborlando/utils'
 import Color from 'color'
 import { OperateFill } from 'src/editor/operate/fill'
 import { SchemaCreator } from 'src/editor/schema/creator'
@@ -17,7 +17,7 @@ const createFillCache = (type: S.Fill['type']) =>
     linearGradient: SchemaCreator.fillLinearGradient(),
     image: SchemaCreator.fillImage(),
   })
-const fillCache = createCache<S.Fill['type'], S.Fill>()
+const fillCache = new Map<S.Fill['type'], S.Fill>()
 
 export const FillPickerComp: FC<{}> = observer(({}) => {
   const { t } = useTranslation()
@@ -40,7 +40,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
 
   const handleChangeFill = (value: S.Fill['type']) => {
     FillPickerState.fillType = value
-    changeFill(fillCache.getSet(value, () => createFillCache(value)))
+    changeFill(getSet(fillCache, value, () => createFillCache(value)))
     Undo.track('state', t('change fill type'))
   }
 

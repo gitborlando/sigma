@@ -1,4 +1,4 @@
-import { createCache, firstOne, iife, stableIndex } from '@gitborlando/utils'
+import { firstOne, getSet, iife, stableIndex } from '@gitborlando/utils'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { SchemaCreator } from '../schema/creator'
@@ -9,10 +9,10 @@ class HandleNodeService {
   @observable.ref datumXY = XY.$(0, 0)
   copiedIds = <ID[]>[]
 
-  private mrectCache = createCache<ID, MRect>()
+  private mrectCache = new Map<ID, MRect>()
 
   getMRect(node: S.Node) {
-    return this.mrectCache.getSet(node.id, () => MRect.of(node), [
+    return getSet(this.mrectCache, node.id, () => MRect.of(node), [
       node.width,
       node.height,
       node.matrix,
