@@ -27,7 +27,11 @@ export function migrationSchema(schema: any) {
   return newSchema
 }
 
-const migrationList = [
+export function getLatestVersion() {
+  return migrationList.length
+}
+
+export const migrationList = [
   {
     version: 0,
     desc: '对frame, group, rectangle, ellipse, text, line, polygon, star, path节点:新增 matrix 属性; 添加 __isNode 属性, 标记为节点类型',

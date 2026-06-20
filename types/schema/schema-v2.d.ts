@@ -43,7 +43,6 @@ namespace S2 {
     type: 'page'
     id: `page_${string}`
     name: string
-    matrix: Matrix
   }
 
   type NodeParent = Frame | Group | Page
@@ -70,7 +69,7 @@ namespace S2 {
 
   type NodeEffect = {
     opacity: number
-    // 0: 不翻转, 1: 水平翻转, 2: 垂直翻转, 3: 水平和垂直翻转
+    /**@abstract 0: 不翻转, 1: 水平翻转, 2: 垂直翻转, 3: 水平和垂直翻转 */
     flip: 0 | 1 | 2 | 3
     fills: Fill[]
     strokes: Stroke[]

@@ -7,6 +7,7 @@ import {
   createRegularPolygon,
   createStarPolygon,
 } from 'src/editor/math/point'
+import { getLatestVersion } from 'src/editor/schema/migration'
 import { COLOR } from 'src/utils/color'
 import { T } from 'src/utils/common'
 import { Assets } from 'src/view/assets/assets'
@@ -18,10 +19,12 @@ class SchemaCreatorService {
     const page = this.page()
     const meta = this.meta()
     meta.pageIds = [page.id]
-    return {
-      meta,
-      [page.id]: page,
-    }
+    return Object.assign(
+      { meta },
+      {
+        [page.id]: page,
+      },
+    )
   }
 
   meta(): S.Meta {
@@ -30,7 +33,7 @@ class SchemaCreatorService {
       id: 'meta',
       fileId: '',
       name: t('untitled'),
-      version: 'v0',
+      version: getLatestVersion(),
       pageIds: [],
       userId: '',
     }
@@ -47,6 +50,7 @@ class SchemaCreatorService {
 
   point(option?: Partial<S.Point>): S.Point {
     return {
+      id: miniId(),
       type: 'point',
       symmetric: 'angle',
       x: 0,
@@ -135,8 +139,7 @@ class SchemaCreatorService {
     const nodeBase = this.createNodeBase('line')
     const start = XY.$(nodeBase.x, nodeBase.y)
     const length = option?.width || nodeBase.width
-    const rotation = option?.rotation || nodeBase.rotation
-    const points = createLine(start, length, rotation)
+    const points = createLine(start, length)
     return {
       type: 'line',
       points,
@@ -278,6 +281,7 @@ class SchemaCreatorService {
       lock: false,
       visible: true,
       parentId: '',
+      __isNode: true,
     }
   }
 
@@ -290,6 +294,7 @@ class SchemaCreatorService {
       height: 100,
       opacity: 1,
       rotation: 0,
+      flip: 0,
       fills: [this.fillColor()],
       strokes: [],
       blurs: [],
