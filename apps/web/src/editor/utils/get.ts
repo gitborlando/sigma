@@ -2,6 +2,13 @@ import { HandleSelect } from 'src/editor/handle/select'
 import { YClients } from 'src/editor/y-state/y-clients'
 import { YState } from 'src/editor/y-state/y-state'
 
+const allSelectIdMap = computed(() => ({
+  ...HandleSelect.selectIdMap,
+  ...Object.values(YClients.others).reduce((acc, client) => {
+    return { ...acc, ...client.selectIdMap }
+  }, {}),
+}))
+
 export function getSelectIdMap() {
   return HandleSelect.selectIdMap
 }
@@ -15,12 +22,7 @@ export function getSelectPageId() {
 }
 
 export function getAllSelectIdMap() {
-  return {
-    ...HandleSelect.selectIdMap,
-    ...Object.values(YClients.others).reduce((acc, client) => {
-      return { ...acc, ...client.selectIdMap }
-    }, {}),
-  }
+  return allSelectIdMap.get()
 }
 
 export const getSelectedNodes = () => {
