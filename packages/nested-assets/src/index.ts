@@ -1,4 +1,3 @@
-import camelcase from 'camelcase'
 import fs from 'node:fs'
 import path from 'node:path'
 import { globSync, isDynamicPattern } from 'tinyglobby'
@@ -32,6 +31,7 @@ interface ResolvedNestedAssetsOptions {
 interface AssetFile {
   parts: string[]
   key: string
+  extKey: string
   importVarName: string
   importPath: string
 }
@@ -52,6 +52,29 @@ const normalizePath = (value: string) => path.resolve(value)
 
 const isValidIdentifier = (value: string) =>
   /^[$A-Z_a-z][$\w]*$/.test(value) && !['default'].includes(value)
+
+const toPropertyKey = (key: string) =>
+  isValidIdentifier(key) ? key : JSON.stringify(key)
+
+const capitalize = (value: string) =>
+  value ? `${value[0].toUpperCase()}${value.slice(1)}` : ''
+
+const toCamelCase = (value: string, options?: { pascalCase?: boolean }) => {
+  const parts = value
+    .split(/[^A-Z_a-z\d]+/)
+    .filter(Boolean)
+    .map((part) => `${part[0].toLowerCase()}${part.slice(1)}`)
+
+  if (parts.length === 0) return ''
+
+  const [first, ...rest] = parts
+  const result = [
+    options?.pascalCase ? capitalize(first) : first,
+    ...rest.map(capitalize),
+  ]
+
+  return result.join('')
+}
 
 const assertValidExportName = (name: string) => {
   if (!isValidIdentifier(name)) {
@@ -111,6 +134,16 @@ const toImportPath = (fromDir: string, file: string) => {
 const toObjectKey = (value: string) =>
   value.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
 
+const getAvailableKey = (obj: AssetsTree, key: string) => {
+  if (!obj[key]) return key
+
+  let index = 2
+
+  while (obj[`${key}${index}`]) index += 1
+
+  return `${key}${index}`
+}
+
 const getAssetFiles = (
   options: ResolvedNestedAssetsOptions,
   include: GlobPattern,
@@ -145,30 +178,62 @@ const pathToAssetFile = (
 
   return {
     parts: parts.slice(0, -1),
-    key: camelcase(nameWithoutExt),
-    importVarName: camelcase(pathParts.join('-')),
+    key: toCamelCase(nameWithoutExt),
+    extKey: toCamelCase(ext.slice(1), { pascalCase: true }),
+    importVarName: toCamelCase(pathParts.join('-')),
     importPath: toImportPath(path.dirname(options.output), filePath),
   }
 }
 
+const getPathKey = (parts: string[]) => parts.join('/')
+
+const getConflictedAssetKeySet = (files: AssetFile[]) => {
+  const set = new Set<string>()
+  const countMap = new Map<string, number>()
+
+  for (const file of files) {
+    const currentParts: string[] = []
+
+    for (const part of file.parts) {
+      set.add(getPathKey([...currentParts, toObjectKey(part)]))
+      currentParts.push(toObjectKey(part))
+    }
+
+    const fileKey = getPathKey([...currentParts, file.key])
+
+    countMap.set(fileKey, (countMap.get(fileKey) ?? 0) + 1)
+  }
+
+  for (const [key, count] of countMap) {
+    if (count > 1) set.add(key)
+  }
+
+  return set
+}
+
 const buildNestedObject = (files: AssetFile[]) => {
   const result: AssetsTree = {}
+  const conflictedAssetKeySet = getConflictedAssetKeySet(files)
 
   for (const file of files) {
     let current = result
+    const currentParts: string[] = []
 
     for (const part of file.parts) {
       const key = toObjectKey(part)
       const value = current[key]
 
-      if (typeof value === 'string') continue
-
       if (!value) current[key] = {}
 
       current = current[key] as AssetsTree
+      currentParts.push(key)
     }
 
-    current[file.key] = file.importVarName
+    const key = conflictedAssetKeySet.has(getPathKey([...currentParts, file.key]))
+      ? `${file.key}${file.extKey}`
+      : file.key
+
+    current[getAvailableKey(current, key)] = file.importVarName
   }
 
   return result
@@ -179,10 +244,12 @@ const generateTypeScriptCode = (obj: AssetsTree, indent = 2): string => {
 
   return Object.entries(obj)
     .map(([key, value]) => {
-      if (typeof value === 'string') return `${spaces}${key}: ${value},`
+      const propertyKey = toPropertyKey(key)
+
+      if (typeof value === 'string') return `${spaces}${propertyKey}: ${value},`
 
       return [
-        `${spaces}${key}: {`,
+        `${spaces}${propertyKey}: {`,
         generateTypeScriptCode(value, indent + 2),
         `${spaces}},`,
       ].join('\n')
@@ -215,11 +282,17 @@ const getAssetPathSet = (files: AssetFile[]) =>
 
 const createImportVarMap = (files: AssetFile[]) => {
   const map = new Map<string, string>()
+  const uniqueAssetFiles = uniqueFiles(files)
+  const countMap = new Map<string, number>()
 
-  for (const file of files) {
-    if (!map.has(file.importPath)) {
-      map.set(file.importPath, file.importVarName)
-    }
+  for (const file of uniqueAssetFiles) {
+    const count = countMap.get(file.importVarName) ?? 0
+
+    map.set(
+      file.importPath,
+      count === 0 ? file.importVarName : `${file.importVarName}${count + 1}`,
+    )
+    countMap.set(file.importVarName, count + 1)
   }
 
   return map
