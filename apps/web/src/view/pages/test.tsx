@@ -1,4 +1,4 @@
-import { recordTime } from 'src/utils/misc'
+import { recordTime } from 'src/utils/dev'
 
 export const Test = () => {
   useEffect(() => {}, [])
