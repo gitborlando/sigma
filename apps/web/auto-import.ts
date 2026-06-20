@@ -1,5 +1,5 @@
-import autoImportPlugin from 'unplugin-auto-import/vite'
 import path from 'path'
+import autoImportPlugin from 'unplugin-auto-import/vite'
 import { fileURLToPath } from 'url'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -19,6 +19,7 @@ export const autoImportConfig = autoImportPlugin({
       '@linaria/core': ['css', 'cx'],
       '@gitborlando/signal': ['Signal'],
       '@gitborlando/geo': ['AABB', 'OBB', 'XY', 'Angle'],
+      '@gitborlando/toolkit/disposer': ['Disposer'],
       'src/view/assets/assets': ['Assets'],
       'src/view/component/grid': ['Grid', 'G', 'C'],
       'src/view/component/lucide': ['Lucide'],
@@ -27,13 +28,11 @@ export const autoImportConfig = autoImportPlugin({
       'src/editor/y-state/y-state': ['YState'],
       'src/editor/y-state/y-clients': ['YClients'],
       'src/editor/editor/undo-service': ['Undo'],
-      'src/utils/global': ['T', 'isDEV', 'isPROD'],
+      'src/utils/common': ['T', 'isDEV', 'isPROD'],
       'src/utils/color': ['COLOR'],
       'src/view/styles/styles': ['styles'],
       'src/view/styles/classes': ['classes'],
-      '@gitborlando/toolkit/disposer': ['Disposer'],
-      'src/view/i18n/config': ['t', 'sentence'],
-      'src/editor/editor/global-get': ['getNodeMRect'],
+      'src/view/i18n/config': ['t'],
     },
     {
       from: 'react',
