@@ -11,20 +11,20 @@ import editorNodePolygon from './editor/node/polygon.svg'
 import editorNodeRect from './editor/node/rect.svg'
 import editorNodeStar from './editor/node/star.svg'
 import editorNodeText from './editor/node/text.svg'
-import editorRpOperateAlignAlignCenter from './editor/RP/operate/align/align-center.svg'
-import editorRpOperateAlignAlignLeft from './editor/RP/operate/align/align-left.svg'
-import editorRpOperateAlignAlignRight from './editor/RP/operate/align/align-right.svg'
-import editorRpOperateAlignVerticalBottom from './editor/RP/operate/align/vertical-bottom.svg'
-import editorRpOperateAlignVerticalCenter from './editor/RP/operate/align/vertical-center.svg'
-import editorRpOperateAlignVerticalTop from './editor/RP/operate/align/vertical-top.svg'
-import editorRpOperateFillNone from './editor/RP/operate/fill/none.png'
-import editorRpOperateGeoH from './editor/RP/operate/geo/h.svg'
-import editorRpOperateGeoRadius from './editor/RP/operate/geo/radius.svg'
-import editorRpOperateGeoRotate from './editor/RP/operate/geo/rotate.svg'
-import editorRpOperateGeoW from './editor/RP/operate/geo/w.svg'
-import editorRpOperateGeoX from './editor/RP/operate/geo/x.svg'
-import editorRpOperateGeoY from './editor/RP/operate/geo/y.svg'
-import editorRpOperatePickerDefaultImage from './editor/RP/operate/picker/default-image.png'
+import editorRPOperateAlignAlignCenter from './editor/RP/operate/align/align-center.svg'
+import editorRPOperateAlignAlignLeft from './editor/RP/operate/align/align-left.svg'
+import editorRPOperateAlignAlignRight from './editor/RP/operate/align/align-right.svg'
+import editorRPOperateAlignVerticalBottom from './editor/RP/operate/align/vertical-bottom.svg'
+import editorRPOperateAlignVerticalCenter from './editor/RP/operate/align/vertical-center.svg'
+import editorRPOperateAlignVerticalTop from './editor/RP/operate/align/vertical-top.svg'
+import editorRPOperateFillNone from './editor/RP/operate/fill/none.png'
+import editorRPOperateGeoH from './editor/RP/operate/geo/h.svg'
+import editorRPOperateGeoRadius from './editor/RP/operate/geo/radius.svg'
+import editorRPOperateGeoRotate from './editor/RP/operate/geo/rotate.svg'
+import editorRPOperateGeoW from './editor/RP/operate/geo/w.svg'
+import editorRPOperateGeoX from './editor/RP/operate/geo/x.svg'
+import editorRPOperateGeoY from './editor/RP/operate/geo/y.svg'
+import editorRPOperatePickerDefaultImage from './editor/RP/operate/picker/default-image.png'
 import favIconSigmaLoading2 from './fav-icon/sigma-loading-2.svg'
 import favIconSigmaLoading from './fav-icon/sigma-loading.svg'
 import favIconSigmaLogoText2 from './fav-icon/sigma-logo-text-2.svg'
@@ -56,26 +56,26 @@ export const Assets = {
     RP: {
       operate: {
         align: {
-          alignCenter: editorRpOperateAlignAlignCenter,
-          alignLeft: editorRpOperateAlignAlignLeft,
-          alignRight: editorRpOperateAlignAlignRight,
-          verticalBottom: editorRpOperateAlignVerticalBottom,
-          verticalCenter: editorRpOperateAlignVerticalCenter,
-          verticalTop: editorRpOperateAlignVerticalTop,
+          alignCenter: editorRPOperateAlignAlignCenter,
+          alignLeft: editorRPOperateAlignAlignLeft,
+          alignRight: editorRPOperateAlignAlignRight,
+          verticalBottom: editorRPOperateAlignVerticalBottom,
+          verticalCenter: editorRPOperateAlignVerticalCenter,
+          verticalTop: editorRPOperateAlignVerticalTop,
         },
         fill: {
-          none: editorRpOperateFillNone,
+          none: editorRPOperateFillNone,
         },
         geo: {
-          h: editorRpOperateGeoH,
-          radius: editorRpOperateGeoRadius,
-          rotate: editorRpOperateGeoRotate,
-          w: editorRpOperateGeoW,
-          x: editorRpOperateGeoX,
-          y: editorRpOperateGeoY,
+          h: editorRPOperateGeoH,
+          radius: editorRPOperateGeoRadius,
+          rotate: editorRPOperateGeoRotate,
+          w: editorRPOperateGeoW,
+          x: editorRPOperateGeoX,
+          y: editorRPOperateGeoY,
         },
         picker: {
-          defaultImage: editorRpOperatePickerDefaultImage,
+          defaultImage: editorRPOperatePickerDefaultImage,
         },
       },
     },
