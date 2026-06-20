@@ -3,7 +3,7 @@ import { clone } from '@gitborlando/utils'
 import { omit } from 'es-toolkit'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper, type SchemaTraverseContext } from 'src/editor/schema/helper'
-import { T } from 'src/utils/global'
+import { T } from 'src/utils/common'
 
 type Migration = {
   version: number
