@@ -1,9 +1,7 @@
 import { miniId } from '@gitborlando/utils'
 import multiavatar from '@multiavatar/multiavatar/esm'
-import autobind from 'class-autobind-decorator'
 import { nickName } from 'src/utils/nick-name'
 
-@autobind
 class UserServiceClass {
   userId = miniId(8)
   avatar = multiavatar(this.userId)
@@ -12,4 +10,4 @@ class UserServiceClass {
   constructor() {}
 }
 
-export const UserService = new UserServiceClass()
+export const UserService = autoBind(new UserServiceClass())

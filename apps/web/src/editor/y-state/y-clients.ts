@@ -1,6 +1,5 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
-import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import { ClientUndo } from 'src/editor/editor/client-undo'
 import { HandleSelect } from 'src/editor/handle/select'
@@ -8,7 +7,6 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
 
-@autobind
 class YClientsService {
   clientId!: number
 
@@ -113,4 +111,4 @@ class YClientsService {
   }
 }
 
-export const YClients = makeObservable(new YClientsService())
+export const YClients = autoBind(makeObservable(new YClientsService()))

@@ -1,8 +1,5 @@
-import autobind from 'class-autobind-decorator'
-
 export type IUploadFileAcceptType = 'image/*' | (string & {})
 
-@autobind
 class UploaderService {
   private inputRef!: HTMLInputElement
 
@@ -48,4 +45,4 @@ class UploaderService {
   }
 }
 
-export const Uploader = new UploaderService()
+export const Uploader = autoBind(new UploaderService())

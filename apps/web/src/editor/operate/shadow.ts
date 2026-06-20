@@ -1,12 +1,10 @@
 import { clone } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import { rgb } from 'src/utils/color'
 import { UIPickerCopy } from '../handle/picker'
 import { SchemaCreator } from '../schema/creator'
 import { getSelectedNodes } from '../utils/get'
 
-@autobind
 class OperateShadowService {
   shadows = <S.Shadow[]>[]
   isMultiShadows = false
@@ -97,4 +95,4 @@ class OperateShadowService {
   }
 }
 
-export const OperateShadow = new OperateShadowService()
+export const OperateShadow = autoBind(new OperateShadowService())

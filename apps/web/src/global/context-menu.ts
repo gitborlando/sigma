@@ -1,5 +1,4 @@
 import { AnyObject } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import { type MouseEvent } from 'react'
 
 export type Command = {
@@ -13,7 +12,6 @@ export type MenuItem = Command & {
   children?: MenuItem[][]
 }
 
-@autobind
 class ContextMenuService {
   @observable menus: MenuItem[][] = []
   context = <AnyObject>{}
@@ -40,4 +38,4 @@ class ContextMenuService {
   }
 }
 
-export const ContextMenu = makeObservable(new ContextMenuService())
+export const ContextMenu = autoBind(makeObservable(new ContextMenuService()))

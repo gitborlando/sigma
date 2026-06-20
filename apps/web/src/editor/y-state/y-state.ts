@@ -1,12 +1,10 @@
 import { clone } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import type { Patch } from 'immer'
 import Immut, { ImmutPatch } from 'src/utils/immut/immut'
 import { bind } from 'src/utils/immut/immut-y'
 import { toYValue } from 'src/utils/immut/json-to-y'
 import * as Y from 'yjs'
 
-@autobind
 class YStateService {
   doc?: Y.Doc
   immut = new Immut(<S.Schema>{})
@@ -297,4 +295,4 @@ class YStateService {
   }
 }
 
-export const YState = new YStateService()
+export const YState = autoBind(new YStateService())

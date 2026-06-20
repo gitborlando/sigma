@@ -1,6 +1,5 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
-import autoBind from 'class-autobind-decorator'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { max } from 'src/editor/math/base'
@@ -12,7 +11,6 @@ import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
 import { Elem, HitTest } from './elem'
 
-@autoBind
 class ElemDrawerService {
   private node!: S.Node
   private elem!: Elem
@@ -463,4 +461,4 @@ class ElemDrawerService {
   }
 }
 
-export const ElemDrawer = new ElemDrawerService()
+export const ElemDrawer = autoBind(new ElemDrawerService())

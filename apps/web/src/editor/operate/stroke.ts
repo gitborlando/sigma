@@ -1,12 +1,10 @@
 import { clone } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import { rgb } from 'src/utils/color'
 import { UIPickerCopy } from '../handle/picker'
 import { SchemaCreator } from '../schema/creator'
 import { getSelectedNodes } from '../utils/get'
 
-@autobind
 class OperateStrokeService {
   strokes = <S.Stroke[]>[]
   isMultiStrokes = false
@@ -97,4 +95,4 @@ class OperateStrokeService {
   }
 }
 
-export const OperateStroke = new OperateStrokeService()
+export const OperateStroke = autoBind(new OperateStrokeService())

@@ -79,9 +79,6 @@ importers:
       axios:
         specifier: 1.10.0
         version: 1.10.0
-      class-autobind-decorator:
-        specifier: ^3.0.1
-        version: 3.0.1
       color:
         specifier: ^5.0.2
         version: 5.0.3
@@ -3789,12 +3786,6 @@ packages:
     resolution:
       {
         integrity: sha512-tskPPKEs8D2KPafUypv2gxwJP8h/OaJmC82QQGGDQcHvXX43xF2VDACcJVmZ0EuSxkpO9Kc4MlrA3q0+FG58AQ==,
-      }
-
-  class-autobind-decorator@3.0.1:
-    resolution:
-      {
-        integrity: sha512-/5QCUe6KYGIMDDFEI/UrVc3egWVTVhuK00ppY/8sS/9f0KapY5Y2TirBbM1qICRq0p0WafuTaMfEGL2GKHcN0Q==,
       }
 
   cli-boxes@3.0.0:
@@ -10930,8 +10921,6 @@ snapshots:
   citty@0.1.6:
     dependencies:
       consola: 3.4.2
-
-  class-autobind-decorator@3.0.1: {}
 
   cli-boxes@3.0.0: {}
 

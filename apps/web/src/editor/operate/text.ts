@@ -1,4 +1,3 @@
-import autobind from 'class-autobind-decorator'
 import { getSelectedNodes } from '../utils/get'
 
 type ITextStyle = S.Text['style']
@@ -30,7 +29,6 @@ export const textStyleKeys = <IBaseStyleKey[]>Object.keys(createBaseStyle())
 
 type IBaseStyleKey = keyof IBaseStyle
 
-@autobind
 class OperateTextService {
   textStyle = createBaseStyle()
   afterOperate = Signal.create()
@@ -97,7 +95,7 @@ class OperateTextService {
   }
 }
 
-export const OperateText = new OperateTextService()
+export const OperateText = autoBind(new OperateTextService())
 
 function createTextStyleOptions() {
   return {

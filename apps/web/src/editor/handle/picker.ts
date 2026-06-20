@@ -1,9 +1,6 @@
-import autobind from 'class-autobind-decorator'
-
 type IOperateType = 'solid-color'
 type FillKey = string | number
 
-@autobind
 class UIPickerService {
   fill!: S.Fill
   show = Signal.create(false)
@@ -50,4 +47,4 @@ class UIPickerService {
   }
 }
 
-export const UIPickerCopy = new UIPickerService()
+export const UIPickerCopy = autoBind(new UIPickerService())

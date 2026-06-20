@@ -1,5 +1,3 @@
-import autobind from 'class-autobind-decorator'
-
 export type IImage = {
   objectUrl: string
   arrayBuffer: ArrayBuffer
@@ -8,7 +6,6 @@ export type IImage = {
   image: HTMLImageElement
 }
 
-@autobind
 class ImgService {
   private imageCache = new Map<string, IImage>()
 
@@ -53,4 +50,4 @@ class ImgService {
   }
 }
 
-export const ImgManager = new ImgService()
+export const ImgManager = autoBind(new ImgService())

@@ -1,6 +1,3 @@
-import autobind from 'class-autobind-decorator'
-
-@autobind
 class EditorLPLayerStateService {
   @observable pagePanelHeight = 200
   @observable allPageExpanded = true
@@ -13,4 +10,4 @@ class EditorLPLayerStateService {
   }
 }
 
-export const EditorLPLayerState = new EditorLPLayerStateService()
+export const EditorLPLayerState = autoBind(new EditorLPLayerStateService())

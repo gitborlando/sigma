@@ -1,4 +1,3 @@
-import autobind from 'class-autobind-decorator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { getSelectPageId } from 'src/editor/utils/get'
@@ -9,7 +8,6 @@ export type EditorLPLayerNodeInfo = {
   ancestors: string[]
 }
 
-@autobind
 class EditorLPLayerNodeStateService {
   nodeInfoChanged = Signal.create<void>()
 
@@ -75,6 +73,6 @@ class EditorLPLayerNodeStateService {
   }
 }
 
-export const EditorLPLayerNodeState = makeObservable(
-  new EditorLPLayerNodeStateService(),
+export const EditorLPLayerNodeState = autoBind(
+  makeObservable(new EditorLPLayerNodeStateService()),
 )

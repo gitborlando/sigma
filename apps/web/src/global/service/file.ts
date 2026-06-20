@@ -1,9 +1,7 @@
 import axios from 'axios'
-import autobind from 'class-autobind-decorator'
 import type { Database } from '@sigma/api-types/supabase'
 import { supabase } from '../sdk/supabase'
 
-@autobind
 class FileServiceClass {
   async getFiles() {
     try {
@@ -49,4 +47,4 @@ class FileServiceClass {
   }
 }
 
-export const FileService = new FileServiceClass()
+export const FileService = autoBind(new FileServiceClass())

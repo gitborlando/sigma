@@ -1,4 +1,3 @@
-import autobind from 'class-autobind-decorator'
 import { StageScene } from 'src/editor/render/scene'
 import { SchemaHelper } from '../schema/helper'
 import { getSelectedNodes } from '../utils/get'
@@ -14,7 +13,6 @@ const alignTypes = <const>[
 
 export type IAlignType = (typeof alignTypes)[number]
 
-@autobind
 class OperateAlignService {
   alignTypes = alignTypes
   canAlign = Signal.create(false)
@@ -141,4 +139,4 @@ class OperateAlignService {
   }
 }
 
-export const OperateAlign = new OperateAlignService()
+export const OperateAlign = autoBind(new OperateAlignService())
