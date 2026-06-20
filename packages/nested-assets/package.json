@@ -4,10 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -16,8 +23,9 @@
   },
   "devDependencies": {
     "@types/node": "^24.9.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vite": "^7.2.4"
+    "vite": "^7.3.5"
   },
   "peerDependencies": {
     "vite": "^7.0.0"

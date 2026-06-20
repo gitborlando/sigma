@@ -202,11 +202,34 @@ const uniqueFiles = (files: AssetFile[]) => {
   const map = new Map<string, AssetFile>()
 
   for (const file of files) {
-    map.set(file.importPath, file)
+    if (!map.has(file.importPath)) {
+      map.set(file.importPath, file)
+    }
   }
 
   return [...map.values()]
 }
+
+const getAssetPathSet = (files: AssetFile[]) =>
+  new Set(files.map((file) => file.importPath))
+
+const createImportVarMap = (files: AssetFile[]) => {
+  const map = new Map<string, string>()
+
+  for (const file of files) {
+    if (!map.has(file.importPath)) {
+      map.set(file.importPath, file.importVarName)
+    }
+  }
+
+  return map
+}
+
+const normalizeImportVars = (files: AssetFile[], map: Map<string, string>) =>
+  files.map((file) => ({
+    ...file,
+    importVarName: map.get(file.importPath) ?? file.importVarName,
+  }))
 
 const generateAssets = (inputOptions: ResolvedNestedAssetsOptions) => {
   const options = {
@@ -214,14 +237,27 @@ const generateAssets = (inputOptions: ResolvedNestedAssetsOptions) => {
     base: normalizePath(inputOptions.base),
     output: normalizePath(inputOptions.output),
   }
-  const mainFiles = getAssetFiles(options, options.include).map((file) =>
+  const rawMainFiles = getAssetFiles(options, options.include).map((file) =>
     pathToAssetFile(file, options, options.base),
   )
-  const aliases = options.aliases.map((item) => ({
+  const rawAliases = options.aliases.map((item) => ({
     key: item.key,
     files: getAssetFiles(options, item.include).map((file) =>
       pathToAssetFile(file, options, item.base),
     ),
+  }))
+  const aliasPathSet = getAssetPathSet(rawAliases.flatMap((item) => item.files))
+  const filteredMainFiles = rawMainFiles.filter(
+    (file) => !aliasPathSet.has(file.importPath),
+  )
+  const importVarMap = createImportVarMap([
+    ...rawMainFiles,
+    ...rawAliases.flatMap((item) => item.files),
+  ])
+  const mainFiles = normalizeImportVars(filteredMainFiles, importVarMap)
+  const aliases = rawAliases.map((item) => ({
+    ...item,
+    files: normalizeImportVars(item.files, importVarMap),
   }))
   const files = uniqueFiles([...mainFiles, ...aliases.flatMap((item) => item.files)])
   const imports = generateImportStatements(files)
