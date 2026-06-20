@@ -40,6 +40,9 @@ importers:
       '@gitborlando/utils':
         specifier: ^5.0.2
         version: 5.0.2(react@18.3.1)
+      '@gitborlando/vite-plugin-nested-assets':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin-nested-assets
       '@gitborlando/widget':
         specifier: ^1.0.2
         version: 1.0.2(react@18.3.1)
@@ -301,6 +304,25 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+
+  packages/vite-plugin-nested-assets:
+    dependencies:
+      camelcase:
+        specifier: ^8.0.0
+        version: 8.0.0
+      tinyglobby:
+        specifier: ^0.2.16
+        version: 0.2.16
+    devDependencies:
+      '@types/node':
+        specifier: ^24.9.1
+        version: 24.10.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.2.4
+        version: 7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.20.6)
 
 packages:
   '@alcalzone/ansi-tokenize@0.2.2':

@@ -1,4 +1,5 @@
 import { miniId } from '@gitborlando/utils'
+import vitePluginNestedAssets from '@gitborlando/vite-plugin-nested-assets'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import wywInJs from '@wyw-in-js/vite'
@@ -10,6 +11,9 @@ import { autoImportConfig } from './auto-import'
 export default defineConfig(() => {
   return {
     plugins: [
+      vitePluginNestedAssets({
+        base: 'src/view/assets',
+      }),
       autoImportConfig,
       wywInJs({
         include: 'src/**/*.tsx',

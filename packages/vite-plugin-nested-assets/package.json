@@ -1,0 +1,25 @@
+{
+  "name": "@gitborlando/vite-plugin-nested-assets",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "camelcase": "^8.0.0",
+    "tinyglobby": "^0.2.16"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4"
+  },
+  "peerDependencies": {
+    "vite": "^7.0.0"
+  }
+}

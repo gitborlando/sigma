@@ -14,7 +14,6 @@
     "typecheck:web": "pnpm --filter @sigma/web typecheck",
     "edgeone": "pnpm --filter @sigma/web edgeone",
     "bench:traverser": "pnpm --filter @sigma/web bench:traverser",
-    "gen:assets": "pnpm --filter @sigma/web gen:assets",
     "gen:supabase-types": "pnpm --filter @sigma/web gen:supabase-types",
     "prepare": "simple-git-hooks",
     "re-base:main": "git fetch origin main && git rebase origin/main"
