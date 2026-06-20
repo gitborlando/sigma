@@ -2,7 +2,11 @@ import { XY } from '@gitborlando/geo'
 import { clone } from '@gitborlando/utils'
 import { omit } from 'es-toolkit'
 import { MRect } from 'src/editor/math'
-import { SchemaHelper, type SchemaTraverseContext } from 'src/editor/schema/helper'
+import { SchemaHelper } from 'src/editor/schema/helper'
+import {
+  createSchemaTraverse,
+  type SchemaTraverseContext,
+} from 'src/editor/schema/traverse'
 import { T } from 'src/utils/common'
 
 type Migration = {
@@ -17,7 +21,7 @@ export function migrationSchema(schema: any) {
   const newSchema = clone(schema) as S.Schema
   const migrations = migrationList.slice(version)
 
-  const traverse = SchemaHelper.createTraverse2({
+  const traverse = createSchemaTraverse({
     schema: newSchema,
     enter: (ctx) => migrations.forEach((m) => m.transform(ctx)),
   })
@@ -80,7 +84,7 @@ export const migrationList = [
   // {
   //   version: 2,
   //   desc: '对所有节点: 使用8位短id代替长id',
-  //   func: (props: SchemaUtilTraverseData, schema: S.Schema) => {
+  //   func: (ctx: SchemaTraverseContext, schema: S.Schema) => {
   //     const { node, parent, index } = props
   //     node.id = miniId(8)
   //     node.parentId = parent.id

@@ -10,6 +10,7 @@ import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import {
   getSelectIdList,
@@ -137,7 +138,7 @@ class StageSelectService {
       )
     }
 
-    const traverser = SchemaHelper.createTraverse2<{ matrix: IMatrix }>({
+    const traverser = createSchemaTraverse<{ matrix: IMatrix }>({
       schema: YState.schema,
       enter: (ctx) => {
         const { item, depth, childIds, forwardCtx } = ctx

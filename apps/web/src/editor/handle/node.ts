@@ -1,8 +1,9 @@
 import { clampIndex, firstOne, getSet, iife } from '@gitborlando/utils'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { SchemaCreator } from '../schema/creator'
-import { getSelectIdList } from '../utils/get'
+import { getSelectedNodes, getSelectIdList } from '../utils/get'
 
 class HandleNodeService {
   datumId = ''
@@ -67,8 +68,12 @@ class HandleNodeService {
 
   deleteSelectedNodes() {
     YState.transact(() => {
-      const traverse = SchemaHelper.createTraverse({
-        bubbleCallback: ({ node, parent }) => this.deleteChild(parent, node),
+      const traverse = createSchemaTraverse({
+        schema: YState.schema,
+        leave: ({ item, parent }) => {
+          if (!parent || !SchemaHelper.isNode(item)) return
+          this.deleteChild(parent, item)
+        },
       })
       traverse(getSelectIdList())
 
@@ -86,14 +91,17 @@ class HandleNodeService {
 
     const newSelectIds = <ID[]>[]
     YState.transact(() => {
-      const traverse = SchemaHelper.createTraverse({
-        callback: (props) => {
-          const { node, parent, forwardRef: upLevelRef, depth } = props
-          const newParent = upLevelRef?.newNode || parent
-          const newNode = SchemaCreator.clone(node)
+      const traverse = createSchemaTraverse<{ newNode?: S.Node | S.NodeParent }>({
+        schema: YState.schema,
+        enter: (ctx) => {
+          const { item, parent, forwardCtx, depth } = ctx
+          if (!parent || !SchemaHelper.isNode(item)) return false
+
+          const newParent = forwardCtx?.newNode || parent
+          const newNode = SchemaCreator.clone(item)
           this.addNodes([newNode])
-          this.insertChildAt(newParent, newNode)
-          props.newNode = newNode
+          this.insertChildAt(newParent as S.NodeParent, newNode)
+          ctx.newNode = newNode
           if (depth === 0) newSelectIds.push(newNode.id)
         },
       })
@@ -108,7 +116,7 @@ class HandleNodeService {
   }
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
-    const selected = getSelectIdList().map(YState.find<S.Node>)
+    const selected = getSelectedNodes()
 
     YState.transact(() => {
       selected.forEach((node) => {

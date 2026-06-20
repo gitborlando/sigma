@@ -1,5 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { getSelectPageId } from 'src/editor/utils/get'
 
 export type EditorLPLayerNodeInfo = {
   id: string
@@ -33,19 +35,28 @@ class EditorLPLayerNodeStateService {
   }
 
   toggleAllNodeExpanded(expanded: boolean) {
-    SchemaHelper.createCurrentPageTraverse({
-      callback: ({ id }) => void this.nodeExpandedMap.set(id, expanded),
-    })()
+    const traverse = createSchemaTraverse({
+      schema: YState.schema,
+      enter: ({ item }) => void this.nodeExpandedMap.set(item.id, expanded),
+    })
+    traverse(SchemaHelper.getPageChildIds(getSelectPageId()))
   }
 
   getNodeInfoList() {
     const nodeInfoList: EditorLPLayerNodeInfo[] = []
-    SchemaHelper.createCurrentPageTraverse({
-      callback: ({ id, ancestors }) => {
-        nodeInfoList.push({ id, indent: ancestors.length, ancestors })
-        return !!this.nodeExpandedMap.get(id)
+    const traverse = createSchemaTraverse({
+      schema: YState.schema,
+      enter: ({ item, ancestors }) => {
+        const ancestorIds = ancestors.map((node) => node.id)
+        nodeInfoList.push({
+          id: item.id,
+          indent: ancestorIds.length,
+          ancestors: ancestorIds,
+        })
+        return !!this.nodeExpandedMap.get(item.id)
       },
-    })()
+    })
+    traverse(SchemaHelper.getPageChildIds(getSelectPageId()))
     return nodeInfoList
   }
 
