@@ -9,6 +9,7 @@ import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
@@ -81,6 +82,7 @@ export class EditorService {
 
     if (schema) {
       YState.initSchema(fileId, schema)
+      SchemaHelper.init({ find: YState.find })
       this.disposer.add(YClients.init())
       // this.disposer.add(YSync.init(fileId, YState.doc))
       StageViewport.init()

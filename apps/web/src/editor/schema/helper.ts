@@ -1,6 +1,18 @@
 import { isNil } from 'es-toolkit'
 
+type SchemaFinder = <T extends S.SchemaItem>(id: string) => T
+
+const missingFinder: SchemaFinder = () => {
+  throw new Error('SchemaHelper.find is not configured')
+}
+
 export class SchemaHelper {
+  private static find: SchemaFinder = missingFinder
+
+  static init(option: { find: SchemaFinder }) {
+    this.find = option.find
+  }
+
   static isPageById(id: ID) {
     return id.startsWith('page_')
   }
@@ -18,8 +30,8 @@ export class SchemaHelper {
 
   static isById(id: ID, type: S.SchemaItem['type'] | 'nodeParent'): boolean {
     if (type === 'nodeParent')
-      return ['page', 'frame', 'group'].includes(YState.find(id).type)
-    return YState.find(id).type === type
+      return ['page', 'frame', 'group'].includes(this.find(id).type)
+    return this.find(id).type === type
   }
 
   static isNodeParent<T extends { childIds: string[] }>(node: any): node is T {
@@ -27,22 +39,22 @@ export class SchemaHelper {
   }
 
   static isFirstLayerFrame(id: ID) {
-    const node = YState.find(id)
+    const node = this.find(id)
     return node.type === 'frame' && this.isPageById(node.parentId)
   }
 
   static getChildren(id: ID | S.NodeParent) {
     const childIds =
-      (typeof id !== 'string' ? id : YState.find<S.NodeParent>(id))?.childIds || []
-    return childIds.map((id) => YState.find<S.Node>(id))
+      (typeof id !== 'string' ? id : this.find<S.NodeParent>(id))?.childIds || []
+    return childIds.map((id) => this.find<S.Node>(id))
   }
 
   static findAncestor(id: ID | S.Node, utilFunc?: (node: S.Node) => boolean) {
-    let node = typeof id === 'string' ? YState.find<S.Node>(id) : id
+    let node = typeof id === 'string' ? this.find<S.Node>(id) : id
     utilFunc ||= (node: S.Node) => SchemaHelper.isPageById(node.parentId)
     while (node.parentId) {
       if (utilFunc(node)) return node
-      node = YState.find<S.Node>(node.parentId)
+      node = this.find<S.Node>(node.parentId)
     }
     return node
   }
@@ -50,7 +62,7 @@ export class SchemaHelper {
   static findParent(node: S.Node) {
     while (node.parentId) {
       if (SchemaHelper.is<S.Frame>(node, 'frame')) return node
-      node = YState.find<S.Node>(node.parentId)
+      node = this.find<S.Node>(node.parentId)
     }
     return node
   }
@@ -58,7 +70,7 @@ export class SchemaHelper {
   static getForwardAccumulatedMatrix(node: S.Node) {
     const matrix = Matrix.identity()
     while (node.parentId) {
-      node = YState.find<S.Node>(node.parentId)
+      node = this.find<S.Node>(node.parentId)
       if (node.matrix) matrix.prepend(node.matrix)
     }
     return matrix.plain()
@@ -67,7 +79,7 @@ export class SchemaHelper {
   static getSceneMatrix(node: S.Node) {
     const matrix = Matrix.of(node.matrix)
     while (node.parentId) {
-      const parent = YState.find<S.Node>(node.parentId)
+      const parent = this.find<S.Node>(node.parentId)
       if (parent.matrix) {
         matrix.prepend(Matrix.of(parent.matrix))
       }
@@ -77,6 +89,6 @@ export class SchemaHelper {
   }
 
   static getPageChildIds(pageId: ID) {
-    return YState.find<S.Page>(pageId).childIds
+    return this.find<S.Page>(pageId).childIds
   }
 }
