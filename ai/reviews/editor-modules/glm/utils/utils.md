@@ -58,10 +58,10 @@ export function isNumberEqual(a, b, precision = 0.00001) {
 `utils` 这个名字在项目里已经有歧义：
 
 - `app/web/src/utils/`（全局 utils：color/common/defu/disposer/global/misc/nick-name/signal-react/immut）
-- `packages/utils/`（`@sigma/utils`：common/defu/index/storage/zod）
+- `packages/sigma-utils/`（`@sigma/utils`：common/defu/index/storage/zod）
 - `app/web/src/editor/utils/`（本目录：get/misc）
 
-三个 utils 目录，职责边界不清。`editor/utils` 既不是「全局通用工具」（那是 `src/utils`），也不是「跨包工具」（那是 `packages/utils`），它更像是「editor 内部、但又不想放进某个 service 的东西」。
+三个 utils 目录，职责边界不清。`editor/utils` 既不是「全局通用工具」（那是 `src/utils`），也不是「跨包工具」（那是 `packages/sigma-utils`），它更像是「editor 内部、但又不想放进某个 service 的东西」。
 
 问题在于：**它太薄（76 行 2 文件），不足以称为一个「模块」**。`get.ts` 本质是 HandleSelect 的派生查询，更应该归到 `handle/select.ts` 作为它的 getter，或归到一个 `select-queries.ts`。`misc.ts` 的内容（吸附、像素对齐、环形索引）互相之间没有内聚性，是真正的「杂项」。
 
@@ -131,7 +131,7 @@ export function snapGridRound(value: number) {
 2. **`get.ts` 改成可测的纯函数签名**：`getSelectIdList(selectIdList, schema)`，或在 HandleSelect 上提供 `get validSelectIdList()` getter（因为它本质是 select 的派生）。
 3. **删死代码**：`getAllSelectIdMap`、`arrayLoopGet` 如无调用方直接删。
 4. **`snapGridRound` 去全局耦合**：改成 `snapToGrid(value, gridStep, enabled)`，支持按 gridStep 吸附。
-5. **和 `src/utils`、`packages/utils` 划清边界**：在 README 或目录注释里说明「editor/utils 只放 editor 内部领域函数，通用工具去 src/utils」。
+5. **和 `src/utils`、`packages/sigma-utils` 划清边界**：在 README 或目录注释里说明「editor/utils 只放 editor 内部领域函数，通用工具去 src/utils」。
 
 ---
 

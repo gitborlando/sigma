@@ -82,14 +82,14 @@
 
 ### 已完成
 
-- 新增 `packages/utils` 私有源码包，包名为 `@sigma/utils`。
+- 新增 `packages/sigma-utils` 私有源码包，包名为 `@sigma/utils`。
 - 新增 `@sigma/utils` 的显式 `exports`：
   - `.`
   - `./common`
   - `./defu`
-- 将 `apps/web/src/utils/common.ts` 实现迁到 `packages/utils/src/common.ts`。
+- 将 `apps/web/src/utils/common.ts` 实现迁到 `packages/sigma-utils/src/common.ts`。
 - 将 `apps/web/src/utils/disposer.ts` 实现迁到 `@gitborlando/toolkit/disposer`。
-- 将 `apps/web/src/utils/defu.ts` 实现迁到 `packages/utils/src/defu.ts`。
+- 将 `apps/web/src/utils/defu.ts` 实现迁到 `packages/sigma-utils/src/defu.ts`。
 - 旧 `apps/web/src/utils/common.ts`、`apps/web/src/utils/disposer.ts` 和 `apps/web/src/utils/defu.ts` 保留为 re-export shim。
 - `logTime()` 在 shared 包内通过结构化 `globalThis` 访问 `performance` / `console`，避免为纯工具包引入 DOM lib。
 - `@sigma/web` 增加 `@sigma/utils: workspace:*` 依赖。
