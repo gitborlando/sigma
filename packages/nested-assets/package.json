@@ -1,16 +1,28 @@
 {
   "name": "@gitborlando/vite-plugin-nested-assets",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Generate a typed nested asset map from a directory in Vite.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "readme.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gitborlando/sigma.git",
+    "directory": "packages/nested-assets"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",

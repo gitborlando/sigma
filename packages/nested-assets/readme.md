@@ -4,6 +4,12 @@ Generate a typed nested asset map from a directory.
 
 The plugin scans static assets under `base`, creates import statements for each file, and writes an `assets.ts` file that mirrors the folder structure.
 
+## Install
+
+```bash
+pnpm add -D @gitborlando/vite-plugin-nested-assets
+```
+
 ## Usage
 
 ```ts
