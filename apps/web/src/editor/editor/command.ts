@@ -5,7 +5,7 @@ import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { Command, ContextMenu } from 'src/global/context-menu'
+import { Command } from 'src/global/context-menu'
 import { getSelectIdList, getSetting } from '../utils/get'
 
 class EditorCommandManager {
@@ -50,7 +50,7 @@ class EditorCommandManager {
     const commands = [
       {
         name: t('delete page'),
-        callback: ({ id }: { id: ID }) => {
+        callback: ({ id }: IDPayload) => {
           HandlePage.removePage(YState.find<S.Page>(id))
         },
       },
@@ -59,7 +59,7 @@ class EditorCommandManager {
     if (getSetting().devMode) {
       commands.push({
         name: t('print schema'),
-        callback: ({ id }: { id: ID }) => {
+        callback: ({ id }: IDPayload) => {
           HandlePage.DEV_logPageSchema(id)
         },
       })
@@ -72,8 +72,7 @@ class EditorCommandManager {
     const commands = [
       {
         name: t('rename'),
-        callback: () => {
-          const { id } = ContextMenu.context
+        callback: ({ id }: IDPayload) => {
           // UILeftPanelLayer.enterReName.dispatch(id)
         },
       },
@@ -158,15 +157,11 @@ class EditorCommandManager {
     return [
       {
         name: t('delete file'),
-        callback: () => {
-          const { id } = ContextMenu.context
-        },
+        callback: () => {},
       },
       {
         name: t('export file'),
-        callback: () => {
-          const { id } = ContextMenu.context
-        },
+        callback: () => {},
       },
     ]
   }
