@@ -3,7 +3,6 @@ import { Wheeler } from '@gitborlando/toolkit/browser'
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
-import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
@@ -44,7 +43,6 @@ class StageViewportService {
       this.onMatrixChange(),
       this.onCurrentPageChange(),
       StageSurface.inited.hook(this.onWheelZoom),
-      EditorSetting.inited.hook(this.DEV_loadSceneMatrix),
       this.disposer.dispose,
     )
   }
@@ -185,18 +183,11 @@ class StageViewportService {
     return reaction(
       () => HandleSelect.selectPageId,
       (pageId) => {
-        const getMatrix = () =>
-          getEditorSetting().dev.sceneMatrix || Matrix.identity()
+        const getMatrix = () => Matrix.identity()
         const matrix = getSet(HandlePage.pageSceneMatrix, pageId, getMatrix)
         StageViewport.sceneMatrix = Matrix.of(matrix)
       },
     )
-  }
-
-  @action
-  private DEV_loadSceneMatrix() {
-    const { fixedSceneMatrix, sceneMatrix } = getEditorSetting().dev
-    if (fixedSceneMatrix) this.sceneMatrix = Matrix.of(sceneMatrix)
   }
 
   handleZoomToFitAll() {

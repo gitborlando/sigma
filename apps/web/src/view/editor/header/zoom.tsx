@@ -68,14 +68,6 @@ const InputZoomComp: FC<{}> = observer(({}) => {
 const ZoomingOptionsComp: FC<{}> = observer(({}) => {
   const { updateZoom, handleZoomToFitAll, handleZoomToFitSelection } = StageViewport
 
-  const handelSaveSceneMatrix = (shouldSave: boolean) => {
-    const setting = getEditorSetting()
-    setting.dev.fixedSceneMatrix = shouldSave
-    if (shouldSave) {
-      setting.dev.sceneMatrix = StageViewport.sceneMatrix
-    }
-  }
-
   return (
     <>
       <OptionBalanceItem label={t('zoom to 100')} onClick={() => updateZoom(1)} />
@@ -83,11 +75,6 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
       <OptionBalanceItem
         label={t('zoom to fit selection')}
         onClick={handleZoomToFitSelection}
-      />
-      <OptionBalanceItem
-        label={t('save current zoom and offset')}
-        checked={getEditorSetting().dev.fixedSceneMatrix}
-        onChecked={handelSaveSceneMatrix}
       />
     </>
   )

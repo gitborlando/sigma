@@ -10,23 +10,19 @@ const initSetting = () => {
     needSliceRender: true,
     showDirtyRect: false,
     fullRender: false,
-    dev: {
-      fixedSceneMatrix: true,
-      logUndoRedoInfo: false,
-      sceneMatrix: Matrix.identity(),
-    },
     snapToGrid: false,
+    dev: {
+      logUndoRedoInfo: false,
+    },
   }
 }
 
 class EditorSettingService {
-  inited = Signal.create(false)
   @observable setting = initSetting()
 
   init() {
     this.loadSetting()
     this.autoSaveSetting()
-    this.inited.dispatch(true)
   }
 
   private loadSetting() {
