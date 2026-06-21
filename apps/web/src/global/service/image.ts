@@ -1,3 +1,5 @@
+import { LRU } from 'tiny-lru'
+
 export type IImage = {
   objectUrl: string
   arrayBuffer: ArrayBuffer
@@ -7,7 +9,7 @@ export type IImage = {
 }
 
 class ImageService {
-  private imageCache = new Map<string, IImage>()
+  private imageCache = new LRU<IImage>(300)
 
   getImage(url: string) {
     return this.imageCache.get(url)

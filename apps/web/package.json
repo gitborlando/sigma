@@ -69,6 +69,7 @@
     "svg-path-parser": "^1.1.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.17",
+    "tiny-lru": "^13.0.0",
     "tinyqueue": "^3.0.0",
     "y-indexeddb": "^9.0.12",
     "y-protocols": "^1.0.6",
