@@ -19,7 +19,7 @@ export const PageComp: FC<{}> = observer(({}) => {
         style={{ height: pagePanelHeight - 37 }}>
         <Scrollbars style={{ height: pagePanelHeight - 37 }}>
           {meta.pageIds.map((id) => {
-            const page = YState.find<IPage>(id)
+            const page = YState.find<S.Page>(id)
             return <PageItemComp key={page.id} name={page.name} id={page.id} />
           })}
         </Scrollbars>

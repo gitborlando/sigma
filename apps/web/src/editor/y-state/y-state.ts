@@ -19,8 +19,6 @@ class YStateService {
   inited$ = Signal.create(false)
   flushPatch$ = Signal.create<ImmutPatch>()
 
-  private unbind?: () => void
-  private unSub?: () => void
   private transactionDepth = 0
   private disposer = new Disposer()
 
