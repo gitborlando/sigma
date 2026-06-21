@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { Icon } from '@gitborlando/widget'
 import { ChevronRight } from 'lucide-react'
-import { EditorCommand } from 'src/editor/editor/command'
+import { EditorCommand } from 'src/editor/core/command'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import {

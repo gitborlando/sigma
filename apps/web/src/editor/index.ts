@@ -1,6 +1,6 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { EditorCommand } from 'src/editor/editor/command'
-import { EditorSetting } from 'src/editor/editor/setting'
+import { EditorCommand } from 'src/editor/core/command'
+import { EditorSetting } from 'src/editor/core/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
@@ -9,14 +9,27 @@ import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
 import { LayerPanel } from 'src/editor/workbench/layer-panel'
 import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
-import { OperateAlign } from '../operate/align'
-import { OperateFill } from '../operate/fill'
-import { StageInteract } from '../stage/interact/interact'
-import { StageViewport } from '../stage/viewport'
+import { OperateAlign } from './operate/align'
+import { OperateFill } from './operate/fill'
+import { StageInteract } from './stage/interact/interact'
+import { StageViewport } from './stage/viewport'
 
 export class EditorService {
-  inited = Signal.create(false)
+  private inited = false
   private disposer = new Disposer()
+
+  init = async () => {
+    if (this.inited) return
+
+    this.disposer.add(this.subscribe())
+    this.inited = true
+  }
+
+  dispose() {
+    this.inited = false
+    YState.dispose()
+    this.disposer.dispose()
+  }
 
   private subscribe() {
     return Disposer.combine(
@@ -39,19 +52,6 @@ export class EditorService {
       LayerPanel.subscribe(),
       LayerPanelNodeTree.subscribe(),
     )
-  }
-
-  init = async () => {
-    if (this.inited.value) return
-
-    this.disposer.add(this.subscribe())
-    this.inited.dispatch(true)
-  }
-
-  dispose() {
-    Editor.inited.value = false
-    YState.dispose()
-    this.disposer.dispose()
   }
 }
 

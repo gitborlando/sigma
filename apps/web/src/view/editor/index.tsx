@@ -1,5 +1,5 @@
 import { useClean, withSuspense } from '@gitborlando/utils/react'
-import { Editor } from 'src/editor/editor/editor'
+import { Editor } from 'src/editor'
 import { StageSurface } from 'src/editor/render/surface'
 import { Loading } from 'src/view/component/loading'
 import { LeftPanelComp } from 'src/view/editor/left-panel'

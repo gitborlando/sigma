@@ -27,7 +27,7 @@ export const autoImportConfig = autoImportPlugin({
       'src/editor/handle/select': ['HandleSelect'],
       'src/editor/y-state/y-state': ['YState'],
       'src/editor/y-state/y-clients': ['YClients'],
-      'src/editor/editor/undo': ['Undo'],
+      'src/editor/core/undo': ['Undo'],
       'src/utils/common': ['T', 'isDEV', 'isPROD'],
       'src/utils/color': ['COLOR'],
       'src/view/styles/styles': ['styles'],

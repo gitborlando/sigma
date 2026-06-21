@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { EditorCommand } from 'src/editor/editor/command'
+import { EditorCommand } from 'src/editor/core/command'
 import { ContextMenu } from 'src/global/context-menu'
 import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
 

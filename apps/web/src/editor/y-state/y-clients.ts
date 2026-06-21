@@ -1,7 +1,7 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
-import { MobxUndo } from 'src/editor/editor/undo'
+import { MobxUndo } from 'src/editor/core/undo'
 import { HandleSelect } from 'src/editor/handle/select'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'

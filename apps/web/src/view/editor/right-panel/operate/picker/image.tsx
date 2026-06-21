@@ -1,6 +1,6 @@
 import { iife } from '@gitborlando/utils'
 import { withSuspense } from '@gitborlando/utils/react'
-import { ImgManager } from 'src/editor/editor/img-manager'
+import { ImgManager } from 'src/editor/core/img-manager'
 import { Uploader } from 'src/global/upload'
 import { suspend } from 'suspend-react'
 
