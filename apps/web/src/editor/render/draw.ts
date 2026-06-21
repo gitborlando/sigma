@@ -6,9 +6,9 @@ import { max } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
 import { StageSurface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
-import { getZoom } from 'src/editor/stage/viewport'
 import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
+import { getZoom } from '../utils/get'
 import { Elem, HitTest } from './elem'
 
 class ElemDrawerService {

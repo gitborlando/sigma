@@ -1,4 +1,5 @@
 import { HandleSelect } from 'src/editor/handle/select'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { YClients } from 'src/editor/y-state/y-clients'
 import { YState } from 'src/editor/y-state/y-state'
 
@@ -28,3 +29,4 @@ export function getAllSelectIdMap() {
 export const getSelectedNodes = () => {
   return getSelectIdList().map((id) => YState.find<S.Node>(id))
 }
+export const getZoom = () => StageViewport.zoom

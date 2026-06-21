@@ -220,5 +220,3 @@ class StageViewportService {
 }
 
 export const StageViewport = autoBind(makeObservable(new StageViewportService()))
-
-export const getZoom = () => StageViewport.zoom

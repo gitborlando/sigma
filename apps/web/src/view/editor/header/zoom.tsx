@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { getZoom, StageViewport } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { getZoom } from 'src/editor/utils/get'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Divider } from 'src/view/component/divider'
 import { InputNum } from 'src/view/component/input-num'

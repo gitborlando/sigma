@@ -10,10 +10,11 @@ import {
   TextBreaker,
   createTextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
-import { StageViewport, getZoom } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { Raf, reverseFor } from 'src/editor/utils/misc'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
+import { getZoom } from '../utils/get'
 import { Elem } from './elem'
 
 const dpr = devicePixelRatio

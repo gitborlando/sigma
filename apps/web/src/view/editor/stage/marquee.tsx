@@ -1,6 +1,6 @@
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageSelect } from 'src/editor/stage/interact/select'
-import { getZoom } from 'src/editor/stage/viewport'
+import { getZoom } from 'src/editor/utils/get'
 import { rgbToRgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
 

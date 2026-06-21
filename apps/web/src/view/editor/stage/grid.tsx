@@ -1,5 +1,6 @@
 import { SchemaCreator } from 'src/editor/schema/creator'
-import { getZoom, StageViewport } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { getZoom } from 'src/editor/utils/get'
 import { rgb } from 'src/utils/color'
 
 const getStepByZoom = (zoom: number) => {

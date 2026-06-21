@@ -1,5 +1,6 @@
 import { StageSurface } from 'src/editor/render/surface'
-import { getZoom, StageViewport } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { getZoom } from 'src/editor/utils/get'
 import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
 
 class StageToolGridService {
