@@ -28,7 +28,7 @@ class YClientsService {
     return others[this.observingClientId]
   }
 
-  init() {
+  subscribe() {
     const disposeSelect = reaction(
       () => ({
         selectIdMap: HandleSelect.selectIdMap,

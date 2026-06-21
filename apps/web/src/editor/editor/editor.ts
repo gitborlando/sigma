@@ -1,27 +1,18 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { jsonParse } from '@gitborlando/utils'
-import { logTime } from '@sigma/utils/common'
-import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
-import { mock_transform_v } from 'src/editor/editor/mock/transfrom_v'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
-import { SchemaHelper } from 'src/editor/schema/helper'
-import { migrationSchema } from 'src/editor/schema/migration'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
 import { LayerPanel } from 'src/editor/workbench/layer-panel'
 import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
-import { FileService } from 'src/global/service/file'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { StageInteract } from '../stage/interact/interact'
 import { StageViewport } from '../stage/viewport'
-
-const jsZip = new JSZip()
 
 export class EditorService {
   inited = Signal.create(false)
@@ -48,34 +39,6 @@ export class EditorService {
       LayerPanel.subscribe(),
       LayerPanelNodeTree.subscribe(),
     )
-  }
-
-  initSchema = async (fileId: string, onProgress?: (progress: number) => void) => {
-    let schema: S.Schema | undefined
-
-    if (fileId === 'mock') {
-      let mockSchema = mock_transform_v()
-      if (mockSchema) schema = mockSchema
-    } else {
-      const fileMeta = await FileService.getFileMeta(fileId)
-      if (fileMeta) {
-        const zipBuffer = await FileService.loadFile(fileMeta.url, onProgress)
-        const zipFiles = await jsZip.loadAsync(zipBuffer)
-        const fileText = await zipFiles
-          .file(`${decodeURIComponent(fileMeta.name)}.json`)
-          ?.async('text')
-        schema = jsonParse(fileText) as S.Schema
-
-        schema = logTime('updateSchema', () => migrationSchema(schema))
-      }
-    }
-
-    if (schema) {
-      YState.initSchema(fileId, schema)
-      SchemaHelper.init({ find: YState.find })
-      this.disposer.add(YClients.init())
-      // this.disposer.add(YSync.init(fileId, YState.doc))
-    }
   }
 
   init = async () => {

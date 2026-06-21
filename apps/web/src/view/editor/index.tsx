@@ -13,7 +13,7 @@ export const EditorComp = withSuspense(
     const { fileId } = useParams<{ fileId: string }>()
 
     useMemo(() => Editor.init(), [])
-    suspend(() => Editor.initSchema(fileId!), [fileId])
+    suspend(() => YState.initSchema(fileId!), [fileId])
     suspend(() => StageSurface.initTextBreaker(), ['initTextBreaker'])
 
     useClean(() => {

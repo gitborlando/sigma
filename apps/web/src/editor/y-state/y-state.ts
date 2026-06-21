@@ -1,9 +1,16 @@
-import { clone } from '@gitborlando/utils'
+import { clone, jsonParse } from '@gitborlando/utils'
 import type { Patch } from 'immer'
+import JSZip from 'jszip'
+import { mock_transform_v } from 'src/editor/editor/mock/transfrom_v'
+import { SchemaHelper } from 'src/editor/schema/helper'
+import { migrationSchema } from 'src/editor/schema/migration'
+import { FileService } from 'src/global/service/file'
 import Immut, { ImmutPatch } from 'src/utils/immut/immut'
 import { bind } from 'src/utils/immut/immut-y'
 import { toYValue } from 'src/utils/immut/json-to-y'
 import * as Y from 'yjs'
+
+const jsZip = new JSZip()
 
 class YStateService {
   doc?: Y.Doc
@@ -15,6 +22,7 @@ class YStateService {
   private unbind?: () => void
   private unSub?: () => void
   private transactionDepth = 0
+  private disposer = new Disposer()
 
   get schema() {
     return this.immut.state
@@ -114,15 +122,37 @@ class YStateService {
     })
   }
 
-  async initSchema(fileId: string, mockSchema?: S.Schema) {
+  async initSchema(fileId: string) {
+    let schema: S.Schema | undefined
+
+    if (fileId === 'mock') {
+      let mockSchema = mock_transform_v()
+      if (mockSchema) schema = mockSchema
+    } else {
+      const fileMeta = await FileService.getFileMeta(fileId)
+      if (fileMeta) {
+        const zipBuffer = await FileService.loadFile(fileMeta.url)
+        const zipFiles = await jsZip.loadAsync(zipBuffer)
+        const fileText = await zipFiles
+          .file(`${decodeURIComponent(fileMeta.name)}.json`)
+          ?.async('text')
+        schema = jsonParse(fileText) as S.Schema
+      }
+    }
+
+    if (!schema) return
+
+    schema = migrationSchema(schema)
+
     this.dispose()
     this.doc = new Y.Doc()
 
     // YSync.init(fileId, this.doc)
 
-    this.immut.state = mockSchema!
-    this.unbind = bind(this.immut, this.doc.getMap('schema'))
-    this.unSub = this.flushPatch()
+    this.immut.state = schema!
+    this.disposer.add(bind(this.immut, this.doc.getMap('schema')))
+    this.disposer.add(this.flushPatch())
+    this.disposer.add(YClients.subscribe())
 
     YClients.clientId = this.doc.clientID
     Undo.initUndo({
@@ -130,17 +160,16 @@ class YStateService {
       getPatches: this.getPatches,
     })
 
+    SchemaHelper.init({ find: YState.find })
+
     this.inited$.dispatch(true)
   }
 
   dispose() {
     this.inited$.value = false
-    this.unbind?.()
-    this.unbind = undefined
-    this.unSub?.()
-    this.unSub = undefined
     this.doc?.destroy()
     this.doc = undefined
+    this.disposer.dispose()
   }
 
   private flushPatch() {
