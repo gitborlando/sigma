@@ -6,18 +6,18 @@ import { ChevronRight } from 'lucide-react'
 import { EditorCommand } from 'src/editor/editor/command'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageSelect } from 'src/editor/stage/interact/select'
-import { ContextMenu } from 'src/global/context-menu'
 import {
-  EditorLPLayerNodeInfo,
-  EditorLPLayerNodeState,
-} from 'src/view/editor/left-panel/panels/layer/node/state'
+  LayerPanelNodeInfo,
+  LayerPanelNodeTree,
+} from 'src/editor/workbench/layer-panel/node-tree'
+import { ContextMenu } from 'src/global/context-menu'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
 
 export const EditorLeftPanelLayerNodeItemComp: FC<{
-  nodeInfo: EditorLPLayerNodeInfo
+  nodeInfo: LayerPanelNodeInfo
 }> = observer(({ nodeInfo }) => {
-  const { id, indent, ancestors } = nodeInfo
-  const { toggleNodeExpanded, getNodeExpanded } = EditorLPLayerNodeState
+  const { id, indent, ancestorIds } = nodeInfo
+  const { toggleNodeExpanded, getNodeExpanded } = LayerPanelNodeTree
 
   const node = YState.find<S.Node>(id)
   const isParent = SchemaHelper.isNodeParent(node)
@@ -25,7 +25,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
 
   const selectIdMap = useSelectIdMap()
   const selected = selectIdMap[id]
-  const subSelected = ancestors.some((ancestor) => selectIdMap[ancestor])
+  const subSelected = ancestorIds.some((ancestor) => selectIdMap[ancestor])
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id, disabled: false })

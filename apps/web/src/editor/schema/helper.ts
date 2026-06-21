@@ -34,7 +34,7 @@ export class SchemaHelper {
     return this.find(id).type === type
   }
 
-  static isNodeParent<T extends { childIds: string[] }>(node: any): node is T {
+  static isNodeParent<T extends S.NodeParent>(node: S.SchemaItem): node is T {
     return 'childIds' in node
   }
 

@@ -89,7 +89,7 @@ export default class Immut<T extends AnyObject = AnyObject> {
 
   subscribe = (callback: (patches: ImmutPatch[]) => void) => {
     this.listeners.add(callback)
-    return () => this.listeners.delete(callback)
+    return () => void this.listeners.delete(callback)
   }
 
   private accumulatePatches: ImmutPatch[] = []

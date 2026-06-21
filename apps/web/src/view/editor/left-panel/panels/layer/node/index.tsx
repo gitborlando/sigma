@@ -9,12 +9,11 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { useEventSignal } from '@gitborlando/signal/react'
 import { useState } from 'react'
+import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
 import { EditorLeftPanelLayerNodeHeaderComp } from 'src/view/editor/left-panel/panels/layer/node/header'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
 import { EditorLeftPanelLayerNodeListComp } from 'src/view/editor/left-panel/panels/layer/node/list'
-import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
 import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 
 const dropAnimationConfig: DropAnimation = {
@@ -28,9 +27,8 @@ const dropAnimationConfig: DropAnimation = {
 }
 
 export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
-  const { nodeInfoChanged, getNodeInfoList } = EditorLPLayerNodeState
+  const { nodeInfoList } = LayerPanelNodeTree
   const [activeId, setActiveId] = useState<string | null>(null)
-  useEventSignal(nodeInfoChanged)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -40,7 +38,6 @@ export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
     }),
   )
 
-  const nodeInfoList = getNodeInfoList()
   const activeNodeInfo = nodeInfoList.find((info) => info.id === activeId)
 
   const handleDragStart = (event: any) => {
@@ -68,8 +65,6 @@ export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
   const handleDragCancel = () => {
     setActiveId(null)
   }
-
-  useEffect(() => EditorLPLayerNodeState.init(), [])
 
   return (
     <DndContext

@@ -1,32 +1,19 @@
-import { useEventSignal } from '@gitborlando/signal/react'
 import { ChevronsUp } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
 
-import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
+import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
 
 export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
-  const { nodeInfoChanged, getAllNodeExpanded, toggleAllNodeExpanded } =
-    EditorLPLayerNodeState
-  useEventSignal(nodeInfoChanged)
-
-  const allNodeExpanded = getAllNodeExpanded()
+  const { hasNodeExpanded, toggleAllNodeExpanded } = LayerPanelNodeTree
 
   const handleToggleExpand = () => {
-    toggleAllNodeExpanded(!allNodeExpanded)
+    toggleAllNodeExpanded(!hasNodeExpanded)
   }
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-  }
-
-  const handleClearSearch = () => {}
 
   return (
     <G horizontal='1fr auto' center className={cls()}>
       <input
         type='text'
-        // value={searchSlice.value}
-        // onChange={handleSearchChange}
         placeholder={t('search layer')}
         className={cls('search-input')}
       />
@@ -37,7 +24,7 @@ export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
           <Lucide
             icon={ChevronsUp}
             style={{
-              transform: allNodeExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transform: hasNodeExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
             }}
           />
         }
