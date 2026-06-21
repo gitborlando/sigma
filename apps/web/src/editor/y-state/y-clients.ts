@@ -3,7 +3,6 @@ import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import { MobxUndo } from 'src/editor/editor/undo'
 import { HandleSelect } from 'src/editor/handle/select'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
 
@@ -15,7 +14,7 @@ class YClientsService {
     selectPageId: '',
     cursor: XY.$(0, 0),
     color: COLOR.random(),
-    sceneMatrix: StageViewport.sceneMatrix,
+    sceneMatrix: Matrix.identity(),
     userId: '',
     userName: '',
     userAvatar: '',
