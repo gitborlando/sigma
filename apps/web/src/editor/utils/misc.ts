@@ -1,9 +1,9 @@
-import { getEditorSetting } from './get'
+import { getSetting } from './get'
 
 export type TRBL = 'top' | 'right' | 'bottom' | 'left'
 
 export function snapGridRound(value: number) {
-  if (getEditorSetting().snapToGrid) {
+  if (getSetting().snapToGrid) {
     return Math.round(value)
   }
   return value

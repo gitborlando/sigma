@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { getEditorSetting, getZoom } from 'src/editor/utils/get'
+import { getSetting, getZoom } from 'src/editor/utils/get'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Divider } from 'src/view/component/divider'
 import { InputNum } from 'src/view/component/input-num'
@@ -84,9 +84,9 @@ const OtherOptionsComp: FC<{}> = observer(({}) => {
   return (
     <OptionBalanceItem
       label={t('snap to grid')}
-      checked={getEditorSetting().snapToGrid}
+      checked={getSetting().snapToGrid}
       onChecked={(value) => {
-        const setting = getEditorSetting()
+        const setting = getSetting()
         setting.snapToGrid = value
       }}
     />

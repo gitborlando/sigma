@@ -1,5 +1,5 @@
 import { Settings } from 'lucide-react'
-import { getEditorSetting } from 'src/editor/utils/get'
+import { getSetting } from 'src/editor/utils/get'
 import { CommonBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
@@ -40,7 +40,7 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
 })
 
 export const CommonSettingComp: FC<{}> = observer(({}) => {
-  const setting = getEditorSetting()
+  const setting = getSetting()
   const {
     autosave,
     showFPS,

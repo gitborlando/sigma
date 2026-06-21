@@ -13,7 +13,7 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { Raf, reverseFor } from 'src/editor/utils/misc'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
-import { getEditorSetting, getZoom } from '../utils/get'
+import { getSetting, getZoom } from '../utils/get'
 import { Elem } from './elem'
 
 const dpr = devicePixelRatio
@@ -125,10 +125,8 @@ export class StageSurfaceService {
     if (type !== 'nextFullRender') this.renderTasks.length = 0
 
     this.renderTasks.push(() => {
-      if (type === 'firstFullRender' || getEditorSetting().fullRender)
-        this.clearSurface()
-      const isPartialRender =
-        type === 'partialRender' && !getEditorSetting().fullRender
+      if (type === 'firstFullRender' || getSetting().fullRender) this.clearSurface()
+      const isPartialRender = type === 'partialRender' && !getSetting().fullRender
       isPartialRender ? this.partialRender() : this.fullRender()
     })
 
@@ -192,9 +190,7 @@ export class StageSurfaceService {
   private fullRender = () => {
     this.transformCanvas()
 
-    if (
-      !getEditorSetting().needSliceRender /*  || getEditorSetting().showDirtyRect */
-    ) {
+    if (!getSetting().needSliceRender /*  || getEditorSetting().showDirtyRect */) {
       StageScene.sceneRoot.children.forEach((elem) => elem.traverseDraw())
       while (this.fullRenderElemsMinHeap.length) this.fullRenderElemsMinHeap.pop()
       return
@@ -319,7 +315,7 @@ export class StageSurfaceService {
 
   private DEV_showDirtyRect() {
     return this.onRenderTopCanvas.hook(() => {
-      if (!getEditorSetting().showDirtyRect) return
+      if (!getSetting().showDirtyRect) return
 
       this.ctxSaveRestore((ctx) => {
         if (!this.DEV_dirtyArea) return
@@ -486,8 +482,7 @@ export class StageSurfaceService {
   private onPointerEvents = () => {
     const onMouseEvent = (e: MouseEvent) => {
       if (this.isPointerEventNone) return
-      if (getEditorSetting().needSliceRender && this.fullRenderElemsMinHeap.length)
-        return
+      if (getSetting().needSliceRender && this.fullRenderElemsMinHeap.length) return
 
       this.getEventXY(e)
       this.elemsFromPoint.length = 0

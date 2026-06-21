@@ -5,7 +5,7 @@ import { MRect } from 'src/editor/math'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { getEditorSetting } from '../utils/get'
+import { getSetting } from '../utils/get'
 
 declare module 'react' {
   namespace JSX {
@@ -93,7 +93,7 @@ export class Elem {
   traverseDraw() {
     if (!this.visible) return
 
-    if (getEditorSetting().ignoreUnVisible && this.optimize) {
+    if (getSetting().ignoreUnVisible && this.optimize) {
       const visualSize = StageSurface.getVisualSize(this.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }

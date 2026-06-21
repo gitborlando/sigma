@@ -5,7 +5,7 @@ import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { Command, ContextMenu } from 'src/global/context-menu'
-import { getEditorSetting, getSelectIdList } from '../utils/get'
+import { getSelectIdList, getSetting } from '../utils/get'
 
 class EditorCommandManager {
   init() {
@@ -54,7 +54,7 @@ class EditorCommandManager {
       },
     ]
 
-    if (getEditorSetting().devMode) {
+    if (getSetting().devMode) {
       commands.push({
         name: t('print schema'),
         callback: ({ id }: { id: ID }) => {
@@ -86,7 +86,7 @@ class EditorCommandManager {
       },
     ]
 
-    if (getEditorSetting().devMode) {
+    if (getSetting().devMode) {
       commands.push(
         {
           name: t('print schema'),

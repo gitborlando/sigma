@@ -11,6 +11,14 @@ const allSelectIdMap = computed(() => ({
   }, {}),
 }))
 
+export function getZoom() {
+  return StageViewport.zoom
+}
+
+export function getSetting() {
+  return EditorSetting.setting
+}
+
 export function getSelectIdMap() {
   return HandleSelect.selectIdMap
 }
@@ -27,11 +35,6 @@ export function getAllSelectIdMap() {
   return allSelectIdMap.get()
 }
 
-export const getSelectedNodes = () => {
+export function getSelectedNodes() {
   return getSelectIdList().map((id) => YState.find<S.Node>(id))
-}
-export const getZoom = () => StageViewport.zoom
-
-export function getEditorSetting() {
-  return EditorSetting.setting
 }
