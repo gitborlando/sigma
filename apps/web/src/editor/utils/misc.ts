@@ -1,4 +1,4 @@
-import { getEditorSetting } from 'src/editor/editor/setting'
+import { getEditorSetting } from './get'
 
 export type TRBL = 'top' | 'right' | 'bottom' | 'left'
 

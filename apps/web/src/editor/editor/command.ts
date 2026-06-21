@@ -1,12 +1,11 @@
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
-import { getEditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageScene } from 'src/editor/render/scene'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { Command, ContextMenu } from 'src/global/context-menu'
-import { getSelectIdList } from '../utils/get'
+import { getEditorSetting, getSelectIdList } from '../utils/get'
 
 class EditorCommandManager {
   init() {

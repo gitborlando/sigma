@@ -1,5 +1,5 @@
 import { Settings } from 'lucide-react'
-import { getEditorSetting } from 'src/editor/editor/setting'
+import { getEditorSetting } from 'src/editor/utils/get'
 import { CommonBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'

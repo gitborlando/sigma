@@ -39,7 +39,3 @@ class EditorSettingService {
 }
 
 export const EditorSetting = autoBind(makeObservable(new EditorSettingService()))
-
-export function getEditorSetting() {
-  return EditorSetting.setting
-}
