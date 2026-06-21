@@ -1,37 +1,36 @@
-import autoBind from 'auto-bind'
 import { action, toJS } from 'mobx'
 import { createTravels, type TravelMetadata } from 'travels'
 
-export type ClientUndoState = Record<string, unknown>
-export type ClientUndoMetadata = TravelMetadata
-export type ClientUndoUpdater<T> = (state: T) => void
-type ClientUndoListener = (state: ClientUndoState) => void
-export type ClientUndoSliceListener<T> = (state: T) => void
-type ClientUndoTarget = Record<string, unknown>
+export type MobxUndoState = Record<string, unknown>
+export type MobxUndoMetadata = TravelMetadata
+export type MobxUndoUpdater<T> = (state: T) => void
+type MobxUndoListener = (state: MobxUndoState) => void
+export type MobxUndoSliceListener<T> = (state: T) => void
+type MobxUndoTarget = Record<string, unknown>
 
-export class ClientUndoSlice<T extends object> {
+export class MobxUndoSlice<T extends object> {
   state: T
-  private listeners = new Set<ClientUndoSliceListener<T>>()
+  private listeners = new Set<MobxUndoSliceListener<T>>()
 
   constructor(
-    private clientUndo: ClientUndoService,
+    private mobxUndo: MobxUndoService,
     private key: string,
     state: T,
   ) {
     this.state = state
   }
 
-  set(updater: ClientUndoUpdater<T>, metadata?: ClientUndoMetadata) {
-    this.clientUndo.set(this.key, updater, metadata)
+  set(updater: MobxUndoUpdater<T>, metadata?: MobxUndoMetadata) {
+    this.mobxUndo.set(this.key, updater, metadata)
     return this
   }
 
-  replace(state: T, metadata?: ClientUndoMetadata) {
-    this.clientUndo.replace(this.key, state, metadata)
+  replace(state: T, metadata?: MobxUndoMetadata) {
+    this.mobxUndo.replace(this.key, state, metadata)
     return this
   }
 
-  subscribe(listener: ClientUndoSliceListener<T>) {
+  subscribe(listener: MobxUndoSliceListener<T>) {
     this.listeners.add(listener)
     return () => this.listeners.delete(listener)
   }
@@ -42,12 +41,12 @@ export class ClientUndoSlice<T extends object> {
   }
 }
 
-export class ClientUndoService {
-  private travels = createTravels<ClientUndoState>(
+export class MobxUndoService {
+  private travels = createTravels<MobxUndoState>(
     {},
     { autoArchive: false, maxHistory: 100 },
   )
-  private slices = new Map<string, ClientUndoSlice<object>>()
+  private slices = new Map<string, MobxUndoSlice<object>>()
   private syncedState = this.travels.getState()
 
   constructor() {
@@ -70,7 +69,7 @@ export class ClientUndoService {
   ) {
     const slice = this.slices.get(key)
     if (slice) {
-      const existSlice = slice as ClientUndoSlice<Pick<TTarget, TField>>
+      const existSlice = slice as MobxUndoSlice<Pick<TTarget, TField>>
       this.syncTargetWithSlice(existSlice, target, fields)
       return existSlice
     }
@@ -82,9 +81,9 @@ export class ClientUndoService {
       state[key] = this.clone(initialState)
     })
 
-    const newSlice = new ClientUndoSlice(this, key, state)
+    const newSlice = new MobxUndoSlice(this, key, state)
     this.syncTargetWithSlice(newSlice, target, fields)
-    this.slices.set(key, newSlice as ClientUndoSlice<object>)
+    this.slices.set(key, newSlice as MobxUndoSlice<object>)
     return newSlice
   }
 
@@ -99,8 +98,8 @@ export class ClientUndoService {
 
   set<T extends object>(
     key: string,
-    updater: ClientUndoUpdater<T>,
-    metadata?: ClientUndoMetadata,
+    updater: MobxUndoUpdater<T>,
+    metadata?: MobxUndoMetadata,
   ) {
     this.assertRegistered(key)
     this.travels.setState((state) => {
@@ -108,28 +107,28 @@ export class ClientUndoService {
     }, metadata)
   }
 
-  replace<T extends object>(key: string, value: T, metadata?: ClientUndoMetadata) {
+  replace<T extends object>(key: string, value: T, metadata?: MobxUndoMetadata) {
     this.assertRegistered(key)
     this.travels.setState((state) => {
       state[key] = value
     }, metadata)
   }
 
-  applyState(state: ClientUndoState | undefined, metadata?: ClientUndoMetadata) {
+  applyState(state: MobxUndoState | undefined, metadata?: MobxUndoMetadata) {
     if (!state) return
 
     this.assertRegisteredState(state)
     this.travels.setState(() => state, metadata)
   }
 
-  applyStateWithoutHistory(state: ClientUndoState | undefined) {
+  applyStateWithoutHistory(state: MobxUndoState | undefined) {
     if (!state) return
 
     this.assertRegisteredState(state)
     this.travels.replaceStateWithoutHistory(() => state)
   }
 
-  archive(metadata?: ClientUndoMetadata) {
+  archive(metadata?: MobxUndoMetadata) {
     if (!this.travels.canArchive()) return false
 
     this.travels.archive(metadata)
@@ -164,11 +163,11 @@ export class ClientUndoService {
     return this.travels.getMetadata()
   }
 
-  batch(metadata: ClientUndoMetadata, callback: () => void) {
+  batch(metadata: MobxUndoMetadata, callback: () => void) {
     this.travels.transaction(metadata, callback)
   }
 
-  subscribe(listener: ClientUndoListener) {
+  subscribe(listener: MobxUndoListener) {
     return this.travels.subscribe((state) => listener(state))
   }
 
@@ -184,7 +183,7 @@ export class ClientUndoService {
     return this.travels.canArchive()
   }
 
-  private syncSlices(state: ClientUndoState) {
+  private syncSlices(state: MobxUndoState) {
     this.slices.forEach((slice, key) => {
       const nextState = state[key] as object | undefined
       if (!nextState) return
@@ -196,11 +195,7 @@ export class ClientUndoService {
   private syncTargetWithSlice<
     TTarget extends object,
     TField extends keyof TTarget & string,
-  >(
-    slice: ClientUndoSlice<Pick<TTarget, TField>>,
-    target: TTarget,
-    fields: TField[],
-  ) {
+  >(slice: MobxUndoSlice<Pick<TTarget, TField>>, target: TTarget, fields: TField[]) {
     slice.subscribe(
       action((state) => {
         fields.forEach((field) => (target[field] = state[field]))
@@ -212,7 +207,7 @@ export class ClientUndoService {
     TTarget extends object,
     TField extends keyof TTarget & string,
   >(target: TTarget, fields: TField[]) {
-    const targetRecord = target as ClientUndoTarget
+    const targetRecord = target as MobxUndoTarget
     return Object.fromEntries(
       fields.map((field) => [field, this.clone(targetRecord[field])]),
     ) as Pick<TTarget, TField>
@@ -224,17 +219,15 @@ export class ClientUndoService {
 
   private assertRegistered(key: string) {
     if (this.slices.has(key)) return
-    throw new Error(`ClientUndo: "${key}" is not registered.`)
+    throw new Error(`MobxUndo: "${key}" is not registered.`)
   }
 
-  private assertRegisteredState(state: ClientUndoState) {
+  private assertRegisteredState(state: MobxUndoState) {
     Object.keys(state).forEach((key) => this.assertRegistered(key))
   }
 
   private assertCanRegister() {
     if (!this.canUndo && !this.canRedo && !this.canArchive) return
-    throw new Error('ClientUndo: register slices before editing undo state.')
+    throw new Error('MobxUndo: register slices before editing undo state.')
   }
 }
-
-export const ClientUndo = autoBind(new ClientUndoService())

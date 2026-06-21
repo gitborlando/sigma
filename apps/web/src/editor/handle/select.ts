@@ -1,4 +1,4 @@
-import { ClientUndo } from 'src/editor/editor/client-undo'
+import { MobxUndo } from 'src/editor/editor/undo-service'
 
 export type HandleSelectState = {
   selectIdMap: Record<string, boolean>
@@ -10,7 +10,7 @@ class HandleSelectService {
   @observable selectPageId: ID | '' = ''
   afterSelect = Signal.create<void>()
 
-  private selectUndo = ClientUndo.register<
+  private selectUndo = MobxUndo.register<
     HandleSelectService,
     keyof HandleSelectState
   >('select', this, ['selectIdMap', 'selectPageId'])

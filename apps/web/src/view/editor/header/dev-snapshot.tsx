@@ -1,7 +1,7 @@
+import { MobxUndoState } from '@gitborlando/mobx-undo'
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import { ClientUndo, type ClientUndoState } from 'src/editor/editor/client-undo'
-import type { UndoInfo } from 'src/editor/editor/undo-service'
+import { MobxUndo, type UndoInfo } from 'src/editor/editor/undo-service'
 import { Btn } from 'src/view/component/btn'
 
 type SnapshotState = {
@@ -216,7 +216,7 @@ function restoreReplayableSnapshot(snapshot: DevSnapshot) {
   replaceSchema(base.schema)
   if (!resetUndo()) return
 
-  ClientUndo.rebase()
+  MobxUndo.rebase()
   replayHistoryFromBase(snapshot, base)
 }
 
@@ -275,13 +275,13 @@ function replayHistoryInfo(info: UndoInfo) {
 function applyReplayLocalState(info: UndoInfo) {
   const localState = info.clientState
   if (localState) {
-    ClientUndo.applyState(normalizeLocalState(localState))
+    MobxUndo.applyState(normalizeLocalState(localState))
     return
   }
 
-  if (ClientUndo.has('select')) {
-    const select = ClientUndo.get<HandleSelectState>('select')
-    ClientUndo.applyState({ select: normalizeSelectState(select) })
+  if (MobxUndo.has('select')) {
+    const select = MobxUndo.get<HandleSelectState>('select')
+    MobxUndo.applyState({ select: normalizeSelectState(select) })
   }
 }
 
@@ -290,7 +290,7 @@ type HandleSelectState = {
   selectPageId: string
 }
 
-function normalizeLocalState(state: ClientUndoState) {
+function normalizeLocalState(state: MobxUndoState) {
   if (!state.select) return state
 
   return {

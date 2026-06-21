@@ -1,7 +1,7 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
-import { ClientUndo } from 'src/editor/editor/client-undo'
+import { MobxUndo } from 'src/editor/editor/undo-service'
 import { HandleSelect } from 'src/editor/handle/select'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
@@ -43,7 +43,7 @@ class YClientsService {
       this.client.userAvatar = UserService.avatar
     })
     HandleSelect.selectPage(YState.state.meta.pageIds[0])
-    ClientUndo.rebase()
+    MobxUndo.rebase()
     this.syncSelectState()
     return Disposer.combine(this.onMouseMove(), disposeSelect)
   }
