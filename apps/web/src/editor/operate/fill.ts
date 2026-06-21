@@ -9,14 +9,16 @@ class OperateFillService {
   @observable.ref fills = <S.Fill[]>[]
   isMultiFills = false
 
-  init() {
-    HandleSelect.afterSelect.hook(() => {
-      this.setupFills()
-    })
-    YState.subscribe((patches) => {
-      if (!patches.some((p) => p.keys[1] === 'fills')) return
-      this.updateFills()
-    })
+  subscribe() {
+    return Disposer.combine(
+      HandleSelect.afterSelect.hook(() => {
+        this.setupFills()
+      }),
+      YState.subscribe((patches) => {
+        if (!patches.some((p) => p.keys[1] === 'fills')) return
+        this.updateFills()
+      }),
+    )
   }
 
   @action

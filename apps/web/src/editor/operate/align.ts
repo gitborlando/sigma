@@ -21,9 +21,11 @@ class OperateAlignService {
   private needAlign = false
   private toAlignNodes = <S.Node[]>[]
 
-  initHook() {
-    HandleSelect.afterSelect.hook(this.setupAlign)
-    this.currentAlign.hook(this.autoAlign)
+  subscribe() {
+    return Disposer.combine(
+      HandleSelect.afterSelect.hook(this.setupAlign),
+      this.currentAlign.hook(this.autoAlign),
+    )
   }
 
   private setupAlign() {

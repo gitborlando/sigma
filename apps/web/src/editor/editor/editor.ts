@@ -27,6 +27,9 @@ export class EditorService {
 
   private subscribe() {
     return Disposer.combine(
+      EditorSetting.subscribe(),
+      EditorCommand.subscribe(),
+
       HandleNode.subscribe(),
       HandlePage.subscribe(),
 
@@ -36,22 +39,10 @@ export class EditorService {
       StageToolGrid.subscribe(),
       StageInteract.subscribe(),
       StageCursor.subscribe(),
+
+      OperateAlign.subscribe(),
+      OperateFill.subscribe(),
     )
-  }
-
-  private initHooks() {
-    EditorSetting.init()
-    EditorCommand.init()
-
-    OperateAlign.initHook()
-    OperateFill.init()
-  }
-
-  dispose() {
-    Editor.inited.value = false
-    YState.dispose()
-
-    this.disposer.dispose()
   }
 
   initSchema = async (fileId: string, onProgress?: (progress: number) => void) => {
@@ -79,16 +70,20 @@ export class EditorService {
       SchemaHelper.init({ find: YState.find })
       this.disposer.add(YClients.init())
       // this.disposer.add(YSync.init(fileId, YState.doc))
-      StageViewport.init()
     }
   }
 
-  initEditor = async () => {
+  init = async () => {
     if (this.inited.value) return
 
     this.disposer.add(this.subscribe())
-    this.initHooks()
     this.inited.dispatch(true)
+  }
+
+  dispose() {
+    Editor.inited.value = false
+    YState.dispose()
+    this.disposer.dispose()
   }
 }
 

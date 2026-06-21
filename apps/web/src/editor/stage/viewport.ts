@@ -47,10 +47,6 @@ class StageViewportService {
     )
   }
 
-  init() {
-    this.onObserving()
-  }
-
   toCanvasXY(xy: IXY) {
     return XY.of(xy).minus(XY.leftTop(this.bound))
   }
@@ -165,18 +161,6 @@ class StageViewportService {
     })
     setBound()
     return listen('resize', setBound)
-  }
-
-  private onObserving() {
-    return Disposer.combine(
-      autorun(() => {
-        YClients.client.sceneMatrix = Matrix.of(this.sceneMatrix)
-      }),
-      autorun(() => {
-        const client = YClients.observingClient
-        if (!client) return
-      }),
-    )
   }
 
   private onCurrentPageChange() {

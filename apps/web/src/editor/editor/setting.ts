@@ -20,9 +20,9 @@ const initSetting = () => {
 class EditorSettingService {
   @observable setting = initSetting()
 
-  init() {
+  subscribe() {
     this.loadSetting()
-    this.autoSaveSetting()
+    return this.autoSaveSetting()
   }
 
   private loadSetting() {
@@ -31,7 +31,7 @@ class EditorSettingService {
   }
 
   private autoSaveSetting() {
-    reaction(
+    return reaction(
       () => jsonFy(this.setting),
       (json) => localStorage.setItem('editor.setting', json || ''),
     )

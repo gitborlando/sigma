@@ -1,3 +1,4 @@
+import { noopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { HandleNode } from 'src/editor/handle/node'
@@ -8,8 +9,9 @@ import { Command, ContextMenu } from 'src/global/context-menu'
 import { getSelectIdList, getSetting } from '../utils/get'
 
 class EditorCommandManager {
-  init() {
+  subscribe() {
     this.bindHotkeys()
+    return noopFunc
   }
 
   get copyPasteGroup(): Command[] {
