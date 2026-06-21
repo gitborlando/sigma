@@ -1,12 +1,12 @@
 import Scrollbars from 'react-custom-scrollbars-2'
+import { LayerPanel } from 'src/editor/workbench/layer-panel'
 import { Drag } from 'src/global/event/drag'
-import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
 
 export const PageComp: FC<{}> = observer(({}) => {
-  const { pagePanelHeight, allPageExpanded } = EditorLPLayerState
+  const { pagePanelHeight, pagePanelExpanded } = LayerPanel
   const meta = useSchema((schema) => schema.meta)
 
   return (
@@ -15,7 +15,7 @@ export const PageComp: FC<{}> = observer(({}) => {
       <G
         vertical
         className={cls('content')}
-        x-if={allPageExpanded}
+        x-if={pagePanelExpanded}
         style={{ height: pagePanelHeight - 37 }}>
         <Scrollbars style={{ height: pagePanelHeight - 37 }}>
           {meta.pageIds.map((id) => {
@@ -26,13 +26,13 @@ export const PageComp: FC<{}> = observer(({}) => {
       </G>
       <G
         className={cls('resize')}
-        x-if={allPageExpanded}
+        x-if={pagePanelExpanded}
         onMouseDown={() => {
           let lastHeight = pagePanelHeight
           Drag.onMove(({ shift }) => {
             let newHeight = lastHeight + shift.y
             if (newHeight <= 69 || newHeight >= 800) return
-            EditorLPLayerState.pagePanelHeight = newHeight
+            LayerPanel.pagePanelHeight = newHeight
           }).start()
         }}></G>
     </G>

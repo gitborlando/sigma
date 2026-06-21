@@ -10,11 +10,11 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react'
+import { LayerPanel } from 'src/editor/workbench/layer-panel'
 import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
 import { EditorLeftPanelLayerNodeHeaderComp } from 'src/view/editor/left-panel/panels/layer/node/header'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
 import { EditorLeftPanelLayerNodeListComp } from 'src/view/editor/left-panel/panels/layer/node/list'
-import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 
 const dropAnimationConfig: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -77,7 +77,7 @@ export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
         <G
           vertical='auto 1fr'
           className={cls()}
-          style={{ height: innerHeight - 48 - EditorLPLayerState.pagePanelHeight }}>
+          style={{ height: innerHeight - 48 - LayerPanel.pagePanelHeight }}>
           <EditorLeftPanelLayerNodeHeaderComp />
           <EditorLeftPanelLayerNodeListComp />
         </G>

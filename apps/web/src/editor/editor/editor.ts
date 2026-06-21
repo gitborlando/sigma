@@ -13,6 +13,7 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
+import { LayerPanel } from 'src/editor/workbench/layer-panel'
 import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
 import { FileService } from 'src/global/service/file'
 import { OperateAlign } from '../operate/align'
@@ -44,6 +45,7 @@ export class EditorService {
       OperateAlign.subscribe(),
       OperateFill.subscribe(),
 
+      LayerPanel.subscribe(),
       LayerPanelNodeTree.subscribe(),
     )
   }
