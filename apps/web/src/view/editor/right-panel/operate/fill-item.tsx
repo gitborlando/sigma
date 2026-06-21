@@ -2,8 +2,8 @@ import { iife, matchCase } from '@gitborlando/utils'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { withSuspense } from '@gitborlando/utils/react'
 import { Eye, EyeOff } from 'lucide-react'
-import { ImgManager } from 'src/editor/core/img-manager'
 import { OperateFill } from 'src/editor/operate/fill'
+import { Image } from 'src/global/service/image'
 import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
 import { InputNum } from 'src/view/component/input-num'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
@@ -46,7 +46,7 @@ export const EditorRPOperateFillItemComp: FC<{
 }
 
 const ImgComp = withSuspense<{ url: string }>(({ url }) => {
-  const image = suspend(() => ImgManager.getImageAsync(url), [url])
+  const image = suspend(() => Image.getImageAsync(url), [url])
   const imageBound = iife(() => {
     const { width, height } = image
     const rate = width / height

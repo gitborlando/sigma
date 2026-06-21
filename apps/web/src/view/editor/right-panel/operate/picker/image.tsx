@@ -1,13 +1,11 @@
 import { iife } from '@gitborlando/utils'
 import { withSuspense } from '@gitborlando/utils/react'
-import { ImgManager } from 'src/editor/core/img-manager'
-import { Uploader } from 'src/global/upload'
+import { Image } from 'src/global/service/image'
 import { suspend } from 'suspend-react'
 
 export const PickerImageComp: FC<{ fill: S.FillImage }> = memo(({ fill }) => {
   const uploadImage = async () => {
-    const file = await Uploader.open({ accept: 'image/*' })
-    const url = await ImgManager.uploadLocal(file!)
+    throw new Error('not implemented yet')
   }
 
   return (
@@ -25,7 +23,7 @@ export const PickerImageComp: FC<{ fill: S.FillImage }> = memo(({ fill }) => {
 })
 
 const ImgComp = withSuspense<{ url: string }>(({ url }) => {
-  const image = suspend(() => ImgManager.getImageAsync(url), [url])
+  const image = suspend(() => Image.getImageAsync(url), [url])
   const imageBound = iife(() => {
     const { width, height } = image
     const rate = width / height

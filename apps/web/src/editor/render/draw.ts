@@ -1,11 +1,11 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
-import { ImgManager } from 'src/editor/core/img-manager'
 import { EditorSetting } from 'src/editor/core/setting'
 import { max } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
 import { StageSurface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
+import { Image } from 'src/global/service/image'
 import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
 import { getZoom } from '../utils/get'
@@ -251,9 +251,9 @@ class ElemDrawerService {
         break
 
       case 'image':
-        const image = ImgManager.getImage(fill.url)
+        const image = Image.getImage(fill.url)
         if (!image) {
-          ImgManager.getImageAsync(fill.url).then(() => {
+          Image.getImageAsync(fill.url).then(() => {
             StageSurface.collectDirty(this.elem)
           })
         } else {

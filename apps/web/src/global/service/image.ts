@@ -6,7 +6,7 @@ export type IImage = {
   image: HTMLImageElement
 }
 
-class ImgService {
+class ImageService {
   private imageCache = new Map<string, IImage>()
 
   getImage(url: string) {
@@ -21,20 +21,9 @@ class ImgService {
     return loadedImage
   }
 
-  async uploadLocal(file: File) {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = (e) => {
-        const base64String = e.target?.result
-        resolve(base64String as string)
-      }
-    })
-  }
-
   private async loadImage(url: string) {
     const image = <IImage>{}
-    const htmlImage = new Image()
+    const htmlImage = new globalThis.Image()
     htmlImage.crossOrigin = 'anonymous'
     image.objectUrl = url
     await new Promise<void>((resolve) => {
@@ -50,4 +39,4 @@ class ImgService {
   }
 }
 
-export const ImgManager = autoBind(new ImgService())
+export const Image = autoBind(new ImageService())
