@@ -20,12 +20,12 @@ type StateUndoConfig = {
 }
 
 export const MobxUndo = autoBind(new MobxUndoService())
+export let YUndo: Y.UndoManager
 
-class UndoImpl {
+class UndoService {
   @observable.shallow stack: UndoInfo[] = []
   @observable next = 0
 
-  private stateUndo?: Y.UndoManager
   private getStatePatches?: () => ImmutPatch[]
   private shouldTrack = true
 
@@ -37,11 +37,11 @@ class UndoImpl {
     return this.next < this.stack.length
   }
 
-  initStateUndo({ stateMap, getPatches }: StateUndoConfig) {
+  initUndo({ stateMap, getPatches }: StateUndoConfig) {
     this.stack = []
     this.next = 0
     this.getStatePatches = getPatches
-    this.stateUndo = new Y.UndoManager(stateMap)
+    YUndo = new Y.UndoManager(stateMap)
   }
 
   undo() {
@@ -64,7 +64,7 @@ class UndoImpl {
     const info: UndoInfo = { type, description }
 
     if (type === 'state' || type === 'all') {
-      this.stateUndo?.stopCapturing()
+      YUndo?.stopCapturing()
       info.statePatches = this.getStatePatches?.()
     }
     if (type === 'client' || type === 'all') {
@@ -95,7 +95,7 @@ class UndoImpl {
   private replayInfo(type: UndoType, info: UndoInfo | undefined) {
     if (!info) return
 
-    const replayYState = () => this.stateUndo?.[type]()
+    const replayYState = () => YUndo?.[type]()
     const replayClientState = () => MobxUndo[type]()
 
     matchCase(info.type, {
@@ -114,4 +114,4 @@ class UndoImpl {
   }
 }
 
-export const Undo = autoBind(makeObservable(new UndoImpl()))
+export const Undo = autoBind(makeObservable(new UndoService()))

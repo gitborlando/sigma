@@ -125,7 +125,7 @@ class YStateService {
     this.unSub = this.flushPatch()
 
     YClients.clientId = this.doc.clientID
-    Undo.initStateUndo({
+    Undo.initUndo({
       stateMap: this.doc.getMap('schema'),
       getPatches: this.getPatches,
     })

@@ -1,7 +1,7 @@
 import { MobxUndoState } from '@gitborlando/mobx-undo'
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import { MobxUndo, type UndoInfo } from 'src/editor/editor/undo-service'
+import { MobxUndo, type UndoInfo } from 'src/editor/editor/undo'
 import { Btn } from 'src/view/component/btn'
 
 type SnapshotState = {
@@ -242,7 +242,7 @@ function resetUndo() {
   const ySchema = YState.doc?.getMap<S.Schema>('schema')
   if (!ySchema) return false
 
-  Undo.initStateUndo({
+  Undo.initUndo({
     stateMap: ySchema,
     getPatches: YState.getPatches,
   })

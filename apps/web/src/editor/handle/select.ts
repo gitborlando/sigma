@@ -1,4 +1,4 @@
-import { MobxUndo } from 'src/editor/editor/undo-service'
+import { MobxUndo } from 'src/editor/editor/undo'
 
 export type HandleSelectState = {
   selectIdMap: Record<string, boolean>
