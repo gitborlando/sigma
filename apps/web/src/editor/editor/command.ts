@@ -183,7 +183,7 @@ class EditorCommandManager {
       this.fileGroup,
     ].flat() as Command[]
 
-    commandList.forEach(({ shortcut, callback }) => {
+    commandList.forEach(({ shortcut, callback, when }) => {
       if (!shortcut) return
 
       hotkeys(shortcut!, (keyboardEvent) => {
@@ -192,7 +192,7 @@ class EditorCommandManager {
           if (isKeyDown) return
           isKeyDown = true
         }
-        callback({})
+        if (!when || when()) callback({})
       })
     })
 
