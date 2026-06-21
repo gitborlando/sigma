@@ -5,12 +5,12 @@ import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { EditorCommand } from 'src/editor/editor/command'
 import { IMatrix, MRect } from 'src/editor/math'
-import { OperateText } from 'src/editor/operate/text'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { StageDrag } from 'src/editor/stage/interact/drag'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import {
   getSelectIdList,
@@ -18,7 +18,6 @@ import {
   getSelectPageId,
 } from 'src/editor/utils/get'
 import { ContextMenu } from 'src/global/context-menu'
-import { StageDrag } from 'src/editor/stage/interact/drag'
 
 class StageSelectService {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
@@ -124,7 +123,6 @@ class StageSelectService {
   private onDeepSelect() {
     const hoverNode = YState.find(this.hoverId!)
     if (hoverNode?.type !== 'text') return
-    OperateText.intoEditing.dispatch(hoverNode.id)
   }
 
   private onMarqueeSelect() {
@@ -188,9 +186,7 @@ class StageSelectService {
       .start()
   }
 
-  private onEditText(hoverNode: S.Node) {
-    OperateText.intoEditing.dispatch(hoverNode.id)
-  }
+  private onEditText(hoverNode: S.Node) {}
 }
 
 export const StageSelect = autoBind(makeObservable(new StageSelectService()))

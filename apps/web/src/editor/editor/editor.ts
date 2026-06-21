@@ -16,9 +16,6 @@ import { StageToolGrid } from 'src/editor/stage/tools/grid'
 import { FileService } from 'src/global/service/file'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
-import { OperateShadow } from '../operate/shadow'
-import { OperateStroke } from '../operate/stroke'
-import { OperateText } from '../operate/text'
 import { StageInteract } from '../stage/interact/interact'
 import { StageViewport } from '../stage/viewport'
 
@@ -48,9 +45,6 @@ export class EditorService {
 
     OperateAlign.initHook()
     OperateFill.init()
-    OperateStroke.initHook()
-    OperateShadow.initHook()
-    OperateText.initHook()
   }
 
   dispose() {
