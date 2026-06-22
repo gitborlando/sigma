@@ -11,7 +11,7 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectPageId, getZoom } from 'src/editor/utils/get'
-import { snapGridRoundXY } from 'src/editor/utils/misc'
+import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
 import { YState } from 'src/editor/y-state/y-state'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
@@ -114,13 +114,11 @@ class StageCreateService {
   }
 
   private calcNodeMRect(rect: IRect) {
+    const snapRect = snapGridRoundRect(rect)
     const forwardMatrix =
       this.parent.type === 'page' ? Matrix.identity() : Matrix.of(this.parent.matrix)
-    const matrix = forwardMatrix
-      .invert()
-      .append(Matrix.identity().shift(snapGridRoundXY(rect)))
-
-    return MRect.fromRect(rect, matrix.plain())
+    const matrix = forwardMatrix.invert().append(Matrix.identity().shift(snapRect))
+    return MRect.fromRect(snapRect, matrix.plain())
   }
 
   private findParent() {

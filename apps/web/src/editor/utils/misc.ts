@@ -1,3 +1,4 @@
+import { IRect } from '@gitborlando/geo'
 import { getSetting } from './get'
 
 export type TRBL = 'top' | 'right' | 'bottom' | 'left'
@@ -11,6 +12,17 @@ export function snapGridRound(value: number) {
 
 export function snapGridRoundXY(xy: IXY) {
   return XY.$(snapGridRound(xy.x), snapGridRound(xy.y))
+}
+
+export function snapGridRoundRect(rect: IRect): IRect {
+  const { x, y, width, height } = rect
+  const snapStart = snapGridRoundXY(XY.$(x, y))
+  const snapEnd = snapGridRoundXY(XY.$(x + width, y + height))
+  return {
+    ...snapStart,
+    width: snapEnd.x - snapStart.x,
+    height: snapEnd.y - snapStart.y,
+  }
 }
 
 export const snapHalfPixel = (n: number) => {
