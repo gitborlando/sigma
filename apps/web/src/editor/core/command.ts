@@ -1,4 +1,3 @@
-import { noopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { HandleNode } from 'src/editor/handle/node'
@@ -10,8 +9,7 @@ import { getSelectIdList, getSetting } from '../utils/get'
 
 class EditorCommandManager {
   subscribe() {
-    this.bindHotkeys()
-    return noopFunc
+    return this.bindHotkeys()
   }
 
   get copyPasteGroup(): Command[] {
@@ -191,10 +189,13 @@ class EditorCommandManager {
       })
     })
 
-    listen('keyup', () => (isKeyDown = false))
-    listen('keydown', (e) => {
-      if (e.altKey) e.preventDefault()
-    })
+    return Disposer.combine(
+      () => hotkeys.unbind(),
+      listen('keyup', () => (isKeyDown = false)),
+      listen('keydown', (e) => {
+        if (e.altKey) e.preventDefault()
+      }),
+    )
   }
 }
 
