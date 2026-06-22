@@ -2,16 +2,15 @@ import { IRect } from '@gitborlando/geo'
 import type { DragData } from '@gitborlando/toolkit/browser'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { Undo } from 'src/editor/core/undo'
-import { HandleNode } from 'src/editor/handle/node'
-import { HandleSelect } from 'src/editor/handle/select'
 import { Matrix, MRect } from 'src/editor/geometry'
+import { HandleNode } from 'src/editor/handle/node'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageDrag } from 'src/editor/stage/interact/drag'
-import { getZoom } from 'src/editor/utils/get'
+import { getSelectPageId, getZoom } from 'src/editor/utils/get'
 import { snapGridRoundXY } from 'src/editor/utils/misc'
 import { YState } from 'src/editor/y-state/y-state'
 import { StageInteract } from './interact'
@@ -107,13 +106,8 @@ class StageCreateService {
 
   private createNode(rect: IRect) {
     const mrect = this.calcNodeMRect(rect)
-    const node = SchemaCreator[this.currentType]({
-      ...mrect.plain(),
-    })
-    node.name = SchemaCreator.createNodeName(this.currentType)
-    this.node = node
-
-    return node
+    const node = SchemaCreator[this.currentType]({ ...mrect.plain() })
+    return (this.node = node)
   }
 
   private calcNodeMRect(rect: IRect) {
@@ -131,7 +125,7 @@ class StageCreateService {
       SchemaHelper.isById(elem.id, 'frame'),
     )
     if (frame) return YState.find<S.NodeParent>(frame.id)
-    return YState.find<S.Page>(HandleSelect.selectPageId)
+    return YState.find<S.Page>(getSelectPageId())
   }
 }
 
