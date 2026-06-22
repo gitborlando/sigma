@@ -1,7 +1,7 @@
 namespace S2 {
   type IXY = { x: number; y: number }
-  type Matrix = import('src/editor/math/matrix').IMatrix
-  type MRect = import('src/editor/math/mrect').IMRect
+  type Matrix = import('src/editor/geometry/matrix').IMatrix
+  type MRect = import('src/editor/geometry/mrect').IMRect
 
   type Schema = {
     meta: Meta

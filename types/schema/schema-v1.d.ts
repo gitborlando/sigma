@@ -1,6 +1,6 @@
 namespace S1 {
   type IXY = { x: number; y: number }
-  type Matrix = import('src/editor/math/matrix').IMatrix
+  type Matrix = import('src/editor/geometry/matrix').IMatrix
 
   type Schema = {
     meta: Meta
