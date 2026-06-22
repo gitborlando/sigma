@@ -1,6 +1,7 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
 import { EditorSetting } from 'src/editor/core/setting'
+import { HitTest } from 'src/editor/geometry'
 import { max } from 'src/editor/geometry/base'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
 import { StageSurface } from 'src/editor/render/surface'
@@ -9,7 +10,7 @@ import { Image } from 'src/global/service/image'
 import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
 import { getZoom } from '../utils/get'
-import { Elem, HitTest } from './elem'
+import { Elem } from './elem'
 
 class ElemDrawerService {
   private node!: S.Node

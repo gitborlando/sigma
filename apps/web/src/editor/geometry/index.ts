@@ -1,4 +1,5 @@
 export * from './base'
+export * from './hit-test'
 export * from './matrix'
 export * from './mrect'
 export * from './point'
