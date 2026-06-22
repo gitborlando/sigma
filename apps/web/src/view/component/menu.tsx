@@ -6,6 +6,7 @@ import {
   OptionBalanceItem,
   OptionBalanceItemProps,
 } from 'src/view/component/balance-item'
+import { Lucide } from 'src/view/component/lucide'
 
 export interface MenuProps extends Omit<MenuRootProps, 'children'> {
   trigger: ReactNode

@@ -4,6 +4,7 @@ import { getSetting, getZoom } from 'src/editor/utils/get'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Divider } from 'src/view/component/divider'
 import { InputNum } from 'src/view/component/input-num'
+import { Lucide } from 'src/view/component/lucide'
 import { Menu } from 'src/view/component/menu'
 
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {

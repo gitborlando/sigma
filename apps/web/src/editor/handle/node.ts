@@ -1,7 +1,11 @@
+import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clampIndex, firstOne, getSet, iife } from '@gitborlando/utils'
+import { Undo } from 'src/editor/core/undo'
+import { HandleSelect } from 'src/editor/handle/select'
 import { MRect } from 'src/editor/math'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { YState } from 'src/editor/y-state/y-state'
 import { SchemaCreator } from '../schema/creator'
 import { getSelectedNodes, getSelectIdList } from '../utils/get'
 

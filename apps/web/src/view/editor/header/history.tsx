@@ -2,11 +2,13 @@ import { objectId } from '@gitborlando/utils'
 import { Braces, Copy, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
 import type { UndoInfo } from 'src/editor/core/undo'
+import { Undo } from 'src/editor/core/undo'
 import { HandlePage } from 'src/editor/handle/page'
 import { getSelectPageId, getSetting } from 'src/editor/utils/get'
 import { BalanceItem, OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
+import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
 
 export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {

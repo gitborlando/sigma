@@ -3,8 +3,11 @@ import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import { MobxUndo } from 'src/editor/core/undo'
 import { HandleSelect } from 'src/editor/handle/select'
+import { Matrix } from 'src/editor/math'
+import { YState } from 'src/editor/y-state/y-state'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
+import { COLOR } from 'src/utils/color'
 
 class YClientsService {
   clientId!: number

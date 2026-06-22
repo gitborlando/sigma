@@ -1,3 +1,4 @@
+import { Disposer } from '@gitborlando/toolkit/disposer'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { getZoom } from 'src/editor/utils/get'

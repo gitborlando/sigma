@@ -2,6 +2,7 @@ import { ChevronsUp } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
 
 import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
+import { Lucide } from 'src/view/component/lucide'
 
 export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
   const { hasNodeExpanded, toggleAllNodeExpanded } = LayerPanelNodeTree

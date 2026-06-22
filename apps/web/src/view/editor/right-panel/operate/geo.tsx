@@ -1,5 +1,6 @@
 import { Icon } from '@gitborlando/widget'
 import { twoDecimal } from '@sigma/utils/common'
+import { Undo } from 'src/editor/core/undo'
 import { HandleNode } from 'src/editor/handle/node'
 import { DesignGeoInfo, DesignGeometry } from 'src/editor/operate/geometry'
 import { getZoom } from 'src/editor/utils/get'

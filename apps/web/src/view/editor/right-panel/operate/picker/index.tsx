@@ -1,6 +1,7 @@
 import { getSet } from '@gitborlando/utils'
 import { useClean } from '@gitborlando/utils/react'
 import Color from 'color'
+import { Undo } from 'src/editor/core/undo'
 import { OperateFill } from 'src/editor/operate/fill'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { IRGBA } from 'src/utils/color'

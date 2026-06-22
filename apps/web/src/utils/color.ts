@@ -1,3 +1,4 @@
+import Color from 'color'
 export const HUE_MAP = {
   red: 0,
   orange: 30,

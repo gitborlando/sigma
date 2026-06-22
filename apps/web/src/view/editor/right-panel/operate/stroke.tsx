@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
+import { Lucide } from 'src/view/component/lucide'
 import {
   OpFieldComp,
   OpFieldHeaderComp,

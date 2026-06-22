@@ -10,7 +10,9 @@ import {
   LayerPanelNodeInfo,
   LayerPanelNodeTree,
 } from 'src/editor/workbench/layer-panel/node-tree'
+import { YState } from 'src/editor/y-state/y-state'
 import { ContextMenu } from 'src/global/context-menu'
+import { Lucide } from 'src/view/component/lucide'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
 
 export const EditorLeftPanelLayerNodeItemComp: FC<{

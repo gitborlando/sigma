@@ -1,5 +1,7 @@
 import { Check } from 'lucide-react'
 import { EditorCommand } from 'src/editor/core/command'
+import { Undo } from 'src/editor/core/undo'
+import { HandleSelect } from 'src/editor/handle/select'
 import { ContextMenu } from 'src/global/context-menu'
 import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
 

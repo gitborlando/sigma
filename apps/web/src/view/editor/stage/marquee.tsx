@@ -1,3 +1,4 @@
+import { Matrix } from 'src/editor/math'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { getZoom } from 'src/editor/utils/get'

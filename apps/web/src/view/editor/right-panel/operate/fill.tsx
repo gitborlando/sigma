@@ -1,6 +1,7 @@
 import { Minus, Plus } from 'lucide-react'
 import { OperateFill } from 'src/editor/operate/fill'
 import { Btn } from 'src/view/component/btn'
+import { Lucide } from 'src/view/component/lucide'
 import {
   OpFieldComp,
   OpFieldContentComp,

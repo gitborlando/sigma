@@ -1,3 +1,4 @@
+import { Signal } from '@gitborlando/signal'
 import { MobxUndo } from 'src/editor/core/undo'
 
 export type HandleSelectState = {

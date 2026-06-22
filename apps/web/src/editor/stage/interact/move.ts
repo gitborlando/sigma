@@ -1,3 +1,5 @@
+import { Disposer } from '@gitborlando/toolkit/disposer'
+import { Matrix } from 'src/editor/math'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { Drag } from 'src/global/event/drag'

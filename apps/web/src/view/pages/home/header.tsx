@@ -2,6 +2,7 @@ import { Icon } from '@gitborlando/widget'
 import { Github, LucideLanguages } from 'lucide-react'
 import { UserService } from 'src/global/service/user'
 import { Btn } from 'src/view/component/btn'
+import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
 

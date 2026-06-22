@@ -1,11 +1,13 @@
 import { iife, matchCase } from '@gitborlando/utils'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { withSuspense } from '@gitborlando/utils/react'
+import Color from 'color'
 import { Eye, EyeOff } from 'lucide-react'
 import { OperateFill } from 'src/editor/operate/fill'
 import { Image } from 'src/global/service/image'
 import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
 import { InputNum } from 'src/view/component/input-num'
+import { Lucide } from 'src/view/component/lucide'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
 import { suspend } from 'suspend-react'
 

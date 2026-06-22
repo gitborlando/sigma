@@ -2,6 +2,7 @@ import { AnyObject, iife, objKeys } from '@gitborlando/utils'
 import { HandleNode } from 'src/editor/handle/node'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
+import { YState } from 'src/editor/y-state/y-state'
 import { MULTI_VALUE } from 'src/global/constant'
 import { getSelectedNodes } from '../utils/get'
 

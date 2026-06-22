@@ -1,5 +1,6 @@
 import { firstOne, lastOne, miniId, optionalSet } from '@gitborlando/utils'
 import { range } from 'es-toolkit'
+import { Matrix } from 'src/editor/math'
 import { max } from 'src/editor/math/base'
 
 export function point(option?: Partial<S.Point>): S.Point {

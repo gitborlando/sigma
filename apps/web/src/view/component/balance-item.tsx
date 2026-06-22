@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react'
+import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
 
 export const BalanceItem = forwardRef<

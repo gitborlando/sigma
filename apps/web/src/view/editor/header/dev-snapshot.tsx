@@ -1,8 +1,10 @@
 import { MobxUndoState } from '@gitborlando/mobx-undo'
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import { MobxUndo, type UndoInfo } from 'src/editor/core/undo'
+import { MobxUndo, Undo, UndoInfo } from 'src/editor/core/undo'
+import { YState } from 'src/editor/y-state/y-state'
 import { Btn } from 'src/view/component/btn'
+import { Lucide } from 'src/view/component/lucide'
 
 type SnapshotState = {
   schema: S.Schema

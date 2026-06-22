@@ -3,6 +3,7 @@ import { Layers } from 'lucide-react'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Btn } from 'src/view/component/btn'
 
+import { Lucide } from 'src/view/component/lucide'
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer'
 
 export const EditorLeftPanelIds = ['layer'] as const

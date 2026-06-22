@@ -3,6 +3,7 @@ import { getSetting } from 'src/editor/utils/get'
 import { CommonBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
+import { Lucide } from 'src/view/component/lucide'
 import { Segments } from 'src/view/component/segments'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
 
