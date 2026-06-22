@@ -32,5 +32,10 @@
     "semi": false,
     "singleQuote": true,
     "jsxSingleQuote": true
+  },
+  "pnpm": {
+    "overrides": {
+      "baseline-browser-mapping": "2.10.38"
+    }
   }
 }
