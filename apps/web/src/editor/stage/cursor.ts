@@ -61,6 +61,11 @@ class StageCursorService {
           new Blob([this.resizeSvg(this.rotation)], { type: 'image/svg+xml' }),
         )}') 14 14, auto`
       }
+      if (this.type === 'rotate') {
+        return `url('${URL.createObjectURL(
+          new Blob([this[this.type]], { type: 'image/svg+xml' }),
+        )}') 12 12, auto`
+      }
       return `url('${URL.createObjectURL(
         new Blob([this[this.type]], { type: 'image/svg+xml' }),
       )}') 5 5, auto`
