@@ -81,34 +81,24 @@ export const migrationList = [
       Object.assign(node, { ...mrect.plain(), __isNode: true })
     },
   },
-  // {
-  //   version: 2,
-  //   desc: '对所有节点: 使用8位短id代替长id',
-  //   func: (ctx: SchemaTraverseContext, schema: S.Schema) => {
-  //     const { node, parent, index } = props
-  //     node.id = miniId(8)
-  //     node.parentId = parent.id
-  //     parent.childIds[index] = node.id
-  //     schema[node.id] = node
-  //     delete schema[props.id]
-  //   },
-  // },
   {
     version: 2,
-    desc: '去除hFlip, vFlip属性, 改为flip: "x" | "y" | "xy" | undefined',
+    desc: '去除hFlip, vFlip属性或flip: "x"|"y"|"xy", 改为flip: 0|1|2|3',
     transform: (ctx: SchemaTraverseContext) => {
       const { item: node, schema } = ctx
       if (!SchemaHelper.isNode(node)) return
 
-      const hFlip = T<any>(node).hFlip
-      const vFlip = T<any>(node).vFlip
+      const old = node as any
+      const hFlip = old.hFlip || old.flip === 'x'
+      const vFlip = old.vFlip || old.flip === 'y'
+      const bothFlip = (hFlip && vFlip) || old.flip === 'xy'
 
       node.flip = 0
-      if (hFlip && vFlip) node.flip = 3
+      if (bothFlip) node.flip = 3
       else if (hFlip) node.flip = 1
       else if (vFlip) node.flip = 2
 
-      const newNode = omit(node, ['hFlip', 'vFlip'])
+      const newNode = omit(old, ['hFlip', 'vFlip'])
       schema[node.id] = newNode as S.SchemaItem
     },
   },
