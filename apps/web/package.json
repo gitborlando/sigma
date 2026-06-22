@@ -10,7 +10,6 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "bench:traverser": "tsx ../../scripts/traverser-bench.ts",
     "gen:supabase-types": "supabase gen types typescript --project-id sucnlytjgnhjgvwykfbg > ../../packages/api-types/src/supabase.ts"
   },
   "dependencies": {
