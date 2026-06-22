@@ -17,7 +17,7 @@ export const snapHalfPixel = (n: number) => {
   return Math.round(n - 0.5) + 0.5
 }
 
-export function arrayLoopGet(arr: any[], index: number) {
+export function arrayLoopGet<T>(arr: T[], index: number) {
   const loopIndex = index < 0 ? arr.length - 1 : index >= arr.length ? 0 : index
   return arr[loopIndex]
 }
