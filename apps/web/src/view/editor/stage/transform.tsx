@@ -1,6 +1,6 @@
 import { isLeftMouse } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
-import { Matrix, MRect } from 'src/editor/math'
+import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'

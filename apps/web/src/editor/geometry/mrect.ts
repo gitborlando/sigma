@@ -1,5 +1,5 @@
 import { AABB, IRect } from '@gitborlando/geo'
-import { IMatrix, Matrix } from 'src/editor/math/matrix'
+import { IMatrix, Matrix } from 'src/editor/geometry/matrix'
 
 export interface IMRect {
   width: number

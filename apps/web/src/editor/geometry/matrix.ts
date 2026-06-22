@@ -1,5 +1,5 @@
 import { AABB } from '@gitborlando/geo'
-import { max, min } from 'src/editor/math/base'
+import { max, min } from 'src/editor/geometry/base'
 
 export type IMatrix = {
   a: number

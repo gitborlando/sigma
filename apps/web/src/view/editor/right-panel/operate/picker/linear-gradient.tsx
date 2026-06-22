@@ -1,5 +1,5 @@
 import { Undo } from 'src/editor/core/undo'
-import { max, min } from 'src/editor/math'
+import { max, min } from 'src/editor/geometry'
 import { OperateFill } from 'src/editor/operate/fill'
 import { Drag } from 'src/global/event/drag'
 import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'

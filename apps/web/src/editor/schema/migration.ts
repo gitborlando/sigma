@@ -1,7 +1,7 @@
 import { XY } from '@gitborlando/geo'
 import { clone } from '@gitborlando/utils'
 import { omit } from 'es-toolkit'
-import { MRect } from 'src/editor/math'
+import { MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import {
   createSchemaTraverse,

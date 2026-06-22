@@ -1,7 +1,7 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { Undo } from 'src/editor/core/undo'
 import { HandleSelect } from 'src/editor/handle/select'
-import { IMatrix, Matrix } from 'src/editor/math'
+import { IMatrix, Matrix } from 'src/editor/geometry'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YState } from 'src/editor/y-state/y-state'
 import { SchemaCreator } from '../schema/creator'

@@ -1,5 +1,5 @@
 import { isNil } from 'es-toolkit'
-import { Matrix } from 'src/editor/math'
+import { Matrix } from 'src/editor/geometry'
 
 type SchemaFinder = <T extends S.SchemaItem>(id: string) => T
 

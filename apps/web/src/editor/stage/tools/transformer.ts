@@ -1,6 +1,6 @@
 import { iife } from '@gitborlando/utils'
 import { Undo } from 'src/editor/core/undo'
-import { IMRect, Matrix, MRect } from 'src/editor/math'
+import { IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'

@@ -1,4 +1,4 @@
-import { MRect } from 'src/editor/math'
+import { MRect } from 'src/editor/geometry'
 import { SchemaCreator } from 'src/editor/schema/creator'
 
 export function mock() {

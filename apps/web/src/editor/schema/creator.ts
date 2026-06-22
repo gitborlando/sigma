@@ -1,12 +1,12 @@
 import { XY } from '@gitborlando/geo'
 import { clone, getSet, miniId } from '@gitborlando/utils'
 import { defuOverrideArray } from '@sigma/utils/defu'
-import { Matrix } from 'src/editor/math'
+import { Matrix } from 'src/editor/geometry'
 import {
   createLine,
   createRegularPolygon,
   createStarPolygon,
-} from 'src/editor/math/point'
+} from 'src/editor/geometry/point'
 import { getLatestVersion } from 'src/editor/schema/migration'
 import { COLOR } from 'src/utils/color'
 import { T } from 'src/utils/common'

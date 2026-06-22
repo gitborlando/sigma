@@ -4,9 +4,9 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { createTraverser } from '@gitborlando/toolkit/traverser'
 import type { NoopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
-import { Matrix, max } from 'src/editor/math'
-import { abs, round } from 'src/editor/math/base'
-import { IMatrix } from 'src/editor/math/matrix'
+import { Matrix, max } from 'src/editor/geometry'
+import { abs, round } from 'src/editor/geometry/base'
+import { IMatrix } from 'src/editor/geometry/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
