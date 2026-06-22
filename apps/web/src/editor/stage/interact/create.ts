@@ -106,7 +106,10 @@ class StageCreateService {
 
   private createNode(rect: IRect) {
     const mrect = this.calcNodeMRect(rect)
-    const node = SchemaCreator[this.currentType]({ ...mrect.plain() })
+    const node = SchemaCreator[this.currentType]({
+      ...mrect.plain(),
+      name: SchemaCreator.createNodeName(this.currentType),
+    })
     return (this.node = node)
   }
 

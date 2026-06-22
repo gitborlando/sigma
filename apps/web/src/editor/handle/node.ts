@@ -1,8 +1,8 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clampIndex, firstOne, getSet, iife } from '@gitborlando/utils'
 import { Undo } from 'src/editor/core/undo'
-import { HandleSelect } from 'src/editor/handle/select'
 import { MRect } from 'src/editor/geometry'
+import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { YState } from 'src/editor/y-state/y-state'
@@ -102,7 +102,9 @@ class HandleNodeService {
           if (!parent || !SchemaHelper.isNode(item)) return false
 
           const newParent = forwardCtx?.newNode || parent
-          const newNode = SchemaCreator.clone(item)
+          const newNode = SchemaCreator.clone(item, {
+            name: SchemaCreator.createNodeName(item.type),
+          })
           this.addNodes([newNode])
           this.insertChildAt(newParent as S.NodeParent, newNode)
           ctx.newNode = newNode
