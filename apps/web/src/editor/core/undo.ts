@@ -1,6 +1,5 @@
 import { MobxUndoService, MobxUndoState } from '@gitborlando/mobx-undo'
 import { matchCase } from '@gitborlando/utils'
-import autoBind from 'auto-bind'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
 import type { ImmutPatch } from 'src/utils/immut/immut'
 import * as Y from 'yjs'

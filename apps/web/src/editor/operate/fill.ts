@@ -1,6 +1,5 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
-import autoBind from 'auto-bind'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
 import { Undo } from 'src/editor/core/undo'
