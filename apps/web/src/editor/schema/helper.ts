@@ -2,6 +2,10 @@ import { isNil } from 'es-toolkit'
 import { Matrix } from 'src/editor/geometry'
 
 type SchemaFinder = <T extends S.SchemaItem>(id: string) => T
+type SpecificSchemaItem<T extends S.SchemaItem['type']> = Extract<
+  S.SchemaItem,
+  { type: T }
+>
 
 const missingFinder: SchemaFinder = () => {
   throw new Error('SchemaHelper.find is not configured')
@@ -18,21 +22,22 @@ export class SchemaHelper {
     return id.startsWith('page_')
   }
 
-  static is<T extends S.SchemaItem>(
+  static isById(id: ID, type: S.SchemaItem['type'] | 'nodeParent'): boolean {
+    if (type === 'nodeParent')
+      return ['page', 'frame', 'group'].includes(this.find(id).type)
+    return this.find(id).type === type
+  }
+
+  static is<T extends S.SchemaItem['type']>(
     item: S.SchemaItem,
-    type: S.SchemaItem['type'],
-  ): item is T {
+    type: T,
+  ): item is SpecificSchemaItem<T>
+  static is(item: S.SchemaItem, type: S.SchemaItem['type']) {
     return item.type === type
   }
 
   static isNode(item?: S.SchemaItem): item is S.Node {
     return !isNil(item) && '__isNode' in item && item.__isNode
-  }
-
-  static isById(id: ID, type: S.SchemaItem['type'] | 'nodeParent'): boolean {
-    if (type === 'nodeParent')
-      return ['page', 'frame', 'group'].includes(this.find(id).type)
-    return this.find(id).type === type
   }
 
   static isNodeParent<T extends S.NodeParent>(node: S.SchemaItem): node is T {
@@ -62,7 +67,7 @@ export class SchemaHelper {
 
   static findParent(node: S.Node) {
     while (node.parentId) {
-      if (SchemaHelper.is<S.Frame>(node, 'frame')) return node
+      if (SchemaHelper.is(node, 'frame')) return node
       node = this.find<S.Node>(node.parentId)
     }
     return node
