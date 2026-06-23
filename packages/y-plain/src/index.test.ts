@@ -11,6 +11,21 @@ type EditorState = {
   }[]
 }
 
+type Rectangle = {
+  id: string
+  width: number
+  fills: {
+    color: string
+  }[]
+}
+
+type FlatState = {
+  meta: {
+    pageIds: string[]
+  }
+  [id: string]: any
+}
+
 const createPlain = () => {
   const doc = new Y.Doc()
   const yMap = doc.getMap('state')
@@ -45,6 +60,47 @@ describe('YPlain', () => {
       title: 'Draft',
       nodes: [{ id: 'node-1', name: 'Footer' }],
     })
+  })
+
+  it('writes id-keyed record paths with an explicit item type', () => {
+    const doc = new Y.Doc()
+    const yMap = doc.getMap('state')
+    const rect: Rectangle = {
+      id: 'rect-1',
+      width: 100,
+      fills: [{ color: 'red' }],
+    }
+    const plain = new YPlain<FlatState>(yMap, {
+      meta: { pageIds: [] },
+      [rect.id]: rect,
+    })
+    const disposeObserve = plain.observe()
+
+    expect(plain.set<Rectangle>([rect.id, 'width'], 120)).toBe(true)
+    expect(plain.replace<Rectangle>([rect.id, 'fills', 0, 'color'], 'blue')).toBe(
+      true,
+    )
+    expect(plain.insert<Rectangle>([rect.id, 'fills'], { color: 'green' })).toBe(
+      true,
+    )
+    expect(plain.set<Rectangle>(['rect-2'], { ...rect, id: 'rect-2' })).toBe(true)
+    expect(plain.delete<Rectangle>([rect.id, 'fills', 0])).toBe(true)
+
+    expect(plain.state).toEqual({
+      meta: { pageIds: [] },
+      'rect-1': {
+        id: 'rect-1',
+        width: 120,
+        fills: [{ color: 'green' }],
+      },
+      'rect-2': {
+        id: 'rect-2',
+        width: 100,
+        fills: [{ color: 'red' }],
+      },
+    })
+
+    disposeObserve()
   })
 
   it('rejects invalid paths and non-serializable values', () => {

@@ -138,6 +138,28 @@ export type YPlainInsertValue<T, P extends YPlainPath> = P extends readonly [
     ? Item
     : never
 
+export type YPlainRecordPath<T, Depth extends YPlainDepthKey = 6> =
+  | readonly [string]
+  | readonly [string, ...YPlainTypedPath<T, Depth>]
+
+export type YPlainRecordPathValue<T, P extends YPlainPath> = P extends readonly [
+  string,
+]
+  ? T
+  : P extends readonly [string, ...infer Rest extends YPlainPath]
+    ? YPlainPathValue<T, Rest>
+    : never
+
+export type YPlainRecordInsertValue<T, P extends YPlainPath> = P extends readonly [
+  string,
+]
+  ? T extends readonly (infer Item)[]
+    ? Item
+    : never
+  : P extends readonly [string, ...infer Rest extends YPlainPath]
+    ? YPlainInsertValue<T, Rest>
+    : never
+
 type YPlainNestedPath<
   Key extends YPlainPathKey,
   Value,
@@ -233,15 +255,31 @@ export class YPlain<T extends AnyObject = AnyObject> {
     }
   }
 
-  get = <const P extends YPlainTypedPath<T>>(path: P) =>
-    getPlainValue(this.plainState, path) as YPlainPathValue<T, P>
+  get<const P extends YPlainTypedPath<T>>(path: P): YPlainPathValue<T, P>
+  get<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
+    path: P,
+  ): YPlainRecordPathValue<Item, P>
+  get(path: YPlainPath) {
+    return getPlainValue(this.plainState, path)
+  }
 
-  getY = <const P extends YPlainTypedPath<T>>(path: P) => this.getYValue(path)
+  getY<const P extends YPlainTypedPath<T>>(path: P): unknown
+  getY<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
+    path: P,
+  ): unknown
+  getY(path: YPlainPath) {
+    return this.getYValue(path)
+  }
 
-  insert = <const P extends YPlainTypedPath<T>>(
+  insert<const P extends YPlainTypedPath<T>>(
     path: P,
     value: YPlainInsertValue<T, P>,
-  ) => {
+  ): boolean
+  insert<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
+    path: P,
+    value: YPlainRecordInsertValue<Item, P>,
+  ): boolean
+  insert(path: YPlainPath, value: unknown) {
     const key = path[path.length - 1]
     const hasIndex = isYPlainArrayIndex(key)
     const target = hasIndex
@@ -258,11 +296,16 @@ export class YPlain<T extends AnyObject = AnyObject> {
     return true
   }
 
-  set = <const P extends YPlainTypedPath<T>>(
+  set<const P extends YPlainTypedPath<T>>(
     path: P,
     value: YPlainPathValue<T, P> | undefined,
-  ) => {
-    if (value === undefined) return this.delete(path)
+  ): boolean
+  set<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
+    path: P,
+    value: YPlainRecordPathValue<Item, P> | undefined,
+  ): boolean
+  set(path: YPlainPath, value: unknown) {
+    if (value === undefined) return this.deleteYPath(path)
 
     const target = this.getYParent(path)
     if (!target) return false
@@ -289,10 +332,15 @@ export class YPlain<T extends AnyObject = AnyObject> {
     return true
   }
 
-  replace = <const P extends YPlainTypedPath<T>>(
+  replace<const P extends YPlainTypedPath<T>>(
     path: P,
     value: YPlainPathValue<T, P> | undefined,
-  ) => {
+  ): boolean
+  replace<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
+    path: P,
+    value: YPlainRecordPathValue<Item, P> | undefined,
+  ): boolean
+  replace(path: YPlainPath, value: unknown) {
     const target = this.getYParent(path)
     if (!target) return false
 
@@ -328,7 +376,15 @@ export class YPlain<T extends AnyObject = AnyObject> {
     return true
   }
 
-  delete = <const P extends YPlainTypedPath<T>>(path: P) => {
+  delete<const P extends YPlainTypedPath<T>>(path: P): boolean
+  delete<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
+    path: P,
+  ): boolean
+  delete(path: YPlainPath) {
+    return this.deleteYPath(path)
+  }
+
+  private deleteYPath(path: YPlainPath) {
     const target = this.getYParent(path)
     if (!target) return false
 
