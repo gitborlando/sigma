@@ -17,8 +17,5 @@
   "dependencies": {
     "defu": "^6.1.4",
     "zod": "3.25.76"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3"
   }
 }

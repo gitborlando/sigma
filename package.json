@@ -13,13 +13,16 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "typecheck:web": "pnpm --filter @sigma/web typecheck",
     "edgeone": "pnpm --filter @sigma/web edgeone",
-    "gen:supabase-types": "pnpm --filter @sigma/web gen:supabase-types",
     "prepare": "simple-git-hooks",
-    "re-base:main": "git fetch origin main && git rebase origin/main"
+    "re-base:main": "git fetch origin main && git rebase origin/main",
+    "re-i": "find . -path ./.git -prune -o -name node_modules -type d -prune -exec rm -rf '{}' + && pnpm i"
   },
   "devDependencies": {
     "pretty-quick": "^4.2.2",
-    "simple-git-hooks": "^2.13.1"
+    "simple-git-hooks": "^2.13.1",
+    "tsx": "^4.22.4",
+    "typescript": "7.0.1-rc",
+    "vitest": "^4.1.9"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec pretty-quick --staged"

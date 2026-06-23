@@ -16,6 +16,15 @@ importers:
       simple-git-hooks:
         specifier: ^2.13.1
         version: 2.13.1
+      tsx:
+        specifier: ^4.22.4
+        version: 4.22.4
+      typescript:
+        specifier: 7.0.1-rc
+        version: 7.0.1-rc
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@24.13.2)(happy-dom@15.11.7)(vite@7.3.5(@types/node@24.13.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4))
 
   apps/web:
     dependencies:
@@ -254,12 +263,6 @@ importers:
       supabase:
         specifier: ^2.53.6
         version: 2.107.0
-      tsx:
-        specifier: ^4.20.6
-        version: 4.22.4
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
       unplugin-auto-import:
         specifier: ^19.3.0
         version: 19.3.0(@nuxt/kit@3.21.8)
@@ -273,11 +276,7 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(vite@7.3.5(@types/node@24.13.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4))
 
-  packages/api-types:
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+  packages/api-types: {}
 
   packages/mobx-undo:
     dependencies:
@@ -288,12 +287,6 @@ importers:
       mobx:
         specifier: ^6.15.0
         version: 6.16.1
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.4
-        version: 3.2.6(@types/node@24.13.2)(happy-dom@15.11.7)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)
 
   packages/nested-assets:
     dependencies:
@@ -307,9 +300,6 @@ importers:
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
       vite:
         specifier: ^7.3.5
         version: 7.3.5(@types/node@24.13.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)
@@ -322,10 +312,6 @@ importers:
       zod:
         specifier: 3.25.76
         version: 3.25.76
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
   packages/toolkit:
     dependencies:
@@ -335,22 +321,9 @@ importers:
       '@gitborlando/signal':
         specifier: ^1.0.2
         version: 1.0.2(react@18.3.1)
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
   packages/y-plain:
     devDependencies:
-      tsx:
-        specifier: ^4.20.6
-        version: 4.22.4
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.4
-        version: 3.2.6(@types/node@24.13.2)(happy-dom@15.11.7)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)
       yjs:
         specifier: ^13.6.27
         version: 13.6.31
@@ -1943,7 +1916,6 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   '@oxc-parser/binding-linux-arm64-musl@0.82.3':
     resolution:
@@ -1953,7 +1925,6 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   '@oxc-parser/binding-linux-riscv64-gnu@0.82.3':
     resolution:
@@ -1963,7 +1934,6 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [riscv64]
     os: [linux]
-    libc: [glibc]
 
   '@oxc-parser/binding-linux-s390x-gnu@0.82.3':
     resolution:
@@ -1973,7 +1943,6 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [s390x]
     os: [linux]
-    libc: [glibc]
 
   '@oxc-parser/binding-linux-x64-gnu@0.82.3':
     resolution:
@@ -1983,7 +1952,6 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   '@oxc-parser/binding-linux-x64-musl@0.82.3':
     resolution:
@@ -1993,7 +1961,6 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   '@oxc-parser/binding-wasm32-wasi@0.82.3':
     resolution:
@@ -2163,7 +2130,6 @@ packages:
       }
     cpu: [arm]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.62.2':
     resolution:
@@ -2172,7 +2138,6 @@ packages:
       }
     cpu: [arm]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.62.2':
     resolution:
@@ -2181,7 +2146,6 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.62.2':
     resolution:
@@ -2190,7 +2154,6 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-loong64-gnu@4.62.2':
     resolution:
@@ -2199,7 +2162,6 @@ packages:
       }
     cpu: [loong64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-loong64-musl@4.62.2':
     resolution:
@@ -2208,7 +2170,6 @@ packages:
       }
     cpu: [loong64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-ppc64-gnu@4.62.2':
     resolution:
@@ -2217,7 +2178,6 @@ packages:
       }
     cpu: [ppc64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-ppc64-musl@4.62.2':
     resolution:
@@ -2226,7 +2186,6 @@ packages:
       }
     cpu: [ppc64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-riscv64-gnu@4.62.2':
     resolution:
@@ -2235,7 +2194,6 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-musl@4.62.2':
     resolution:
@@ -2244,7 +2202,6 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-s390x-gnu@4.62.2':
     resolution:
@@ -2253,7 +2210,6 @@ packages:
       }
     cpu: [s390x]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.62.2':
     resolution:
@@ -2262,7 +2218,6 @@ packages:
       }
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.62.2':
     resolution:
@@ -2271,7 +2226,6 @@ packages:
       }
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-openbsd-x64@4.62.2':
     resolution:
@@ -2339,6 +2293,70 @@ packages:
         integrity: sha512-tNaQmBgodDZwgB40mRwVbxFy8IDYwjdpcZ0BYrWiwlULCSQoJj4QoG4zgJT7QRPXcqipefNOzvO/qAu4dF98ag==,
       }
     engines: { node: '>=20.0.0' }
+
+  '@supabase/cli-darwin-arm64@2.107.0':
+    resolution:
+      {
+        integrity: sha512-930MojHei14+PrGNF0QzlPJAjOYilCofgO9aTtKiQ6x36ZUI7dc4ujl5VzccC/19ex/f4ird0lH1d2U92MwDqQ==,
+      }
+    cpu: [arm64]
+    os: [darwin]
+
+  '@supabase/cli-darwin-x64@2.107.0':
+    resolution:
+      {
+        integrity: sha512-qcnichkHiCCNybtCqoeqYO6q8WuTxilaah18QilZskEM+zCSdV5rOXXfeF1BPexRxsvGYbghZ+fEQfWp7+lOUQ==,
+      }
+    cpu: [x64]
+    os: [darwin]
+
+  '@supabase/cli-linux-arm64-musl@2.107.0':
+    resolution:
+      {
+        integrity: sha512-5se1bYRIzivL+ehImnwFjBpzKZ+AwLS6/cBg6lvJOJdWatuaK9Edu6wOZAmPjVMy4vZRJ27tdL+3F7N+Vk64AA==,
+      }
+    cpu: [arm64]
+    os: [linux]
+
+  '@supabase/cli-linux-arm64@2.107.0':
+    resolution:
+      {
+        integrity: sha512-an0dsOhPcLQXZ0sFEBm6NU1HFUjXCStHxetfJvgt4u7SiH/EyDMLfDvV7W9ef56bgG+3hoWHtih2Kplj3cecQA==,
+      }
+    cpu: [arm64]
+    os: [linux]
+
+  '@supabase/cli-linux-x64-musl@2.107.0':
+    resolution:
+      {
+        integrity: sha512-gXDzvDsmmJw9HbeVRFD6xboGwbu/cpBp84ZESEcXKyB8Onvs3igWKwoXMofx+ppFM1EaZb/flTwJ77b19EMD1A==,
+      }
+    cpu: [x64]
+    os: [linux]
+
+  '@supabase/cli-linux-x64@2.107.0':
+    resolution:
+      {
+        integrity: sha512-8ttnpfBFEXk0JFmH6gw8ZCVcMa/UNH1sD6iG9PQLbK2eXdZ6kDIzGs5g+CEvxZ3j6HxEIYn9h9rfxoqGoBUgwA==,
+      }
+    cpu: [x64]
+    os: [linux]
+
+  '@supabase/cli-windows-arm64@2.107.0':
+    resolution:
+      {
+        integrity: sha512-V/4q5dbDgBQXhDAJaHamTm9u/kY2UJ4nNibVKOYMaLh9q7H74b8unteJ+rYHSwWZy0EIT8DTDryGP6xatKQicw==,
+      }
+    cpu: [arm64]
+    os: [win32]
+
+  '@supabase/cli-windows-x64@2.107.0':
+    resolution:
+      {
+        integrity: sha512-ciDDFUGHt6bFjtVD00cojFhB5oscZAyjPo2vg94RGUeKHXx1zo/UzfMvUlCA32y5b5KONZ4TKStCHhlFK7Clrw==,
+      }
+    cpu: [x64]
+    os: [win32]
 
   '@supabase/functions-js@2.108.2':
     resolution:
@@ -2446,7 +2464,6 @@ packages:
     engines: { node: '>= 20' }
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   '@tailwindcss/oxide-linux-arm64-musl@4.3.1':
     resolution:
@@ -2456,7 +2473,6 @@ packages:
     engines: { node: '>= 20' }
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   '@tailwindcss/oxide-linux-x64-gnu@4.3.1':
     resolution:
@@ -2466,7 +2482,6 @@ packages:
     engines: { node: '>= 20' }
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   '@tailwindcss/oxide-linux-x64-musl@4.3.1':
     resolution:
@@ -2476,7 +2491,6 @@ packages:
     engines: { node: '>= 20' }
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   '@tailwindcss/oxide-wasm32-wasi@4.3.1':
     resolution:
@@ -2762,6 +2776,186 @@ packages:
         integrity: sha512-6fJ9MHWtK14C1DSkiMlHUSOmrVebL7150xZJBlJiL62jjhIA4JmOq6flwBgDxIdBKKdoiZRel+dfPD5MLfny3w==,
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
+
+  '@typescript/typescript-aix-ppc64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-oqq2ZfEJ7BQuufcC3QBQndZLPNyamYNHLao8lKRBeeSkZKypBqxPSgkzrcFZtbYcIaBvpiyUnQP9MT7DEYHWbw==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [ppc64]
+    os: [aix]
+
+  '@typescript/typescript-darwin-arm64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-Slc0yTftT2F/uGDmtPst8ijydneL6uZaLEyr2UjahxZpbhTjHFBJ5agXtVz/TL4A+ldxzjzj+E8QtLZlh/5mXw==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [arm64]
+    os: [darwin]
+
+  '@typescript/typescript-darwin-x64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-h68iFW/LbA1/BsGgSRGFw981/3s1f/rY27YrmeZNuN+ly7dI+fiDduwT9ZT9866x2onoKNRq7PTyxSKyKDzfAQ==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [x64]
+    os: [darwin]
+
+  '@typescript/typescript-freebsd-arm64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-DE+ppd8Ix2c6OMuRkKY4PJ4hngMGJ9M95OQUP17p9xL/1IKXof7npIeuusMN/bgL5o5JzMfSGh+N+5scTYRg0Q==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [arm64]
+    os: [freebsd]
+
+  '@typescript/typescript-freebsd-x64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-ST1ozHMw0u+CLOnWkcTyWDMV4Qn9osZ6fd1V1lnKDM1t0hZIp81mdGpdHxyHJjd7jdGrb6Gb/QXcZ1uqZ0t5zw==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [x64]
+    os: [freebsd]
+
+  '@typescript/typescript-linux-arm64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-N46pRihK3t5zD5MUtTQcdmQUqr1WI4U2nxno1gLwOtRSsB4krFkRjPHcQNG7h2DtRkX64rQiReX6WKwg2wprMA==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [arm64]
+    os: [linux]
+
+  '@typescript/typescript-linux-arm@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-gHmHwT5Naq5CKM8g9bbaGeEpnwQEvWCLn3fwP4K2m61VQdDKkPk0Dhab/OoZ4LV2SrMddmclYXTzpyg23YGt5g==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [arm]
+    os: [linux]
+
+  '@typescript/typescript-linux-loong64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-G17Sao312rgiPBTh2F4nOpLpa3CcnBSaNhqNghZk2LNhnsp1RaMO5HMq2me21gqu9xLpc6CIgHtOzU6JBgNlfg==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [loong64]
+    os: [linux]
+
+  '@typescript/typescript-linux-mips64el@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-0FQspOb5UsQ4tQKvWgUO3pS9OIWkP7/8dPRWq+CRazJUeQZ4LBjtYK52jg5iIOrvItrVl2CwvRtrU3/9OihwJg==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [mips64el]
+    os: [linux]
+
+  '@typescript/typescript-linux-ppc64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-SUmwfVBEv6A2Ld0eWfcvW0FqrgemfQL8jFGOmV1qYxsDqumjE5DekHXqbstgmbE4SHr4rrjHjvmuGCY+kTH/vw==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [ppc64]
+    os: [linux]
+
+  '@typescript/typescript-linux-riscv64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-rxeqnNnGiYzv/LlPHi/3+4p0ooR1cNJLjRIHXKovtiVmxXGJq6gtw8VSpbHuWPekyFMXgIAoLCZN0SQ51rAALQ==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [riscv64]
+    os: [linux]
+
+  '@typescript/typescript-linux-s390x@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-RYWCHCiPypxajdRHM2CNK/eM22e4Ex5TTjV2pXf7PTtBowGr0xX8i8kIMknyZS0LX2QfleYHouaoMVsFDSle3g==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [s390x]
+    os: [linux]
+
+  '@typescript/typescript-linux-x64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-PfLJSu0JzroDkqw2m4nqflPEcn8yev0m/vHFQlY9EzHorzjR6QG0wL8AJHvnD1e6h1s76AZngJ5u+z1K/D/HKw==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [x64]
+    os: [linux]
+
+  '@typescript/typescript-netbsd-arm64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-FfbPxH3dTfp8yVIaNM7bdWTixXuyxpzoemluqcqMROSIz+ImpCG3Q9HO9Ptzp9/giv+P9YYEnCMSXh61migj2w==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [arm64]
+    os: [netbsd]
+
+  '@typescript/typescript-netbsd-x64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-FzdTfSzhRYb6hlav6K3cI5RVgcvCTvNAu/vc+t7B6AmZkThQ+t/1ntnvT5fnHmY1Az2RIBw7/b+qtCEG61HJTQ==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [x64]
+    os: [netbsd]
+
+  '@typescript/typescript-openbsd-arm64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-PQGhlxfNig+0YQ9Wwzd0USPBkt6w/ZqkBQWsU7G/0JkTzunJel+jSWwhKw4947pak/m7hGSeYiI04xReDLGZww==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [arm64]
+    os: [openbsd]
+
+  '@typescript/typescript-openbsd-x64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-WJ7NYgO2mHmLUkI/tZ+hl8lFd26QPJqO8ONOHNuYbdsybLvSB6B6sep222JIVrOfPRDGvFinbGGB+l3m1FWRWA==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [x64]
+    os: [openbsd]
+
+  '@typescript/typescript-sunos-x64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-UYjDeUxd765V9qcwlUPk4pEXyL0i3G76CJm9baK4i99u1pGO1psf3nXDw4MMmElVOPvGbZag99ZR/O59E2OX6w==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [x64]
+    os: [sunos]
+
+  '@typescript/typescript-win32-arm64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-KzXzFSXZOm7zvEt2Aw0MsB2LbTL88znAiVqTDNAOHdlEb7brgmUQh/X2wM/8Be+N0fjEqWKl65cBKNwpWEbJiw==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [arm64]
+    os: [win32]
+
+  '@typescript/typescript-win32-x64@7.0.1-rc':
+    resolution:
+      {
+        integrity: sha512-98R3+OqDr/r0/PLWEoXu88AE0lGVLNd335Ew8ONgzK1JWkNs4ou/5BGt3Or1ij4iXjH+c7PRL+jFjCbtWze+EA==,
+      }
+    engines: { node: '>=16.20.0' }
+    cpu: [x64]
+    os: [win32]
 
   '@vercel/nft@0.29.4':
     resolution:
@@ -4903,6 +5097,7 @@ packages:
       {
         integrity: sha512-SHG6CKUfWfYyYXGpW143NEZtcVVn8S/WHcEOxk62LuDXnY4Zpmc+WmxJKN6GMTgTClXJXhEM5KQlxKY6YjbucQ==,
       }
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       esbuild: '*'
 
@@ -6396,7 +6591,6 @@ packages:
     engines: { node: '>= 12.0.0' }
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   lightningcss-linux-arm64-musl@1.32.0:
     resolution:
@@ -6406,7 +6600,6 @@ packages:
     engines: { node: '>= 12.0.0' }
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   lightningcss-linux-x64-gnu@1.32.0:
     resolution:
@@ -6416,7 +6609,6 @@ packages:
     engines: { node: '>= 12.0.0' }
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   lightningcss-linux-x64-musl@1.32.0:
     resolution:
@@ -6426,7 +6618,6 @@ packages:
     engines: { node: '>= 12.0.0' }
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   lightningcss-win32-arm64-msvc@1.32.0:
     resolution:
@@ -8836,6 +9027,14 @@ packages:
     engines: { node: '>=14.17' }
     hasBin: true
 
+  typescript@7.0.1-rc:
+    resolution:
+      {
+        integrity: sha512-drEP77wK7CCDlPfXZH4e008UUQOsw1DFmHmZOZjuNA+yoDLLnSNMZRXi90NbV/1LVo7SbNLq1bs3jjvk49TEqQ==,
+      }
+    engines: { node: '>=16.20.0' }
+    hasBin: true
+
   ufo@1.6.4:
     resolution:
       {
@@ -9005,7 +9204,7 @@ packages:
       {
         integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==,
       }
-    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   validate-npm-package-license@3.0.4:
@@ -10577,6 +10776,30 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@supabase/cli-darwin-arm64@2.107.0':
+    optional: true
+
+  '@supabase/cli-darwin-x64@2.107.0':
+    optional: true
+
+  '@supabase/cli-linux-arm64-musl@2.107.0':
+    optional: true
+
+  '@supabase/cli-linux-arm64@2.107.0':
+    optional: true
+
+  '@supabase/cli-linux-x64-musl@2.107.0':
+    optional: true
+
+  '@supabase/cli-linux-x64@2.107.0':
+    optional: true
+
+  '@supabase/cli-windows-arm64@2.107.0':
+    optional: true
+
+  '@supabase/cli-windows-x64@2.107.0':
+    optional: true
+
   '@supabase/functions-js@2.108.2':
     dependencies:
       tslib: 2.8.1
@@ -10821,6 +11044,66 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.61.1
       eslint-visitor-keys: 5.0.1
+
+  '@typescript/typescript-aix-ppc64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-darwin-arm64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-darwin-x64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-freebsd-arm64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-freebsd-x64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-linux-arm64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-linux-arm@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-linux-loong64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-linux-mips64el@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-linux-ppc64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-linux-riscv64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-linux-s390x@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-linux-x64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-netbsd-arm64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-netbsd-x64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-openbsd-arm64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-openbsd-x64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-sunos-x64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-win32-arm64@7.0.1-rc':
+    optional: true
+
+  '@typescript/typescript-win32-x64@7.0.1-rc':
+    optional: true
 
   '@vercel/nft@0.29.4(rollup@4.62.2)':
     dependencies:
@@ -14691,7 +14974,16 @@ snapshots:
       tinyglobby: 0.2.17
       ts-interface-checker: 0.1.13
 
-  supabase@2.107.0: {}
+  supabase@2.107.0:
+    optionalDependencies:
+      '@supabase/cli-darwin-arm64': 2.107.0
+      '@supabase/cli-darwin-x64': 2.107.0
+      '@supabase/cli-linux-arm64': 2.107.0
+      '@supabase/cli-linux-arm64-musl': 2.107.0
+      '@supabase/cli-linux-x64': 2.107.0
+      '@supabase/cli-linux-x64-musl': 2.107.0
+      '@supabase/cli-windows-arm64': 2.107.0
+      '@supabase/cli-windows-x64': 2.107.0
 
   supports-color@7.2.0:
     dependencies:
@@ -14931,6 +15223,29 @@ snapshots:
       reflect.getprototypeof: 1.0.10
 
   typescript@5.9.3: {}
+
+  typescript@7.0.1-rc:
+    optionalDependencies:
+      '@typescript/typescript-aix-ppc64': 7.0.1-rc
+      '@typescript/typescript-darwin-arm64': 7.0.1-rc
+      '@typescript/typescript-darwin-x64': 7.0.1-rc
+      '@typescript/typescript-freebsd-arm64': 7.0.1-rc
+      '@typescript/typescript-freebsd-x64': 7.0.1-rc
+      '@typescript/typescript-linux-arm': 7.0.1-rc
+      '@typescript/typescript-linux-arm64': 7.0.1-rc
+      '@typescript/typescript-linux-loong64': 7.0.1-rc
+      '@typescript/typescript-linux-mips64el': 7.0.1-rc
+      '@typescript/typescript-linux-ppc64': 7.0.1-rc
+      '@typescript/typescript-linux-riscv64': 7.0.1-rc
+      '@typescript/typescript-linux-s390x': 7.0.1-rc
+      '@typescript/typescript-linux-x64': 7.0.1-rc
+      '@typescript/typescript-netbsd-arm64': 7.0.1-rc
+      '@typescript/typescript-netbsd-x64': 7.0.1-rc
+      '@typescript/typescript-openbsd-arm64': 7.0.1-rc
+      '@typescript/typescript-openbsd-x64': 7.0.1-rc
+      '@typescript/typescript-sunos-x64': 7.0.1-rc
+      '@typescript/typescript-win32-arm64': 7.0.1-rc
+      '@typescript/typescript-win32-x64': 7.0.1-rc
 
   ufo@1.6.4: {}
 
