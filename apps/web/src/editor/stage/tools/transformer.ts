@@ -184,11 +184,9 @@ class StageTransformerService {
       startMRect.transform(localDiff)
     }
 
-    YState.setProp(node.id, {
-      width: startMRect.width,
-      height: startMRect.height,
-      matrix: startMRect.matrix,
-    })
+    YState.set<S.Node>([node.id, 'width'], startMRect.width)
+    YState.set<S.Node>([node.id, 'height'], startMRect.height)
+    YState.set<S.Node>([node.id, 'matrix'], startMRect.matrix)
   }
 }
 

@@ -228,9 +228,9 @@ function replaceSchema(schema: S.Schema) {
 
   YState.transact(() => {
     currentKeys.forEach((key) => {
-      if (!(key in schema)) YState.delete(key)
+      if (!(key in schema)) YState.delete<any>([key])
     })
-    nextKeys.forEach((key) => YState.set(key, schema[key]))
+    nextKeys.forEach((key) => YState.set<any>([key], schema[key]))
   })
 }
 
@@ -318,31 +318,29 @@ function getValidPageId(pageId: string) {
 
 function applyStatePatches(patches: UndoInfo['statePatches']) {
   patches?.forEach((patch) => {
-    const keyPath = patch.keys.join('.')
-
     switch (patch.type) {
       case 'add':
         if (shouldInsertPatch(patch.keys))
-          YState.insert(keyPath, toPlain(patch.value))
-        else YState.set(keyPath, toPlain(patch.value))
+          YState.insert(patch.keys, toPlain(patch.value))
+        else YState.set(patch.keys, toPlain(patch.value))
         return
       case 'replace':
-        YState.set(keyPath, toPlain(patch.value))
+        YState.set(patch.keys, toPlain(patch.value))
         return
       case 'remove':
-        YState.delete(keyPath)
+        YState.delete(patch.keys)
     }
   })
 }
 
-function shouldInsertPatch(keys: (string | number)[]) {
+function shouldInsertPatch(keys: readonly (string | number)[]) {
   const lastIndex = Number(keys[keys.length - 1])
   if (Number.isNaN(lastIndex)) return false
 
   return Array.isArray(getSchemaValue(keys.slice(0, -1)))
 }
 
-function getSchemaValue(keys: (string | number)[]) {
+function getSchemaValue(keys: readonly (string | number)[]) {
   let current: any = YState.state
   keys.forEach((key) => {
     current = current?.[key]

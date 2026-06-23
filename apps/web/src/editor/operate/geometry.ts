@@ -142,22 +142,25 @@ class DesignGeometryService {
       }
       if (key === 'radius') {
         const radius = max(0, T<any>(node).radius + this.delta(key, node))
-        YState.set(`${node.id}.radius`, radius)
+        YState.set<any>([node.id, 'radius'], radius)
       }
       if (key === 'sides') {
         let { width, height, sides } = node as S.Polygon
         sides = max(3, sides + floor(this.delta(key, node)))
-        YState.set(`${node.id}.sides`, sides)
-        YState.set(`${node.id}.points`, createRegularPolygon(width, height, sides))
+        YState.set<S.Polygon>([node.id, 'sides'], sides)
+        YState.set<S.Polygon>(
+          [node.id, 'points'],
+          createRegularPolygon(width, height, sides),
+        )
       }
       if (key === 'pointCount' || key === 'innerRate') {
         let { width, height, pointCount, innerRate } = node as S.Star
         pointCount = max(3, floor(pointCount))
         innerRate = min(1, max(0, innerRate))
-        YState.set(`${node.id}.pointCount`, pointCount)
-        YState.set(`${node.id}.innerRate`, innerRate)
-        YState.set(
-          `${node.id}.points`,
+        YState.set<S.Star>([node.id, 'pointCount'], pointCount)
+        YState.set<S.Star>([node.id, 'innerRate'], innerRate)
+        YState.set<S.Star>(
+          [node.id, 'points'],
           createStarPolygon(width, height, pointCount, innerRate),
         )
       }
@@ -175,9 +178,9 @@ class DesignGeometryService {
       mrect[key] = this.currentGeometries[key]
     }
     if (key === 'x' || key === 'y' || key === 'rotation') {
-      YState.set(`${node.id}.matrix`, mrect.matrix)
+      YState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
     } else {
-      YState.set(`${node.id}.${key}`, mrect[key])
+      YState.set<S.Node>([node.id, key], mrect[key])
     }
   }
 
@@ -189,30 +192,30 @@ class DesignGeometryService {
   //     if (this.changingKeys.has('width')) {
   //       const deltaRate = this.deltaRate('width', node)
   //       const newX = point.x * (1 + deltaRate)
-  //       YState.set(`${node.id}.points.${i}.x`, newX)
+  //       YState.set<S.Vector>([node.id, 'points', i, 'x'], newX)
 
   //       if (point.handleL) {
   //         const handleLX = point.handleL.x * (1 + deltaRate)
-  //         YState.set(`${node.id}.points.${i}.handleL.x`, handleLX)
+  //         YState.set<S.Vector>([node.id, 'points', i, 'handleL', 'x'], handleLX)
   //       }
   //       if (point.handleR) {
   //         const handleRX = point.handleR.x * (1 + deltaRate)
-  //         YState.set(`${node.id}.points.${i}.handleR.x`, handleRX)
+  //         YState.set<S.Vector>([node.id, 'points', i, 'handleR', 'x'], handleRX)
   //       }
   //     }
 
   //     if (this.changingKeys.has('height')) {
   //       const deltaRate = this.deltaRate('height', node)
   //       const newY = point.y * (1 + deltaRate)
-  //       YState.set(`${node.id}.points.${i}.y`, newY)
+  //       YState.set<S.Vector>([node.id, 'points', i, 'y'], newY)
 
   //       if (point.handleL) {
   //         const handleLY = point.handleL.y * (1 + deltaRate)
-  //         YState.set(`${node.id}.points.${i}.handleL.y`, handleLY)
+  //         YState.set<S.Vector>([node.id, 'points', i, 'handleL', 'y'], handleLY)
   //       }
   //       if (point.handleR) {
   //         const handleRY = point.handleR.y * (1 + deltaRate)
-  //         YState.set(`${node.id}.points.${i}.handleR.y`, handleRY)
+  //         YState.set<S.Vector>([node.id, 'points', i, 'handleR', 'y'], handleRY)
   //       }
   //     }
   //   })

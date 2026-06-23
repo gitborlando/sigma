@@ -152,12 +152,12 @@ class StageCreateService {
   }
 
   private updateNodeMRect(node: S.Node, mrect: MRect) {
-    YState.set(`${node.id}.width`, mrect.width)
-    YState.set(`${node.id}.height`, mrect.height)
-    YState.set(`${node.id}.matrix`, mrect.matrix)
+    YState.set<S.Node>([node.id, 'width'], mrect.width)
+    YState.set<S.Node>([node.id, 'height'], mrect.height)
+    YState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
 
     const points = this.createNodePoints(node, mrect)
-    if (points) YState.set(`${node.id}.points`, points)
+    if (points) YState.set<any>([node.id, 'points'], points)
   }
 
   private createNodePoints(node: S.Node, mrect: MRect) {

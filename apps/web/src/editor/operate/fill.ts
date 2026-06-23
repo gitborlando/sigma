@@ -69,8 +69,8 @@ class OperateFillService {
     const nodes = getSelectedNodes()
     YState.transact(() => {
       nodes.forEach((node) => {
-        if (this.isMultiFills) YState.set(`${node.id}.fills`, [])
-        YState.applyImmerPatches(patches, `${node.id}.fills`)
+        if (this.isMultiFills) YState.set<S.Node>([node.id, 'fills'], [])
+        applyFillPatches(node.id, patches)
       })
     })
   }
@@ -91,6 +91,30 @@ class OperateFillService {
 
     return isSame
   }
+}
+
+function applyFillPatches(id: ID, patches: Patch[]) {
+  patches.forEach((patch) => {
+    const path = [id, 'fills', ...patch.path] as [
+      ID,
+      'fills',
+      ...(string | number)[],
+    ]
+
+    switch (patch.op) {
+      case 'add':
+        if (!Number.isNaN(Number(path[path.length - 1]))) {
+          YState.insert(path, clone(patch.value))
+        } else {
+          YState.set(path, clone(patch.value))
+        }
+        return
+      case 'replace':
+        return YState.set(path, clone(patch.value))
+      case 'remove':
+        return YState.delete(path)
+    }
+  })
 }
 
 export const OperateFill = autoBind(makeObservable(new OperateFillService()))

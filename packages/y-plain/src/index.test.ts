@@ -111,6 +111,36 @@ describe('YPlain', () => {
       false,
     )
     expect(plain.set(['nodes', 0, 'flags'], [new Date()] as any)).toBe(false)
+    expect(plain.set(['nodes'], [, { id: 'node-1', name: 'Header' }] as any)).toBe(
+      false,
+    )
+  })
+
+  it('compares plain fields named like object methods', () => {
+    const yMap = new Y.Map()
+    const plain = new YPlain<any>(yMap, {
+      meta: {
+        toString: 'plain',
+        valueOf: 'data',
+      },
+    })
+
+    expect(() =>
+      plain.setState({
+        meta: {
+          toString: 'plain',
+          valueOf: 'data',
+        },
+      }),
+    ).not.toThrow()
+  })
+
+  it('rejects unsupported Yjs abstract types', () => {
+    const doc = new Y.Doc()
+    const yMap = doc.getMap('state')
+    yMap.set('text', new Y.Text())
+
+    expect(() => new YPlain<any>(yMap)).toThrow('serializable')
   })
 
   it('observes Yjs changes as plain state and patches', () => {
@@ -146,17 +176,39 @@ describe('YPlain', () => {
     disposeObserve()
   })
 
+  it('keeps add patches clean for observed Yjs map changes', () => {
+    const { doc, plain, yMap } = createPlain()
+    const listener = vi.fn()
+    const disposeObserve = plain.observe()
+    const disposeSubscribe = plain.subscribe(listener)
+
+    doc.transact(() => {
+      yMap.set('description', 'Remote')
+    }, 'remote')
+
+    const patch = listener.mock.calls[0][0].patches[0]
+    expect(patch).toEqual({
+      type: 'add',
+      keys: ['description'],
+      value: 'Remote',
+    })
+    expect('oldValue' in patch).toBe(false)
+
+    disposeSubscribe()
+    disposeObserve()
+  })
+
   it('groups YPlain writes in a transaction with origin', () => {
     const { plain } = createPlain()
     const listener = vi.fn()
     const disposeObserve = plain.observe()
     const disposeSubscribe = plain.subscribe(listener)
 
-    const result = plain.transact(() => {
+    const result = plain.transact('batch', () => {
       plain.set(['title'], 'Batch')
       plain.insert(['nodes'], { id: 'node-1', name: 'Header' })
       return 'done'
-    }, 'batch')
+    })
 
     expect(result).toBe('done')
     expect(listener).toHaveBeenCalledTimes(1)
@@ -171,6 +223,82 @@ describe('YPlain', () => {
     )
 
     disposeSubscribe()
+    disposeObserve()
+  })
+
+  it('supports passing the transaction origin before the callback', () => {
+    const { plain } = createPlain()
+    const listener = vi.fn()
+    const disposeObserve = plain.observe()
+    const disposeSubscribe = plain.subscribe(listener)
+
+    plain.transact('batch', () => {
+      plain.set(['title'], 'Batch')
+    })
+
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: 'batch',
+      }),
+    )
+
+    disposeSubscribe()
+    disposeObserve()
+  })
+
+  it('cleans pending transaction metadata when a listener throws', () => {
+    const { plain } = createPlain()
+    const error = new Error('listener failed')
+    const first = vi.fn(() => {
+      throw error
+    })
+    const second = vi.fn()
+    const disposeFirst = plain.subscribe(first)
+    const disposeSecond = plain.subscribe(second)
+
+    expect(() =>
+      plain.transact('broken', () => {
+        plain.set(['title'], 'Broken')
+      }),
+    ).toThrow(error)
+
+    expect(second).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: 'broken',
+      }),
+    )
+
+    disposeFirst()
+    plain.transact('recovered', () => {
+      plain.set(['title'], 'Recovered')
+    })
+
+    expect(second).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        origin: 'recovered',
+      }),
+    )
+
+    disposeSecond()
+  })
+
+  it('keeps plain state readable inside a transaction', () => {
+    const { plain } = createPlain()
+    const disposeObserve = plain.observe()
+
+    plain.transact(() => {
+      expect(plain.set(['nodes', 0], { id: 'node-1', name: 'Header' })).toBe(false)
+      expect(
+        plain.insert(['nodes'], { id: 'node-1', name: 'Header', flags: [] }),
+      ).toBe(true)
+      expect(plain.get(['nodes', 0, 'flags'])).toEqual([])
+      expect(plain.insert(['nodes', 0, 'flags'], 'selected')).toBe(true)
+    })
+
+    expect(plain.state.nodes).toEqual([
+      { id: 'node-1', name: 'Header', flags: ['selected'] },
+    ])
+
     disposeObserve()
   })
 

@@ -122,13 +122,13 @@ class OperateAlignService {
   private horizontalAlign(node: S.Node, shift: number) {
     if (shift === 0) return
     this.needAlign = true
-    YState.set(`${node.id}.x`, node.x + shift)
+    YState.set<S.Node>([node.id, 'x'], node.x + shift)
   }
 
   private verticalAlign(node: S.Node, shift: number) {
     if (shift === 0) return
     this.needAlign = true
-    YState.set(`${node.id}.y`, node.y + shift)
+    YState.set<S.Node>([node.id, 'y'], node.y + shift)
   }
 
   private getAlignBound() {

@@ -68,7 +68,7 @@ class LayerPanelNodeTreeService {
   }
 
   private onNodeHierarchyChange() {
-    return YState.immut.subscribe((patches) => {
+    return YState.subscribe((patches) => {
       patches.forEach((patch) => {
         const [id, prop] = patch.keys as [string, string]
         if (prop !== 'childIds') return

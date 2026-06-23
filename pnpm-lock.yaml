@@ -61,6 +61,9 @@ importers:
       '@gitborlando/widget':
         specifier: ^1.0.2
         version: 1.0.2(react@18.3.1)
+      '@gitborlando/y-plain':
+        specifier: workspace:*
+        version: link:../../packages/y-plain
       '@hocuspocus/provider':
         specifier: ^3.4.0
         version: 3.4.4(y-protocols@1.0.7(yjs@13.6.31))(yjs@13.6.31)

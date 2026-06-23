@@ -16,8 +16,8 @@ class HandlePageService {
 
   addPage(page = SchemaCreator.page()) {
     YState.transact(() => {
-      YState.set(`${page.id}`, page)
-      YState.insert('meta.pageIds', page.id)
+      YState.set<S.Page>([page.id], page)
+      YState.insert(['meta', 'pageIds'], page.id)
     })
 
     Undo.untrack(() => HandleSelect.selectPage(page.id))
@@ -28,8 +28,8 @@ class HandlePageService {
     if (YState.state.meta.pageIds.length === 1) return
 
     YState.transact(() => {
-      YState.delete(`${page.id}`)
-      YState.delete(`meta.pageIds.${YState.state.meta.pageIds.indexOf(page.id)}`)
+      YState.delete<S.Page>([page.id])
+      YState.delete(['meta', 'pageIds', YState.state.meta.pageIds.indexOf(page.id)])
     })
 
     Undo.untrack(() => HandleSelect.selectPage(YState.state.meta.pageIds[0]))

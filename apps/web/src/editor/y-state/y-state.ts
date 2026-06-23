@@ -1,138 +1,94 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone, jsonParse } from '@gitborlando/utils'
-import type { Patch } from 'immer'
+import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
 import JSZip from 'jszip'
 import { Undo } from 'src/editor/core/undo'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
 import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
 import { YClients } from 'src/editor/y-state/y-clients'
+import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { FileService } from 'src/global/service/file'
-import Immut, { ImmutPatch } from 'src/utils/immut/immut'
-import { bind } from 'src/utils/immut/immut-y'
-import { toYValue } from 'src/utils/immut/json-to-y'
 import * as Y from 'yjs'
 
-const jsZip = new JSZip()
+export type YStatePatch = YPlainPatch
+
+type YStateListener = (patches: YStatePatch[]) => void
 
 class YStateService {
-  doc?: Y.Doc
-  immut = new Immut(<S.Schema>{})
+  doc!: Y.Doc
+  plain!: YPlain<S.Schema>
 
   inited$ = Signal.create(false)
-  flushPatch$ = Signal.create<ImmutPatch>()
+  flushPatch$ = Signal.create<YStatePatch>()
 
-  private transactionDepth = 0
+  private listeners = new Set<YStateListener>()
+  private accumulatePatches: YStatePatch[] = []
   private disposer = new Disposer()
 
   get schema() {
-    return this.immut.state
+    return this.state
   }
+
   get state() {
-    return this.immut.state
+    return this.plain.state
   }
-  get next() {
-    return this.immut.next
-  }
-  get subscribe() {
-    return this.immut.subscribe
-  }
-  get getPatches() {
-    return this.immut.getPatches
-  }
-  transact(callback: () => void, origin?: unknown) {
-    const run = () => {
-      this.transactionDepth += 1
-      try {
-        callback()
-      } finally {
-        this.transactionDepth -= 1
-      }
-      this.immut.next()
-    }
 
-    if (!this.doc) {
-      run()
-      return
-    }
+  get insert() {
+    return this.plain.insert
+  }
 
-    this.doc.transact(run, origin)
+  get set() {
+    return this.plain.set
+  }
+
+  get replace() {
+    return this.plain.replace
+  }
+
+  get delete() {
+    return this.plain.delete
+  }
+
+  transact(callback: () => void, origin = Y_STATE_LOCAL_ORIGIN) {
+    this.plain.transact(origin, callback)
   }
 
   find<T extends S.SchemaItem>(id: string): T {
     return this.state[id] as T
   }
 
-  insert<T>(keyPath: string, value: T) {
-    const nextKeyPath = this.normalizeInsertPath(keyPath)
-    if (!nextKeyPath) return
-
-    if (this.doc) this.insertYValue(nextKeyPath, value)
-    if (!this.doc || this.transactionDepth > 0) {
-      this.immut.insert(nextKeyPath, value)
-    }
+  subscribe(listener: YStateListener) {
+    this.listeners.add(listener)
+    return () => void this.listeners.delete(listener)
   }
 
-  set<T>(keyPath: string, value: T) {
-    if (value === undefined) return this.delete(keyPath)
-
-    const nextKeyPath = this.normalizeSetPath(keyPath)
-    if (!nextKeyPath) return
-
-    if (this.doc) this.setYValue(nextKeyPath, value)
-    if (!this.doc || this.transactionDepth > 0) {
-      this.immut.set(nextKeyPath, value)
-    }
-  }
-
-  delete(keyPath: string) {
-    const nextKeyPath = this.normalizeDeletePath(keyPath)
-    if (!nextKeyPath) return
-
-    if (this.doc) this.deleteYValue(nextKeyPath)
-    if (!this.doc || this.transactionDepth > 0) {
-      this.immut.delete(nextKeyPath)
-    }
-  }
-
-  setProp(path: string, payload: Record<string, any>) {
-    Object.entries(payload).forEach(([key, value]) => {
-      this.set(`${path}.${key}`, value)
-    })
-  }
-
-  applyImmerPatches(patches: Patch[], prefix: string) {
-    const prefixes = prefix.split('.') as (string | number)[]
-    patches.forEach((patch) => {
-      const keys = prefixes.concat(patch.path)
-      const keyPath = keys.join('.')
-
-      switch (patch.op) {
-        case 'add':
-          if (!Number.isNaN(Number(keys[keys.length - 1]))) {
-            this.insert(keyPath, clone(patch.value))
-          } else {
-            this.set(keyPath, clone(patch.value))
-          }
-          return
-        case 'replace':
-          return this.set(keyPath, clone(patch.value))
-        case 'remove':
-          return this.delete(keyPath)
+  getPatches() {
+    const keyPatchMap = new Map<string, YStatePatch>()
+    this.accumulatePatches.forEach((patch) => {
+      const keyPath = patch.keys.join('.')
+      const existingPatch = keyPatchMap.get(keyPath)
+      if (existingPatch && 'value' in patch) {
+        Object.assign(existingPatch, { value: clone(patch.value) })
+        return
       }
+      keyPatchMap.set(keyPath, clone(patch))
     })
+    this.accumulatePatches = []
+    return clone([...keyPatchMap.values()])
   }
 
   async initSchema(fileId: string) {
     let schema: S.Schema | undefined
 
     if (fileId === 'mock') {
-      let mockSchema = mock_transform_v()
+      const mockSchema = mock_transform_v()
       if (mockSchema) schema = mockSchema
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)
       if (fileMeta) {
+        const jsZip = new JSZip()
         const zipBuffer = await FileService.loadFile(fileMeta.url)
         const zipFiles = await jsZip.loadAsync(zipBuffer)
         const fileText = await zipFiles
@@ -142,7 +98,7 @@ class YStateService {
       }
     }
 
-    if (!schema) return
+    if (!schema) throw new Error('Failed to initialize YState schema')
 
     schema = migrationSchema(schema)
 
@@ -151,14 +107,14 @@ class YStateService {
 
     // YSync.init(fileId, this.doc)
 
-    this.immut.state = schema!
-    this.disposer.add(bind(this.immut, this.doc.getMap('schema')))
-    this.disposer.add(this.flushPatch())
+    this.plain = autoBind(new YPlain(this.ySchema, schema))
+    this.disposer.add(this.plain.observe())
+    this.disposer.add(this.plain.subscribe(this.handlePlainChange))
     this.disposer.add(YClients.subscribe())
 
     YClients.clientId = this.doc.clientID
     Undo.initUndo({
-      stateMap: this.doc.getMap('schema'),
+      stateMap: this.ySchema as Y.Map<S.Schema>,
       getPatches: this.getPatches,
     })
 
@@ -168,161 +124,24 @@ class YStateService {
   }
 
   dispose() {
+    if (this.inited$.value) this.doc.destroy()
+    this.accumulatePatches = []
     this.inited$.value = false
-    this.doc?.destroy()
-    this.doc = undefined
     this.disposer.dispose()
   }
 
-  private flushPatch() {
-    return this.immut.subscribe((patches: ImmutPatch[]) => {
-      if (!this.inited$.value) return
-      patches.forEach((patch) => this.flushPatch$.dispatch(patch))
-    })
+  private handlePlainChange = ({ patches }: YPlainChange<S.Schema>) => {
+    if (!patches.length) return
+
+    this.accumulatePatches.push(...clone(patches))
+    this.listeners.forEach((listener) => listener(patches))
+
+    if (!this.inited$.value) return
+    patches.forEach((patch) => this.flushPatch$.dispatch(patch))
   }
 
   private get ySchema() {
-    return this.doc!.getMap('schema')
-  }
-
-  private parseKeyPath(keyPath: string) {
-    return keyPath.split(/\.|\//) as (string | number)[]
-  }
-
-  private joinKeyPath(keys: (string | number)[]) {
-    return keys.join('.')
-  }
-
-  private getLocalValue(keys: (string | number)[]) {
-    let current: any = this.immut.state
-    for (const key of keys) {
-      if (current === undefined || current === null) return undefined
-      current = current[key]
-    }
-    return current
-  }
-
-  private getLocalParent(keyPath: string) {
-    const keys = this.parseKeyPath(keyPath)
-    const lastKey = keys[keys.length - 1]
-    return {
-      keys,
-      parent: this.getLocalValue(keys.slice(0, -1)),
-      lastKey,
-    }
-  }
-
-  private normalizeInsertPath(keyPath: string) {
-    const keys = this.parseKeyPath(keyPath)
-    const lastIndex = Number(keys[keys.length - 1])
-
-    if (Number.isNaN(lastIndex)) {
-      const target = this.getLocalValue(keys)
-      return Array.isArray(target) ? keyPath : undefined
-    }
-
-    const parent = this.getLocalValue(keys.slice(0, -1))
-    if (!Array.isArray(parent)) return
-
-    const index = Math.min(Math.max(lastIndex, 0), parent.length)
-    return this.joinKeyPath([...keys.slice(0, -1), index])
-  }
-
-  private normalizeSetPath(keyPath: string) {
-    const { keys, parent, lastKey } = this.getLocalParent(keyPath)
-
-    if (Array.isArray(parent)) {
-      const index = Number(lastKey)
-      if (Number.isNaN(index) || index < 0 || index >= parent.length) return
-      return this.joinKeyPath([...keys.slice(0, -1), index])
-    }
-
-    return parent && typeof parent === 'object' ? keyPath : undefined
-  }
-
-  private normalizeDeletePath(keyPath: string) {
-    const { keys, parent, lastKey } = this.getLocalParent(keyPath)
-
-    if (Array.isArray(parent)) {
-      const index = Number(lastKey)
-      if (Number.isNaN(index) || index < 0 || index >= parent.length) return
-      return this.joinKeyPath([...keys.slice(0, -1), index])
-    }
-
-    if (!parent || typeof parent !== 'object') return
-    return lastKey in parent ? keyPath : undefined
-  }
-
-  private getYValue(keys: (string | number)[]) {
-    let current: unknown = this.ySchema
-    keys.forEach((key) => {
-      if (current instanceof Y.Map) current = current.get(String(key))
-      else if (current instanceof Y.Array) current = current.get(Number(key))
-      else current = undefined
-    })
-    return current
-  }
-
-  private getYParent(keyPath: string) {
-    const keys = this.parseKeyPath(keyPath)
-    const lastKey = keys[keys.length - 1]
-    return {
-      parent: this.getYValue(keys.slice(0, -1)),
-      lastKey,
-    }
-  }
-
-  private insertYValue<T>(keyPath: string, value: T) {
-    const keys = this.parseKeyPath(keyPath)
-    const lastIndex = Number(keys[keys.length - 1])
-    const isIndexPath = !Number.isNaN(lastIndex)
-    const target = isIndexPath
-      ? this.getYValue(keys.slice(0, -1))
-      : this.getYValue(keys)
-    const index =
-      isIndexPath && target instanceof Y.Array
-        ? Math.min(Math.max(lastIndex, 0), target.length)
-        : target instanceof Y.Array
-          ? target.length
-          : 0
-    if (!(target instanceof Y.Array)) return
-
-    const yValue = toYValue(value)
-    if (yValue !== undefined) target.insert(index, [yValue])
-  }
-
-  private setYValue<T>(keyPath: string, value: T) {
-    const { parent, lastKey } = this.getYParent(keyPath)
-    const yValue = toYValue(value)
-
-    if (parent instanceof Y.Map) {
-      if (yValue === undefined) parent.delete(String(lastKey))
-      else parent.set(String(lastKey), yValue)
-      return
-    }
-
-    if (!(parent instanceof Y.Array)) return
-    const index = Number(lastKey)
-    if (Number.isNaN(index)) return
-    if (index >= 0 && index < parent.length) parent.delete(index, 1)
-    if (yValue !== undefined) {
-      parent.insert(Math.min(Math.max(index, 0), parent.length), [yValue])
-    }
-  }
-
-  private deleteYValue(keyPath: string) {
-    const { parent, lastKey } = this.getYParent(keyPath)
-
-    if (parent instanceof Y.Map) {
-      parent.delete(String(lastKey))
-      return
-    }
-
-    if (!(parent instanceof Y.Array)) return
-    const index = Number(lastKey)
-    if (!Number.isNaN(index) && index >= 0 && index < parent.length) {
-      parent.delete(index, 1)
-    }
+    return this.doc.getMap('schema')
   }
 }
 

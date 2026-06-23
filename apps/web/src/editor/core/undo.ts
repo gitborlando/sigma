@@ -1,7 +1,8 @@
 import { MobxUndoService, MobxUndoState } from '@gitborlando/mobx-undo'
 import { matchCase } from '@gitborlando/utils'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
-import type { ImmutPatch } from 'src/utils/immut/immut'
+import type { YStatePatch } from 'src/editor/y-state/y-state'
+import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import * as Y from 'yjs'
 
 export type UndoType = 'undo' | 'redo'
@@ -10,12 +11,12 @@ export type UndoInfo = {
   type: 'state' | 'client' | 'all'
   description: string
   clientState?: MobxUndoState
-  statePatches?: ImmutPatch[]
+  statePatches?: YStatePatch[]
 }
 
 type StateUndoConfig = {
   stateMap: Y.Map<S.Schema>
-  getPatches: () => ImmutPatch[]
+  getPatches: () => YStatePatch[]
 }
 
 export const MobxUndo = autoBind(new MobxUndoService())
@@ -25,7 +26,7 @@ class UndoService {
   @observable.shallow stack: UndoInfo[] = []
   @observable next = 0
 
-  private getStatePatches?: () => ImmutPatch[]
+  private getStatePatches?: () => YStatePatch[]
   private shouldTrack = true
 
   @computed get canUndo() {
@@ -40,7 +41,9 @@ class UndoService {
     this.stack = []
     this.next = 0
     this.getStatePatches = getPatches
-    YUndo = new Y.UndoManager(stateMap)
+    YUndo = new Y.UndoManager(stateMap, {
+      trackedOrigins: new Set([null, Y_STATE_LOCAL_ORIGIN]),
+    })
   }
 
   undo() {

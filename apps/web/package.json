@@ -24,6 +24,7 @@
     "@gitborlando/utils": "^5.0.2",
     "@gitborlando/vite-plugin-nested-assets": "workspace:*",
     "@gitborlando/widget": "^1.0.2",
+    "@gitborlando/y-plain": "workspace:*",
     "@hocuspocus/provider": "^3.4.0",
     "@multiavatar/multiavatar": "^1.0.7",
     "@radix-ui/react-slot": "^1.2.4",

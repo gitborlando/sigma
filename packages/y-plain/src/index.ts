@@ -1,55 +1,50 @@
 import * as Y from 'yjs'
 
 const NON_SERIALIZABLE_ERROR = new Error('YPlain value must be serializable')
+const UNSAFE_KEYS = new Set(['__proto__', 'prototype', 'constructor'])
 
 type AnyObject = Record<string, any>
-type YPlainPrimitive = string | number | boolean | bigint | symbol | null | undefined
+type YPlainPrimitive = string | number | boolean | null
 type YPlainDepthKey = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
 type YPlainDepth = [never, 0, 1, 2, 3, 4, 5, 6]
 
 function deepEqual(a: any, b: any) {
   if (a === b) return true
+  if (a !== a && b !== b) return true
 
-  if (a && b && typeof a == 'object' && typeof b == 'object') {
-    if (a.constructor !== b.constructor) return false
-
-    if (Array.isArray(a)) {
-      const length = a.length
-      if (length != b.length) return false
-      for (let i = length; i-- !== 0; ) if (!deepEqual(a[i], b[i])) return false
-      return true
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b)) return false
+    if (a.length !== b.length) return false
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i])) return false
     }
-
-    if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags
-    if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf()
-    if (a.toString !== Object.prototype.toString)
-      return a.toString() === b.toString()
-
-    const keys: string[] = Object.keys(a)
-    const length = keys.length
-    if (length !== Object.keys(b).length) return false
-
-    for (let i = length; i-- !== 0; )
-      if (!Object.prototype.hasOwnProperty.call(b, keys[i] as string)) return false
-
-    for (let i = length; i-- !== 0; ) {
-      const key = keys[i] as string
-
-      if (!deepEqual(a[key], b[key])) return false
-    }
-
     return true
   }
 
-  if ((a === undefined || a === null) && b === null) return true
+  if (isPlainObject(a) || isPlainObject(b)) {
+    if (!isPlainObject(a) || !isPlainObject(b)) return false
 
-  return a !== a && b !== b
+    const keys = Object.keys(a)
+    if (keys.length !== Object.keys(b).length) return false
+
+    for (const key of keys) {
+      if (!Object.prototype.hasOwnProperty.call(b, key)) return false
+      if (!deepEqual(a[key], b[key])) return false
+    }
+    return true
+  }
+
+  return false
 }
 
-const isObject = (x: unknown): x is Record<string, unknown> =>
-  typeof x === 'object' && x !== null
-
 const isArray = (x: unknown): x is unknown[] => Array.isArray(x)
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null) return false
+
+  const proto = Object.getPrototypeOf(value)
+  return proto === Object.prototype || proto === null
+}
 
 const isPrimitiveValue = (v: unknown) =>
   v === null ||
@@ -58,33 +53,73 @@ const isPrimitiveValue = (v: unknown) =>
   typeof v === 'boolean'
 
 const toYValue = (value: any) => {
-  if (value === undefined) return undefined
+  if (isPrimitiveValue(value)) return value
 
   if (isArray(value)) {
     const array = new Y.Array()
-    array.insert(
-      0,
-      value.map(toYValue).filter((item) => item !== undefined),
-    )
+    const children = []
+
+    for (let index = 0; index < value.length; index++) {
+      if (!Object.prototype.hasOwnProperty.call(value, index)) {
+        throw NON_SERIALIZABLE_ERROR
+      }
+      children.push(toYValue(value[index]))
+    }
+
+    array.insert(0, children)
     return array
   }
 
-  if (isObject(value)) {
+  if (isPlainObject(value)) {
     const map = new Y.Map()
     Object.entries(value).forEach(([key, child]) => {
-      const yValue = toYValue(child)
-      if (yValue !== undefined) map.set(key, yValue)
+      if (!isYPlainMapKey(key)) throw NON_SERIALIZABLE_ERROR
+      map.set(key, toYValue(child))
     })
     return map
   }
 
-  if (isPrimitiveValue(value)) return value
-
   throw NON_SERIALIZABLE_ERROR
 }
 
-const toJSON = (value: unknown) =>
-  value instanceof Y.AbstractType ? value.toJSON() : value
+const fromYValue = (value: unknown): unknown => {
+  if (value instanceof Y.Map) {
+    const record: AnyObject = {}
+    value.forEach((child, key) => {
+      if (isYPlainMapKey(key)) record[key] = fromYValue(child)
+    })
+    return record
+  }
+
+  if (value instanceof Y.Array) return value.toArray().map(fromYValue)
+  if (value instanceof Y.AbstractType) throw NON_SERIALIZABLE_ERROR
+
+  if (isArray(value)) {
+    const children = []
+
+    for (let index = 0; index < value.length; index++) {
+      if (!Object.prototype.hasOwnProperty.call(value, index)) {
+        throw NON_SERIALIZABLE_ERROR
+      }
+      children.push(fromYValue(value[index]))
+    }
+
+    return children
+  }
+
+  if (isPlainObject(value)) {
+    const record: AnyObject = {}
+    Object.entries(value).forEach(([key, child]) => {
+      if (isYPlainMapKey(key)) record[key] = fromYValue(child)
+    })
+    return record
+  }
+
+  if (isPrimitiveValue(value)) return value
+  throw NON_SERIALIZABLE_ERROR
+}
+
+const toJSON = fromYValue
 
 export type YPlainPathKey = string | number
 export type YPlainPath = readonly YPlainPathKey[]
@@ -193,46 +228,66 @@ export type YPlainChange<T extends AnyObject = AnyObject> = {
   state: T
   patches: YPlainPatch[]
   origin: unknown
-  transaction: Y.Transaction
+  transaction?: Y.Transaction
 }
 
 export type YPlainListener<T extends AnyObject = AnyObject> = (
   change: YPlainChange<T>,
 ) => void
 
+type YPlainTransact = {
+  <R>(fn: () => R): R
+  <R>(origin: unknown, fn: () => R): R
+}
+
 export class YPlain<T extends AnyObject = AnyObject> {
   private plainState: T
   private listeners = new Set<YPlainListener<T>>()
   private observeCount = 0
+  private transactionDepth = 0
+  private pendingProjectionPatches: YPlainPatch[] = []
+  private pendingNotifyPatches: YPlainPatch[] = []
+  private pendingTransaction?: Y.Transaction
+  private pendingOrigin: unknown
 
   constructor(
     private yMap: Y.Map<unknown>,
     initialState?: T,
   ) {
-    this.plainState = yMap.toJSON() as T
+    this.plainState = toJSON(yMap) as T
     if (initialState !== undefined && !this.replaceYMapState(initialState)) {
       throw new Error('YPlain initialState must be serializable')
     }
   }
 
   get state() {
+    this.flushProjection()
     return this.plainState
   }
 
-  getState = () => this.plainState
+  getState = () => this.state
 
-  setState = (state: T) => this.replaceYMapState(state)
+  setState = (state: T) => this.runMutation(() => this.replaceYMapState(state, true))
 
-  transact = <R>(fn: () => R, origin?: unknown) => {
+  transact: YPlainTransact = <R>(...args: [() => R] | [unknown, () => R]) => {
+    const [origin, fn] = args.length === 1 ? [undefined, args[0]] : args
+
+    if (this.transactionDepth > 0) return fn()
+
     const { doc } = this.yMap
-    if (!doc) return fn()
+    this.beginTransaction(origin)
 
-    let result!: R
-    doc.transact(() => {
-      result = fn()
-    }, origin)
+    try {
+      if (!doc) return fn()
 
-    return result
+      let result!: R
+      doc.transact(() => {
+        result = fn()
+      }, origin)
+      return result
+    } finally {
+      this.endTransaction()
+    }
   }
 
   subscribe = (listener: YPlainListener<T>) => {
@@ -260,7 +315,7 @@ export class YPlain<T extends AnyObject = AnyObject> {
     path: P,
   ): YPlainRecordPathValue<Item, P>
   get(path: YPlainPath) {
-    return getPlainValue(this.plainState, path)
+    return getPlainValue(this.state, path)
   }
 
   getY<const P extends YPlainTypedPath<T>>(path: P): unknown
@@ -280,6 +335,10 @@ export class YPlain<T extends AnyObject = AnyObject> {
     value: YPlainRecordInsertValue<Item, P>,
   ): boolean
   insert(path: YPlainPath, value: unknown) {
+    return this.runMutation(() => this.insertYPath(path, value))
+  }
+
+  private insertYPath(path: YPlainPath, value: unknown) {
     const key = path[path.length - 1]
     const hasIndex = isYPlainArrayIndex(key)
     const target = hasIndex
@@ -293,6 +352,13 @@ export class YPlain<T extends AnyObject = AnyObject> {
 
     const index = hasIndex ? clampIndex(key, target.length) : target.length
     target.insert(index, [result.value])
+    this.enqueuePatches([
+      {
+        type: 'add',
+        keys: (hasIndex ? path.slice(0, -1) : path).concat(index),
+        value: toJSON(result.value),
+      },
+    ])
     return true
   }
 
@@ -305,6 +371,10 @@ export class YPlain<T extends AnyObject = AnyObject> {
     value: YPlainRecordPathValue<Item, P> | undefined,
   ): boolean
   set(path: YPlainPath, value: unknown) {
+    return this.runMutation(() => this.setYPath(path, value))
+  }
+
+  private setYPath(path: YPlainPath, value: unknown) {
     if (value === undefined) return this.deleteYPath(path)
 
     const target = this.getYParent(path)
@@ -317,7 +387,17 @@ export class YPlain<T extends AnyObject = AnyObject> {
     if (parent instanceof Y.Map) {
       if (!isYPlainMapKey(key)) return false
 
+      const existed = parent.has(key)
+      const oldValue = existed ? toJSON(parent.get(key)) : undefined
       parent.set(key, result.value)
+      const nextValue = toJSON(result.value)
+      if (!existed || !deepEqual(nextValue, oldValue)) {
+        this.enqueuePatches([
+          existed
+            ? { type: 'replace', keys: path, value: nextValue, oldValue }
+            : { type: 'add', keys: path, value: nextValue },
+        ])
+      }
       return true
     }
 
@@ -325,10 +405,17 @@ export class YPlain<T extends AnyObject = AnyObject> {
 
     if (!isValidArrayIndex(parent, key)) return false
 
+    const oldValue = toJSON(parent.get(key))
     transactY(parent, () => {
       parent.delete(key, 1)
       parent.insert(key, [result.value])
     })
+    const nextValue = toJSON(result.value)
+    if (!deepEqual(nextValue, oldValue)) {
+      this.enqueuePatches([
+        { type: 'replace', keys: path, value: nextValue, oldValue },
+      ])
+    }
     return true
   }
 
@@ -341,6 +428,10 @@ export class YPlain<T extends AnyObject = AnyObject> {
     value: YPlainRecordPathValue<Item, P> | undefined,
   ): boolean
   replace(path: YPlainPath, value: unknown) {
+    return this.runMutation(() => this.replaceYPath(path, value))
+  }
+
+  private replaceYPath(path: YPlainPath, value: unknown) {
     const target = this.getYParent(path)
     if (!target) return false
 
@@ -348,21 +439,32 @@ export class YPlain<T extends AnyObject = AnyObject> {
 
     if (parent instanceof Y.Map) {
       if (!isYPlainMapKey(key) || !parent.has(key)) return false
+      const oldValue = toJSON(parent.get(key))
       if (value === undefined) parent.delete(key)
       else {
         const result = tryToYValue(value)
         if (!result.ok || result.value === undefined) return false
         parent.set(key, result.value)
+        const nextValue = toJSON(result.value)
+        if (!deepEqual(nextValue, oldValue)) {
+          this.enqueuePatches([
+            { type: 'replace', keys: path, value: nextValue, oldValue },
+          ])
+        }
+        return true
       }
+      this.enqueuePatches([{ type: 'remove', keys: path, oldValue }])
       return true
     }
 
     if (!(parent instanceof Y.Array)) return false
 
     if (!isValidArrayIndex(parent, key)) return false
+    const oldValue = toJSON(parent.get(key))
 
     if (value === undefined) {
       parent.delete(key, 1)
+      this.enqueuePatches([{ type: 'remove', keys: path, oldValue }])
       return true
     }
 
@@ -373,6 +475,12 @@ export class YPlain<T extends AnyObject = AnyObject> {
       parent.delete(key, 1)
       parent.insert(key, [result.value])
     })
+    const nextValue = toJSON(result.value)
+    if (!deepEqual(nextValue, oldValue)) {
+      this.enqueuePatches([
+        { type: 'replace', keys: path, value: nextValue, oldValue },
+      ])
+    }
     return true
   }
 
@@ -381,7 +489,7 @@ export class YPlain<T extends AnyObject = AnyObject> {
     path: P,
   ): boolean
   delete(path: YPlainPath) {
-    return this.deleteYPath(path)
+    return this.runMutation(() => this.deleteYPath(path))
   }
 
   private deleteYPath(path: YPlainPath) {
@@ -393,7 +501,9 @@ export class YPlain<T extends AnyObject = AnyObject> {
     if (parent instanceof Y.Map) {
       if (!isYPlainMapKey(key) || !parent.has(key)) return false
 
+      const oldValue = toJSON(parent.get(key))
       parent.delete(key)
+      this.enqueuePatches([{ type: 'remove', keys: path, oldValue }])
       return true
     }
 
@@ -401,7 +511,9 @@ export class YPlain<T extends AnyObject = AnyObject> {
 
     if (!isValidArrayIndex(parent, key)) return false
 
+    const oldValue = toJSON(parent.get(key))
     parent.delete(key, 1)
+    this.enqueuePatches([{ type: 'remove', keys: path, oldValue }])
     return true
   }
 
@@ -409,14 +521,28 @@ export class YPlain<T extends AnyObject = AnyObject> {
     events: Y.YEvent<Y.Map<unknown> | Y.Array<unknown>>[],
     transaction: Y.Transaction,
   ) => {
+    this.flushProjection()
+
     const patches: YPlainPatch[] = []
     let nextState = this.plainState
 
     events.forEach((event) => {
-      const result = projectYEvent(nextState, event)
+      const result =
+        this.transactionDepth > 0
+          ? projectYTransactionEvent(nextState, event)
+          : projectYEvent(nextState, event)
       nextState = result.state as T
       patches.push(...result.patches)
     })
+
+    if (this.transactionDepth > 0) {
+      this.pendingTransaction = transaction
+      if (patches.length > 0) {
+        this.plainState = nextState
+        this.pendingNotifyPatches.push(...patches)
+      }
+      return
+    }
 
     if (patches.length === 0) return
 
@@ -427,24 +553,35 @@ export class YPlain<T extends AnyObject = AnyObject> {
       origin: transaction.origin,
       transaction,
     }
-    this.listeners.forEach((listener) => listener(change))
+    notifyListeners(this.listeners, change)
   }
 
-  private replaceYMapState = (state: T) => {
+  private replaceYMapState = (state: T, notify = false) => {
+    if (!isPlainObject(state)) return false
+
     const entries: [string, unknown][] = []
 
     for (const [key, value] of Object.entries(state)) {
+      if (!isYPlainMapKey(key)) return false
       const result = tryToYValue(value)
       if (!result.ok) return false
-      if (result.value !== undefined) entries.push([key, result.value])
+      entries.push([key, result.value])
     }
+
+    const oldState = notify ? this.state : undefined
 
     transactY(this.yMap, () => {
       this.yMap.clear()
       entries.forEach(([key, value]) => this.yMap.set(key, value))
     })
 
-    this.plainState = this.yMap.toJSON() as T
+    const nextState = toJSON(this.yMap) as T
+    if (!notify) {
+      this.plainState = nextState
+      return true
+    }
+
+    this.enqueuePatches(diffPlainObject([], oldState, nextState))
     return true
   }
 
@@ -473,6 +610,57 @@ export class YPlain<T extends AnyObject = AnyObject> {
       key,
     }
   }
+
+  private runMutation(callback: () => boolean) {
+    if (this.transactionDepth > 0) return callback()
+    return this.transact(callback)
+  }
+
+  private beginTransaction(origin: unknown) {
+    if (this.transactionDepth === 0) this.pendingOrigin = origin
+    this.transactionDepth += 1
+  }
+
+  private endTransaction() {
+    this.transactionDepth -= 1
+    if (this.transactionDepth > 0) return
+
+    try {
+      this.flushProjection()
+      this.flushNotify()
+    } finally {
+      this.pendingOrigin = undefined
+      this.pendingTransaction = undefined
+    }
+  }
+
+  private enqueuePatches(patches: YPlainPatch[]) {
+    if (patches.length === 0) return
+    this.pendingProjectionPatches.push(...patches)
+    this.pendingNotifyPatches.push(...patches)
+  }
+
+  private flushProjection() {
+    if (this.pendingProjectionPatches.length === 0) return
+    this.plainState = applyPlainPatches(
+      this.plainState,
+      this.pendingProjectionPatches,
+    )
+    this.pendingProjectionPatches = []
+  }
+
+  private flushNotify() {
+    if (this.pendingNotifyPatches.length === 0) return
+
+    const change = {
+      state: this.plainState,
+      patches: this.pendingNotifyPatches,
+      origin: this.pendingTransaction?.origin ?? this.pendingOrigin,
+      transaction: this.pendingTransaction,
+    }
+    this.pendingNotifyPatches = []
+    notifyListeners(this.listeners, change)
+  }
 }
 
 export function joinYPlainPath(path: YPlainPath) {
@@ -494,6 +682,17 @@ export function projectYEvent<T extends AnyObject>(
   return { state, patches: [] }
 }
 
+function projectYTransactionEvent<T extends AnyObject>(
+  state: T,
+  event: Y.YEvent<Y.Map<unknown> | Y.Array<unknown>>,
+) {
+  if (event.target instanceof Y.Array) {
+    return projectYArraySnapshotEvent(state, event as Y.YArrayEvent<unknown>)
+  }
+
+  return projectYEvent(state, event)
+}
+
 function projectYMapEvent<T extends AnyObject>(
   state: T,
   event: Y.YMapEvent<unknown>,
@@ -503,6 +702,8 @@ function projectYMapEvent<T extends AnyObject>(
 
   event.changes.keys.forEach((change, key) => {
     const keys = event.path.concat(key)
+    if (!isSafePlainPath(keys)) return
+
     const existed = hasPlainValue(nextState, keys)
     const oldValue = getPlainValue(nextState, keys)
 
@@ -518,12 +719,11 @@ function projectYMapEvent<T extends AnyObject>(
     if (existed && deepEqual(value, oldValue)) return
 
     nextState = setPlainValue(nextState, keys, value)
-    patches.push({
-      type: existed ? 'replace' : 'add',
-      keys,
-      value,
-      oldValue,
-    })
+    patches.push(
+      existed
+        ? { type: 'replace', keys, value, oldValue }
+        : { type: 'add', keys, value },
+    )
   })
 
   return { state: nextState, patches }
@@ -533,6 +733,8 @@ function projectYArrayEvent<T extends AnyObject>(
   state: T,
   event: Y.YArrayEvent<unknown>,
 ) {
+  if (!isSafePlainPath(event.path)) return { state, patches: [] }
+
   const oldArray = getPlainValue(state, event.path)
   const nextArray = Array.isArray(oldArray) ? [...oldArray] : []
   const patches: YPlainPatch[] = []
@@ -540,10 +742,10 @@ function projectYArrayEvent<T extends AnyObject>(
   let pendingRemove: { index: number; values: any[] } | undefined
 
   const flushRemove = () => {
-    pendingRemove?.values.forEach((oldValue, offset) => {
+    pendingRemove?.values.forEach((oldValue) => {
       patches.push({
         type: 'remove',
-        keys: event.path.concat(pendingRemove!.index + offset),
+        keys: event.path.concat(pendingRemove!.index),
         oldValue,
       })
     })
@@ -598,6 +800,28 @@ function projectYArrayEvent<T extends AnyObject>(
   }
 }
 
+function projectYArraySnapshotEvent<T extends AnyObject>(
+  state: T,
+  event: Y.YArrayEvent<unknown>,
+) {
+  if (!isSafePlainPath(event.path)) return { state, patches: [] }
+
+  const oldArray = getPlainValue(state, event.path)
+  const nextArray = toJSON(event.target)
+  if (!Array.isArray(nextArray) || deepEqual(oldArray, nextArray)) {
+    return { state, patches: [] }
+  }
+
+  return {
+    state: setPlainValue(state, event.path, nextArray),
+    patches: diffPlainArray(
+      event.path,
+      Array.isArray(oldArray) ? oldArray : [],
+      nextArray,
+    ),
+  }
+}
+
 function pushReplacePatches(
   patches: YPlainPatch[],
   path: YPlainPath,
@@ -616,10 +840,10 @@ function pushReplacePatches(
     })
   }
 
-  oldValues.slice(replaceCount).forEach((oldValue, offset) => {
+  oldValues.slice(replaceCount).forEach((oldValue) => {
     patches.push({
       type: 'remove',
-      keys: path.concat(index + replaceCount + offset),
+      keys: path.concat(index + replaceCount),
       oldValue,
     })
   })
@@ -633,17 +857,71 @@ function pushReplacePatches(
   })
 }
 
+function notifyListeners<T extends AnyObject>(
+  listeners: Set<YPlainListener<T>>,
+  change: YPlainChange<T>,
+) {
+  const errors: unknown[] = []
+
+  for (const listener of [...listeners]) {
+    try {
+      listener(change)
+    } catch (error) {
+      errors.push(error)
+    }
+  }
+
+  if (errors.length === 1) throw errors[0]
+  if (errors.length > 1) throw new AggregateError(errors, 'YPlain listeners failed')
+}
+
 function normalizeArrayInsert(value: unknown) {
   const values = Array.isArray(value) ? value : [value]
   return values.map(toJSON)
 }
 
+function diffPlainArray(path: YPlainPath, oldArray: any[], nextArray: any[]) {
+  const patches: YPlainPatch[] = []
+  let start = 0
+
+  while (
+    start < oldArray.length &&
+    start < nextArray.length &&
+    deepEqual(oldArray[start], nextArray[start])
+  ) {
+    start += 1
+  }
+
+  let oldEnd = oldArray.length
+  let nextEnd = nextArray.length
+
+  while (
+    oldEnd > start &&
+    nextEnd > start &&
+    deepEqual(oldArray[oldEnd - 1], nextArray[nextEnd - 1])
+  ) {
+    oldEnd -= 1
+    nextEnd -= 1
+  }
+
+  pushReplacePatches(
+    patches,
+    path,
+    oldArray.slice(start, oldEnd),
+    nextArray.slice(start, nextEnd),
+    start,
+  )
+
+  return patches
+}
+
 function getPlainValue(root: unknown, keys: YPlainPath) {
   let current: any = root
 
-  keys.forEach((key) => {
+  for (const key of keys) {
+    if (!isYPlainPathKey(key)) return undefined
     current = current?.[key]
-  })
+  }
 
   return current
 }
@@ -669,8 +947,89 @@ function hasPlainValue(root: unknown, keys: YPlainPath) {
   return true
 }
 
+function diffPlainObject(
+  path: YPlainPath,
+  oldValue: unknown,
+  nextValue: Record<string, unknown>,
+) {
+  const patches: YPlainPatch[] = []
+  const oldObject = isPlainObject(oldValue) ? oldValue : {}
+
+  Object.keys(oldObject).forEach((key) => {
+    if (!isYPlainMapKey(key)) return
+    if (!Object.prototype.hasOwnProperty.call(nextValue, key)) {
+      patches.push({
+        type: 'remove',
+        keys: path.concat(key),
+        oldValue: oldObject[key],
+      })
+    }
+  })
+
+  Object.entries(nextValue).forEach(([key, value]) => {
+    if (!isYPlainMapKey(key)) return
+
+    const keys = path.concat(key)
+    if (!Object.prototype.hasOwnProperty.call(oldObject, key)) {
+      patches.push({ type: 'add', keys, value })
+      return
+    }
+
+    const oldChild = oldObject[key]
+    if (!deepEqual(value, oldChild)) {
+      patches.push({ type: 'replace', keys, value, oldValue: oldChild })
+    }
+  })
+
+  return patches
+}
+
+function applyPlainPatches<T>(state: T, patches: YPlainPatch[]) {
+  return patches.reduce((nextState, patch) => {
+    if (patch.type === 'add') {
+      return insertPlainValue(nextState, patch.keys, patch.value)
+    }
+    if (patch.type === 'replace') {
+      return setPlainValue(nextState, patch.keys, patch.value)
+    }
+    return deletePlainValue(nextState, patch.keys)
+  }, state)
+}
+
+function insertPlainValue<T>(root: T, keys: YPlainPath, value: unknown): T {
+  if (keys.length === 0) return value as T
+  if (!isSafePlainPath(keys)) return root
+
+  const parent = getPlainValue(root, keys.slice(0, -1))
+  const lastKey = keys[keys.length - 1]
+  if (!Array.isArray(parent) || !isYPlainArrayIndex(lastKey)) {
+    return setPlainValue(root, keys, value)
+  }
+
+  const nextRoot = clonePlainContainer(root, keys[0])
+  let current: any = nextRoot
+  let previous: any = root
+
+  keys.slice(0, -1).forEach((key, index) => {
+    const nextKey = keys[index + 1]
+    const child = previous?.[key]
+    const nextChild =
+      index === keys.length - 2
+        ? [...(child || [])]
+        : clonePlainContainer(child, nextKey)
+
+    current[key] = nextChild
+    current = nextChild
+    previous = child
+  })
+
+  current.splice(lastKey, 0, value)
+  return nextRoot as T
+}
+
 function setPlainValue<T>(root: T, keys: YPlainPath, value: unknown): T {
   if (keys.length === 0) return value as T
+  if (!isSafePlainPath(keys)) return root
 
   const nextRoot = clonePlainContainer(root, keys[0])
   let current: any = nextRoot
@@ -694,6 +1053,7 @@ function setPlainValue<T>(root: T, keys: YPlainPath, value: unknown): T {
 
 function deletePlainValue<T>(root: T, keys: YPlainPath): T {
   if (keys.length === 0) return undefined as T
+  if (!isSafePlainPath(keys)) return root
 
   const nextRoot = clonePlainContainer(root, keys[0])
   let current: any = nextRoot
@@ -722,7 +1082,7 @@ function deletePlainValue<T>(root: T, keys: YPlainPath): T {
 
 function clonePlainContainer(value: unknown, nextKey: unknown) {
   if (Array.isArray(value)) return [...value]
-  if (value && typeof value === 'object') return { ...value }
+  if (isPlainObject(value)) return { ...value }
   return isYPlainArrayIndex(nextKey) ? [] : {}
 }
 
@@ -750,7 +1110,11 @@ function isYPlainPathKey(key: unknown): key is YPlainPathKey {
 }
 
 function isYPlainMapKey(key: unknown): key is string {
-  return typeof key === 'string'
+  return typeof key === 'string' && !UNSAFE_KEYS.has(key)
+}
+
+function isSafePlainPath(path: YPlainPath) {
+  return path.every(isYPlainPathKey)
 }
 
 function isYPlainArrayIndex(key: unknown): key is number {

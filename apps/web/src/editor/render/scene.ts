@@ -4,7 +4,7 @@ import { clone } from '@gitborlando/utils'
 import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { YState } from 'src/editor/y-state/y-state'
-import { ImmutPatch } from 'src/utils/immut/immut'
+import type { YStatePatch } from 'src/editor/y-state/y-state'
 import { Elem } from './elem'
 import { StageSurface } from './surface'
 
@@ -86,7 +86,7 @@ class StageSceneService {
     })
   }
 
-  private render(op: ImmutPatch['type'], keys: string[]) {
+  private render(op: YStatePatch['type'], keys: string[]) {
     const id = keys[0]
     if (id === 'meta' || id === 'client') return
 
@@ -139,12 +139,13 @@ class StageSceneService {
     this.elements.delete(id)
   }
 
-  private reHierarchy(patch: ImmutPatch) {
-    const { type, keys, value } = patch
+  private reHierarchy(patch: YStatePatch) {
+    const { type, keys } = patch
     const [id, _, index] = keys as [ID, string, number]
     const parent = this.findElem(id) || this.sceneRoot
 
     if (type === 'add') {
+      const value = patch.value
       const elem = this.findElem(value)
       const oldIndex = parent.children.indexOf(elem)
       if (oldIndex !== -1) parent.children.splice(oldIndex, 1)

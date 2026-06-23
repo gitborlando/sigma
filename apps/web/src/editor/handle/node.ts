@@ -29,36 +29,36 @@ class HandleNodeService {
   }
 
   addNodes(nodes: S.Node[]) {
-    nodes.forEach((node) => YState.set(`${node.id}`, node))
+    nodes.forEach((node) => YState.set<S.Node>([node.id], node))
   }
 
   removeNodes(nodes: S.Node[]) {
-    nodes.forEach((node) => YState.delete(`${node.id}`))
+    nodes.forEach((node) => YState.delete<S.Node>([node.id]))
   }
 
   insertChildAt(parent: S.NodeParent, node: S.Node, index?: number) {
     index ??= parent.childIds.length
-    YState.insert(`${parent.id}.childIds.${index}`, node.id)
-    YState.set(`${node.id}.parentId`, parent.id)
+    YState.insert<S.NodeParent>([parent.id, 'childIds', index], node.id)
+    YState.set<S.Node>([node.id, 'parentId'], parent.id)
   }
 
   removeChild(parent: S.NodeParent, node: S.Node) {
     const index = parent.childIds.indexOf(node.id)
-    YState.delete(`${parent.id}.childIds.${index}`)
-    YState.set(`${node.id}.parentId`, '')
+    YState.delete<S.NodeParent>([parent.id, 'childIds', index])
+    YState.set<S.Node>([node.id, 'parentId'], '')
   }
 
   deleteChild(parent: S.NodeParent, node: S.Node) {
     const index = parent.childIds.indexOf(node.id)
-    YState.delete(`${parent.id}.childIds.${index}`)
-    YState.delete(`${node.id}`)
+    YState.delete<S.NodeParent>([parent.id, 'childIds', index])
+    YState.delete<S.Node>([node.id])
   }
 
   reHierarchy(parent: S.NodeParent, node: S.Node, index: number) {
     index = clampIndex(parent.childIds, index)
     const oldIndex = parent.childIds.indexOf(node.id)
-    YState.delete(`${parent.id}.childIds.${oldIndex}`)
-    YState.insert(`${parent.id}.childIds.${index}`, node.id)
+    YState.delete<S.NodeParent>([parent.id, 'childIds', oldIndex])
+    YState.insert<S.NodeParent>([parent.id, 'childIds', index], node.id)
   }
 
   getNodesMergedOBB(nodes: S.Node[]) {
