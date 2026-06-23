@@ -90,6 +90,34 @@ describe('YPlain', () => {
     disposeObserve()
   })
 
+  it('groups YPlain writes in a transaction with origin', () => {
+    const { plain } = createPlain()
+    const listener = vi.fn()
+    const disposeObserve = plain.observe()
+    const disposeSubscribe = plain.subscribe(listener)
+
+    const result = plain.transact(() => {
+      plain.set(['title'], 'Batch')
+      plain.insert(['nodes'], { id: 'node-1', name: 'Header' })
+      return 'done'
+    }, 'batch')
+
+    expect(result).toBe('done')
+    expect(listener).toHaveBeenCalledTimes(1)
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: 'batch',
+        state: {
+          title: 'Batch',
+          nodes: [{ id: 'node-1', name: 'Header' }],
+        },
+      }),
+    )
+
+    disposeSubscribe()
+    disposeObserve()
+  })
+
   it('joins paths for display', () => {
     expect(joinYPlainPath(['nodes', 0, 'name'])).toBe('nodes.0.name')
   })

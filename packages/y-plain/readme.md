@@ -147,6 +147,22 @@ plain.delete(['title'])
 plain.delete(['nodes', 0])
 ```
 
+### transact
+
+`transact(fn, origin?)` 用于把多次写入合并到同一个 Yjs transaction，适合一次业务动作拆到多个函数里执行的场景。
+
+```ts
+plain.transact(() => {
+  plain.set(['title'], 'New title')
+  plain.insert(['nodes'], {
+    id: 'node-1',
+    name: 'Header',
+  })
+}, 'user-action')
+```
+
+`origin` 会透传到订阅回调里的 `change.origin`。如果传入 `YPlain` 的 `Y.Map` 没有绑定到 `Y.Doc`，`transact()` 会直接执行回调。
+
 ## 监听变化
 
 监听回调收到的是 `YPlainChange`：
@@ -262,4 +278,4 @@ plain.set(['nodes', 0, 'createdAt'], new Date()) // Date 不可序列化
 - 生命周期里只需要调用一次 `observe()`，多个订阅者用 `subscribe()` 即可。
 - 写数组新增用 `insert()`，写对象字段或替换已有值用 `set()` / `replace()`。
 - 业务层尽量读 `plain.state` 或 `plain.get()`，不要混用普通对象修改和 Yjs 原生修改。
-- 需要协同 origin 时，把写入包在 `doc.transact(() => {}, origin)` 里，订阅回调可以从 `change.origin` 里拿到。
+- 需要协同 origin 或合并多次写入时，把写入包在 `plain.transact(() => {}, origin)` 里，订阅回调可以从 `change.origin` 里拿到。

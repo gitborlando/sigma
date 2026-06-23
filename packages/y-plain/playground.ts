@@ -23,10 +23,10 @@ const disposeSubscribe = plain.subscribe(({ state, patches, origin }) => {
   console.log('state:', state)
 })
 
-doc.transact(() => {
+plain.transact(() => {
   plain.set(['title'], 'YPlain playground')
   plain.insert(['nodes'], { id: 'node-1', name: 'Header' })
-  plain.replace(['nodes', 10, 'name'], 'Hero')
+  plain.replace(['nodes', 0, 'name'], 'Hero')
 }, 'playground')
 
 disposeSubscribe()

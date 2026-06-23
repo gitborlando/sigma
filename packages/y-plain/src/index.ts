@@ -201,6 +201,18 @@ export class YPlain<T extends AnyObject = AnyObject> {
 
   setState = (state: T) => this.replaceYMapState(state)
 
+  transact = <R>(fn: () => R, origin?: unknown) => {
+    const { doc } = this.yMap
+    if (!doc) return fn()
+
+    let result!: R
+    doc.transact(() => {
+      result = fn()
+    }, origin)
+
+    return result
+  }
+
   subscribe = (listener: YPlainListener<T>) => {
     this.listeners.add(listener)
     return () => void this.listeners.delete(listener)
