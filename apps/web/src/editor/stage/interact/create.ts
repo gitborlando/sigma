@@ -1,8 +1,15 @@
 import { IRect } from '@gitborlando/geo'
 import type { DragData } from '@gitborlando/toolkit/browser'
 import { Disposer } from '@gitborlando/toolkit/disposer'
+import { clone } from '@gitborlando/utils'
 import { Undo } from 'src/editor/core/undo'
-import { Matrix, MRect } from 'src/editor/geometry'
+import {
+  createLine,
+  createRegularPolygon,
+  createStarPolygon,
+  Matrix,
+  MRect,
+} from 'src/editor/geometry'
 import { HandleNode } from 'src/editor/handle/node'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
@@ -27,9 +34,11 @@ const createTypes = [
 ] as const
 export type IStageCreateType = (typeof createTypes)[number]
 
+const defaultCreateSize = 100
+
 class StageCreateService {
   createTypes = createTypes
-  @observable currentType: IStageCreateType = 'frame'
+  @observable createType: IStageCreateType = 'frame'
   private node!: S.Node
   private parent!: S.NodeParent
 
@@ -52,10 +61,16 @@ class StageCreateService {
       .start()
   }
 
-  private onCreateStart({ start }: DragData) {
+  private onCreateStart(dragData: DragData) {
     const size = 0.01 / getZoom()
+
+    dragData = clone(dragData)
+    dragData.current = XY.of(dragData.start).plusNum(size)
+    dragData.marquee.width = size
+    dragData.marquee.height = size
+
     this.parent = this.findParent()
-    this.node = this.createNode({ ...start, width: size, height: size })
+    this.node = this.createNode(dragData)
 
     YState.transact(() => {
       HandleNode.addNodes([this.node])
@@ -65,66 +80,108 @@ class StageCreateService {
     StageSelect.onCreateSelect(this.node.id)
     StageSurface.disablePointEvent()
 
-    if (this.node.type === 'line') {
+    if (this.createType === 'line') {
       StageCursor.setCursor('move').lock().upReset()
     }
   }
 
-  private onCreateMove({ marquee, current, start }: DragData) {
+  private onCreateMove(dragData: DragData) {
     YState.transact(() => {
-      if (this.node.type === 'line') {
-        current = snapGridRoundXY(current)
-        start = snapGridRoundXY(start)
-
-        const rotation = Angle.sweep(XY.vector(current, start))
-        const width = XY.distance(current, start)
-
-        // OperateGeometry.setActiveGeometries({ ...start, width, rotation }, false)
-      } else {
-        const mrect = this.calcNodeMRect(marquee)
-
-        YState.set(`${this.node.id}.width`, mrect.width)
-        YState.set(`${this.node.id}.height`, mrect.height)
-        YState.set(`${this.node.id}.matrix`, mrect.matrix)
-      }
+      this.updateNodeMRect(this.node, this.calcCreateMRect(dragData))
     })
   }
 
   private onCreateEnd({ moved }: DragData & { moved: boolean }) {
     if (!moved) {
       YState.transact(() => {
-        YState.set(`${this.node.id}.width`, 100)
-        if (this.node.type !== 'line') {
-          YState.set(`${this.node.id}.height`, 100)
-        }
+        this.updateNodeMRect(this.node, this.calcDefaultMRect())
       })
     }
-
     StageInteract.interaction = 'select'
     Undo.track('all', t('create node'))
   }
 
-  private createNode(rect: IRect) {
-    const mrect = this.calcNodeMRect(rect)
-    const node = SchemaCreator[this.currentType]({
+  private createNode(dragData: DragData) {
+    const length = XY.distance(dragData.current, dragData.start)
+    const mrect = this.calcCreateMRect(dragData)
+    const node = SchemaCreator[this.createType]({
+      name: SchemaCreator.createNodeName(this.createType),
       ...mrect.plain(),
-      name: SchemaCreator.createNodeName(this.currentType),
+      ...(this.createType === 'line' && { width: length }),
     })
-    return (this.node = node)
+
+    return node
+  }
+
+  private calcCreateMRect({ marquee, current, start }: DragData) {
+    if (this.createType === 'line') {
+      return this.calcLineMRect(current, start)
+    }
+    return this.calcNodeMRect(marquee)
+  }
+
+  private calcDefaultMRect() {
+    const height = this.createType === 'line' ? 0 : defaultCreateSize
+    return new MRect(defaultCreateSize, height, this.node.matrix)
   }
 
   private calcNodeMRect(rect: IRect) {
     const snapRect = snapGridRoundRect(rect)
+    const matrix = this.prependParentMatrix(Matrix.identity().shift(snapRect))
+
+    return MRect.fromRect(snapRect, matrix)
+  }
+
+  private calcLineMRect(current: IXY, start: IXY) {
+    current = snapGridRoundXY(current)
+    start = snapGridRoundXY(start)
+
+    const width = XY.distance(current, start)
+    const rotation = Angle.sweep(XY.vector(current, start))
+    const matrix = this.prependParentMatrix(
+      Matrix.identity().rotate(rotation).shift(start),
+    )
+
+    return new MRect(width, 0, matrix)
+  }
+
+  private prependParentMatrix(matrix: Matrix) {
     const forwardMatrix =
       this.parent.type === 'page' ? Matrix.identity() : Matrix.of(this.parent.matrix)
-    const matrix = forwardMatrix.invert().append(Matrix.identity().shift(snapRect))
-    return MRect.fromRect(snapRect, matrix.plain())
+    return forwardMatrix.invert().append(matrix).plain()
+  }
+
+  private updateNodeMRect(node: S.Node, mrect: MRect) {
+    YState.set(`${node.id}.width`, mrect.width)
+    YState.set(`${node.id}.height`, mrect.height)
+    YState.set(`${node.id}.matrix`, mrect.matrix)
+
+    const points = this.createNodePoints(node, mrect)
+    if (points) YState.set(`${node.id}.points`, points)
+  }
+
+  private createNodePoints(node: S.Node, mrect: MRect) {
+    if (SchemaHelper.is(node, 'line')) {
+      return createLine(XY.$(0, 0), mrect.width)
+    }
+    if (SchemaHelper.is(node, 'polygon')) {
+      return createRegularPolygon(mrect.width, mrect.height, node.sides)
+    }
+    if (SchemaHelper.is(node, 'star')) {
+      return createStarPolygon(
+        mrect.width,
+        mrect.height,
+        node.pointCount,
+        node.innerRate,
+      )
+    }
   }
 
   private findParent() {
     const frame = StageScene.elemsFromPoint().find((elem) =>
       SchemaHelper.isById(elem.id, 'frame'),
     )
+
     if (frame) return YState.find<S.NodeParent>(frame.id)
     return YState.find<S.Page>(getSelectPageId())
   }

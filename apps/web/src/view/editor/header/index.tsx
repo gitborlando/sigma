@@ -69,7 +69,7 @@ const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) =>
 
 const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
   const isActive =
-    StageInteract.interaction === 'create' && StageCreate.currentType === type
+    StageInteract.interaction === 'create' && StageCreate.createType === type
   const iconUrl = Assets.editor.node[type as keyof typeof Assets.editor.node]
   return (
     <Btn
@@ -78,7 +78,7 @@ const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
       active={isActive}
       onClick={action(() => {
         StageInteract.interaction = 'create'
-        StageCreate.currentType = type
+        StageCreate.createType = type
       })}
     />
   )
