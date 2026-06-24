@@ -5,7 +5,7 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
 import { snapGridRound, TRBL } from 'src/editor/utils/misc'
-import { YState } from 'src/editor/y-state/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 

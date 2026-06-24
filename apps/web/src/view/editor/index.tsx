@@ -1,7 +1,7 @@
 import { useClean, withSuspense } from '@gitborlando/utils/react'
 import { Editor } from 'src/editor'
 import { StageSurface } from 'src/editor/render/surface'
-import { YState } from 'src/editor/y-state/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Loading } from 'src/view/component/loading'
 import { LeftPanelComp } from 'src/view/editor/left-panel'
 import { RightPanelComp } from 'src/view/editor/right-panel'

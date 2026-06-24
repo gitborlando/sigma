@@ -1,6 +1,6 @@
 import Scrollbars from 'react-custom-scrollbars-2'
 import { LayerPanel } from 'src/editor/workbench/layer-panel'
-import { YState } from 'src/editor/y-state/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Drag } from 'src/global/event/drag'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { PageHeaderComp } from './header'

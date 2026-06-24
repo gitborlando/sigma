@@ -1,7 +1,7 @@
 import { values } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { YClients } from 'src/editor/y-state/y-clients'
+import { YClients } from 'src/editor/y-adapter/y-clients'
 import { COLOR } from 'src/utils/color'
 
 export const EditorStageCursorsComp: FC<{}> = observer(({}) => {

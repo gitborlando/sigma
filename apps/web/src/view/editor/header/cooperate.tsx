@@ -1,6 +1,6 @@
 import { entries } from 'mobx'
 import { Popover } from 'react-tiny-popover'
-import { YClients } from 'src/editor/y-state/y-clients'
+import { YClients } from 'src/editor/y-adapter/y-clients'
 import { PopoverCard } from 'src/view/component/popover-card'
 import { AvatarCircles } from 'src/view/component/shadcn/ui/avatar-circles'
 import { Text } from 'src/view/component/text'

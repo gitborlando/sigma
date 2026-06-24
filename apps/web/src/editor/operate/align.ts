@@ -3,7 +3,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { Undo } from 'src/editor/core/undo'
 import { HandleSelect } from 'src/editor/handle/select'
 import { StageScene } from 'src/editor/render/scene'
-import { YState } from 'src/editor/y-state/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { SchemaHelper } from '../schema/helper'
 import { getSelectedNodes } from '../utils/get'
 

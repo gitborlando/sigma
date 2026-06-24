@@ -19,7 +19,7 @@ import { StageCursor } from 'src/editor/stage/cursor'
 import { StageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectPageId, getZoom } from 'src/editor/utils/get'
 import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
-import { YState } from 'src/editor/y-state/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
 

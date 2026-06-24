@@ -1,7 +1,7 @@
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { getSelectPageId } from 'src/editor/utils/get'
-import { YState } from 'src/editor/y-state/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 
 export type LayerPanelNodeInfo = {
   id: string

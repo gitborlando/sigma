@@ -1,7 +1,7 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import { YClients } from 'src/editor/y-state/y-clients'
+import { YClients } from 'src/editor/y-adapter/y-clients'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 

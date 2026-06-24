@@ -5,7 +5,7 @@ import { MRect } from 'src/editor/geometry'
 import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { YState } from 'src/editor/y-state/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { SchemaCreator } from '../schema/creator'
 import { getSelectedNodes, getSelectIdList } from '../utils/get'
 

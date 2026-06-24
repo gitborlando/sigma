@@ -7,7 +7,7 @@ import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { getSelectIdList, getZoom } from 'src/editor/utils/get'
-import { YClients } from 'src/editor/y-state/y-clients'
+import { YClients } from 'src/editor/y-adapter/y-clients'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 

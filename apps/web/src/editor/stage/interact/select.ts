@@ -6,8 +6,8 @@ import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { EditorCommand } from 'src/editor/core/command'
 import { Undo } from 'src/editor/core/undo'
-import { HandleSelect } from 'src/editor/handle/select'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
+import { HandleSelect } from 'src/editor/handle/select'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
@@ -20,7 +20,7 @@ import {
   getSelectIdMap,
   getSelectPageId,
 } from 'src/editor/utils/get'
-import { YState } from 'src/editor/y-state/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { ContextMenu } from 'src/global/context-menu'
 
 class StageSelectService {
