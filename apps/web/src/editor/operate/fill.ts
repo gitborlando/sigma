@@ -2,14 +2,11 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
-import { Undo } from 'src/editor/core/undo'
-import { HandleSelect } from 'src/editor/handle/select'
-import { YState } from 'src/editor/y-adapter/y-state'
 import { COLOR } from 'src/utils/color'
-import { SchemaCreator } from '../schema/creator'
+import { HandleSelect, SchemaCreator, Undo, YState } from '..'
 import { getSelectedNodes } from '../utils/get'
 
-class OperateFillService {
+export class OperateFillService {
   @observable.ref fills = <S.Fill[]>[]
   isMultiFills = false
 
@@ -116,5 +113,3 @@ function applyFillPatches(id: ID, patches: Patch[]) {
     }
   })
 }
-
-export const OperateFill = autoBind(makeObservable(new OperateFillService()))

@@ -1,6 +1,6 @@
 import { matchCase } from '@gitborlando/utils'
 import { Layers } from 'lucide-react'
-import { StageViewport } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor'
 import { Btn } from 'src/view/component/btn'
 
 import { Lucide } from 'src/view/component/lucide'

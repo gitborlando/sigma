@@ -1,4 +1,4 @@
-class LayerPanelService {
+export class LayerPanelService {
   @observable pagePanelHeight = 200
   @observable pagePanelExpanded = true
 
@@ -8,5 +8,3 @@ class LayerPanelService {
     })
   }
 }
-
-export const LayerPanel = autoBind(makeObservable(new LayerPanelService()))

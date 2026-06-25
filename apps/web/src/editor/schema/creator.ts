@@ -14,7 +14,7 @@ import { Assets } from 'src/view/assets/assets'
 import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
 
-class SchemaCreatorService {
+export class SchemaCreatorService {
   schema(): S.Schema {
     const page = this.page()
     const meta = this.meta()
@@ -327,5 +327,3 @@ class SchemaCreatorService {
     return defuOverrideArray(option || {}, newItem) as T
   }
 }
-
-export const SchemaCreator = new SchemaCreatorService()

@@ -7,15 +7,14 @@ import { listen } from '@gitborlando/utils/browser'
 import { Matrix, max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
 import { IMatrix } from 'src/editor/geometry/matrix'
-import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
   createTextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { Raf, reverseFor } from 'src/editor/utils/misc'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
+import { StageScene, StageViewport } from '..'
 import { getSetting, getZoom } from '../utils/get'
 import { Elem } from './elem'
 
@@ -519,5 +518,3 @@ export class StageSurfaceService {
     this.isPointerEventNone = false
   }
 }
-
-export const StageSurface = autoBind(new StageSurfaceService())

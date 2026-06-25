@@ -1,11 +1,11 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import { YClients } from 'src/editor/y-adapter/y-clients'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
+import { YClients } from '..'
 
-class YSyncService {
+export class YSyncService {
   inited$ = Signal.create(false)
 
   provider!: HocuspocusProvider
@@ -23,5 +23,3 @@ class YSyncService {
     return disposer
   }
 }
-
-export const YSync = autoBind(new YSyncService())

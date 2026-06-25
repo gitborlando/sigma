@@ -1,14 +1,16 @@
 import { isLeftMouse } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
+import {
+  SchemaCreator,
+  StageCursor,
+  StageInteract,
+  StageMove,
+  StageSurface,
+  StageTransformer,
+  StageViewport,
+} from 'src/editor'
 import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
-import { StageSurface } from 'src/editor/render/surface'
-import { SchemaCreator } from 'src/editor/schema/creator'
-import { StageCursor } from 'src/editor/stage/cursor'
-import { StageInteract } from 'src/editor/stage/interact/interact'
-import { StageMove } from 'src/editor/stage/interact/move'
-import { StageTransformer } from 'src/editor/stage/tools/transformer'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { getZoom } from 'src/editor/utils/get'
 import { arrayLoopGet, TRBL } from 'src/editor/utils/misc'
 import { COLOR } from 'src/utils/color'

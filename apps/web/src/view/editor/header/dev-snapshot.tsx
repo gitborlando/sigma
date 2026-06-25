@@ -1,8 +1,8 @@
 import { MobxUndoState } from '@gitborlando/mobx-undo'
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import { MobxUndo, Undo, UndoInfo } from 'src/editor/core/undo'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { Undo, YState } from 'src/editor'
+import { MobxUndo, UndoInfo } from 'src/editor/core/undo'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 

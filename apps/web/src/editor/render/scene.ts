@@ -1,14 +1,12 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
-import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { HandleSelect, StageSurface, YState } from '..'
 import { Elem } from './elem'
-import { StageSurface } from './surface'
 
-class StageSceneService {
+export class StageSceneService {
   elements = new Map<string, Elem>()
 
   sceneRoot!: Elem
@@ -157,5 +155,3 @@ class StageSceneService {
     }
   }
 }
-
-export const StageScene = autoBind(new StageSceneService())

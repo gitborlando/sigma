@@ -6,7 +6,7 @@ export type HandleSelectState = {
   selectPageId: ID | ''
 }
 
-class HandleSelectService {
+export class HandleSelectService {
   @observable.ref selectIdMap: Record<string, boolean> = {}
   @observable selectPageId: ID | '' = ''
   afterSelect = Signal.create<void>()
@@ -59,5 +59,3 @@ class HandleSelectService {
     })
   }
 }
-
-export const HandleSelect = autoBind(makeObservable(new HandleSelectService()))

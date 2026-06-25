@@ -1,9 +1,8 @@
 import { AnyObject, iife, objKeys } from '@gitborlando/utils'
 import { divide, floor, max, min } from 'src/editor/geometry/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
-import { HandleNode } from 'src/editor/handle/node'
-import { YState } from 'src/editor/y-adapter/y-state'
 import { MULTI_VALUE } from 'src/global/constant'
+import { HandleNode, YState } from '..'
 import { getSelectedNodes } from '../utils/get'
 
 function createDesignGeoInfos() {
@@ -39,7 +38,7 @@ export function cleanObject(object: AnyObject) {
   for (const key in object) delete object[key]
 }
 
-class DesignGeometryService {
+export class DesignGeometryService {
   currentGeometries = createDesignGeoInfos()
   currentKeys = createActiveKeys(new Set())
   changingKeys = createActiveKeys(new Set())
@@ -221,5 +220,3 @@ class DesignGeometryService {
   //   })
   // }
 }
-
-export const DesignGeometry = autoBind(new DesignGeometryService())

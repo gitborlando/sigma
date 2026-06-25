@@ -1,16 +1,11 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
-import { Undo } from 'src/editor/core/undo'
-import { HandleNode } from 'src/editor/handle/node'
-import { HandlePage } from 'src/editor/handle/page'
-import { StageScene } from 'src/editor/render/scene'
-import { StageInteract } from 'src/editor/stage/interact/interact'
-import { YState } from 'src/editor/y-adapter/y-state'
 import { Command } from 'src/global/context-menu'
+import { HandleNode, HandlePage, StageInteract, StageScene, Undo, YState } from '..'
 import { getSelectIdList, getSetting } from '../utils/get'
 
-class EditorCommandManager {
+export class EditorCommandManager {
   subscribe() {
     return this.bindHotkeys()
   }
@@ -201,5 +196,3 @@ class EditorCommandManager {
     )
   }
 }
-
-export const EditorCommand = new EditorCommandManager()

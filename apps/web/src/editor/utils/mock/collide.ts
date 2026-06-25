@@ -1,4 +1,4 @@
-import { SchemaCreator } from 'src/editor/schema/creator'
+import { SchemaCreator } from 'src/editor'
 
 export function mockCollide() {
   const schema = <S.Schema>{}

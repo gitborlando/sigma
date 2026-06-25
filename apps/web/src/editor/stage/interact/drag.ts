@@ -1,5 +1,5 @@
 import { Dragger } from '@gitborlando/toolkit/browser'
-import { StageViewport } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor'
 
 export const StageDrag = new Dragger({
   processXY: (xy) => StageViewport.toSceneXY(xy),

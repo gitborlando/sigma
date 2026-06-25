@@ -1,5 +1,5 @@
 import { optionalSet } from '@gitborlando/utils'
-import { EditorSetting } from 'src/editor/core/setting'
+import { EditorSetting } from 'src/editor'
 
 export const FPSComp: FC<{}> = observer(({}) => {
   const { showFPS } = EditorSetting.setting

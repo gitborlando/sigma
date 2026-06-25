@@ -1,6 +1,6 @@
 import { MobxUndoService, MobxUndoState } from '@gitborlando/mobx-undo'
 import { matchCase } from '@gitborlando/utils'
-import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
+import { computed, observable, runInAction, toJS } from 'mobx'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import * as Y from 'yjs'
@@ -22,7 +22,7 @@ type StateUndoConfig = {
 export const MobxUndo = autoBind(new MobxUndoService())
 export let YUndo: Y.UndoManager
 
-class UndoService {
+export class UndoService {
   @observable.shallow stack: UndoInfo[] = []
   @observable next = 0
 
@@ -115,5 +115,3 @@ class UndoService {
     })?.()
   }
 }
-
-export const Undo = autoBind(makeObservable(new UndoService()))

@@ -2,7 +2,17 @@ import { IRect } from '@gitborlando/geo'
 import type { DragData } from '@gitborlando/toolkit/browser'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
-import { Undo } from 'src/editor/core/undo'
+import {
+  HandleNode,
+  SchemaCreator,
+  StageCursor,
+  StageInteract,
+  StageScene,
+  StageSelect,
+  StageSurface,
+  Undo,
+  YState,
+} from 'src/editor'
 import {
   createLine,
   createRegularPolygon,
@@ -10,18 +20,10 @@ import {
   Matrix,
   MRect,
 } from 'src/editor/geometry'
-import { HandleNode } from 'src/editor/handle/node'
-import { StageScene } from 'src/editor/render/scene'
-import { StageSurface } from 'src/editor/render/surface'
-import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { StageCursor } from 'src/editor/stage/cursor'
 import { StageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectPageId, getZoom } from 'src/editor/utils/get'
 import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
-import { YState } from 'src/editor/y-adapter/y-state'
-import { StageInteract } from './interact'
-import { StageSelect } from './select'
 
 const createTypes = [
   'frame',
@@ -36,7 +38,7 @@ export type IStageCreateType = (typeof createTypes)[number]
 
 const defaultCreateSize = 100
 
-class StageCreateService {
+export class StageCreateService {
   createTypes = createTypes
   @observable createType: IStageCreateType = 'frame'
   private node!: S.Node
@@ -186,5 +188,3 @@ class StageCreateService {
     return YState.find<S.Page>(getSelectPageId())
   }
 }
-
-export const StageCreate = autoBind(makeObservable(new StageCreateService()))

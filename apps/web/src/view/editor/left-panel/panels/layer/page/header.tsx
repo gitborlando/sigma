@@ -1,6 +1,5 @@
 import { ChevronDown, Plus } from 'lucide-react'
-import { HandlePage } from 'src/editor/handle/page'
-import { LayerPanel } from 'src/editor/workbench/layer-panel'
+import { HandlePage, LayerPanel } from 'src/editor'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'

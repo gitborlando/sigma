@@ -2,9 +2,7 @@ import { type IXY } from '@gitborlando/geo'
 import { getSet, type NoopFunc } from '@gitborlando/utils'
 import { memorized } from '@sigma/utils/common'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import { ElemDrawer } from 'src/editor/render/draw'
-import { StageSurface } from 'src/editor/render/surface'
-import { StageViewport } from 'src/editor/stage/viewport'
+import { ElemDrawer, StageSurface, StageViewport } from '..'
 import { getSetting } from '../utils/get'
 
 declare module 'react' {

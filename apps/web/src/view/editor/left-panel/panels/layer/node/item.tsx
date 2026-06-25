@@ -3,14 +3,9 @@ import { CSS } from '@dnd-kit/utilities'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { Icon } from '@gitborlando/widget'
 import { ChevronRight } from 'lucide-react'
-import { EditorCommand } from 'src/editor/core/command'
+import { EditorCommand, LayerPanelNodeTree, StageSelect, YState } from 'src/editor'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { StageSelect } from 'src/editor/stage/interact/select'
-import {
-  LayerPanelNodeInfo,
-  LayerPanelNodeTree,
-} from 'src/editor/workbench/layer-panel/node-tree'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { LayerPanelNodeInfo } from 'src/editor/workbench/layer-panel/node-tree'
 import { ContextMenu } from 'src/global/context-menu'
 import { Lucide } from 'src/view/component/lucide'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'

@@ -1,13 +1,9 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { Undo } from 'src/editor/core/undo'
 import { IMatrix, Matrix } from 'src/editor/geometry'
-import { HandleSelect } from 'src/editor/handle/select'
-import { StageViewport } from 'src/editor/stage/viewport'
-import { YState } from 'src/editor/y-adapter/y-state'
-import { SchemaCreator } from '../schema/creator'
+import { HandleSelect, SchemaCreator, StageViewport, Undo, YState } from '..'
 import { getSelectPageId } from '../utils/get'
 
-class HandlePageService {
+export class HandlePageService {
   pageSceneMatrix = new Map<ID, IMatrix>()
 
   subscribe() {
@@ -64,5 +60,3 @@ class HandlePageService {
     })
   }
 }
-
-export const HandlePage = autoBind(new HandlePageService())

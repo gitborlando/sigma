@@ -1,9 +1,6 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { Undo } from 'src/editor/core/undo'
-import { HandleSelect } from 'src/editor/handle/select'
-import { StageScene } from 'src/editor/render/scene'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { HandleSelect, StageScene, Undo, YState } from '..'
 import { SchemaHelper } from '../schema/helper'
 import { getSelectedNodes } from '../utils/get'
 
@@ -18,7 +15,7 @@ const alignTypes = <const>[
 
 export type IAlignType = (typeof alignTypes)[number]
 
-class OperateAlignService {
+export class OperateAlignService {
   alignTypes = alignTypes
   canAlign = Signal.create(false)
   currentAlign = Signal.create<IAlignType>()
@@ -145,5 +142,3 @@ class OperateAlignService {
     return nodeOBB.aabb
   }
 }
-
-export const OperateAlign = autoBind(new OperateAlignService())

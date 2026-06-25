@@ -2,7 +2,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { floor } from 'src/editor/geometry/base'
-import { StageSurface } from 'src/editor/render/surface'
+import { StageSurface } from '..'
 
 export type StageCursorType =
   | 'select'
@@ -14,7 +14,7 @@ export type StageCursorType =
   | 'hand'
   | 'grab'
 
-class StageCursorService {
+export class StageCursorService {
   private type: StageCursorType = 'select'
   private rotation = 0
   private locked = false
@@ -112,5 +112,3 @@ class StageCursorService {
     <path transform='rotate(${degree} 12.5 12.5)' d='M23.9611 11.8673L20.2565 16.2419V13.301V12.901H19.8565H12.4758H5.00089H4.60089V13.301V16.2169L1.02101 11.8627L4.60089 7.78206V10.6414V11.0414H5.00089H12.4758H19.6995H20.0995V10.6414V7.7337L23.9611 11.8673Z' fill='black' stroke='white' stroke-width='0.8'/>
     </svg>`
 }
-
-export const StageCursor = autoBind(new StageCursorService())

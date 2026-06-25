@@ -1,7 +1,7 @@
+import { YState } from 'src/editor'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { getSelectPageId } from 'src/editor/utils/get'
-import { YState } from 'src/editor/y-adapter/y-state'
 
 export type LayerPanelNodeInfo = {
   id: string
@@ -9,7 +9,7 @@ export type LayerPanelNodeInfo = {
   ancestorIds: string[]
 }
 
-class LayerPanelNodeTreeService {
+export class LayerPanelNodeTreeService {
   private expandedNodeMap = observable.map<string, boolean>()
   @observable private nodeInfoVersion = 0
 
@@ -78,7 +78,3 @@ class LayerPanelNodeTreeService {
     })
   }
 }
-
-export const LayerPanelNodeTree = autoBind(
-  makeObservable(new LayerPanelNodeTreeService()),
-)

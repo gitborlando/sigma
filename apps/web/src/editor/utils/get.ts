@@ -1,8 +1,4 @@
-import { EditorSetting } from 'src/editor/core/setting'
-import { HandleSelect } from 'src/editor/handle/select'
-import { StageViewport } from 'src/editor/stage/viewport'
-import { YClients } from 'src/editor/y-adapter/y-clients'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { EditorSetting, HandleSelect, StageViewport, YClients, YState } from '..'
 
 const allSelectIdMap = computed(() => ({
   ...HandleSelect.selectIdMap,

@@ -4,11 +4,14 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
-import { HandlePage } from 'src/editor/handle/page'
-import { HandleSelect } from 'src/editor/handle/select'
 import { Matrix, max, min } from 'src/editor/geometry'
-import { StageScene } from 'src/editor/render/scene'
-import { StageSurface } from 'src/editor/render/surface'
+import {
+  HandlePage,
+  HandleSelect,
+  StageScene,
+  StageSurface,
+  StageViewport,
+} from '..'
 import { getSelectIdList } from '../utils/get'
 
 const createInitBound = () => ({
@@ -20,7 +23,7 @@ const createInitBound = () => ({
   height: window.innerHeight - 48 - 0,
 })
 
-class StageViewportService {
+export class StageViewportService {
   @observable.ref sceneMatrix = Matrix.identity()
   @observable bound = createInitBound()
 
@@ -205,5 +208,3 @@ class StageViewportService {
     })
   }
 }
-
-export const StageViewport = autoBind(makeObservable(new StageViewportService()))

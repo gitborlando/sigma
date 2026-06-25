@@ -1,11 +1,9 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
+import { StageCursor, StageSurface, StageViewport } from 'src/editor'
 import { Matrix } from 'src/editor/geometry'
-import { StageSurface } from 'src/editor/render/surface'
-import { StageCursor } from 'src/editor/stage/cursor'
 import { Drag } from 'src/global/event/drag'
-import { StageViewport } from '../viewport'
 
-class StageMoveService {
+export class StageMoveService {
   @observable isMoving = false
 
   startInteract() {
@@ -35,5 +33,3 @@ class StageMoveService {
       .start()
   }
 }
-
-export const StageMove = autoBind(makeObservable(new StageMoveService()))

@@ -4,26 +4,28 @@ import { clone, firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
-import { EditorCommand } from 'src/editor/core/command'
-import { Undo } from 'src/editor/core/undo'
+import {
+  EditorCommand,
+  HandleSelect,
+  StageScene,
+  StageSurface,
+  StageTransformer,
+  Undo,
+  YState,
+} from 'src/editor'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import { HandleSelect } from 'src/editor/handle/select'
 import { ElemMouseEvent } from 'src/editor/render/elem'
-import { StageScene } from 'src/editor/render/scene'
-import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { StageDrag } from 'src/editor/stage/interact/drag'
-import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import {
   getSelectIdList,
   getSelectIdMap,
   getSelectPageId,
 } from 'src/editor/utils/get'
-import { YState } from 'src/editor/y-adapter/y-state'
 import { ContextMenu } from 'src/global/context-menu'
 
-class StageSelectService {
+export class StageSelectService {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
   @observable hoverId?: string
 
@@ -192,5 +194,3 @@ class StageSelectService {
 
   private onEditText(hoverNode: S.Node) {}
 }
-
-export const StageSelect = autoBind(makeObservable(new StageSelectService()))

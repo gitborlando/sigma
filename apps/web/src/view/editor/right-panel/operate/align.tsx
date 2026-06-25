@@ -1,6 +1,6 @@
 import { useSignal } from '@gitborlando/signal/react'
 import { Icon } from '@gitborlando/widget'
-import { OperateAlign } from 'src/editor/operate/align'
+import { OperateAlign } from 'src/editor'
 import { Btn } from 'src/view/component/btn'
 
 export const AlignComp: FC<{}> = observer(({}) => {

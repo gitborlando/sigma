@@ -3,20 +3,19 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone, jsonParse } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
 import JSZip from 'jszip'
-import { Undo } from 'src/editor/core/undo'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
 import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
-import { YClients } from 'src/editor/y-adapter/y-clients'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { FileService } from 'src/global/service/file'
 import * as Y from 'yjs'
+import { Undo, YClients, YState } from '..'
 
 export type YStatePatch = YPlainPatch
 
 type YStateListener = (patches: YStatePatch[]) => void
 
-class YStateService {
+export class YStateService {
   doc!: Y.Doc
   plain!: YPlain<S.Schema>
 
@@ -144,5 +143,3 @@ class YStateService {
     return this.doc.getMap('schema')
   }
 }
-
-export const YState = autoBind(new YStateService())

@@ -1,11 +1,9 @@
 import { matchCase, NoopFunc } from '@gitborlando/utils'
-import { StageCreate } from './create'
-import { StageMove } from './move'
-import { StageSelect } from './select'
+import { StageCreate, StageMove, StageSelect } from 'src/editor'
 
 export type IStageInteraction = 'select' | 'move' | 'create'
 
-class StageInteractService {
+export class StageInteractService {
   @observable interaction: IStageInteraction = 'select'
   private offInteract?: NoopFunc
 
@@ -31,5 +29,3 @@ class StageInteractService {
     })
   }
 }
-
-export const StageInteract = autoBind(makeObservable(new StageInteractService()))

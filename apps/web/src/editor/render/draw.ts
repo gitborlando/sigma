@@ -1,18 +1,17 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
-import { EditorSetting } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
 import { max } from 'src/editor/geometry/base'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
-import { StageSurface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
 import { Image } from 'src/global/service/image'
 import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
+import { EditorSetting, StageSurface } from '..'
 import { getZoom } from '../utils/get'
 import { Elem } from './elem'
 
-class ElemDrawerService {
+export class ElemDrawerService {
   private node!: S.Node
   private elem!: Elem
   private ctx!: CanvasRenderingContext2D
@@ -461,5 +460,3 @@ class ElemDrawerService {
     return collideXys
   }
 }
-
-export const ElemDrawer = autoBind(new ElemDrawerService())

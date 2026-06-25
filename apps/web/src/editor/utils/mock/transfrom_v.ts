@@ -1,5 +1,5 @@
+import { SchemaCreator } from 'src/editor'
 import { MRect } from 'src/editor/geometry'
-import { SchemaCreator } from 'src/editor/schema/creator'
 
 export function mock_transform_v() {
   const schema = <S.Schema>{}

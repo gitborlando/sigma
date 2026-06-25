@@ -1,15 +1,14 @@
 import { iife } from '@gitborlando/utils'
-import { Undo } from 'src/editor/core/undo'
+import { Undo, YState } from 'src/editor'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
 import { snapGridRound, TRBL } from 'src/editor/utils/misc'
-import { YState } from 'src/editor/y-adapter/y-state'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
-class StageTransformerService {
+export class StageTransformerService {
   @observable.ref mrect = MRect.identity()
   @observable.ref diffMatrix = Matrix.identity()
   @observable isMoving = false
@@ -189,7 +188,3 @@ class StageTransformerService {
     YState.set<S.Node>([node.id, 'matrix'], startMRect.matrix)
   }
 }
-
-export const StageTransformer = autoBind(
-  makeObservable(new StageTransformerService()),
-)

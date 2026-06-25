@@ -17,7 +17,7 @@ const initSetting = () => {
   }
 }
 
-class EditorSettingService {
+export class EditorSettingService {
   @observable setting = initSetting()
 
   subscribe() {
@@ -37,5 +37,3 @@ class EditorSettingService {
     )
   }
 }
-
-export const EditorSetting = autoBind(makeObservable(new EditorSettingService()))

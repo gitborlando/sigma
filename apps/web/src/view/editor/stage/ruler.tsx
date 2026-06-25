@@ -1,5 +1,4 @@
-import { HandleNode } from 'src/editor/handle/node'
-import { StageViewport } from 'src/editor/stage/viewport'
+import { HandleNode, StageViewport } from 'src/editor'
 
 const getNearestIntMultiple = (number: number, rate: number) => {
   const n = Math.floor(number / rate)

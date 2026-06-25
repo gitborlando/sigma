@@ -3,13 +3,11 @@ import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import { MobxUndo } from 'src/editor/core/undo'
 import { Matrix } from 'src/editor/geometry'
-import { HandleSelect } from 'src/editor/handle/select'
-import { YState } from 'src/editor/y-adapter/y-state'
-import { YSync } from 'src/editor/y-adapter/y-sync'
 import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
+import { HandleSelect, YState, YSync } from '..'
 
-class YClientsService {
+export class YClientsService {
   clientId!: number
 
   @observable client: S.Client = {
@@ -112,5 +110,3 @@ class YClientsService {
     return listen('mousemove', (e) => (this.client.cursor = XY.client(e)))
   }
 }
-
-export const YClients = autoBind(makeObservable(new YClientsService()))

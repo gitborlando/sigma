@@ -1,10 +1,9 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { StageSurface } from 'src/editor/render/surface'
-import { StageViewport } from 'src/editor/stage/viewport'
+import { StageSurface, StageViewport } from 'src/editor'
 import { getZoom } from 'src/editor/utils/get'
 import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
 
-class StageToolGridService {
+export class StageToolGridService {
   private ctx!: CanvasRenderingContext2D
 
   subscribe() {
@@ -64,5 +63,3 @@ class StageToolGridService {
     return ticks
   }
 }
-
-export const StageToolGrid = autoBind(makeObservable(new StageToolGridService()))

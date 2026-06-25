@@ -1,5 +1,5 @@
 import { Minus, Plus } from 'lucide-react'
-import { OperateFill } from 'src/editor/operate/fill'
+import { OperateFill } from 'src/editor'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 import {

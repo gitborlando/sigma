@@ -1,13 +1,15 @@
 import { iife } from '@gitborlando/utils'
 import { entries } from 'mobx'
-import { SchemaCreator } from 'src/editor/schema/creator'
+import {
+  SchemaCreator,
+  StageMove,
+  StageSelect,
+  StageTransformer,
+  StageViewport,
+  YClients,
+} from 'src/editor'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { StageMove } from 'src/editor/stage/interact/move'
-import { StageSelect } from 'src/editor/stage/interact/select'
-import { StageTransformer } from 'src/editor/stage/tools/transformer'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { getSelectIdList, getZoom } from 'src/editor/utils/get'
-import { YClients } from 'src/editor/y-adapter/y-clients'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 

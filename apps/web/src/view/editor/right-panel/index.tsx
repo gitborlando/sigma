@@ -1,4 +1,4 @@
-import { StageViewport } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor'
 import { OperatePanelComp } from './operate'
 
 export const RightPanelComp: FC<{}> = ({}) => {
