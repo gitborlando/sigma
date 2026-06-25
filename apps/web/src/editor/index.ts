@@ -1,6 +1,6 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { makeObservable } from 'mobx'
-import { EditorCommandManager } from 'src/editor/core/command'
+import { EditorCommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import { HandleNodeService } from 'src/editor/handle/node'
@@ -34,7 +34,7 @@ export class EditorService {
   handleNode = this.initService(HandleNodeService)
   handlePage = this.initService(HandlePageService)
   editorSetting = this.initService(EditorSettingService)
-  editorCommand = this.initService(EditorCommandManager)
+  editorCommand = this.initService(EditorCommandService)
   undo = this.initService(UndoService)
   handleSelect = this.initService(HandleSelectService)
   operateAlign = this.initService(OperateAlignService)
@@ -96,15 +96,13 @@ export class EditorService {
   private initService<T extends object>(service: new () => T) {
     return autoBind(makeObservable(new service()))
   }
-
-  private initServices() {}
 }
 
 export const Editor = autoBind(new EditorService())
 export const HandleNode = Editor.handleNode
 export const HandlePage = Editor.handlePage
 export const EditorSetting = Editor.editorSetting
-export const EditorCommand = new EditorCommandManager()
+export const EditorCommand = new EditorCommandService()
 export const Undo = Editor.undo
 export const HandleSelect = Editor.handleSelect
 export const OperateAlign = Editor.operateAlign

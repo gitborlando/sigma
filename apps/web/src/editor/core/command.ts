@@ -5,7 +5,7 @@ import { Command } from 'src/global/context-menu'
 import { HandleNode, HandlePage, StageInteract, StageScene, Undo, YState } from '..'
 import { getSelectIdList, getSetting } from '../utils/get'
 
-export class EditorCommandManager {
+export class EditorCommandService {
   subscribe() {
     return this.bindHotkeys()
   }
