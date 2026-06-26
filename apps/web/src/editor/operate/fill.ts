@@ -4,7 +4,7 @@ import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
 import { EditorService } from 'src/editor/service'
 import { COLOR } from 'src/utils/color'
-import { type EditorService2 } from '..'
+import { type Editor } from '..'
 import { getSelectedNodes } from '../utils/get'
 
 export class OperateFillService extends EditorService {
@@ -96,7 +96,7 @@ export class OperateFillService extends EditorService {
   }
 }
 
-function applyFillPatches(editor: EditorService2, id: ID, patches: Patch[]) {
+function applyFillPatches(editor: Editor, id: ID, patches: Patch[]) {
   patches.forEach((patch) => {
     const path = [id, 'fills', ...patch.path] as [
       ID,

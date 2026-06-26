@@ -1,26 +1,26 @@
-import type { EditorService2 } from '..'
+import type { Editor } from '..'
 
-export function getZoom(editor: EditorService2) {
+export function getZoom(editor: Editor) {
   return editor.stageViewport.zoom
 }
 
-export function getSetting(editor: EditorService2) {
+export function getSetting(editor: Editor) {
   return editor.editorSetting.setting
 }
 
-export function getSelectIdMap(editor: EditorService2) {
+export function getSelectIdMap(editor: Editor) {
   return editor.handleSelect.selectIdMap
 }
 
-export function getSelectIdList(editor: EditorService2) {
+export function getSelectIdList(editor: Editor) {
   return editor.handleSelect.selectIdList.filter((id) => editor.yState.state[id])
 }
 
-export function getSelectPageId(editor: EditorService2) {
+export function getSelectPageId(editor: Editor) {
   return editor.handleSelect.selectPageId
 }
 
-export function getAllSelectIdMap(editor: EditorService2) {
+export function getAllSelectIdMap(editor: Editor) {
   return {
     ...editor.handleSelect.selectIdMap,
     ...Object.values(editor.yClients.others).reduce((acc, client) => {
@@ -29,6 +29,6 @@ export function getAllSelectIdMap(editor: EditorService2) {
   }
 }
 
-export function getSelectedNodes(editor: EditorService2) {
+export function getSelectedNodes(editor: Editor) {
   return getSelectIdList(editor).map((id) => editor.yState.find<S.Node>(id))
 }

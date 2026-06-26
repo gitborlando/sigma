@@ -2,7 +2,7 @@ import { type IXY } from '@gitborlando/geo'
 import { getSet, type NoopFunc } from '@gitborlando/utils'
 import { memorized } from '@sigma/utils/common'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import type { EditorService2 } from '..'
+import type { Editor } from '..'
 import { getSetting } from '../utils/get'
 
 declare module 'react' {
@@ -22,7 +22,7 @@ export type ElemProps = {
 
 export class Elem {
   constructor(
-    public editor: EditorService2,
+    public editor: Editor,
     public id = '',
     public type: 'sceneElem' | 'widgetElem',
   ) {}

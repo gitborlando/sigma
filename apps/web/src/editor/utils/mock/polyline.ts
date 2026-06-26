@@ -1,6 +1,6 @@
-import { EditorService2 } from 'src/editor'
+import { Editor } from 'src/editor'
 
-export function mockPolyline(editor: EditorService2) {
+export function mockPolyline(editor: Editor) {
   const schema = <S.Schema>{}
 
   const meta = editor.schemaCreator.meta()

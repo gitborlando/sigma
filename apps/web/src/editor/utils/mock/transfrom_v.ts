@@ -1,7 +1,7 @@
-import { EditorService2 } from 'src/editor'
+import { Editor } from 'src/editor'
 import { MRect } from 'src/editor/geometry'
 
-export function mock_transform_v(editor: EditorService2) {
+export function mock_transform_v(editor: Editor) {
   const schema = <S.Schema>{}
 
   const meta = editor.schemaCreator.meta()

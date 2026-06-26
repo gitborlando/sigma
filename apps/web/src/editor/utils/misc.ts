@@ -1,21 +1,21 @@
 import { IRect } from '@gitborlando/geo'
-import type { EditorService2 } from '..'
+import type { Editor } from '..'
 import { getSetting } from './get'
 
 export type TRBL = 'top' | 'right' | 'bottom' | 'left'
 
-export function snapGridRound(editor: EditorService2, value: number) {
+export function snapGridRound(editor: Editor, value: number) {
   if (getSetting(editor).snapToGrid) {
     return Math.round(value)
   }
   return value
 }
 
-export function snapGridRoundXY(editor: EditorService2, xy: IXY) {
+export function snapGridRoundXY(editor: Editor, xy: IXY) {
   return XY.$(snapGridRound(editor, xy.x), snapGridRound(editor, xy.y))
 }
 
-export function snapGridRoundRect(editor: EditorService2, rect: IRect): IRect {
+export function snapGridRoundRect(editor: Editor, rect: IRect): IRect {
   const { x, y, width, height } = rect
   const snapStart = snapGridRoundXY(editor, XY.$(x, y))
   const snapEnd = snapGridRoundXY(editor, XY.$(x + width, y + height))

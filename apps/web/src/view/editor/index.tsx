@@ -1,5 +1,5 @@
 import { useClean, withSuspense } from '@gitborlando/utils/react'
-import { EditorService2 } from 'src/editor'
+import { Editor } from 'src/editor'
 import { Loading } from 'src/view/component/loading'
 import { LeftPanelComp } from 'src/view/editor/left-panel'
 import { RightPanelComp } from 'src/view/editor/right-panel'
@@ -11,7 +11,7 @@ import { HeaderComp } from './header'
 export const EditorComp = withSuspense(
   ({}) => {
     const { fileId } = useParams<{ fileId: string }>()
-    const { editor, dispose } = useMemo(() => EditorService2.initInstance(), [])
+    const { editor, dispose } = useMemo(() => Editor.initInstance(), [])
 
     suspend(() => editor.yState.initSchema(fileId!), [fileId])
     suspend(() => editor.stageSurface.initTextBreaker(), ['initTextBreaker'])

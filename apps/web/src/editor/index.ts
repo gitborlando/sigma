@@ -28,8 +28,8 @@ import { YStateService } from 'src/editor/y-adapter/y-state'
 import { YSyncService } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
-export class EditorService2 extends Service {
-  private static editor: EditorService2
+export class Editor extends Service {
+  private static editor: Editor
 
   static getInstance() {
     if (!this.editor) this.initInstance()
@@ -37,7 +37,7 @@ export class EditorService2 extends Service {
   }
 
   static initInstance() {
-    const editor = (this.editor = autoBind(new EditorService2()))
+    const editor = (this.editor = autoBind(new Editor()))
     const dispose = editor.subscribe()
     return { editor, dispose }
   }
@@ -76,9 +76,7 @@ export class EditorService2 extends Service {
   ySync = this.initService(YSyncService)
   yState = this.initService(YStateService)
 
-  private initService<T extends EditorService>(
-    Service: new (editor: EditorService2) => T,
-  ) {
+  private initService<T extends EditorService>(Service: new (editor: Editor) => T) {
     const service = autoBind(makeObservable(new Service(this)))
     this.services.push(service)
     return service

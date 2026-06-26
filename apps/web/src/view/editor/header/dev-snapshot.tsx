@@ -1,7 +1,7 @@
 import { MobxUndoState } from '@gitborlando/mobx-undo'
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import type { EditorService2 } from 'src/editor'
+import type { Editor } from 'src/editor'
 import { MobxUndo, UndoInfo } from 'src/editor/core/undo'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
@@ -199,7 +199,7 @@ function readSnapshot(storageKey: string) {
   }
 }
 
-function createSnapshotState(editor: EditorService2): SnapshotState {
+function createSnapshotState(editor: Editor): SnapshotState {
   return {
     schema: toPlain(editor.yState.schema),
     undoStack: toPlain(editor.undo.stack),
@@ -208,12 +208,12 @@ function createSnapshotState(editor: EditorService2): SnapshotState {
   }
 }
 
-function restoreFinalSnapshot(editor: EditorService2, snapshot: SnapshotState) {
+function restoreFinalSnapshot(editor: Editor, snapshot: SnapshotState) {
   replaceSchema(editor, snapshot.schema)
   restoreUndo(editor, snapshot)
 }
 
-function restoreReplayableSnapshot(editor: EditorService2, snapshot: DevSnapshot) {
+function restoreReplayableSnapshot(editor: Editor, snapshot: DevSnapshot) {
   const base = snapshot.base
   if (!base) return restoreFinalSnapshot(editor, snapshot)
 
@@ -224,7 +224,7 @@ function restoreReplayableSnapshot(editor: EditorService2, snapshot: DevSnapshot
   replayHistoryFromBase(editor, snapshot, base)
 }
 
-function replaceSchema(editor: EditorService2, schema: S.Schema) {
+function replaceSchema(editor: Editor, schema: S.Schema) {
   const currentKeys = Object.keys(editor.yState.state)
   const nextKeys = Object.keys(schema)
 
@@ -236,7 +236,7 @@ function replaceSchema(editor: EditorService2, schema: S.Schema) {
   })
 }
 
-function restoreUndo(editor: EditorService2, snapshot: SnapshotState) {
+function restoreUndo(editor: Editor, snapshot: SnapshotState) {
   if (!resetUndo(editor)) return
 
   editor.undo.restoreHistory(
@@ -245,7 +245,7 @@ function restoreUndo(editor: EditorService2, snapshot: SnapshotState) {
   )
 }
 
-function resetUndo(editor: EditorService2) {
+function resetUndo(editor: Editor) {
   const ySchema = editor.yState.doc?.getMap<S.Schema>('schema')
   if (!ySchema) return false
 
@@ -257,7 +257,7 @@ function resetUndo(editor: EditorService2) {
 }
 
 function replayHistoryFromBase(
-  editor: EditorService2,
+  editor: Editor,
   snapshot: DevSnapshot,
   base: SnapshotState,
 ) {
@@ -270,7 +270,7 @@ function replayHistoryFromBase(
   editor.undo.restoreHistory(toPlain(stack), end)
 }
 
-function replayHistoryInfo(editor: EditorService2, info: UndoInfo) {
+function replayHistoryInfo(editor: Editor, info: UndoInfo) {
   if (info.type === 'client') {
     applyReplayLocalState(editor, info)
     editor.undo.track(info.type, info.description)
@@ -283,7 +283,7 @@ function replayHistoryInfo(editor: EditorService2, info: UndoInfo) {
   editor.undo.track(info.type, info.description)
 }
 
-function applyReplayLocalState(editor: EditorService2, info: UndoInfo) {
+function applyReplayLocalState(editor: Editor, info: UndoInfo) {
   const localState = info.clientState
   if (localState) {
     MobxUndo.applyState(normalizeLocalState(editor, localState))
@@ -301,7 +301,7 @@ type HandleSelectState = {
   selectPageId: string
 }
 
-function normalizeLocalState(editor: EditorService2, state: MobxUndoState) {
+function normalizeLocalState(editor: Editor, state: MobxUndoState) {
   if (!state.select) return state
 
   return {
@@ -310,7 +310,7 @@ function normalizeLocalState(editor: EditorService2, state: MobxUndoState) {
   }
 }
 
-function normalizeSelectState(editor: EditorService2, state: HandleSelectState) {
+function normalizeSelectState(editor: Editor, state: HandleSelectState) {
   return {
     ...state,
     selectIdMap: Object.fromEntries(
@@ -322,15 +322,12 @@ function normalizeSelectState(editor: EditorService2, state: HandleSelectState) 
   }
 }
 
-function getValidPageId(editor: EditorService2, pageId: string) {
+function getValidPageId(editor: Editor, pageId: string) {
   if (pageId && editor.yState.state[pageId]) return pageId
   return editor.yState.state.meta?.pageIds[0] || ''
 }
 
-function applyStatePatches(
-  editor: EditorService2,
-  patches: UndoInfo['statePatches'],
-) {
+function applyStatePatches(editor: Editor, patches: UndoInfo['statePatches']) {
   patches?.forEach((patch) => {
     const yState = editor.yState as any
     const keys = patch.keys as [string, ...Array<string | number>]
@@ -349,17 +346,14 @@ function applyStatePatches(
   })
 }
 
-function shouldInsertPatch(
-  editor: EditorService2,
-  keys: readonly (string | number)[],
-) {
+function shouldInsertPatch(editor: Editor, keys: readonly (string | number)[]) {
   const lastIndex = Number(keys[keys.length - 1])
   if (Number.isNaN(lastIndex)) return false
 
   return Array.isArray(getSchemaValue(editor, keys.slice(0, -1)))
 }
 
-function getSchemaValue(editor: EditorService2, keys: readonly (string | number)[]) {
+function getSchemaValue(editor: Editor, keys: readonly (string | number)[]) {
   let current: any = editor.yState.state
   keys.forEach((key) => {
     current = current?.[key]
