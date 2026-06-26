@@ -1,5 +1,4 @@
 import { Dragger } from '@gitborlando/toolkit/browser'
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { EditorCommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
@@ -26,11 +25,9 @@ import { LayerPanelNodeTreeService } from 'src/editor/workbench/layer-panel/node
 import { YClientsService } from 'src/editor/y-adapter/y-clients'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { YSyncService } from 'src/editor/y-adapter/y-sync'
+import { Service } from 'src/global/service'
 
-export class EditorService2 {
-  private inited = false
-  private disposer = new Disposer()
-
+export class EditorService2 extends Service {
   stageDragger = new Dragger({
     processXY: (xy) => this.stageViewport.toSceneXY(xy),
     processShift: (shift) => this.stageViewport.toSceneShift(shift),
@@ -68,20 +65,8 @@ export class EditorService2 {
     return this.yState.find<T>(id)
   }
 
-  init = () => {
-    if (this.inited) return
-    this.disposer.add(this.subscribe())
-    this.inited = true
-  }
-
-  dispose = () => {
-    this.inited = false
-    this.yState.dispose()
-    this.disposer.dispose()
-  }
-
-  private subscribe() {
-    return Disposer.combine(
+  subscribe() {
+    this.disposer.add(
       this.editorSetting.subscribe(),
       this.editorCommand.subscribe(),
 
@@ -101,6 +86,10 @@ export class EditorService2 {
       this.layerPanel.subscribe(),
       this.layerPanelNodeTree.subscribe(),
     )
+    return () => {
+      this.yState.dispose()
+      this.disposer.dispose()
+    }
   }
 
   private initService<T extends object>(service: new (editor: EditorService2) => T) {
