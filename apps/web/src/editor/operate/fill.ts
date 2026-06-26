@@ -15,7 +15,7 @@ export class OperateFillService extends EditorService {
       this.editor.handleSelect.afterSelect.hook(() => {
         this.setupFills()
       }),
-      this.editor.yState.subscribe((patches) => {
+      this.editor.yState.listen((patches) => {
         if (!patches.some((p) => p.keys[1] === 'fills')) return
         this.updateFills()
       }),

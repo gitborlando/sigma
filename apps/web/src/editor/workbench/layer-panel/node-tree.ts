@@ -68,7 +68,7 @@ export class LayerPanelNodeTreeService extends EditorService {
   }
 
   private onNodeHierarchyChange() {
-    return this.editor.yState.subscribe((patches) => {
+    return this.editor.yState.listen((patches) => {
       patches.forEach((patch) => {
         const [id, prop] = patch.keys as [string, string]
         if (prop !== 'childIds') return

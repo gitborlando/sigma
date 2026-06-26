@@ -1,5 +1,4 @@
 import { Signal } from '@gitborlando/signal'
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone, jsonParse } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
 import JSZip from 'jszip'
@@ -24,7 +23,6 @@ export class YStateService extends EditorService {
 
   private listeners = new Set<YStateListener>()
   private accumulatePatches: YStatePatch[] = []
-  private disposer = new Disposer()
 
   get schema() {
     return this.state
@@ -58,7 +56,7 @@ export class YStateService extends EditorService {
     return this.state[id] as T
   }
 
-  subscribe(listener: YStateListener) {
+  listen(listener: YStateListener) {
     this.listeners.add(listener)
     return () => void this.listeners.delete(listener)
   }
