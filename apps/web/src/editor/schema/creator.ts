@@ -13,8 +13,9 @@ import { T } from 'src/utils/common'
 import { Assets } from 'src/view/assets/assets'
 import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
+import { EditorService } from '..'
 
-export class SchemaCreatorService {
+export class SchemaCreatorService extends EditorService {
   schema(): S.Schema {
     const page = this.page()
     const meta = this.meta()

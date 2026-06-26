@@ -1,7 +1,7 @@
-import { YState } from 'src/editor'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { getSelectPageId } from 'src/editor/utils/get'
+import { EditorService } from '../..'
 
 export type LayerPanelNodeInfo = {
   id: string
@@ -9,7 +9,7 @@ export type LayerPanelNodeInfo = {
   ancestorIds: string[]
 }
 
-export class LayerPanelNodeTreeService {
+export class LayerPanelNodeTreeService extends EditorService {
   private expandedNodeMap = observable.map<string, boolean>()
   @observable private nodeInfoVersion = 0
 
@@ -30,7 +30,7 @@ export class LayerPanelNodeTreeService {
   }
 
   getNodeExpanded(id: string) {
-    if (!SchemaHelper.isNodeParent(YState.find(id))) return
+    if (!SchemaHelper.isNodeParent(this.editor.find(id))) return
     return this.expandedNodeMap.get(id)
   }
 
@@ -40,19 +40,19 @@ export class LayerPanelNodeTreeService {
 
   toggleAllNodeExpanded(expanded: boolean) {
     const traverse = createSchemaTraverse({
-      schema: YState.schema,
+      schema: this.editor.yState.schema,
       enter: ({ item }) => {
         if (!SchemaHelper.isNodeParent(item)) return
         this.expandedNodeMap.set(item.id, expanded)
       },
     })
-    traverse(SchemaHelper.getPageChildIds(getSelectPageId()))
+    traverse(SchemaHelper.getPageChildIds(getSelectPageId(this.editor)))
   }
 
   private getNodeInfoList() {
     const nodeInfoList: LayerPanelNodeInfo[] = []
     const traverse = createSchemaTraverse({
-      schema: YState.schema,
+      schema: this.editor.yState.schema,
       enter: ({ item, ancestors }) => {
         const ancestorIds = ancestors.map((node) => node.id)
         nodeInfoList.push({
@@ -63,12 +63,12 @@ export class LayerPanelNodeTreeService {
         return !!this.expandedNodeMap.get(item.id)
       },
     })
-    traverse(SchemaHelper.getPageChildIds(getSelectPageId()))
+    traverse(SchemaHelper.getPageChildIds(getSelectPageId(this.editor)))
     return nodeInfoList
   }
 
   private onNodeHierarchyChange() {
-    return YState.subscribe((patches) => {
+    return this.editor.yState.subscribe((patches) => {
       patches.forEach((patch) => {
         const [id, prop] = patch.keys as [string, string]
         if (prop !== 'childIds') return

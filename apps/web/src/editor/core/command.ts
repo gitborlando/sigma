@@ -2,10 +2,10 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { Command } from 'src/global/context-menu'
-import { HandleNode, HandlePage, StageInteract, StageScene, Undo, YState } from '..'
+import { EditorService } from '..'
 import { getSelectIdList, getSetting } from '../utils/get'
 
-export class EditorCommandService {
+export class EditorCommandService extends EditorService {
   subscribe() {
     return this.bindHotkeys()
   }
@@ -15,14 +15,14 @@ export class EditorCommandService {
       {
         name: t('copy'),
         shortcut: 'ctrl+c',
-        when: () => !!getSelectIdList().length,
-        callback: () => HandleNode.copySelectedNodes(),
+        when: () => !!getSelectIdList(this.editor).length,
+        callback: () => this.editor.handleNode.copySelectedNodes(),
       },
       {
         name: t('paste'),
         shortcut: 'ctrl+v',
-        when: () => !!HandleNode.copiedIds.length,
-        callback: () => HandleNode.pasteNodes(),
+        when: () => !!this.editor.handleNode.copiedIds.length,
+        callback: () => this.editor.handleNode.pasteNodes(),
       },
     ]
   }
@@ -32,12 +32,12 @@ export class EditorCommandService {
       {
         name: t('undo'),
         shortcut: 'ctrl+z',
-        callback: () => Undo.undo(),
+        callback: () => this.editor.undo.undo(),
       },
       {
         name: t('redo'),
         shortcut: 'ctrl+shift+z',
-        callback: () => Undo.redo(),
+        callback: () => this.editor.undo.redo(),
       },
     ]
   }
@@ -47,16 +47,16 @@ export class EditorCommandService {
       {
         name: t('delete page'),
         callback: ({ id }: IDPayload) => {
-          HandlePage.removePage(YState.find<S.Page>(id))
+          this.editor.handlePage.removePage(this.editor.find<S.Page>(id))
         },
       },
     ]
 
-    if (getSetting().devMode) {
+    if (getSetting(this.editor).devMode) {
       commands.push({
         name: t('print schema'),
         callback: ({ id }: IDPayload) => {
-          HandlePage.DEV_logPageSchema(id)
+          this.editor.handlePage.DEV_logPageSchema(id)
         },
       })
     }
@@ -74,22 +74,22 @@ export class EditorCommandService {
       },
       {
         name: t('create frame'),
-        callback: () => HandleNode.wrapInFrame(),
+        callback: () => this.editor.handleNode.wrapInFrame(),
       },
       {
         name: t('delete'),
         shortcut: 'del',
-        callback: () => HandleNode.deleteSelectedNodes(),
+        callback: () => this.editor.handleNode.deleteSelectedNodes(),
       },
     ]
 
-    if (getSetting().devMode) {
+    if (getSetting(this.editor).devMode) {
       commands.push(
         {
           name: t('print schema'),
           callback: () => {
-            getSelectIdList().forEach((id) => {
-              const node = YState.find<S.SchemaItem>(id)
+            getSelectIdList(this.editor).forEach((id) => {
+              const node = this.editor.find<S.SchemaItem>(id)
               console.log(node)
             })
           },
@@ -97,8 +97,8 @@ export class EditorCommandService {
         {
           name: t('print element'),
           callback: () => {
-            getSelectIdList().forEach((id) => {
-              const elem = StageScene.findElem(id)
+            getSelectIdList(this.editor).forEach((id) => {
+              const elem = this.editor.stageScene.findElem(id)
               console.log(elem)
             })
           },
@@ -114,22 +114,22 @@ export class EditorCommandService {
       {
         name: t('move up'),
         shortcut: 'ctrl+]',
-        callback: () => HandleNode.reHierarchySelectedNode('up'),
+        callback: () => this.editor.handleNode.reHierarchySelectedNode('up'),
       },
       {
         name: t('move down'),
         shortcut: 'ctrl+[',
-        callback: () => HandleNode.reHierarchySelectedNode('down'),
+        callback: () => this.editor.handleNode.reHierarchySelectedNode('down'),
       },
       {
         name: t('move to top'),
         shortcut: 'ctrl+alt+]',
-        callback: () => HandleNode.reHierarchySelectedNode('top'),
+        callback: () => this.editor.handleNode.reHierarchySelectedNode('top'),
       },
       {
         name: t('move to bottom'),
         shortcut: 'ctrl+alt+[',
-        callback: () => HandleNode.reHierarchySelectedNode('bottom'),
+        callback: () => this.editor.handleNode.reHierarchySelectedNode('bottom'),
       },
     ]
   }
@@ -139,12 +139,12 @@ export class EditorCommandService {
       {
         name: t('select'),
         shortcut: 'v',
-        callback: () => (StageInteract.interaction = 'select'),
+        callback: () => (this.editor.stageInteract.interaction = 'select'),
       },
       {
         name: t('move'),
         shortcut: 'h',
-        callback: () => (StageInteract.interaction = 'move'),
+        callback: () => (this.editor.stageInteract.interaction = 'move'),
       },
     ]
   }

@@ -5,9 +5,9 @@ import { MobxUndo } from 'src/editor/core/undo'
 import { Matrix } from 'src/editor/geometry'
 import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
-import { HandleSelect, YState, YSync } from '..'
+import { EditorService } from '..'
 
-export class YClientsService {
+export class YClientsService extends EditorService {
   clientId!: number
 
   @observable client: S.Client = {
@@ -32,8 +32,8 @@ export class YClientsService {
   subscribe() {
     const disposeSelect = reaction(
       () => ({
-        selectIdMap: HandleSelect.selectIdMap,
-        selectPageId: HandleSelect.selectPageId,
+        selectIdMap: this.editor.handleSelect.selectIdMap,
+        selectPageId: this.editor.handleSelect.selectPageId,
       }),
       () => this.syncSelectState(),
     )
@@ -42,19 +42,19 @@ export class YClientsService {
       this.client.userName = UserService.userName
       this.client.userAvatar = UserService.avatar
     })
-    HandleSelect.selectPage(YState.state.meta.pageIds[0])
+    this.editor.handleSelect.selectPage(this.editor.yState.state.meta.pageIds[0])
     MobxUndo.rebase()
     this.syncSelectState()
     return Disposer.combine(this.onMouseMove(), disposeSelect)
   }
 
   private syncSelectState() {
-    this.client.selectIdMap = HandleSelect.selectIdMap
-    this.client.selectPageId = HandleSelect.selectPageId
+    this.client.selectIdMap = this.editor.handleSelect.selectIdMap
+    this.client.selectPageId = this.editor.handleSelect.selectPageId
   }
 
   syncSelf() {
-    YSync.awareness.setLocalState(toJS(this.client))
+    this.editor.ySync.awareness.setLocalState(toJS(this.client))
 
     const clientKeys = Object.keys(this.client) as (keyof S.Client)[]
     const commonKeys = clientKeys.filter(
@@ -67,24 +67,24 @@ export class YClientsService {
         reaction(
           () => this.client[key],
           (value) => {
-            YSync.awareness.setLocalStateField(key, toJS(value))
+            this.editor.ySync.awareness.setLocalStateField(key, toJS(value))
           },
         ),
       )
     })
     disposer.add(
-      HandleSelect.afterSelect.hook(() => {
-        YSync.awareness.setLocalStateField(
+      this.editor.handleSelect.afterSelect.hook(() => {
+        this.editor.ySync.awareness.setLocalStateField(
           'selectIdMap',
-          toJS(HandleSelect.selectIdMap),
+          toJS(this.editor.handleSelect.selectIdMap),
         )
-        YSync.awareness.setLocalStateField(
+        this.editor.ySync.awareness.setLocalStateField(
           'selectPageId',
-          toJS(HandleSelect.selectPageId),
+          toJS(this.editor.handleSelect.selectPageId),
         )
       }),
     )
-    disposer.add(() => YSync.awareness.destroy())
+    disposer.add(() => this.editor.ySync.awareness.destroy())
 
     return disposer.dispose
   }
@@ -92,7 +92,7 @@ export class YClientsService {
   syncOthers() {
     let prev: S.Clients = this.others
     const onUpdate = () => {
-      const states = YSync.awareness.getStates()
+      const states = this.editor.ySync.awareness.getStates()
       states.delete(this.clientId)
       const others = Object.fromEntries(states.entries()) as S.Clients
       if (!equal(prev, others)) {
@@ -100,9 +100,9 @@ export class YClientsService {
         prev = others
       }
     }
-    YSync.awareness.on('update', onUpdate)
+    this.editor.ySync.awareness.on('update', onUpdate)
     return () => {
-      YSync.awareness.off('update', onUpdate)
+      this.editor.ySync.awareness.off('update', onUpdate)
     }
   }
 

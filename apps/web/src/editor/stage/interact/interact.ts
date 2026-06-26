@@ -1,9 +1,9 @@
 import { matchCase, NoopFunc } from '@gitborlando/utils'
-import { StageCreate, StageMove, StageSelect } from 'src/editor'
+import { EditorService } from '../..'
 
 export type IStageInteraction = 'select' | 'move' | 'create'
 
-export class StageInteractService {
+export class StageInteractService extends EditorService {
   @observable interaction: IStageInteraction = 'select'
   private offInteract?: NoopFunc
 
@@ -20,9 +20,9 @@ export class StageInteractService {
       this.offInteract?.()
 
       const interact = matchCase(this.interaction, {
-        select: () => StageSelect.startInteract(),
-        move: () => StageMove.startInteract(),
-        create: () => StageCreate.startInteract(),
+        select: () => this.editor.stageSelect.startInteract(),
+        move: () => this.editor.stageMove.startInteract(),
+        create: () => this.editor.stageCreate.startInteract(),
       })
 
       this.offInteract = interact?.()

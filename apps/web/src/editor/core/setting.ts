@@ -1,5 +1,6 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
 import { defuOverrideArray } from '@sigma/utils/defu'
+import { EditorService } from '..'
 
 const initSetting = () => {
   return {
@@ -17,7 +18,7 @@ const initSetting = () => {
   }
 }
 
-export class EditorSettingService {
+export class EditorSettingService extends EditorService {
   @observable setting = initSetting()
 
   subscribe() {

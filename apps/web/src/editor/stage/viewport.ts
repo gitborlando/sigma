@@ -5,13 +5,7 @@ import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { Matrix, max, min } from 'src/editor/geometry'
-import {
-  HandlePage,
-  HandleSelect,
-  StageScene,
-  StageSurface,
-  StageViewport,
-} from '..'
+import { EditorService } from '..'
 import { getSelectIdList } from '../utils/get'
 
 const createInitBound = () => ({
@@ -23,7 +17,7 @@ const createInitBound = () => ({
   height: window.innerHeight - 48 - 0,
 })
 
-export class StageViewportService {
+export class StageViewportService extends EditorService {
   @observable.ref sceneMatrix = Matrix.identity()
   @observable bound = createInitBound()
 
@@ -37,7 +31,6 @@ export class StageViewportService {
   private prevSceneMatrix = Matrix.identity()
   private boundAABB = new AABB(0, 0, 0, 0)
   private wheeler = new Wheeler()
-  private disposer = new Disposer()
 
   get boundCenter() {
     return XY.center(this.bound).divide(this.zoom)
@@ -48,7 +41,7 @@ export class StageViewportService {
       this.onBoundChange(),
       this.onMatrixChange(),
       this.onCurrentPageChange(),
-      StageSurface.inited.hook(this.onWheelZoom),
+      this.editor.stageSurface.inited.hook(this.onWheelZoom),
       this.disposer.dispose,
     )
   }
@@ -138,7 +131,9 @@ export class StageViewportService {
       this.wheeler.beforeWheel.hook(() => (this.isZooming = true)),
       this.wheeler.duringWheel.hook(({ e }) => this.handleWheelZoom(e)),
       this.wheeler.afterWheel.hook(() => (this.isZooming = false)),
-      StageSurface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent)),
+      this.editor.stageSurface.addEvent('wheel', (e) =>
+        this.wheeler.onWheel(e as WheelEvent),
+      ),
       listen('wheel', { passive: false, capture: true }, (e) => {
         e.ctrlKey && e.preventDefault()
       }),
@@ -171,21 +166,29 @@ export class StageViewportService {
 
   private onCurrentPageChange() {
     return reaction(
-      () => HandleSelect.selectPageId,
+      () => this.editor.handleSelect.selectPageId,
       (pageId) => {
         const getMatrix = () => Matrix.identity()
-        const matrix = getSet(HandlePage.pageSceneMatrix, pageId, getMatrix)
-        StageViewport.sceneMatrix = Matrix.of(matrix)
+        const matrix = getSet(
+          this.editor.handlePage.pageSceneMatrix,
+          pageId,
+          getMatrix,
+        )
+        this.sceneMatrix = Matrix.of(matrix)
       },
     )
   }
 
   handleZoomToFitAll() {
-    this.zoomToFit(StageScene.sceneElems.map((elem) => elem.aabb))
+    this.zoomToFit(this.editor.stageScene.sceneElems.map((elem) => elem.aabb))
   }
 
   handleZoomToFitSelection() {
-    this.zoomToFit(getSelectIdList().map((id) => StageScene.findElem(id).aabb))
+    this.zoomToFit(
+      getSelectIdList(this.editor).map(
+        (id) => this.editor.stageScene.findElem(id).aabb,
+      ),
+    )
   }
 
   private zoomToFit(aabbList: AABB[]) {

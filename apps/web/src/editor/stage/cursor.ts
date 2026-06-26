@@ -2,7 +2,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { floor } from 'src/editor/geometry/base'
-import { StageSurface } from '..'
+import { EditorService } from '..'
 
 export type StageCursorType =
   | 'select'
@@ -14,14 +14,14 @@ export type StageCursorType =
   | 'hand'
   | 'grab'
 
-export class StageCursorService {
+export class StageCursorService extends EditorService {
   private type: StageCursorType = 'select'
   private rotation = 0
   private locked = false
 
   subscribe() {
     return Disposer.combine(
-      StageSurface.inited.hook(() => this.setCursor('select')),
+      this.editor.stageSurface.inited.hook(() => this.setCursor('select')),
       listen('mouseup', () => (this.locked = false)),
     )
   }
@@ -31,7 +31,7 @@ export class StageCursorService {
 
     this.type = type
     this.rotation = floor(rotation)
-    StageSurface.setCursor(this.getSvgUrl())
+    this.editor.stageSurface.setCursor(this.getSvgUrl())
     return this
   }
 

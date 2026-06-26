@@ -1,5 +1,4 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { makeObservable } from 'mobx'
 import { EditorCommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
@@ -27,7 +26,13 @@ import { YClientsService } from 'src/editor/y-adapter/y-clients'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { YSyncService } from 'src/editor/y-adapter/y-sync'
 
-export class EditorService {
+export class EditorService extends Service {
+  constructor(protected editor: EditorService2) {
+    super()
+  }
+}
+
+export class EditorService2 {
   private inited = false
   private disposer = new Disposer()
 
@@ -58,13 +63,18 @@ export class EditorService {
   ySync = this.initService(YSyncService)
   yState = this.initService(YStateService)
 
-  init = async () => {
+  /** alias */
+  find = <T extends S.SchemaItem>(id: string) => {
+    return this.yState.find<T>(id)
+  }
+
+  init = () => {
     if (this.inited) return
     this.disposer.add(this.subscribe())
     this.inited = true
   }
 
-  dispose() {
+  dispose = () => {
     this.inited = false
     this.yState.dispose()
     this.disposer.dispose()
@@ -93,16 +103,16 @@ export class EditorService {
     )
   }
 
-  private initService<T extends object>(service: new () => T) {
-    return autoBind(makeObservable(new service()))
+  private initService<T extends object>(service: new (editor: EditorService2) => T) {
+    return autoBind(makeObservable(new service(this)))
   }
 }
 
-export const Editor = autoBind(new EditorService())
+export const Editor = autoBind(new EditorService2())
 export const HandleNode = Editor.handleNode
 export const HandlePage = Editor.handlePage
 export const EditorSetting = Editor.editorSetting
-export const EditorCommand = new EditorCommandService()
+export const EditorCommand = Editor.editorCommand
 export const Undo = Editor.undo
 export const HandleSelect = Editor.handleSelect
 export const OperateAlign = Editor.operateAlign

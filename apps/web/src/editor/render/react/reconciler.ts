@@ -40,8 +40,8 @@ const hostConfig: HostConfig<
   supportsPersistence: false,
   supportsHydration: false,
 
-  createInstance(_, props) {
-    const elem = new Elem(props.node.id, 'widgetElem')
+  createInstance(_, props, container) {
+    const elem = new Elem(container.editor, props.node.id, 'widgetElem')
     applyProps(elem, props)
     return elem
   },
@@ -49,15 +49,18 @@ const hostConfig: HostConfig<
     return instance
   },
   appendInitialChild(parent, child) {
+    child.editor = parent.editor
     parent.addChild(child)
   },
   finalizeInitialChildren() {
     return false
   },
   appendChild(parent, child) {
+    child.editor = parent.editor
     parent.addChild(child)
   },
   appendChildToContainer(container, child) {
+    child.editor = container.editor
     container.addChild(child)
   },
   removeChild(_, child) {
@@ -67,9 +70,11 @@ const hostConfig: HostConfig<
     child.destroy()
   },
   insertBefore(parent, child, beforeChild) {
+    child.editor = parent.editor
     parent.insertBefore(child, beforeChild!)
   },
   insertInContainerBefore(container, child, beforeChild) {
+    child.editor = container.editor
     container.insertBefore(child, beforeChild)
   },
   prepareForCommit() {

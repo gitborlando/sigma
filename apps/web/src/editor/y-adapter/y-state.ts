@@ -9,13 +9,13 @@ import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { FileService } from 'src/global/service/file'
 import * as Y from 'yjs'
-import { Undo, YClients, YState } from '..'
+import { EditorService } from '..'
 
 export type YStatePatch = YPlainPatch
 
 type YStateListener = (patches: YStatePatch[]) => void
 
-export class YStateService {
+export class YStateService extends EditorService {
   doc!: Y.Doc
   plain!: YPlain<S.Schema>
 
@@ -109,15 +109,15 @@ export class YStateService {
     this.plain = autoBind(new YPlain(this.ySchema, schema))
     this.disposer.add(this.plain.observe())
     this.disposer.add(this.plain.subscribe(this.handlePlainChange))
-    this.disposer.add(YClients.subscribe())
+    this.disposer.add(this.editor.yClients.subscribe())
 
-    YClients.clientId = this.doc.clientID
-    Undo.initUndo({
+    this.editor.yClients.clientId = this.doc.clientID
+    this.editor.undo.initUndo({
       stateMap: this.ySchema as Y.Map<S.Schema>,
       getPatches: this.getPatches,
     })
 
-    SchemaHelper.init({ find: YState.find })
+    SchemaHelper.init({ find: this.find })
 
     this.inited$.dispatch(true)
   }

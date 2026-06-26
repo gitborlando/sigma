@@ -3,10 +3,10 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
-import { HandleSelect, StageSurface, YState } from '..'
+import { EditorService } from '..'
 import { Elem } from './elem'
 
-export class StageSceneService {
+export class StageSceneService extends EditorService {
   elements = new Map<string, Elem>()
 
   sceneRoot!: Elem
@@ -20,8 +20,6 @@ export class StageSceneService {
     return this.widgetRoot.children
   }
 
-  private disposer = new Disposer()
-
   subscribe() {
     return Disposer.combine(this.setupElems(), this.hookRenderNode())
   }
@@ -31,15 +29,15 @@ export class StageSceneService {
   }
 
   elemsFromPoint(xy?: IXY) {
-    return StageSurface.getElemsFromPoint(xy).filter(
-      (elem) => elem.type === 'sceneElem',
-    )
+    return this.editor.stageSurface
+      .getElemsFromPoint(xy)
+      .filter((elem) => elem.type === 'sceneElem')
   }
 
   private setupElems() {
     this.elements.clear()
-    this.sceneRoot = new Elem('sceneRoot', 'sceneElem')
-    this.widgetRoot = new Elem('widgetRoot', 'widgetElem')
+    this.sceneRoot = new Elem(this.editor, 'sceneRoot', 'sceneElem')
+    this.widgetRoot = new Elem(this.editor, 'widgetRoot', 'widgetElem')
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
     this.rootElems.push(this.sceneRoot, this.widgetRoot)
@@ -51,10 +49,13 @@ export class StageSceneService {
   }
 
   private hookRenderNode() {
-    return Signal.merge(YState.inited$, StageSurface.inited).hook(() => {
+    return Signal.merge(
+      this.editor.yState.inited$,
+      this.editor.stageSurface.inited,
+    ).hook(() => {
       this.disposer.add(
         autorun(() => {
-          const pageId = HandleSelect.selectPageId
+          const pageId = this.editor.handleSelect.selectPageId
           if (pageId) this.firstRenderPage()
         }),
         this.hookPatchRender(),
@@ -63,21 +64,21 @@ export class StageSceneService {
   }
 
   private firstRenderPage() {
-    StageSurface.clearSurface()
+    this.editor.stageSurface.clearSurface()
     this.sceneRoot.children = []
 
     const traverse = (id: ID) => {
-      const node = YState.find<S.Node>(id)
+      const node = this.editor.find<S.Node>(id)
       this.render('add', [node.id])
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    const page = YState.find<S.Page>(HandleSelect.selectPageId)
+    const page = this.editor.find<S.Page>(this.editor.handleSelect.selectPageId)
     page.childIds.forEach(traverse)
   }
 
   private hookPatchRender() {
-    return YState.flushPatch$.hook((op) => {
+    return this.editor.yState.flushPatch$.hook((op) => {
       const { type, keys } = op
       if (keys[1] === 'childIds') this.reHierarchy(op)
       else this.render(type, keys as string[])
@@ -88,7 +89,7 @@ export class StageSceneService {
     const id = keys[0]
     if (id === 'meta' || id === 'client') return
 
-    const node = YState.find<S.Node>(id)
+    const node = this.editor.find<S.Node>(id)
 
     switch (true) {
       case op === 'add' && keys.length === 1:
@@ -107,7 +108,7 @@ export class StageSceneService {
   private mountNode(node: S.Node) {
     const parent = this.elements.get(node.parentId) || this.sceneRoot
 
-    const elem = new Elem(node.id, 'sceneElem')
+    const elem = new Elem(this.editor, node.id, 'sceneElem')
     this.elements.set(node.id, elem)
     parent.addChild(elem)
 
@@ -151,7 +152,7 @@ export class StageSceneService {
     }
 
     if (parent !== this.sceneRoot) {
-      StageSurface.collectDirty(parent)
+      this.editor.stageSurface.collectDirty(parent)
     }
   }
 }

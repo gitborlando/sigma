@@ -3,19 +3,19 @@ import { clone } from '@gitborlando/utils'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
 import { COLOR } from 'src/utils/color'
-import { HandleSelect, SchemaCreator, Undo, YState } from '..'
+import { EditorService, type EditorService2 } from '..'
 import { getSelectedNodes } from '../utils/get'
 
-export class OperateFillService {
+export class OperateFillService extends EditorService {
   @observable.ref fills = <S.Fill[]>[]
   isMultiFills = false
 
   subscribe() {
     return Disposer.combine(
-      HandleSelect.afterSelect.hook(() => {
+      this.editor.handleSelect.afterSelect.hook(() => {
         this.setupFills()
       }),
-      YState.subscribe((patches) => {
+      this.editor.yState.subscribe((patches) => {
         if (!patches.some((p) => p.keys[1] === 'fills')) return
         this.updateFills()
       }),
@@ -26,7 +26,7 @@ export class OperateFillService {
   setupFills() {
     this.fills = []
     this.isMultiFills = false
-    const nodes = getSelectedNodes()
+    const nodes = getSelectedNodes(this.editor)
     if (nodes.length === 1) return (this.fills = clone(nodes[0].fills))
     if (nodes.length > 1) {
       if (this.isSameFills(nodes)) return (this.fills = clone(nodes[0].fills))
@@ -35,12 +35,15 @@ export class OperateFillService {
   }
 
   updateFills() {
-    const nodes = getSelectedNodes()
+    const nodes = getSelectedNodes(this.editor)
     this.fills = clone(nodes[0].fills)
   }
 
   newFill() {
-    return SchemaCreator.fillColor(COLOR.gray, this.fills.length ? 0.25 : 1)
+    return this.editor.schemaCreator.fillColor(
+      COLOR.gray,
+      this.fills.length ? 0.25 : 1,
+    )
   }
 
   setFills(setter: (draft: S.Fill[]) => any) {
@@ -59,15 +62,17 @@ export class OperateFillService {
   }
 
   onAfterSetFills() {
-    Undo.track('state', t('change fill'))
+    this.editor.undo.track('state', t('change fill'))
   }
 
   applyChangeToYState(patches: Patch[]) {
-    const nodes = getSelectedNodes()
-    YState.transact(() => {
+    const nodes = getSelectedNodes(this.editor)
+    this.editor.yState.transact(() => {
       nodes.forEach((node) => {
-        if (this.isMultiFills) YState.set<S.Node>([node.id, 'fills'], [])
-        applyFillPatches(node.id, patches)
+        if (this.isMultiFills) {
+          this.editor.yState.set<S.Node>([node.id, 'fills'], [])
+        }
+        applyFillPatches(this.editor, node.id, patches)
       })
     })
   }
@@ -90,7 +95,7 @@ export class OperateFillService {
   }
 }
 
-function applyFillPatches(id: ID, patches: Patch[]) {
+function applyFillPatches(editor: EditorService2, id: ID, patches: Patch[]) {
   patches.forEach((patch) => {
     const path = [id, 'fills', ...patch.path] as [
       ID,
@@ -101,15 +106,15 @@ function applyFillPatches(id: ID, patches: Patch[]) {
     switch (patch.op) {
       case 'add':
         if (!Number.isNaN(Number(path[path.length - 1]))) {
-          YState.insert(path, clone(patch.value))
+          editor.yState.insert(path, clone(patch.value))
         } else {
-          YState.set(path, clone(patch.value))
+          editor.yState.set(path, clone(patch.value))
         }
         return
       case 'replace':
-        return YState.set(path, clone(patch.value))
+        return editor.yState.set(path, clone(patch.value))
       case 'remove':
-        return YState.delete(path)
+        return editor.yState.delete(path)
     }
   })
 }

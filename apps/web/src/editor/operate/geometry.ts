@@ -2,7 +2,7 @@ import { AnyObject, iife, objKeys } from '@gitborlando/utils'
 import { divide, floor, max, min } from 'src/editor/geometry/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
 import { MULTI_VALUE } from 'src/global/constant'
-import { HandleNode, YState } from '..'
+import { EditorService } from '..'
 import { getSelectedNodes } from '../utils/get'
 
 function createDesignGeoInfos() {
@@ -38,7 +38,7 @@ export function cleanObject(object: AnyObject) {
   for (const key in object) delete object[key]
 }
 
-export class DesignGeometryService {
+export class DesignGeometryService extends EditorService {
   currentGeometries = createDesignGeoInfos()
   currentKeys = createActiveKeys(new Set())
   changingKeys = createActiveKeys(new Set())
@@ -74,7 +74,7 @@ export class DesignGeometryService {
 
   getGeometryValue(node: S.Node, key: keyof DesignGeoInfo) {
     if (obbKeySet.has(key)) {
-      const mrect = HandleNode.getMRect(node)
+      const mrect = this.editor.handleNode.getMRect(node)
       return mrect[key as 'x' | 'y' | 'width' | 'height' | 'rotation']
     }
     return T<any>(node)[key]
@@ -83,7 +83,7 @@ export class DesignGeometryService {
   private nodeGeoInfoCache = new Map<ID, Partial<DesignGeoInfo>>()
 
   onStartSetGeometries() {
-    getSelectedNodes().forEach((node) => {
+    getSelectedNodes(this.editor).forEach((node) => {
       const geometries = <Partial<DesignGeoInfo>>{}
       this.currentKeys.forEach((key) => {
         geometries[key] = this.getGeometryValue(node, key)
@@ -107,8 +107,8 @@ export class DesignGeometryService {
       this.currentGeometries[key] = geometries[key] as number
     }
 
-    YState.transact(() => {
-      getSelectedNodes().forEach((node) => {
+    this.editor.yState.transact(() => {
+      getSelectedNodes(this.editor).forEach((node) => {
         this.applyChangeToNode(node)
       })
     })
@@ -141,13 +141,13 @@ export class DesignGeometryService {
       }
       if (key === 'radius') {
         const radius = max(0, T<any>(node).radius + this.delta(key, node))
-        YState.set<any>([node.id, 'radius'], radius)
+        this.editor.yState.set<any>([node.id, 'radius'], radius)
       }
       if (key === 'sides') {
         let { width, height, sides } = node as S.Polygon
         sides = max(3, sides + floor(this.delta(key, node)))
-        YState.set<S.Polygon>([node.id, 'sides'], sides)
-        YState.set<S.Polygon>(
+        this.editor.yState.set<S.Polygon>([node.id, 'sides'], sides)
+        this.editor.yState.set<S.Polygon>(
           [node.id, 'points'],
           createRegularPolygon(width, height, sides),
         )
@@ -156,9 +156,9 @@ export class DesignGeometryService {
         let { width, height, pointCount, innerRate } = node as S.Star
         pointCount = max(3, floor(pointCount))
         innerRate = min(1, max(0, innerRate))
-        YState.set<S.Star>([node.id, 'pointCount'], pointCount)
-        YState.set<S.Star>([node.id, 'innerRate'], innerRate)
-        YState.set<S.Star>(
+        this.editor.yState.set<S.Star>([node.id, 'pointCount'], pointCount)
+        this.editor.yState.set<S.Star>([node.id, 'innerRate'], innerRate)
+        this.editor.yState.set<S.Star>(
           [node.id, 'points'],
           createStarPolygon(width, height, pointCount, innerRate),
         )
@@ -170,16 +170,16 @@ export class DesignGeometryService {
     key: 'x' | 'y' | 'width' | 'height' | 'rotation',
     node: S.Node,
   ) {
-    const mrect = HandleNode.getMRect(node)
+    const mrect = this.editor.handleNode.getMRect(node)
     if (this.isDelta) {
       mrect[key] = mrect[key] + this.currentGeometries[key]
     } else {
       mrect[key] = this.currentGeometries[key]
     }
     if (key === 'x' || key === 'y' || key === 'rotation') {
-      YState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
+      this.editor.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
     } else {
-      YState.set<S.Node>([node.id, key], mrect[key])
+      this.editor.yState.set<S.Node>([node.id, key], mrect[key])
     }
   }
 

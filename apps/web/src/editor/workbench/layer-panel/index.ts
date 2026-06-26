@@ -1,4 +1,6 @@
-export class LayerPanelService {
+import { EditorService } from '../..'
+
+export class LayerPanelService extends EditorService {
   @observable pagePanelHeight = 200
   @observable pagePanelExpanded = true
 

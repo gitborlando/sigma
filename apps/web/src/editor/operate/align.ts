@@ -1,6 +1,6 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { HandleSelect, StageScene, Undo, YState } from '..'
+import { EditorService } from '..'
 import { SchemaHelper } from '../schema/helper'
 import { getSelectedNodes } from '../utils/get'
 
@@ -15,7 +15,7 @@ const alignTypes = <const>[
 
 export type IAlignType = (typeof alignTypes)[number]
 
-export class OperateAlignService {
+export class OperateAlignService extends EditorService {
   alignTypes = alignTypes
   canAlign = Signal.create(false)
   currentAlign = Signal.create<IAlignType>()
@@ -25,13 +25,13 @@ export class OperateAlignService {
 
   subscribe() {
     return Disposer.combine(
-      HandleSelect.afterSelect.hook(this.setupAlign),
+      this.editor.handleSelect.afterSelect.hook(this.setupAlign),
       this.currentAlign.hook(this.autoAlign),
     )
   }
 
   private setupAlign() {
-    const selectNodes = getSelectedNodes()
+    const selectNodes = getSelectedNodes(this.editor)
     if (selectNodes.length === 0) {
       this.canAlign.dispatch(false)
     }
@@ -49,11 +49,11 @@ export class OperateAlignService {
   }
 
   private autoAlign() {
-    YState.transact(() => {
+    this.editor.yState.transact(() => {
       this[this.currentAlign.value]()
     })
     if (this.needAlign) {
-      Undo.track('state', t('set alignment'))
+      this.editor.undo.track('state', t('set alignment'))
       this.needAlign = false
     }
   }
@@ -119,26 +119,27 @@ export class OperateAlignService {
   private horizontalAlign(node: S.Node, shift: number) {
     if (shift === 0) return
     this.needAlign = true
-    YState.set<S.Node>([node.id, 'x'], node.x + shift)
+    this.editor.yState.set<S.Node>([node.id, 'x'], node.x + shift)
   }
 
   private verticalAlign(node: S.Node, shift: number) {
     if (shift === 0) return
     this.needAlign = true
-    YState.set<S.Node>([node.id, 'y'], node.y + shift)
+    this.editor.yState.set<S.Node>([node.id, 'y'], node.y + shift)
   }
 
   private getAlignBound() {
-    if (getSelectedNodes().length > 1) {
+    if (getSelectedNodes(this.editor).length > 1) {
       const aabbList = this.toAlignNodes.map((node) => this.getOBBAndBound(node))
       return AABB.merge(aabbList)
     }
 
-    return StageScene.findElem(getSelectedNodes()[0].id).obb.aabb
+    const [node] = getSelectedNodes(this.editor)
+    return this.editor.stageScene.findElem(node.id).obb.aabb
   }
 
   private getOBBAndBound(node: S.Node) {
-    const nodeOBB = StageScene.findElem(node.id).obb
+    const nodeOBB = this.editor.stageScene.findElem(node.id).obb
     return nodeOBB.aabb
   }
 }

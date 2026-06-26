@@ -1,36 +1,34 @@
-import { EditorSetting, HandleSelect, StageViewport, YClients, YState } from '..'
+import type { EditorService2 } from '..'
 
-const allSelectIdMap = computed(() => ({
-  ...HandleSelect.selectIdMap,
-  ...Object.values(YClients.others).reduce((acc, client) => {
-    return { ...acc, ...client.selectIdMap }
-  }, {}),
-}))
-
-export function getZoom() {
-  return StageViewport.zoom
+export function getZoom(editor: EditorService2) {
+  return editor.stageViewport.zoom
 }
 
-export function getSetting() {
-  return EditorSetting.setting
+export function getSetting(editor: EditorService2) {
+  return editor.editorSetting.setting
 }
 
-export function getSelectIdMap() {
-  return HandleSelect.selectIdMap
+export function getSelectIdMap(editor: EditorService2) {
+  return editor.handleSelect.selectIdMap
 }
 
-export function getSelectIdList() {
-  return HandleSelect.selectIdList.filter((id) => YState.state[id])
+export function getSelectIdList(editor: EditorService2) {
+  return editor.handleSelect.selectIdList.filter((id) => editor.yState.state[id])
 }
 
-export function getSelectPageId() {
-  return HandleSelect.selectPageId
+export function getSelectPageId(editor: EditorService2) {
+  return editor.handleSelect.selectPageId
 }
 
-export function getAllSelectIdMap() {
-  return allSelectIdMap.get()
+export function getAllSelectIdMap(editor: EditorService2) {
+  return {
+    ...editor.handleSelect.selectIdMap,
+    ...Object.values(editor.yClients.others).reduce((acc, client) => {
+      return { ...acc, ...client.selectIdMap }
+    }, {}),
+  }
 }
 
-export function getSelectedNodes() {
-  return getSelectIdList().map((id) => YState.find<S.Node>(id))
+export function getSelectedNodes(editor: EditorService2) {
+  return getSelectIdList(editor).map((id) => editor.yState.find<S.Node>(id))
 }

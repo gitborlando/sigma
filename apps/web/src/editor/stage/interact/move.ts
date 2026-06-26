@@ -1,34 +1,34 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { StageCursor, StageSurface, StageViewport } from 'src/editor'
 import { Matrix } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
+import { EditorService } from '../..'
 
-export class StageMoveService {
+export class StageMoveService extends EditorService {
   @observable isMoving = false
 
   startInteract() {
     const disposer = Disposer.combine(
-      StageSurface.addEvent('mousedown', this.onMoveStage),
-      StageSurface.disablePointEvent(false),
+      this.editor.stageSurface.addEvent('mousedown', this.onMoveStage),
+      this.editor.stageSurface.disablePointEvent(false),
     )
-    StageCursor.setCursor('hand').lock()
+    this.editor.stageCursor.setCursor('hand').lock()
 
     return () => {
       disposer()
-      StageCursor.unlock().setCursor('select', 0)
+      this.editor.stageCursor.unlock().setCursor('select', 0)
     }
   }
 
   private onMoveStage() {
-    Drag.onStart(() => StageCursor.unlock().setCursor('grab').lock())
+    Drag.onStart(() => this.editor.stageCursor.unlock().setCursor('grab').lock())
       .onMove(({ delta }) => {
         this.isMoving = true
-        const matrix = Matrix.of(StageViewport.sceneMatrix).shift(delta)
-        StageViewport.sceneMatrix = matrix.clone()
+        const matrix = Matrix.of(this.editor.stageViewport.sceneMatrix).shift(delta)
+        this.editor.stageViewport.sceneMatrix = matrix.clone()
       })
       .onDestroy(() => {
         this.isMoving = false
-        StageCursor.unlock().setCursor('hand').lock()
+        this.editor.stageCursor.unlock().setCursor('hand').lock()
       })
       .start()
   }

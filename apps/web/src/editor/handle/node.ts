@@ -1,12 +1,12 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clampIndex, firstOne, getSet, iife } from '@gitborlando/utils'
+import { EditorService } from 'src/editor'
 import { MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { HandleSelect, SchemaCreator, Undo, YState } from '..'
 import { getSelectedNodes, getSelectIdList } from '../utils/get'
 
-export class HandleNodeService {
+export class HandleNodeService extends EditorService {
   datumId = ''
   @observable.ref datumXY = XY.$(0, 0)
   copiedIds = <ID[]>[]
@@ -22,40 +22,42 @@ export class HandleNodeService {
   }
 
   subscribe() {
-    return Disposer.combine(HandleSelect.afterSelect.hook(() => this.getDatum()))
+    return Disposer.combine(
+      this.editor.handleSelect.afterSelect.hook(() => this.getDatum()),
+    )
   }
 
   addNodes(nodes: S.Node[]) {
-    nodes.forEach((node) => YState.set<S.Node>([node.id], node))
+    nodes.forEach((node) => this.editor.yState.set<S.Node>([node.id], node))
   }
 
   removeNodes(nodes: S.Node[]) {
-    nodes.forEach((node) => YState.delete<S.Node>([node.id]))
+    nodes.forEach((node) => this.editor.yState.delete<S.Node>([node.id]))
   }
 
   insertChildAt(parent: S.NodeParent, node: S.Node, index?: number) {
     index ??= parent.childIds.length
-    YState.insert<S.NodeParent>([parent.id, 'childIds', index], node.id)
-    YState.set<S.Node>([node.id, 'parentId'], parent.id)
+    this.editor.yState.insert<S.NodeParent>([parent.id, 'childIds', index], node.id)
+    this.editor.yState.set<S.Node>([node.id, 'parentId'], parent.id)
   }
 
   removeChild(parent: S.NodeParent, node: S.Node) {
     const index = parent.childIds.indexOf(node.id)
-    YState.delete<S.NodeParent>([parent.id, 'childIds', index])
-    YState.set<S.Node>([node.id, 'parentId'], '')
+    this.editor.yState.delete<S.NodeParent>([parent.id, 'childIds', index])
+    this.editor.yState.set<S.Node>([node.id, 'parentId'], '')
   }
 
   deleteChild(parent: S.NodeParent, node: S.Node) {
     const index = parent.childIds.indexOf(node.id)
-    YState.delete<S.NodeParent>([parent.id, 'childIds', index])
-    YState.delete<S.Node>([node.id])
+    this.editor.yState.delete<S.NodeParent>([parent.id, 'childIds', index])
+    this.editor.yState.delete<S.Node>([node.id])
   }
 
   reHierarchy(parent: S.NodeParent, node: S.Node, index: number) {
     index = clampIndex(parent.childIds, index)
     const oldIndex = parent.childIds.indexOf(node.id)
-    YState.delete<S.NodeParent>([parent.id, 'childIds', oldIndex])
-    YState.insert<S.NodeParent>([parent.id, 'childIds', index], node.id)
+    this.editor.yState.delete<S.NodeParent>([parent.id, 'childIds', oldIndex])
+    this.editor.yState.insert<S.NodeParent>([parent.id, 'childIds', index], node.id)
   }
 
   getNodesMergedOBB(nodes: S.Node[]) {
@@ -68,39 +70,39 @@ export class HandleNodeService {
   }
 
   deleteSelectedNodes() {
-    YState.transact(() => {
+    this.editor.yState.transact(() => {
       const traverse = createSchemaTraverse({
-        schema: YState.schema,
+        schema: this.editor.yState.schema,
         leave: ({ item, parent }) => {
           if (!parent || !SchemaHelper.isNode(item)) return
           this.deleteChild(parent, item)
         },
       })
-      traverse(getSelectIdList())
+      traverse(getSelectIdList(this.editor))
 
-      HandleSelect.clearSelect()
+      this.editor.handleSelect.clearSelect()
     })
-    Undo.track('all', t('delete nodes'))
+    this.editor.undo.track('all', t('delete nodes'))
   }
 
   copySelectedNodes() {
-    this.copiedIds = getSelectIdList()
+    this.copiedIds = getSelectIdList(this.editor)
   }
 
   pasteNodes() {
     if (!this.copiedIds.length) return
 
     const newSelectIds = <ID[]>[]
-    YState.transact(() => {
+    this.editor.yState.transact(() => {
       const traverse = createSchemaTraverse<{ newNode?: S.Node | S.NodeParent }>({
-        schema: YState.schema,
+        schema: this.editor.yState.schema,
         enter: (ctx) => {
           const { item, parent, forwardCtx, depth } = ctx
           if (!parent || !SchemaHelper.isNode(item)) return false
 
           const newParent = forwardCtx?.newNode || parent
-          const newNode = SchemaCreator.clone(item, {
-            name: SchemaCreator.createNodeName(item.type),
+          const newNode = this.editor.schemaCreator.clone(item, {
+            name: this.editor.schemaCreator.createNodeName(item.type),
           })
           this.addNodes([newNode])
           this.insertChildAt(newParent as S.NodeParent, newNode)
@@ -111,19 +113,19 @@ export class HandleNodeService {
       traverse(this.copiedIds)
       this.copiedIds = []
     })
-    Undo.untrack(() => {
-      HandleSelect.clearSelect()
-      newSelectIds.forEach((id) => HandleSelect.select(id))
+    this.editor.undo.untrack(() => {
+      this.editor.handleSelect.clearSelect()
+      newSelectIds.forEach((id) => this.editor.handleSelect.select(id))
     })
-    Undo.track('all', `${t('paste nodes')}: ${newSelectIds.length}`)
+    this.editor.undo.track('all', `${t('paste nodes')}: ${newSelectIds.length}`)
   }
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
-    const selected = getSelectedNodes()
+    const selected = getSelectedNodes(this.editor)
 
-    YState.transact(() => {
+    this.editor.yState.transact(() => {
       selected.forEach((node) => {
-        const parent = YState.find<S.NodeParent>(node.parentId)
+        const parent = this.editor.find<S.NodeParent>(node.parentId)
         let index = parent.childIds.indexOf(node.id)
         index = iife(() => {
           if (type === 'up') return index - 1
@@ -135,50 +137,52 @@ export class HandleNodeService {
       })
     })
 
-    Undo.track('all', t('reorder nodes'))
+    this.editor.undo.track('all', t('reorder nodes'))
   }
 
   wrapInFrame() {
-    const selected = getSelectIdList().map(YState.find<S.Node>)
+    const selected = getSelectIdList(this.editor).map((id) =>
+      this.editor.find<S.Node>(id),
+    )
     if (selected.length === 0) return
 
     const frameOBB = this.getNodesMergedOBB(selected)
-    const frameNode = SchemaCreator.frame({ ...frameOBB })
-    const oldParent = YState.find<S.NodeParent>(selected[0].parentId)
+    const frameNode = this.editor.schemaCreator.frame({ ...frameOBB })
+    const oldParent = this.editor.find<S.NodeParent>(selected[0].parentId)
     const index = oldParent.childIds.indexOf(selected[0].id)
 
-    YState.transact(() => {
+    this.editor.yState.transact(() => {
       this.addNodes([frameNode])
       this.insertChildAt(oldParent, frameNode, index)
       selected.forEach((node) => this.removeChild(oldParent, node))
       selected.forEach((node) => this.insertChildAt(frameNode, node))
     })
-    Undo.untrack(
+    this.editor.undo.untrack(
       action(() => {
-        selected.forEach((node) => HandleSelect.unselect(node.id))
-        HandleSelect.select(frameNode.id)
+        selected.forEach((node) => this.editor.handleSelect.unselect(node.id))
+        this.editor.handleSelect.select(frameNode.id)
       }),
     )
-    Undo.track('all', t('create frame'))
+    this.editor.undo.track('all', t('create frame'))
   }
 
   private getDatum() {
-    const selectIds = getSelectIdList()
+    const selectIds = getSelectIdList(this.editor)
 
     if (selectIds.length === 0) {
       this.datumId = ''
     }
     if (selectIds.length === 1) {
-      this.datumId = YState.find<S.Node>(firstOne(selectIds)!).parentId
+      this.datumId = this.editor.find<S.Node>(firstOne(selectIds)!).parentId
     }
     if (selectIds.length > 1) {
       const parentIds = new Set<string>()
-      selectIds.forEach((id) => parentIds.add(YState.find<S.Node>(id).parentId))
+      selectIds.forEach((id) => parentIds.add(this.editor.find<S.Node>(id).parentId))
       if (parentIds.size === 1) this.datumId = firstOne(parentIds)!
       if (parentIds.size > 1) this.datumId = ''
     }
 
-    const datum = YState.find<S.Node>(this.datumId)
+    const datum = this.editor.find<S.Node>(this.datumId)
     if (datum && !SchemaHelper.isPageById(datum.id)) {
       const aabb = OBB.fromRect(datum, datum.rotation).aabb
       this.datumXY = XY.$(aabb.minX, aabb.minY)

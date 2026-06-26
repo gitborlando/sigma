@@ -2,7 +2,7 @@ import { type IXY } from '@gitborlando/geo'
 import { getSet, type NoopFunc } from '@gitborlando/utils'
 import { memorized } from '@sigma/utils/common'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import { ElemDrawer, StageSurface, StageViewport } from '..'
+import type { EditorService2 } from '..'
 import { getSetting } from '../utils/get'
 
 declare module 'react' {
@@ -22,6 +22,7 @@ export type ElemProps = {
 
 export class Elem {
   constructor(
+    public editor: EditorService2,
     public id = '',
     public type: 'sceneElem' | 'widgetElem',
   ) {}
@@ -34,9 +35,9 @@ export class Elem {
     return this._node
   }
   set node(node: S.Node) {
-    StageSurface.collectDirty(this)
+    this.editor.stageSurface.collectDirty(this)
     this._node = node
-    StageSurface.collectDirty(this)
+    this.editor.stageSurface.collectDirty(this)
   }
 
   private _mrect = MRect.identity()
@@ -68,7 +69,7 @@ export class Elem {
   }
 
   private memoVisible = memorized(() => {
-    return AABB.collide(this.aabb, StageViewport.sceneAABB)
+    return AABB.collide(this.aabb, this.editor.stageViewport.sceneAABB)
   })
   get visible() {
     if (this.hidden) return false
@@ -79,7 +80,7 @@ export class Elem {
       this.aabb.minY,
       this.aabb.maxX,
       this.aabb.maxY,
-      StageViewport.sceneAABB,
+      this.editor.stageViewport.sceneAABB,
     ])
   }
 
@@ -91,22 +92,24 @@ export class Elem {
   traverseDraw() {
     if (!this.visible) return
 
-    if (getSetting().ignoreUnVisible && this.optimize) {
-      const visualSize = StageSurface.getVisualSize(this.aabb)
+    if (getSetting(this.editor).ignoreUnVisible && this.optimize) {
+      const visualSize = this.editor.stageSurface.getVisualSize(this.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
-    const resetCtx = StageSurface.setCurrentCtxType(
+    const resetCtx = this.editor.stageSurface.setCurrentCtxType(
       this.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
     )
 
-    StageSurface.ctxSaveRestore((ctx) => {
+    this.editor.stageSurface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
       let resetTransform = () => {}
 
       if (this.node) {
-        resetTransform = StageSurface.setTransform(this.node.matrix)
-        StageSurface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d))
+        resetTransform = this.editor.stageSurface.setTransform(this.node.matrix)
+        this.editor.stageSurface.ctxSaveRestore(() =>
+          this.editor.elemDrawer.draw(this, ctx, path2d),
+        )
       }
 
       if (this.children.length) {
@@ -168,7 +171,7 @@ export class Elem {
   destroy() {
     this.eventHandle.dispose()
     this.parent?.removeChild(this)
-    StageSurface.collectDirty(this)
+    this.editor.stageSurface.collectDirty(this)
   }
 }
 

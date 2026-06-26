@@ -1,21 +1,23 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { StageSurface, StageViewport } from 'src/editor'
 import { getZoom } from 'src/editor/utils/get'
 import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
+import { EditorService } from '../..'
 
-export class StageToolGridService {
+export class StageToolGridService extends EditorService {
   private ctx!: CanvasRenderingContext2D
 
   subscribe() {
-    return Disposer.combine(StageSurface.onRenderTopCanvas.hook(this.draw))
+    return Disposer.combine(
+      this.editor.stageSurface.onRenderTopCanvas.hook(this.draw),
+    )
   }
 
   private draw() {
-    const zoom = getZoom()
+    const zoom = getZoom(this.editor)
     if (zoom < 10.96) return
 
-    StageSurface.ctxSaveRestore((ctx) => {
-      ctx.transform(...StageViewport.sceneMatrix.invert().tuple())
+    this.editor.stageSurface.ctxSaveRestore((ctx) => {
+      ctx.transform(...this.editor.stageViewport.sceneMatrix.invert().tuple())
       ctx.strokeStyle = '#cccccc55'
       ctx.lineWidth = 1
       this.ctx = ctx
@@ -27,8 +29,8 @@ export class StageToolGridService {
   }
 
   private drawLine(type: 'horizontal' | 'vertical', start: IXY, length: number) {
-    start = StageViewport.sceneMatrix.applyXY(start)
-    length = length * getZoom()
+    start = this.editor.stageViewport.sceneMatrix.applyXY(start)
+    length = length * getZoom(this.editor)
     const startX = snapHalfPixel(start.x)
     const startY = snapHalfPixel(start.y)
 
@@ -46,7 +48,7 @@ export class StageToolGridService {
   private getTicks = () => {
     const ticks: { x: number; y: number; length: number }[] = []
 
-    const { minX, minY, maxX, maxY } = StageViewport.sceneAABB
+    const { minX, minY, maxX, maxY } = this.editor.stageViewport.sceneAABB
 
     const hStart = expandOneStep(minX, 1, 'left')
     const hEnd = expandOneStep(maxX, 1, 'right')

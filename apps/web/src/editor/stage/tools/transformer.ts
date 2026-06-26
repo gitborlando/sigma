@@ -1,24 +1,25 @@
 import { iife } from '@gitborlando/utils'
-import { Undo, YState } from 'src/editor'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { StageDrag } from 'src/editor/stage/interact/drag'
+import { createStageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
 import { snapGridRound, TRBL } from 'src/editor/utils/misc'
+import { EditorService } from '../..'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
-export class StageTransformerService {
+export class StageTransformerService extends EditorService {
   @observable.ref mrect = MRect.identity()
   @observable.ref diffMatrix = Matrix.identity()
   @observable isMoving = false
 
   @computed get isSingleSelect() {
-    return getSelectIdList().length === 1
+    return getSelectIdList(this.editor).length === 1
   }
 
   private action: TransformerAction = 'move'
   isSelectOnlyLine = false
+  private stageDrag = createStageDrag(this.editor)
 
   setup(selectNodes: S.Node[]) {
     if (selectNodes.length === 1) {
@@ -39,26 +40,27 @@ export class StageTransformerService {
     const { startMRect, startMatrix } = this.onStartTransform()
     const startAABB = startMRect.aabb
 
-    StageDrag.onMove(({ shift }) => {
-      this.action = 'move'
-      this.isMoving = true
+    this.stageDrag
+      .onMove(({ shift }) => {
+        this.action = 'move'
+        this.isMoving = true
 
-      const aabb = AABB.shift(startAABB, shift)
-      const snapDelta = XY.$(
-        snapGridRound(aabb.minX) - aabb.minX,
-        snapGridRound(aabb.minY) - aabb.minY,
-      )
+        const aabb = AABB.shift(startAABB, shift)
+        const snapDelta = XY.$(
+          snapGridRound(this.editor, aabb.minX) - aabb.minX,
+          snapGridRound(this.editor, aabb.minY) - aabb.minY,
+        )
 
-      const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)
-      this.diffMatrix = newMatrix.divide(startMatrix)
+        const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)
+        this.diffMatrix = newMatrix.divide(startMatrix)
 
-      this.transform()
-    })
+        this.transform()
+      })
       .onDestroy(({ moved }) => {
         this.isMoving = false
         this.onEndTransform()
         if (moved) {
-          Undo.track('state', t('move nodes'))
+          this.editor.undo.track('state', t('move nodes'))
         }
       })
       .start(e)
@@ -74,42 +76,43 @@ export class StageTransformerService {
     const { startMRect, startMatrix } = this.onStartTransform()
     const endMatrix = Matrix.of(startMatrix)
 
-    StageDrag.onMove(({ shift }) => {
-      this.action = 'resize'
-      shift = Matrix.of(startMRect.matrix).applyShift(shift, true)
+    this.stageDrag
+      .onMove(({ shift }) => {
+        this.action = 'resize'
+        shift = Matrix.of(startMRect.matrix).applyShift(shift, true)
 
-      const { tx, ty, scaleX, scaleY } = iife(() => {
-        let width = startMRect.width
-        let height = startMRect.height
-        let tx = startMatrix.tx
-        let ty = startMatrix.ty
-        const maxShift = Math.max(shift.x, shift.y)
-        const shiftX = options?.shiftKey ? maxShift : shift.x
-        const shiftY = options?.shiftKey ? maxShift : shift.y
-        if (directions.includes('left')) {
-          width -= shiftX
-          tx += shiftX
-        }
-        if (directions.includes('top')) {
-          height -= shiftY
-          ty += shiftY
-        }
-        if (directions.includes('right')) width += shiftX
-        if (directions.includes('bottom')) height += shiftY
-        const scaleX = width / startMRect.width
-        const scaleY = height / startMRect.height
-        return { tx, ty, scaleX, scaleY }
+        const { tx, ty, scaleX, scaleY } = iife(() => {
+          let width = startMRect.width
+          let height = startMRect.height
+          let tx = startMatrix.tx
+          let ty = startMatrix.ty
+          const maxShift = Math.max(shift.x, shift.y)
+          const shiftX = options?.shiftKey ? maxShift : shift.x
+          const shiftY = options?.shiftKey ? maxShift : shift.y
+          if (directions.includes('left')) {
+            width -= shiftX
+            tx += shiftX
+          }
+          if (directions.includes('top')) {
+            height -= shiftY
+            ty += shiftY
+          }
+          if (directions.includes('right')) width += shiftX
+          if (directions.includes('bottom')) height += shiftY
+          const scaleX = width / startMRect.width
+          const scaleY = height / startMRect.height
+          return { tx, ty, scaleX, scaleY }
+        })
+
+        endMatrix.set({ a: scaleX, d: scaleY, tx, ty })
+        this.diffMatrix = Matrix.of(endMatrix).divide(startMatrix)
+
+        this.transform()
       })
-
-      endMatrix.set({ a: scaleX, d: scaleY, tx, ty })
-      this.diffMatrix = Matrix.of(endMatrix).divide(startMatrix)
-
-      this.transform()
-    })
       .onDestroy(({ moved }) => {
         this.onEndTransform()
         if (moved) {
-          Undo.track('state', t('resize nodes'))
+          this.editor.undo.track('state', t('resize nodes'))
         }
       })
       .start(options?.e)
@@ -120,23 +123,24 @@ export class StageTransformerService {
     const startRect = AABB.rect(startMRect.aabb)
     const startMatrix = Matrix.identity().shift(startRect)
 
-    StageDrag.onMove(({ current, start }) => {
-      this.action = 'rotate'
+    this.stageDrag
+      .onMove(({ current, start }) => {
+        this.action = 'rotate'
 
-      const rotation = Angle.sweep(
-        XY.vector(current, startMRect.center),
-        XY.vector(start, startMRect.center),
-      )
-      const aabbMRect = MRect.fromRect(startRect, startMatrix)
-      const endMatrix = aabbMRect.rotate(rotation).matrix
-      this.diffMatrix = Matrix.of(endMatrix).divide(startMatrix)
+        const rotation = Angle.sweep(
+          XY.vector(current, startMRect.center),
+          XY.vector(start, startMRect.center),
+        )
+        const aabbMRect = MRect.fromRect(startRect, startMatrix)
+        const endMatrix = aabbMRect.rotate(rotation).matrix
+        this.diffMatrix = Matrix.of(endMatrix).divide(startMatrix)
 
-      this.transform()
-    })
+        this.transform()
+      })
       .onDestroy(({ moved }) => {
         this.onEndTransform()
         if (moved) {
-          Undo.track('state', t('rotate nodes'))
+          this.editor.undo.track('state', t('rotate nodes'))
         }
       })
       .start()
@@ -145,7 +149,7 @@ export class StageTransformerService {
   private mrectCache = new Map<ID, IMRect>()
 
   private onStartTransform() {
-    getSelectedNodes().forEach((node) => {
+    getSelectedNodes(this.editor).forEach((node) => {
       this.mrectCache.set(node.id, MRect.of(node))
     })
     const startMRect = this.mrect.clone()
@@ -161,8 +165,8 @@ export class StageTransformerService {
   }
 
   private transform() {
-    YState.transact(() => {
-      getSelectedNodes().forEach(this.applyToNode)
+    this.editor.yState.transact(() => {
+      getSelectedNodes(this.editor).forEach(this.applyToNode)
     })
   }
 
@@ -173,7 +177,7 @@ export class StageTransformerService {
     const startMRect = MRect.of(mrect)
     const forwardMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
 
-    if (getSelectIdList().length === 1 && this.action === 'resize') {
+    if (getSelectIdList(this.editor).length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
     } else {
       const localDiff = Matrix.of(forwardMatrix)
@@ -183,8 +187,8 @@ export class StageTransformerService {
       startMRect.transform(localDiff)
     }
 
-    YState.set<S.Node>([node.id, 'width'], startMRect.width)
-    YState.set<S.Node>([node.id, 'height'], startMRect.height)
-    YState.set<S.Node>([node.id, 'matrix'], startMRect.matrix)
+    this.editor.yState.set<S.Node>([node.id, 'width'], startMRect.width)
+    this.editor.yState.set<S.Node>([node.id, 'height'], startMRect.height)
+    this.editor.yState.set<S.Node>([node.id, 'matrix'], startMRect.matrix)
   }
 }
