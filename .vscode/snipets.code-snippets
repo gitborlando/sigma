@@ -39,11 +39,13 @@
   },
   "Service": {
     "prefix": "service",
+    "scope": "typescript",
     "body": [
-      "class $1${TM_FILENAME_BASE}Service {",
-      "}",
+      "import { EditorService } from 'src/editor/service'",
       "",
-      "export const $1${TM_FILENAME_BASE} = autoBind(makeObservable(new $1${TM_FILENAME_BASE}Service()))",
+      "export class $1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g}Service extends EditorService {",
+      "  $0",
+      "}",
       "",
     ],
     "description": "Service",
