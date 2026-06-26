@@ -1,37 +1,38 @@
 import { isLeftMouse } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
-import {
-  SchemaCreator,
-  StageCursor,
-  StageInteract,
-  StageMove,
-  StageSurface,
-  StageTransformer,
-  StageViewport,
-} from 'src/editor'
 import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { getZoom } from 'src/editor/utils/get'
 import { arrayLoopGet, TRBL } from 'src/editor/utils/misc'
 import { COLOR } from 'src/utils/color'
+import { useEditor } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
 let isSelectOnlyLine = false
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
+  const {
+    schemaCreator,
+    stageInteract,
+    stageMove,
+    stageSurface,
+    stageTransformer,
+    stageViewport,
+  } = editor
   const selectNodes = useSelectNodes()
-  const { mrect, isMoving } = StageTransformer
-  const shouldHidden = isMoving || StageViewport.isZooming || StageMove.isMoving
+  const { mrect, isMoving } = stageTransformer
+  const shouldHidden = isMoving || stageViewport.isZooming || stageMove.isMoving
 
   isSelectOnlyLine = selectNodes.length === 1 && selectNodes[0].type === 'line'
-  StageTransformer.isSelectOnlyLine = isSelectOnlyLine
+  stageTransformer.isSelectOnlyLine = isSelectOnlyLine
 
   useLayoutEffect(() => {
-    StageTransformer.setup(selectNodes)
-  }, [selectNodes])
+    stageTransformer.setup(selectNodes)
+  }, [selectNodes, stageTransformer])
 
-  const node = SchemaCreator.rect({
+  const node = schemaCreator.rect({
     id: 'transform',
     fills: [],
     width: mrect.width,
@@ -40,12 +41,12 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   })
 
   const mousedown = (e: ElemMouseEvent) => {
-    if (StageInteract.interaction !== 'select') return
+    if (stageInteract.interaction !== 'select') return
 
-    StageSurface.disablePointEvent(true)
+    stageSurface.disablePointEvent(true)
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()
-      StageTransformer.move(e.hostEvent)
+      stageTransformer.move(e.hostEvent)
     }
   }
 
@@ -72,31 +73,34 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 })
 
 const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) => {
-  const mrect = StageTransformer.mrect.clone()
+  const editor = useEditor()
+  const { schemaCreator, stageCursor, stageTransformer } = editor
+  const zoom = getZoom(editor)
+  const mrect = stageTransformer.mrect.clone()
   const p1 = arrayLoopGet(mrect.vertices, index)
   const p2 = arrayLoopGet(mrect.vertices, index + 1)
 
-  const line = SchemaCreator.line({
+  const line = schemaCreator.line({
     id: `transform-line-${type}`,
-    points: [SchemaCreator.point(p1), SchemaCreator.point(p2)],
-    strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
+    points: [schemaCreator.point(p1), schemaCreator.point(p2)],
+    strokes: [schemaCreator.solidStroke(themeColor(), 1 / zoom)],
   })
 
   const mouseover = (e: ElemMouseEvent) => {
-    if (!e.hovered) return StageCursor.setCursor('select')
+    if (!e.hovered) return stageCursor.setCursor('select')
 
     if (isSelectOnlyLine) {
-      return StageCursor.setCursor('select')
+      return stageCursor.setCursor('select')
     }
 
     const extraRotation = type === 'top' || type === 'bottom' ? 90 : 0
-    StageCursor.setCursor('resize', mrect.rotation + extraRotation)
+    stageCursor.setCursor('resize', mrect.rotation + extraRotation)
   }
 
   const mousedown = (e: ElemMouseEvent) => {
     e.stopPropagation()
-    StageCursor.lock()
-    StageTransformer.onResize([type], { shiftKey: hotkeys.shift })
+    stageCursor.lock()
+    stageTransformer.onResize([type], { shiftKey: hotkeys.shift })
   }
 
   return <elem node={line} events={{ hover: mouseover, mousedown }} />
@@ -107,9 +111,12 @@ const VertexComp: FC<{
   index: number
   directions: TRBL[]
 }> = observer(({ type, index, directions }) => {
-  const mrect = StageTransformer.mrect
+  const editor = useEditor()
+  const { schemaCreator, stageCursor, stageTransformer } = editor
+  const zoom = getZoom(editor)
+  const mrect = stageTransformer.mrect
   const xy = arrayLoopGet(mrect.vertices, index)
-  const size = 8 / getZoom()
+  const size = 8 / zoom
 
   const vertexMRect = MRect.of({
     width: size,
@@ -118,29 +125,29 @@ const VertexComp: FC<{
   })
   vertexMRect.rotate(mrect.rotation)
 
-  const rect = SchemaCreator.rect({
+  const rect = schemaCreator.rect({
     id: `transform-vertex-${type}`,
-    strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
-    fills: [SchemaCreator.fillColor(COLOR.white)],
-    radius: 2 / getZoom(),
+    strokes: [schemaCreator.solidStroke(themeColor(), 1 / zoom)],
+    fills: [schemaCreator.fillColor(COLOR.white)],
+    radius: 2 / zoom,
     ...vertexMRect.plain(),
   })
 
   const mouseenter = (e: ElemMouseEvent) => {
-    if (!e.hovered) return StageCursor.setCursor('select')
+    if (!e.hovered) return stageCursor.setCursor('select')
 
     if (isSelectOnlyLine) {
-      return StageCursor.setCursor('resize', mrect.rotation)
+      return stageCursor.setCursor('resize', mrect.rotation)
     }
 
     const extraRotation = type === 'topLeft' || type === 'bottomRight' ? 45 : -45
-    StageCursor.setCursor('resize', mrect.rotation + extraRotation)
+    stageCursor.setCursor('resize', mrect.rotation + extraRotation)
   }
 
   const mousedown = (e: ElemMouseEvent) => {
     e.stopPropagation()
-    StageCursor.lock()
-    StageTransformer.onResize(directions, { shiftKey: hotkeys.shift })
+    stageCursor.lock()
+    stageTransformer.onResize(directions, { shiftKey: hotkeys.shift })
   }
 
   return (
@@ -156,9 +163,12 @@ const VertexComp: FC<{
 })
 
 const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
-  const mrect = StageTransformer.mrect
+  const editor = useEditor()
+  const { schemaCreator, stageCursor, stageTransformer } = editor
+  const zoom = getZoom(editor)
+  const mrect = stageTransformer.mrect
   const xy = arrayLoopGet(mrect.vertices, index)
-  const size = 8 / getZoom()
+  const size = 8 / zoom
 
   let p1 = arrayLoopGet(mrect.vertices, index + 1)
   let p2 = arrayLoopGet(mrect.vertices, index - 1)
@@ -166,26 +176,26 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
 
   const sweep = Angle.minor(Angle.sweep(XY.vector(xy, p1), XY.vector(xy, p2)))
   const p1_ = XY.of(p1).rotate(xy, sweep / 2)
-  const offset = XY.lerp(xy, p1_, 16 / getZoom())
+  const offset = XY.lerp(xy, p1_, 16 / zoom)
   const matrix = Matrix.identity().shift(XY.of(offset).plusNum(-size / 2))
 
-  const rotatePoint = SchemaCreator.ellipse({
+  const rotatePoint = schemaCreator.ellipse({
     id: `transform-rotatePoint-${index}`,
-    fills: [SchemaCreator.fillColor(COLOR.transparent)],
+    fills: [schemaCreator.fillColor(COLOR.transparent)],
     width: size,
     height: size,
     matrix: matrix,
   })
 
   const mouseenter = (e: ElemMouseEvent) => {
-    if (!e.hovered) return StageCursor.setCursor('select')
-    StageCursor.setCursor('rotate')
+    if (!e.hovered) return stageCursor.setCursor('select')
+    stageCursor.setCursor('rotate')
   }
 
   const mousedown = (e: ElemMouseEvent) => {
     e.stopPropagation()
-    StageCursor.setCursor('rotate').lock().upReset()
-    StageTransformer.onRotate()
+    stageCursor.setCursor('rotate').lock().upReset()
+    stageTransformer.onRotate()
   }
 
   return (

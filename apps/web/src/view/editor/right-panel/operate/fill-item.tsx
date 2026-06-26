@@ -3,12 +3,12 @@ import { stopPropagation } from '@gitborlando/utils/browser'
 import { withSuspense } from '@gitborlando/utils/react'
 import Color from 'color'
 import { Eye, EyeOff } from 'lucide-react'
-import { OperateFill } from 'src/editor'
 import { Image } from 'src/global/service/image'
 import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
+import { useEditor } from 'src/view/hooks/editor'
 import { suspend } from 'suspend-react'
 
 export const EditorRPOperateFillItemComp: FC<{
@@ -63,6 +63,8 @@ const HexInputComp: FC<{
   fill: S.Fill
   index: number
 }> = observer(({ fill, index }) => {
+  const editor = useEditor()
+  const { operateFill } = editor
   const isSolidFill = fill.type === 'color'
 
   const validateColor = (value: string) => {
@@ -77,7 +79,7 @@ const HexInputComp: FC<{
     if (!isSolidFill) {
       return
     }
-    OperateFill.setFill(index, (fill) => {
+    operateFill.setFill(index, (fill) => {
       T<S.FillColor>(fill).color = Color(`#${color}`).toString()
     })
   }
@@ -104,9 +106,12 @@ const HexInputComp: FC<{
 
 const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
+    const editor = useEditor()
+    const { operateFill } = editor
+
     const setAlpha = (value: number) => {
       console.log('value: ', value)
-      OperateFill.setFill(index, (fill) => {
+      operateFill.setFill(index, (fill) => {
         fill.alpha = value / 100
       })
     }
@@ -128,8 +133,11 @@ const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
 
 const VisibleComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
+    const editor = useEditor()
+    const { operateFill } = editor
+
     const toggleVisible = () => {
-      OperateFill.setFill(index, (fill) => {
+      operateFill.setFill(index, (fill) => {
         fill.visible = !fill.visible
       })
     }

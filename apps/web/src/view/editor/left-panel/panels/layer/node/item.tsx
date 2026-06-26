@@ -3,20 +3,22 @@ import { CSS } from '@dnd-kit/utilities'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { Icon } from '@gitborlando/widget'
 import { ChevronRight } from 'lucide-react'
-import { EditorCommand, LayerPanelNodeTree, StageSelect, YState } from 'src/editor'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { LayerPanelNodeInfo } from 'src/editor/workbench/layer-panel/node-tree'
 import { ContextMenu } from 'src/global/context-menu'
 import { Lucide } from 'src/view/component/lucide'
+import { useEditor } from 'src/view/hooks/editor'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
 
 export const EditorLeftPanelLayerNodeItemComp: FC<{
   nodeInfo: LayerPanelNodeInfo
 }> = observer(({ nodeInfo }) => {
+  const editor = useEditor()
+  const { editorCommand, layerPanelNodeTree, stageSelect, yState } = editor
   const { id, indent, ancestorIds } = nodeInfo
-  const { toggleNodeExpanded, getNodeExpanded } = LayerPanelNodeTree
+  const { toggleNodeExpanded, getNodeExpanded } = layerPanelNodeTree
 
-  const node = YState.find<S.Node>(id)
+  const node = yState.find<S.Node>(id)
   const isParent = SchemaHelper.isNodeParent(node)
   const expanded = getNodeExpanded(id)
 
@@ -31,22 +33,22 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
     toggleNodeExpanded(id, !expanded)
   })
   const handleSelect = () => {
-    StageSelect.onPanelSelect(id)
+    stageSelect.onPanelSelect(id)
   }
   const handleDoubleClick = () => {
-    StageSelect.onPanelSelect(id)
+    stageSelect.onPanelSelect(id)
     toggleNodeExpanded(id, true)
   }
   const handleContextMenu = (e: React.MouseEvent) => {
     ContextMenu.context = { id }
-    ContextMenu.menus = [EditorCommand.nodeGroup, EditorCommand.copyPasteGroup]
+    ContextMenu.menus = [editorCommand.nodeGroup, editorCommand.copyPasteGroup]
     ContextMenu.openMenu(e)
   }
   const handleMouseEnter = () => {
-    StageSelect.hoverId = id
+    stageSelect.hoverId = id
   }
   const handleMouseLeave = () => {
-    StageSelect.hoverId = undefined
+    stageSelect.hoverId = undefined
   }
 
   return (
@@ -63,7 +65,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
       {...listeners}
       horizontal='auto auto 1fr auto'
       center
-      data-hover={StageSelect.hoverId === id}
+      data-hover={stageSelect.hoverId === id}
       data-selected={selected}
       data-sub-selected={subSelected}
       data-dragging={isDragging}

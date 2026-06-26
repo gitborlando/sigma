@@ -1,14 +1,15 @@
 import { ChevronDown } from 'lucide-react'
-import { StageViewport } from 'src/editor'
 import { getSetting, getZoom } from 'src/editor/utils/get'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Divider } from 'src/view/component/divider'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
 import { Menu } from 'src/view/component/menu'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
-  const zoom = ~~((getZoom() || 0) * 100)
+  const editor = useEditor()
+  const zoom = ~~((getZoom(editor) || 0) * 100)
   const [show, setShow] = useState(false)
 
   const cls = classes(css`
@@ -49,7 +50,8 @@ const PanelComp: FC<{}> = observer(({}) => {
 })
 
 const InputZoomComp: FC<{}> = observer(({}) => {
-  const { updateZoom } = StageViewport
+  const editor = useEditor()
+  const { updateZoom } = editor.stageViewport
 
   return (
     <InputNum
@@ -57,7 +59,7 @@ const InputZoomComp: FC<{}> = observer(({}) => {
         width: 160px;
         ${styles.borderRadiusSM}
       `}
-      value={~~((getZoom() || 0) * 100)}
+      value={~~((getZoom(editor) || 0) * 100)}
       onEnd={(value) => updateZoom((value || 0) / 100)}
       formatter={(value) => `${value}%`}
       parser={(value) => Number(value?.replace('%', ''))}
@@ -67,7 +69,9 @@ const InputZoomComp: FC<{}> = observer(({}) => {
 })
 
 const ZoomingOptionsComp: FC<{}> = observer(({}) => {
-  const { updateZoom, handleZoomToFitAll, handleZoomToFitSelection } = StageViewport
+  const editor = useEditor()
+  const { updateZoom, handleZoomToFitAll, handleZoomToFitSelection } =
+    editor.stageViewport
 
   return (
     <>
@@ -82,12 +86,14 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
 })
 
 const OtherOptionsComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
+  const setting = getSetting(editor)
+
   return (
     <OptionBalanceItem
       label={t('snap to grid')}
-      checked={getSetting().snapToGrid}
+      checked={setting.snapToGrid}
       onChecked={(value) => {
-        const setting = getSetting()
         setting.snapToGrid = value
       }}
     />

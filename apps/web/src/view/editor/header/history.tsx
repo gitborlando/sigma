@@ -1,7 +1,6 @@
 import { objectId } from '@gitborlando/utils'
 import { Braces, Copy, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { HandlePage, Undo } from 'src/editor'
 import type { UndoInfo } from 'src/editor/core/undo'
 import { getSelectPageId, getSetting } from 'src/editor/utils/get'
 import { BalanceItem, OptionBalanceItem } from 'src/view/component/balance-item'
@@ -9,10 +8,13 @@ import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
   const [showHistory, setShowHistory] = useState(false)
-  const { next, stack } = Undo
+  const { handlePage, undo } = editor
+  const { next, stack } = undo
   return (
     <>
       <Btn
@@ -33,7 +35,7 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
               title='Print current schema'
               icon={<Lucide icon={Braces} />}
               onMouseDown={(e) => e.stopPropagation()}
-              onClick={() => HandlePage.DEV_logPageSchema(getSelectPageId())}
+              onClick={() => handlePage.DEV_logPageSchema(getSelectPageId(editor))}
             />
           )
         }
@@ -41,8 +43,8 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
           isDEV && (
             <OptionBalanceItem
               label='Log undo/redo info'
-              checked={getSetting().dev.logUndoRedoInfo}
-              onChecked={(value) => (getSetting().dev.logUndoRedoInfo = value)}
+              checked={getSetting(editor).dev.logUndoRedoInfo}
+              onChecked={(value) => (getSetting(editor).dev.logUndoRedoInfo = value)}
             />
           )
         }

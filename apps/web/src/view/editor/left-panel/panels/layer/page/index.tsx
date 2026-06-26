@@ -1,12 +1,14 @@
 import Scrollbars from 'react-custom-scrollbars-2'
-import { LayerPanel, YState } from 'src/editor'
 import { Drag } from 'src/global/event/drag'
+import { useEditor } from 'src/view/hooks/editor'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
 
 export const PageComp: FC<{}> = observer(({}) => {
-  const { pagePanelHeight, pagePanelExpanded } = LayerPanel
+  const editor = useEditor()
+  const { layerPanel, yState } = editor
+  const { pagePanelHeight, pagePanelExpanded } = layerPanel
   const meta = useSchema((schema) => schema.meta)
 
   return (
@@ -19,7 +21,7 @@ export const PageComp: FC<{}> = observer(({}) => {
         style={{ height: pagePanelHeight - 37 }}>
         <Scrollbars style={{ height: pagePanelHeight - 37 }}>
           {meta.pageIds.map((id) => {
-            const page = YState.find<S.Page>(id)
+            const page = yState.find<S.Page>(id)
             return <PageItemComp key={page.id} name={page.name} id={page.id} />
           })}
         </Scrollbars>
@@ -32,7 +34,7 @@ export const PageComp: FC<{}> = observer(({}) => {
           Drag.onMove(({ shift }) => {
             let newHeight = lastHeight + shift.y
             if (newHeight <= 69 || newHeight >= 800) return
-            LayerPanel.pagePanelHeight = newHeight
+            layerPanel.pagePanelHeight = newHeight
           }).start()
         }}></G>
     </G>

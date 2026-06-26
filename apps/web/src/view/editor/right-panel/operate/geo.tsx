@@ -1,17 +1,19 @@
 import { Icon } from '@gitborlando/widget'
 import { twoDecimal } from '@sigma/utils/common'
-import { DesignGeometry, HandleNode, Undo } from 'src/editor'
 import { DesignGeoInfo } from 'src/editor/operate/geometry'
 import { getZoom } from 'src/editor/utils/get'
 import { MULTI_VALUE } from 'src/global/constant'
 import { InputNum } from 'src/view/component/input-num'
+import { useEditor } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 
 export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
-  const { currentKeys, currentGeometries, setupGeometries } = DesignGeometry
+  const editor = useEditor()
+  const { currentKeys, currentGeometries, setupGeometries } = editor.designGeometry
   const nodes = useSelectNodes()
+  const zoom = getZoom(editor)
 
-  useMemo(() => setupGeometries(nodes), [nodes])
+  useMemo(() => setupGeometries(nodes), [nodes, setupGeometries])
 
   return (
     <G x-if={nodes.length > 0} className={cls()} horizontal='auto auto' gap={8}>
@@ -19,25 +21,25 @@ export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
         label={<Icon url={Assets.editor.RP.operate.geo.x} />}
         operateKey='x'
         value={currentGeometries.x}
-        slideRate={1 / getZoom()}
+        slideRate={1 / zoom}
       />
       <GeometryItemComp
         label={<Icon url={Assets.editor.RP.operate.geo.y} />}
         operateKey='y'
         value={currentGeometries.y}
-        slideRate={1 / getZoom()}
+        slideRate={1 / zoom}
       />
       <GeometryItemComp
         label={<Icon url={Assets.editor.RP.operate.geo.w} />}
         operateKey='width'
         value={currentGeometries.width}
-        slideRate={1 / getZoom()}
+        slideRate={1 / zoom}
       />
       <GeometryItemComp
         label={<Icon url={Assets.editor.RP.operate.geo.h} />}
         operateKey='height'
         value={currentGeometries.height}
-        slideRate={1 / getZoom()}
+        slideRate={1 / zoom}
       />
       <GeometryItemComp
         label={<Icon url={Assets.editor.RP.operate.geo.rotate} />}
@@ -48,14 +50,14 @@ export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
         x-if={currentKeys.has('radius')}
         label={<Icon url={Assets.editor.RP.operate.geo.radius} />}
         operateKey='radius'
-        slideRate={1 / getZoom()}
+        slideRate={1 / zoom}
         value={currentGeometries.radius}
       />
       <GeometryItemComp
         x-if={currentKeys.has('sides')}
         label='边数'
         operateKey='sides'
-        slideRate={0.5 / getZoom()}
+        slideRate={0.5 / zoom}
         value={currentGeometries.sides}
       />
       <GeometryItemComp
@@ -94,7 +96,9 @@ const GeometryItemComp: FC<{
   value: number
   slideRate?: number
 }> = observer(({ label, operateKey, value, slideRate = 1 }) => {
-  const { setGeometries } = DesignGeometry
+  const editor = useEditor()
+  const { designGeometry, handleNode, undo } = editor
+  const { setGeometries } = designGeometry
 
   const isMultiValue = T<any>(value) === MULTI_VALUE
   const inputValue = useRef(0)
@@ -102,7 +106,7 @@ const GeometryItemComp: FC<{
   const correctedValue = useMemo(() => {
     if (isMultiValue) return value
     if (operateKey === 'x' || operateKey === 'y') {
-      const datum = HandleNode.datumXY[operateKey]
+      const datum = handleNode.datumXY[operateKey]
       return value - datum
     }
     return value
@@ -115,17 +119,17 @@ const GeometryItemComp: FC<{
 
   const handleEnd = (v: number) => {
     if (operateKey === 'x' || operateKey === 'y') {
-      const datum = HandleNode.datumXY[operateKey]
+      const datum = handleNode.datumXY[operateKey]
       const value = v + datum
       setGeometries({ [operateKey]: value }, { delta: false })
     } else {
       setGeometries({ [operateKey]: v }, { delta: false })
     }
-    Undo.track('state', `${t('modify geometry property')}: ${operateKey}`)
+    undo.track('state', `${t('modify geometry property')}: ${operateKey}`)
   }
 
   const handleAfterSlide = () => {
-    Undo.track('state', `${t('modify geometry property')}: ${operateKey}`)
+    undo.track('state', `${t('modify geometry property')}: ${operateKey}`)
   }
 
   return (

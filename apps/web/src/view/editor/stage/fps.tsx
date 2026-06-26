@@ -1,8 +1,9 @@
 import { optionalSet } from '@gitborlando/utils'
-import { EditorSetting } from 'src/editor'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const FPSComp: FC<{}> = observer(({}) => {
-  const { showFPS } = EditorSetting.setting
+  const editor = useEditor()
+  const { showFPS } = editor.editorSetting.setting
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

@@ -1,12 +1,6 @@
-import { SchemaCreator, StageViewport } from 'src/editor'
 import { getZoom } from 'src/editor/utils/get'
 import { rgb } from 'src/utils/color'
-
-const getStepByZoom = (zoom: number) => {
-  const steps = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
-  const base = 50 / zoom
-  return steps.find((i) => i >= base) || steps[0]
-}
+import { useEditor } from 'src/view/hooks/editor'
 
 const getNearestIntMultiple = (number: number, rate: number) => {
   const n = Math.floor(number / rate)
@@ -27,14 +21,15 @@ export const EditorStageGridComp: FC<{}> = observer(({}) => {
 export const Lines: FC<{
   type: 'horizontal' | 'vertical'
 }> = observer(({ type }) => {
-  const { bound, zoom } = StageViewport
+  const editor = useEditor()
+  const { bound, offset: offsetXY, zoom } = editor.stageViewport
 
   const getTicks = () => {
     const ticks: { x: number; y: number; length: number }[] = []
-    const offset = XY.from(StageViewport.offset).divide(zoom)
+    const offset = XY.of(offsetXY).divide(zoom, zoom)
     const sceneWidth = bound.width / zoom
     const sceneHeight = bound.height / zoom
-    const step = getStepByZoom(zoom)
+    const step = editor.stageViewport.getStepByZoom(zoom)
     const hStart = getNearestIntMultiple(-offset.x, step)
     const hEnd = getNearestIntMultiple(sceneWidth - offset.x, step)
     const vStart = getNearestIntMultiple(-offset.y, step)
@@ -63,12 +58,16 @@ const Line: FC<{
   y: number
   length: number
 }> = observer(({ type, x, y, length }) => {
-  const line = SchemaCreator.line({
+  const editor = useEditor()
+  const { schemaCreator } = editor
+  const zoom = getZoom(editor)
+
+  const line = schemaCreator.line({
     x,
     y,
     width: length,
     rotation: type === 'horizontal' ? 0 : 45,
-    strokes: [SchemaCreator.solidStroke(rgb(204, 204, 204), 0.5 / getZoom())],
+    strokes: [schemaCreator.solidStroke(rgb(204, 204, 204), 0.5 / zoom)],
   })
   return <elem node={line} />
 })

@@ -1,9 +1,10 @@
 import { values } from 'mobx'
-import { SchemaCreator, StageViewport, YClients } from 'src/editor'
 import { COLOR } from 'src/utils/color'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
-  const others = YClients.others
+  const editor = useEditor()
+  const others = editor.yClients.others
   const cursors = values(others).map((other) => ({
     xy: other.cursor,
     name: other.userName,
@@ -18,16 +19,19 @@ export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
 })
 
 const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
-  xy = StageViewport.toStageXY(xy)
+  const editor = useEditor()
+  const { schemaCreator, stageViewport } = editor
+
+  xy = stageViewport.toStageXY(xy)
   const [color] = useState(() => COLOR.random())
-  const node = SchemaCreator.rect({
+  const node = schemaCreator.rect({
     ...xy,
     width: 10,
     height: 10,
     radius: 5,
-    fills: [SchemaCreator.fillColor(color, 1)],
+    fills: [schemaCreator.fillColor(color, 1)],
   })
-  const text = SchemaCreator.text({
+  const text = schemaCreator.text({
     x: xy.x + 6,
     y: xy.y + 16,
     width: 60,
@@ -42,7 +46,7 @@ const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
       letterSpacing: 0,
       lineHeight: 16,
     },
-    fills: [SchemaCreator.fillColor(color, 1)],
+    fills: [schemaCreator.fillColor(color, 1)],
   })
 
   return (

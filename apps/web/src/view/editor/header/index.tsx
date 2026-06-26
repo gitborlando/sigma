@@ -1,6 +1,5 @@
 import { Icon } from '@gitborlando/widget'
 import { ChevronLeft, Redo, Undo as UndoIcon } from 'lucide-react'
-import { StageCreate, StageInteract, StageViewport, Undo } from 'src/editor'
 import { IStageCreateType } from 'src/editor/stage/interact/create'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
@@ -9,8 +8,10 @@ import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const HeaderComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
   const navigate = useNavigate()
 
   return (
@@ -18,7 +19,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
       center
       horizontal='auto 1fr auto'
       className={cls()}
-      style={{ height: StageViewport.bound.top }}>
+      style={{ height: editor.stageViewport.bound.top }}>
       <G center horizontal gap={4}>
         <Btn
           size={32}
@@ -37,7 +38,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
           <StageOperateIcon type='move' />
         </G>
         <G center gap={4} horizontal>
-          {StageCreate.createTypes.map((type) => (
+          {editor.stageCreate.createTypes.map((type) => (
             <CreateShapeIcon key={type} type={type} />
           ))}
         </G>
@@ -53,49 +54,58 @@ export const HeaderComp: FC<{}> = observer(({}) => {
 })
 
 const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) => {
-  const isActive = StageInteract.interaction === type
+  const editor = useEditor()
+  const { stageInteract } = editor
+  const isActive = stageInteract.interaction === type
   const iconUrl = Assets.editor.header.stageOperate[type]
+
   return (
     <Btn
       size={32}
       active={isActive}
       icon={<Icon url={iconUrl} className={cls('centerGroup-icon')} />}
-      onClick={() => (StageInteract.interaction = type)}
+      onClick={() => (stageInteract.interaction = type)}
     />
   )
 })
 
 const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
+  const editor = useEditor()
+  const { stageCreate, stageInteract } = editor
   const isActive =
-    StageInteract.interaction === 'create' && StageCreate.createType === type
+    stageInteract.interaction === 'create' && stageCreate.createType === type
   const iconUrl = Assets.editor.node[type as keyof typeof Assets.editor.node]
+
   return (
     <Btn
       size={32}
       icon={<Icon url={iconUrl} className={cls('centerGroup-icon')} />}
       active={isActive}
       onClick={action(() => {
-        StageInteract.interaction = 'create'
-        StageCreate.createType = type
+        stageInteract.interaction = 'create'
+        stageCreate.createType = type
       })}
     />
   )
 })
 
 const UndoGroup: FC<{}> = observer(() => {
+  const editor = useEditor()
+  const { undo } = editor
+
   return (
     <G horizontal gap={4}>
       <Btn
         size={32}
         icon={<Lucide icon={UndoIcon} />}
-        disabled={!Undo.canUndo}
-        onClick={Undo.undo}
+        disabled={!undo.canUndo}
+        onClick={undo.undo}
       />
       <Btn
         size={32}
         icon={<Lucide icon={Redo} />}
-        disabled={!Undo.canRedo}
-        onClick={Undo.redo}
+        disabled={!undo.canRedo}
+        onClick={undo.redo}
       />
     </G>
   )

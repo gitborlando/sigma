@@ -12,6 +12,7 @@ import { ElemDrawerService } from 'src/editor/render/draw'
 import { StageSceneService } from 'src/editor/render/scene'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { EditorService } from 'src/editor/service'
 import { StageCursorService } from 'src/editor/stage/cursor'
 import { StageCreateService } from 'src/editor/stage/interact/create'
 import { StageInteractService } from 'src/editor/stage/interact/interact'
@@ -28,10 +29,25 @@ import { YSyncService } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
 export class EditorService2 extends Service {
+  private static editor: EditorService2
+
+  static getInstance() {
+    if (!this.editor) this.initInstance()
+    return this.editor
+  }
+
+  static initInstance() {
+    const editor = (this.editor = autoBind(new EditorService2()))
+    const dispose = editor.subscribe()
+    return { editor, dispose }
+  }
+
   stageDragger = new Dragger({
     processXY: (xy) => this.stageViewport.toSceneXY(xy),
     processShift: (shift) => this.stageViewport.toSceneShift(shift),
   })
+
+  services: EditorService[] = []
 
   handleNode = this.initService(HandleNodeService)
   handlePage = this.initService(HandlePageService)
@@ -60,40 +76,25 @@ export class EditorService2 extends Service {
   ySync = this.initService(YSyncService)
   yState = this.initService(YStateService)
 
-  /** alias */
-  find = <T extends S.SchemaItem>(id: string) => {
-    return this.yState.find<T>(id)
+  private initService<T extends EditorService>(
+    Service: new (editor: EditorService2) => T,
+  ) {
+    const service = autoBind(makeObservable(new Service(this)))
+    this.services.push(service)
+    return service
   }
 
   subscribe() {
-    this.disposer.add(
-      this.editorSetting.subscribe(),
-      this.editorCommand.subscribe(),
-
-      this.handleNode.subscribe(),
-      this.handlePage.subscribe(),
-
-      this.stageSurface.subscribe(),
-      this.stageScene.subscribe(),
-      this.stageViewport.subscribe(),
-      this.stageToolGrid.subscribe(),
-      this.stageInteract.subscribe(),
-      this.stageCursor.subscribe(),
-
-      this.operateAlign.subscribe(),
-      this.operateFill.subscribe(),
-
-      this.layerPanel.subscribe(),
-      this.layerPanelNodeTree.subscribe(),
-    )
+    this.disposer.add(...this.services.map((s) => s.subscribe()))
     return () => {
       this.yState.dispose()
       this.disposer.dispose()
     }
   }
 
-  private initService<T extends object>(service: new (editor: EditorService2) => T) {
-    return autoBind(makeObservable(new service(this)))
+  /** alias */
+  find = <T extends S.SchemaItem>(id: string) => {
+    return this.yState.find<T>(id)
   }
 }
 

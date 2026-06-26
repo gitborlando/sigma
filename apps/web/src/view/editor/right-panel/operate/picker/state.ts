@@ -1,4 +1,4 @@
-import { OperateFill } from 'src/editor'
+const OperateFill = {} as any
 
 class FillPickerStateService {
   @observable pickerPos = XY.$()

@@ -1,7 +1,7 @@
 import { getSet } from '@gitborlando/utils'
 import { useClean } from '@gitborlando/utils/react'
 import Color from 'color'
-import { OperateFill, SchemaCreator, Undo } from 'src/editor'
+import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { IRGBA } from 'src/utils/color'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Segments } from 'src/view/component/segments'
@@ -9,19 +9,25 @@ import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-pi
 import { PickerImageComp } from 'src/view/editor/right-panel/operate/picker/image'
 import { PickerLinearGradientComp } from 'src/view/editor/right-panel/operate/picker/linear-gradient'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
+import { useEditor } from 'src/view/hooks/editor'
 
-const createFillCache = (type: S.Fill['type']): S.Fill => {
-  if (type === 'color') return SchemaCreator.fillColor()
-  if (type === 'linearGradient') return SchemaCreator.fillLinearGradient()
-  return SchemaCreator.fillImage()
+const createFillCache = (
+  schemaCreator: SchemaCreatorService,
+  type: S.Fill['type'],
+): S.Fill => {
+  if (type === 'color') return schemaCreator.fillColor()
+  if (type === 'linearGradient') return schemaCreator.fillLinearGradient()
+  return schemaCreator.fillImage()
 }
 const fillCache = new Map<S.Fill['type'], S.Fill>()
 
 export const FillPickerComp: FC<{}> = observer(({}) => {
   const { t } = useTranslation()
+  const editor = useEditor()
+  const { operateFill, schemaCreator, undo } = editor
 
   const { fillIndex, fillType, pickerPos, changeFill } = FillPickerState
-  const fill = OperateFill.fills[fillIndex]
+  const fill = operateFill.fills[fillIndex]
 
   useEffect(() => {
     fillCache.set(fill.type, fill)
@@ -38,8 +44,8 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
 
   const handleChangeFill = (value: S.Fill['type']) => {
     FillPickerState.fillType = value
-    changeFill(getSet(fillCache, value, () => createFillCache(value)))
-    Undo.track('state', t('change fill type'))
+    changeFill(getSet(fillCache, value, () => createFillCache(schemaCreator, value)))
+    undo.track('state', t('change fill type'))
   }
 
   return (
@@ -85,13 +91,16 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
 
 export const PickerSolidComp: FC<{ fill: S.FillColor; index: number }> = memo(
   ({ fill, index }) => {
+    const editor = useEditor()
+    const { operateFill } = editor
+
     const getRgbaFromSolidFill = (fill: S.FillColor) => {
       const { color, alpha } = fill
       return Color(color).alpha(alpha).toString()
     }
     const handleChange = (rgba: IRGBA) => {
       const rgb = Color.rgb(rgba.r, rgba.g, rgba.b).string()
-      OperateFill.setFill(index, (draft) => {
+      operateFill.setFill(index, (draft) => {
         if (draft.type !== 'color') return
         draft.color = rgb
         draft.alpha = rgba.a

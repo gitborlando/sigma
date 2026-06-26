@@ -1,18 +1,20 @@
-import { OperateFill, Undo } from 'src/editor'
 import { max, min } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
 import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'
 import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const PickerLinearGradientComp: FC<{
   fill: S.FillLinearGradient
   index: number
 }> = memo(({ fill, index }) => {
+  const editor = useEditor()
+  const { operateFill } = editor
   const [stopIndex, setStopIndex] = useState(0)
   useEffect(() => setStopIndex(0), [index])
 
   const setStopColor = (color: string) => {
-    OperateFill.setFill<S.FillLinearGradient>(index, (draft) => {
+    operateFill.setFill<S.FillLinearGradient>(index, (draft) => {
       draft.stops[stopIndex].color = color
     })
   }
@@ -39,20 +41,22 @@ const StopsBar: FC<{
   stopIndex: number
   setStopIndex: (index: number) => void
 }> = ({ fill, index, stopIndex, setStopIndex }) => {
+  const editor = useEditor()
+  const { operateFill, undo } = editor
   const stopBarRef = useRef<HTMLDivElement>(null)
 
   const handleMove = (e: React.MouseEvent, stopIndex: number) => {
     setStopIndex(stopIndex)
     Drag.onMove(({ delta }) => {
       const deltaOffset = delta.x / stopBarRef.current!.clientWidth
-      OperateFill.setFill<S.FillLinearGradient>(index, (draft) => {
+      operateFill.setFill<S.FillLinearGradient>(index, (draft) => {
         const oldOffset = draft.stops[stopIndex].offset
         draft.stops[stopIndex].offset = min(max(oldOffset + deltaOffset, 0), 1)
       })
     })
       .onDestroy(({ moved }) => {
         if (!moved) return
-        Undo.track('state', t('move gradient point'))
+        undo.track('state', t('move gradient point'))
       })
       .start(e)
   }

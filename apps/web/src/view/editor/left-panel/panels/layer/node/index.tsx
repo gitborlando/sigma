@@ -10,10 +10,10 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react'
-import { LayerPanel, LayerPanelNodeTree } from 'src/editor'
 import { EditorLeftPanelLayerNodeHeaderComp } from 'src/view/editor/left-panel/panels/layer/node/header'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
 import { EditorLeftPanelLayerNodeListComp } from 'src/view/editor/left-panel/panels/layer/node/list'
+import { useEditor } from 'src/view/hooks/editor'
 
 const dropAnimationConfig: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -26,7 +26,9 @@ const dropAnimationConfig: DropAnimation = {
 }
 
 export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
-  const { nodeInfoList } = LayerPanelNodeTree
+  const editor = useEditor()
+  const { layerPanel, layerPanelNodeTree } = editor
+  const { nodeInfoList } = layerPanelNodeTree
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const sensors = useSensors(
@@ -76,7 +78,7 @@ export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
         <G
           vertical='auto 1fr'
           className={cls()}
-          style={{ height: innerHeight - 48 - LayerPanel.pagePanelHeight }}>
+          style={{ height: innerHeight - 48 - layerPanel.pagePanelHeight }}>
           <EditorLeftPanelLayerNodeHeaderComp />
           <EditorLeftPanelLayerNodeListComp />
         </G>

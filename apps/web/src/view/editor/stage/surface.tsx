@@ -1,14 +1,17 @@
-import { StageSurface } from 'src/editor'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const EditorStageSurfaceComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
+  const { stageSurface } = editor
+
   useLayoutEffect(() => {
-    return StageSurface.inited.dispatch(true)
+    return stageSurface.inited.dispatch(true)
   }, [])
 
   return (
-    <G className={cls()} ref={StageSurface.setContainer}>
-      <canvas ref={StageSurface.setCanvas} />
-      <canvas style={{ position: 'absolute' }} ref={StageSurface.setTopCanvas} />
+    <G className={cls()} ref={stageSurface.setContainer}>
+      <canvas ref={stageSurface.setCanvas} />
+      <canvas style={{ position: 'absolute' }} ref={stageSurface.setTopCanvas} />
     </G>
   )
 })

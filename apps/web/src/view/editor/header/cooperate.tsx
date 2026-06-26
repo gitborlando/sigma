@@ -1,9 +1,9 @@
 import { entries } from 'mobx'
 import { Popover } from 'react-tiny-popover'
-import { YClients } from 'src/editor'
 import { PopoverCard } from 'src/view/component/popover-card'
 import { AvatarCircles } from 'src/view/component/shadcn/ui/avatar-circles'
 import { Text } from 'src/view/component/text'
+import { useEditor } from 'src/view/hooks/editor'
 
 type CooperateInfo = {
   clientId: number
@@ -14,9 +14,10 @@ type CooperateInfo = {
 }
 
 export const CooperateComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
   const [show, setShow] = useState(false)
 
-  const cooperates = entries(YClients.others).map(([clientId, other]) => ({
+  const cooperates = entries(editor.yClients.others).map(([clientId, other]) => ({
     clientId: Number(clientId),
     userId: other.userId,
     name: other.userName,
@@ -46,6 +47,8 @@ export const CooperateComp: FC<{}> = observer(({}) => {
 
 const CooperatePopup: FC<{ cooperates: CooperateInfo[] }> = observer(
   ({ cooperates }) => {
+    const editor = useEditor()
+
     return (
       <PopoverCard>
         <G vertical='auto 1fr'>
@@ -59,7 +62,7 @@ const CooperatePopup: FC<{ cooperates: CooperateInfo[] }> = observer(
                 center
                 className={cls('popup-item')}
                 onClick={() => {
-                  YClients.observingClientId = cooperate.clientId
+                  editor.yClients.observingClientId = cooperate.clientId
                 }}>
                 <img src={cooperate.avatar} />
                 <Text style={{ alignSelf: 'center' }}>{cooperate.name}</Text>

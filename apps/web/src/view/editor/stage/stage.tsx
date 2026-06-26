@@ -1,5 +1,4 @@
 import { CSSProperties } from 'react'
-import { StageScene, YClients } from 'src/editor'
 import { renderElem } from 'src/editor/render/react/reconciler'
 import { EditorStageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
@@ -8,8 +7,11 @@ import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
 import { RulerComp } from 'src/view/editor/stage/ruler'
 import { EditorStageSurfaceComp } from 'src/view/editor/stage/surface'
 import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const StageComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
+
   useEffect(() => {
     return renderElem(
       <>
@@ -18,7 +20,7 @@ export const StageComp: FC<{}> = observer(({}) => {
         <EditorStageMarqueeComp />
         <EditorStageCursorsComp />
       </>,
-      StageScene.widgetRoot,
+      editor.stageScene.widgetRoot,
     )
   }, [])
 
@@ -33,10 +35,11 @@ export const StageComp: FC<{}> = observer(({}) => {
 })
 
 export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
-  const { observingClientId: observingUserId } = YClients
+  const editor = useEditor()
+  const { observingClientId: observingUserId } = editor.yClients
   if (!observingUserId) return null
 
-  const client = YClients.others[observingUserId]
+  const client = editor.yClients.others[observingUserId]
 
   return (
     <G

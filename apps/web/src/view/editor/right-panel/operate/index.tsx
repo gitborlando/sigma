@@ -3,11 +3,13 @@ import { getSelectIdList } from 'src/editor/utils/get'
 import { EditorRPOperateFillComp } from 'src/view/editor/right-panel/operate/fill'
 import { FillPickerComp } from 'src/view/editor/right-panel/operate/picker'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
+import { useEditor } from 'src/view/hooks/editor'
 import { AlignComp } from './align'
 import { EditorRightOperateGeo } from './geo'
 
 export const OperatePanelComp: FC<{}> = observer(({}) => {
-  const selectIdList = getSelectIdList()
+  const editor = useEditor()
+  const selectIdList = getSelectIdList(editor)
 
   if (!selectIdList.length) return null
   return (

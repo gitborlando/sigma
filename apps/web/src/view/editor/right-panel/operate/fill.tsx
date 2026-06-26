@@ -1,5 +1,4 @@
 import { Minus, Plus } from 'lucide-react'
-import { OperateFill } from 'src/editor'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 import {
@@ -8,9 +7,11 @@ import {
   OpFieldHeaderComp,
 } from 'src/view/editor/right-panel/operate/components/op-field'
 import { EditorRPOperateFillItemComp } from 'src/view/editor/right-panel/operate/fill-item'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const EditorRPOperateFillComp: FC<{}> = observer(({}) => {
-  const { fills, isMultiFills, setFills, newFill } = OperateFill
+  const editor = useEditor()
+  const { fills, isMultiFills, setFills, newFill } = editor.operateFill
 
   const addFill = () => {
     setFills((draft) => {

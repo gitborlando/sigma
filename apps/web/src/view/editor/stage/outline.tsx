@@ -1,15 +1,8 @@
 import { iife } from '@gitborlando/utils'
 import { entries } from 'mobx'
-import {
-  SchemaCreator,
-  StageMove,
-  StageSelect,
-  StageTransformer,
-  StageViewport,
-  YClients,
-} from 'src/editor'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectIdList, getZoom } from 'src/editor/utils/get'
+import { useEditor } from 'src/view/hooks/editor'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
@@ -20,15 +13,17 @@ type OutlineInfo = {
 }
 
 export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
-  if (StageTransformer.isMoving) return null
-  if (StageViewport.isZooming) return null
-  if (StageMove.isMoving) return null
+  const editor = useEditor()
+  if (editor.stageTransformer.isMoving) return null
+  if (editor.stageViewport.isZooming) return null
+  if (editor.stageMove.isMoving) return null
   return <EditorStageOutlineCompInner />
 })
 
 export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
-  const { hoverId } = StageSelect
-  const others = YClients.others
+  const editor = useEditor()
+  const { hoverId } = editor.stageSelect
+  const others = editor.yClients.others
 
   const outlineInfoLMap = iife(() => {
     const map: Record<string, OutlineInfo> = {}
@@ -44,7 +39,7 @@ export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
     if (hoverId && !SchemaHelper.isFirstLayerFrame(hoverId)) {
       map[hoverId] = { hovered: true }
     }
-    for (const id of getSelectIdList()) {
+    for (const id of getSelectIdList(editor)) {
       map[id] = { hovered: hoverId === id, selected: true }
     }
     return map
@@ -61,25 +56,28 @@ export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
 
 const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
   ({ id, outlineInfo }) => {
+    const editor = useEditor()
+    const { schemaCreator } = editor
     const { color, hovered, selected } = outlineInfo
     const node = T<S.Node>(useSchema((schema) => schema[id]))
+    const zoom = getZoom(editor)
     const strokeColor = hovered || selected ? themeColor() : color
     const strokeWidth = selected ? 1 : 2
     const matrix = SchemaHelper.getSceneMatrix(node)
-    const outline = SchemaCreator.clone<S.Node>(node, {
+    const outline = schemaCreator.clone<S.Node>(node, {
       id: `${id}-outline`,
       fills: [],
       matrix: matrix,
     })
 
     if (node.type === 'text') {
-      T<S.Text>(outline).style.decoration = SchemaCreator.textDecoration({
+      T<S.Text>(outline).style.decoration = schemaCreator.textDecoration({
         color: strokeColor!,
-        width: strokeWidth / getZoom(),
+        width: strokeWidth / zoom,
       })
     } else if (strokeWidth) {
       T<S.Node>(outline).strokes = [
-        SchemaCreator.solidStroke(strokeColor, strokeWidth / getZoom()),
+        schemaCreator.solidStroke(strokeColor, strokeWidth / zoom),
       ]
     }
 

@@ -1,10 +1,11 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { LayerPanelNodeTree } from 'src/editor'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
+import { useEditor } from 'src/view/hooks/editor'
 
 export const EditorLeftPanelLayerNodeListComp: FC<{}> = observer(({}) => {
-  const { nodeInfoList } = LayerPanelNodeTree
+  const editor = useEditor()
+  const { nodeInfoList } = editor.layerPanelNodeTree
   const scrollBarsRef = useRef<Scrollbars>(null)
 
   const virtualizer = useVirtualizer({

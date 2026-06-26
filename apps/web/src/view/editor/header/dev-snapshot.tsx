@@ -1,10 +1,11 @@
 import { MobxUndoState } from '@gitborlando/mobx-undo'
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
-import { Undo, YState } from 'src/editor'
+import type { EditorService2 } from 'src/editor'
 import { MobxUndo, UndoInfo } from 'src/editor/core/undo'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
+import { useEditor } from 'src/view/hooks/editor'
 
 type SnapshotState = {
   schema: S.Schema
@@ -20,6 +21,7 @@ type DevSnapshot = SnapshotState & {
 const STORAGE_KEY_PREFIX = 'sigma:dev-snapshot'
 
 export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
   const { fileId } = useParams<{ fileId: string }>()
   const [searchParams] = useSearchParams()
   const applyRecord = searchParams.get('applyRecord') === 'true'
@@ -41,7 +43,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
     (base = baseSnapshotRef.current) => {
       if (!storageKey) return
 
-      const snapshot: DevSnapshot = { ...createSnapshotState(), base }
+      const snapshot: DevSnapshot = { ...createSnapshotState(editor), base }
 
       try {
         localStorage.setItem(storageKey, JSON.stringify(snapshot))
@@ -50,7 +52,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
         console.warn('Save dev snapshot failed', error)
       }
     },
-    [storageKey],
+    [editor, storageKey],
   )
 
   const restoreSnapshot = useCallback(() => {
@@ -58,12 +60,12 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
     if (!snapshot) return false
 
     if (snapshot.base) {
-      restoreReplayableSnapshot(snapshot)
+      restoreReplayableSnapshot(editor, snapshot)
     } else {
-      restoreFinalSnapshot(snapshot)
+      restoreFinalSnapshot(editor, snapshot)
     }
     return true
-  }, [storageKey])
+  }, [editor, storageKey])
 
   useEffect(() => {
     if (!applyRecord || !storageKey) return
@@ -83,12 +85,12 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
   }, [storageKey])
 
   const startRecording = useCallback(() => {
-    const base = createSnapshotState()
+    const base = createSnapshotState(editor)
     baseSnapshotRef.current = base
     saveSnapshot(base)
     setAppliedRecord(false)
     setRecording(true)
-  }, [saveSnapshot])
+  }, [editor, saveSnapshot])
 
   const stopRecording = useCallback(() => {
     saveSnapshot()
@@ -103,9 +105,9 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
       window.clearTimeout(timer)
       timer = window.setTimeout(saveSnapshot, 300)
     }
-    const unSub = YState.flushPatch$.hook(scheduleSave)
+    const unSub = editor.yState.flushPatch$.hook(scheduleSave)
     const disposeHistoryReaction = reaction(
-      () => [Undo.next, Undo.stack.length],
+      () => [editor.undo.next, editor.undo.stack.length],
       scheduleSave,
     )
 
@@ -115,7 +117,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
       unSub()
       disposeHistoryReaction()
     }
-  }, [recording, saveSnapshot])
+  }, [editor, recording, saveSnapshot])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -197,93 +199,100 @@ function readSnapshot(storageKey: string) {
   }
 }
 
-function createSnapshotState(): SnapshotState {
+function createSnapshotState(editor: EditorService2): SnapshotState {
   return {
-    schema: toPlain(YState.schema),
-    undoStack: toPlain(Undo.stack),
-    undoNext: Undo.next,
+    schema: toPlain(editor.yState.schema),
+    undoStack: toPlain(editor.undo.stack),
+    undoNext: editor.undo.next,
     savedAt: Date.now(),
   }
 }
 
-function restoreFinalSnapshot(snapshot: SnapshotState) {
-  replaceSchema(snapshot.schema)
-  restoreUndo(snapshot)
+function restoreFinalSnapshot(editor: EditorService2, snapshot: SnapshotState) {
+  replaceSchema(editor, snapshot.schema)
+  restoreUndo(editor, snapshot)
 }
 
-function restoreReplayableSnapshot(snapshot: DevSnapshot) {
+function restoreReplayableSnapshot(editor: EditorService2, snapshot: DevSnapshot) {
   const base = snapshot.base
-  if (!base) return restoreFinalSnapshot(snapshot)
+  if (!base) return restoreFinalSnapshot(editor, snapshot)
 
-  replaceSchema(base.schema)
-  if (!resetUndo()) return
+  replaceSchema(editor, base.schema)
+  if (!resetUndo(editor)) return
 
   MobxUndo.rebase()
-  replayHistoryFromBase(snapshot, base)
+  replayHistoryFromBase(editor, snapshot, base)
 }
 
-function replaceSchema(schema: S.Schema) {
-  const currentKeys = Object.keys(YState.state)
+function replaceSchema(editor: EditorService2, schema: S.Schema) {
+  const currentKeys = Object.keys(editor.yState.state)
   const nextKeys = Object.keys(schema)
 
-  YState.transact(() => {
+  editor.yState.transact(() => {
     currentKeys.forEach((key) => {
-      if (!(key in schema)) YState.delete<any>([key])
+      if (!(key in schema)) editor.yState.delete<any>([key])
     })
-    nextKeys.forEach((key) => YState.set<any>([key], schema[key]))
+    nextKeys.forEach((key) => editor.yState.set<any>([key], schema[key]))
   })
 }
 
-function restoreUndo(snapshot: SnapshotState) {
-  if (!resetUndo()) return
+function restoreUndo(editor: EditorService2, snapshot: SnapshotState) {
+  if (!resetUndo(editor)) return
 
-  Undo.restoreHistory(toPlain(snapshot.undoStack || []), snapshot.undoNext || 0)
+  editor.undo.restoreHistory(
+    toPlain(snapshot.undoStack || []),
+    snapshot.undoNext || 0,
+  )
 }
 
-function resetUndo() {
-  const ySchema = YState.doc?.getMap<S.Schema>('schema')
+function resetUndo(editor: EditorService2) {
+  const ySchema = editor.yState.doc?.getMap<S.Schema>('schema')
   if (!ySchema) return false
 
-  Undo.initUndo({
+  editor.undo.initUndo({
     stateMap: ySchema,
-    getPatches: YState.getPatches,
+    getPatches: editor.yState.getPatches,
   })
   return true
 }
 
-function replayHistoryFromBase(snapshot: DevSnapshot, base: SnapshotState) {
+function replayHistoryFromBase(
+  editor: EditorService2,
+  snapshot: DevSnapshot,
+  base: SnapshotState,
+) {
   const stack = snapshot.undoStack || []
   const start = Math.min(base.undoNext || 0, stack.length)
   const end = Math.min(snapshot.undoNext || 0, stack.length)
 
-  stack.slice(start, end).forEach(replayHistoryInfo)
+  stack.slice(start, end).forEach((info) => replayHistoryInfo(editor, info))
 
-  Undo.restoreHistory(toPlain(stack), end)
+  editor.undo.restoreHistory(toPlain(stack), end)
 }
 
-function replayHistoryInfo(info: UndoInfo) {
+function replayHistoryInfo(editor: EditorService2, info: UndoInfo) {
   if (info.type === 'client') {
-    applyReplayLocalState(info)
-    Undo.track(info.type, info.description)
+    applyReplayLocalState(editor, info)
+    editor.undo.track(info.type, info.description)
     return
   }
 
-  YState.transact(() => applyStatePatches(info.statePatches))
-  if (info.type === 'all') applyReplayLocalState(info)
+  editor.yState.transact(() => applyStatePatches(editor, info.statePatches))
+  if (info.type === 'all') applyReplayLocalState(editor, info)
 
-  Undo.track(info.type, info.description)
+  editor.undo.track(info.type, info.description)
 }
 
-function applyReplayLocalState(info: UndoInfo) {
+function applyReplayLocalState(editor: EditorService2, info: UndoInfo) {
   const localState = info.clientState
   if (localState) {
-    MobxUndo.applyState(normalizeLocalState(localState))
+    MobxUndo.applyState(normalizeLocalState(editor, localState))
     return
   }
 
   if (MobxUndo.has('select')) {
     const select = MobxUndo.get<HandleSelectState>('select')
-    MobxUndo.applyState({ select: normalizeSelectState(select) })
+    MobxUndo.applyState({ select: normalizeSelectState(editor, select) })
   }
 }
 
@@ -292,56 +301,66 @@ type HandleSelectState = {
   selectPageId: string
 }
 
-function normalizeLocalState(state: MobxUndoState) {
+function normalizeLocalState(editor: EditorService2, state: MobxUndoState) {
   if (!state.select) return state
 
   return {
     ...state,
-    select: normalizeSelectState(state.select as HandleSelectState),
+    select: normalizeSelectState(editor, state.select as HandleSelectState),
   }
 }
 
-function normalizeSelectState(state: HandleSelectState) {
+function normalizeSelectState(editor: EditorService2, state: HandleSelectState) {
   return {
     ...state,
     selectIdMap: Object.fromEntries(
-      Object.entries(state.selectIdMap || {}).filter(([id]) => YState.state[id]),
+      Object.entries(state.selectIdMap || {}).filter(
+        ([id]) => editor.yState.state[id],
+      ),
     ),
-    selectPageId: getValidPageId(state.selectPageId),
+    selectPageId: getValidPageId(editor, state.selectPageId),
   }
 }
 
-function getValidPageId(pageId: string) {
-  if (pageId && YState.state[pageId]) return pageId
-  return YState.state.meta?.pageIds[0] || ''
+function getValidPageId(editor: EditorService2, pageId: string) {
+  if (pageId && editor.yState.state[pageId]) return pageId
+  return editor.yState.state.meta?.pageIds[0] || ''
 }
 
-function applyStatePatches(patches: UndoInfo['statePatches']) {
+function applyStatePatches(
+  editor: EditorService2,
+  patches: UndoInfo['statePatches'],
+) {
   patches?.forEach((patch) => {
+    const yState = editor.yState as any
+    const keys = patch.keys as [string, ...Array<string | number>]
     switch (patch.type) {
       case 'add':
-        if (shouldInsertPatch(patch.keys))
-          YState.insert(patch.keys, toPlain(patch.value))
-        else YState.set(patch.keys, toPlain(patch.value))
+        if (shouldInsertPatch(editor, keys))
+          yState.insert(keys, toPlain(patch.value))
+        else yState.set(keys, toPlain(patch.value))
         return
       case 'replace':
-        YState.set(patch.keys, toPlain(patch.value))
+        yState.set(keys, toPlain(patch.value))
         return
       case 'remove':
-        YState.delete(patch.keys)
+        yState.delete(keys)
     }
   })
 }
 
-function shouldInsertPatch(keys: readonly (string | number)[]) {
+function shouldInsertPatch(
+  editor: EditorService2,
+  keys: readonly (string | number)[],
+) {
   const lastIndex = Number(keys[keys.length - 1])
   if (Number.isNaN(lastIndex)) return false
 
-  return Array.isArray(getSchemaValue(keys.slice(0, -1)))
+  return Array.isArray(getSchemaValue(editor, keys.slice(0, -1)))
 }
 
-function getSchemaValue(keys: readonly (string | number)[]) {
-  let current: any = YState.state
+function getSchemaValue(editor: EditorService2, keys: readonly (string | number)[]) {
+  let current: any = editor.yState.state
   keys.forEach((key) => {
     current = current?.[key]
   })

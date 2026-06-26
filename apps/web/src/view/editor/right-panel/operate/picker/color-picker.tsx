@@ -2,12 +2,12 @@ import Color from 'color'
 import equal from 'fast-deep-equal'
 import { PipetteIcon } from 'lucide-react'
 import { createContext, RefObject } from 'react'
-import { Undo } from 'src/editor'
 import { max, min } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
 import { IRGBA } from 'src/utils/color'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
+import { useEditor } from 'src/view/hooks/editor'
 
 const Context = createContext({
   hue: 0,
@@ -72,6 +72,8 @@ export const ColorPicker: FC<{
 })
 
 const SquareComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
+  const { undo } = editor
   const { hue, saturation, value, setSaturation, setValue } = useContext(Context)
 
   const [x, setX] = useState(saturation / 100)
@@ -109,7 +111,7 @@ const SquareComp: FC<{}> = observer(({}) => {
         if (equal(lastXY, current) && !moved) return
         lastXY.x = current.x
         lastXY.y = current.y
-        Undo.track('state', t('adjust color'))
+        undo.track('state', t('adjust color'))
       })
       .start(e)
   }
@@ -140,6 +142,8 @@ function useSlider(
   init: number,
   onValueChange: (value: number) => void,
 ) {
+  const editor = useEditor()
+  const { undo } = editor
   const [x, setX] = useState(init)
   const lastValue = useRef(init)
 
@@ -160,7 +164,7 @@ function useSlider(
       .onDestroy(({ current }) => {
         if (lastValue.current === current.x) return
         lastValue.current = current.x
-        Undo.track('state', t('adjust color'))
+        undo.track('state', t('adjust color'))
       })
       .start(e)
   }
