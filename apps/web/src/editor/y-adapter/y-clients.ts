@@ -3,9 +3,9 @@ import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import { MobxUndo } from 'src/editor/core/undo'
 import { Matrix } from 'src/editor/geometry'
+import { EditorService } from 'src/editor/service'
 import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
-import { EditorService } from '..'
 
 export class YClientsService extends EditorService {
   clientId!: number

@@ -1,6 +1,6 @@
 import { Signal } from '@gitborlando/signal'
 import { MobxUndo } from 'src/editor/core/undo'
-import { EditorService } from '..'
+import { EditorService } from 'src/editor/service'
 
 export type HandleSelectState = {
   selectIdMap: Record<string, boolean>

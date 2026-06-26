@@ -1,9 +1,9 @@
 import { iife } from '@gitborlando/utils'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { EditorService } from 'src/editor/service'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
 import { snapGridRound, TRBL } from 'src/editor/utils/misc'
-import { EditorService } from '../..'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 

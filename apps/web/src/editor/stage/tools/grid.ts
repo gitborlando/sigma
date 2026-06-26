@@ -1,7 +1,7 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
+import { EditorService } from 'src/editor/service'
 import { getZoom } from 'src/editor/utils/get'
 import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
-import { EditorService } from '../..'
 
 export class StageToolGridService extends EditorService {
   private ctx!: CanvasRenderingContext2D

@@ -1,9 +1,9 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clampIndex, firstOne, getSet, iife } from '@gitborlando/utils'
-import { EditorService } from 'src/editor'
 import { MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { EditorService } from 'src/editor/service'
 import { getSelectedNodes, getSelectIdList } from '../utils/get'
 
 export class HandleNodeService extends EditorService {

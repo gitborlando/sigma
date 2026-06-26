@@ -11,10 +11,10 @@ import {
   TextBreaker,
   createTextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
+import { EditorService } from 'src/editor/service'
 import { Raf, reverseFor } from 'src/editor/utils/misc'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
-import { EditorService } from '..'
 import { getSetting, getZoom } from '../utils/get'
 import { Elem } from './elem'
 

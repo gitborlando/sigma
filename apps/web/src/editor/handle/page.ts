@@ -1,6 +1,6 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { IMatrix, Matrix } from 'src/editor/geometry'
-import { EditorService } from '..'
+import { EditorService } from 'src/editor/service'
 import { getSelectPageId } from '../utils/get'
 
 export class HandlePageService extends EditorService {

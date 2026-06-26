@@ -4,11 +4,11 @@ import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plai
 import JSZip from 'jszip'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
+import { EditorService } from 'src/editor/service'
 import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { FileService } from 'src/global/service/file'
 import * as Y from 'yjs'
-import { EditorService } from '..'
 
 export type YStatePatch = YPlainPatch
 

@@ -2,8 +2,9 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
+import { EditorService } from 'src/editor/service'
 import { COLOR } from 'src/utils/color'
-import { EditorService, type EditorService2 } from '..'
+import { type EditorService2 } from '..'
 import { getSelectedNodes } from '../utils/get'
 
 export class OperateFillService extends EditorService {

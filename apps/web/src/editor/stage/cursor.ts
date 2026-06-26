@@ -2,7 +2,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { floor } from 'src/editor/geometry/base'
-import { EditorService } from '..'
+import { EditorService } from 'src/editor/service'
 
 export type StageCursorType =
   | 'select'

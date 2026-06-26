@@ -10,9 +10,9 @@ import {
   MRect,
 } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { EditorService } from 'src/editor/service'
 import { getSelectPageId, getZoom } from 'src/editor/utils/get'
 import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
-import { EditorService } from '../..'
 
 const createTypes = [
   'frame',

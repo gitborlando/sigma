@@ -5,7 +5,7 @@ import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { Matrix, max, min } from 'src/editor/geometry'
-import { EditorService } from '..'
+import { EditorService } from 'src/editor/service'
 import { getSelectIdList } from '../utils/get'
 
 const createInitBound = () => ({

@@ -1,7 +1,7 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { Matrix } from 'src/editor/geometry'
+import { EditorService } from 'src/editor/service'
 import { Drag } from 'src/global/event/drag'
-import { EditorService } from '../..'
 
 export class StageMoveService extends EditorService {
   @observable isMoving = false

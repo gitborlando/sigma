@@ -1,9 +1,9 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { HocuspocusProvider } from '@hocuspocus/provider'
+import { EditorService } from 'src/editor/service'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
-import { EditorService } from '..'
 
 export class YSyncService extends EditorService {
   inited$ = Signal.create(false)

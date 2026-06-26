@@ -1,8 +1,8 @@
 import { AnyObject, iife, objKeys } from '@gitborlando/utils'
 import { divide, floor, max, min } from 'src/editor/geometry/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
+import { EditorService } from 'src/editor/service'
 import { MULTI_VALUE } from 'src/global/constant'
-import { EditorService } from '..'
 import { getSelectedNodes } from '../utils/get'
 
 function createDesignGeoInfos() {

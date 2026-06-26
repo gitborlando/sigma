@@ -8,13 +8,13 @@ import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { EditorService } from 'src/editor/service'
 import {
   getSelectIdList,
   getSelectIdMap,
   getSelectPageId,
 } from 'src/editor/utils/get'
 import { ContextMenu } from 'src/global/context-menu'
-import { EditorService } from '../..'
 
 export class StageSelectService extends EditorService {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }

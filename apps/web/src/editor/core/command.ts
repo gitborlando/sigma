@@ -1,8 +1,8 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
+import { EditorService } from 'src/editor/service'
 import { Command } from 'src/global/context-menu'
-import { EditorService } from '..'
 import { getSelectIdList, getSetting } from '../utils/get'
 
 export class EditorCommandService extends EditorService {

@@ -1,7 +1,7 @@
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { EditorService } from 'src/editor/service'
 import { getSelectPageId } from 'src/editor/utils/get'
-import { EditorService } from '../..'
 
 export type LayerPanelNodeInfo = {
   id: string

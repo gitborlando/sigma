@@ -1,6 +1,6 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
 import { defuOverrideArray } from '@sigma/utils/defu'
-import { EditorService } from '..'
+import { EditorService } from 'src/editor/service'
 
 const initSetting = () => {
   return {

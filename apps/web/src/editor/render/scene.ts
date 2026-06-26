@@ -2,8 +2,8 @@ import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { EditorService } from 'src/editor/service'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
-import { EditorService } from '..'
 import { Elem } from './elem'
 
 export class StageSceneService extends EditorService {

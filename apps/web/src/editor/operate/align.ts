@@ -1,6 +1,6 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { EditorService } from '..'
+import { EditorService } from 'src/editor/service'
 import { SchemaHelper } from '../schema/helper'
 import { getSelectedNodes } from '../utils/get'
 

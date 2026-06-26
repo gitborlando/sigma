@@ -1,5 +1,5 @@
 import { matchCase, NoopFunc } from '@gitborlando/utils'
-import { EditorService } from '../..'
+import { EditorService } from 'src/editor/service'
 
 export type IStageInteraction = 'select' | 'move' | 'create'
 

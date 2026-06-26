@@ -27,12 +27,6 @@ import { YClientsService } from 'src/editor/y-adapter/y-clients'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { YSyncService } from 'src/editor/y-adapter/y-sync'
 
-export class EditorService extends Service {
-  constructor(protected editor: EditorService2) {
-    super()
-  }
-}
-
 export class EditorService2 {
   private inited = false
   private disposer = new Disposer()

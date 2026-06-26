@@ -1,4 +1,4 @@
-import { EditorService } from '../..'
+import { EditorService } from 'src/editor/service'
 
 export class LayerPanelService extends EditorService {
   @observable pagePanelHeight = 200
