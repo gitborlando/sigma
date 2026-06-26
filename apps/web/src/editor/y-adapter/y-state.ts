@@ -80,7 +80,7 @@ export class YStateService extends EditorService {
     let schema: S.Schema | undefined
 
     if (fileId === 'mock') {
-      const mockSchema = mock_transform_v()
+      const mockSchema = mock_transform_v(this.editor)
       if (mockSchema) schema = mockSchema
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)
@@ -105,6 +105,7 @@ export class YStateService extends EditorService {
     // YSync.init(fileId, this.doc)
 
     this.plain = autoBind(new YPlain(this.ySchema, schema))
+    console.log('??')
     this.disposer.add(this.plain.observe())
     this.disposer.add(this.plain.subscribe(this.handlePlainChange))
     this.disposer.add(this.editor.yClients.subscribe())

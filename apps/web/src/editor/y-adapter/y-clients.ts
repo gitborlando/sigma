@@ -42,7 +42,9 @@ export class YClientsService extends EditorService {
       this.client.userName = UserService.userName
       this.client.userAvatar = UserService.avatar
     })
-    this.editor.handleSelect.selectPage(this.editor.yState.state.meta.pageIds[0])
+    this.editor.yState.inited$.hook(() => {
+      this.editor.handleSelect.selectPage(this.editor.yState.state.meta.pageIds[0])
+    })
     MobxUndo.rebase()
     this.syncSelectState()
     return Disposer.combine(this.onMouseMove(), disposeSelect)

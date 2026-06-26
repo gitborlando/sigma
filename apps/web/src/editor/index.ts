@@ -97,30 +97,3 @@ export class EditorService2 extends Service {
     return this.yState.find<T>(id)
   }
 }
-
-export const Editor = autoBind(new EditorService2())
-export const HandleNode = Editor.handleNode
-export const HandlePage = Editor.handlePage
-export const EditorSetting = Editor.editorSetting
-export const EditorCommand = Editor.editorCommand
-export const Undo = Editor.undo
-export const HandleSelect = Editor.handleSelect
-export const OperateAlign = Editor.operateAlign
-export const OperateFill = Editor.operateFill
-export const DesignGeometry = Editor.designGeometry
-export const ElemDrawer = Editor.elemDrawer
-export const StageScene = Editor.stageScene
-export const StageSurface = Editor.stageSurface
-export const SchemaCreator = Editor.schemaCreator
-export const StageCreate = Editor.stageCreate
-export const StageInteract = Editor.stageInteract
-export const StageMove = Editor.stageMove
-export const StageSelect = Editor.stageSelect
-export const StageTransformer = Editor.stageTransformer
-export const StageCursor = Editor.stageCursor
-export const StageViewport = Editor.stageViewport
-export const LayerPanel = Editor.layerPanel
-export const LayerPanelNodeTree = Editor.layerPanelNodeTree
-export const YClients = Editor.yClients
-export const YSync = Editor.ySync
-export const YState = Editor.yState

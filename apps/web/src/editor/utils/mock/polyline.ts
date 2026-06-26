@@ -1,22 +1,22 @@
-import { SchemaCreator } from 'src/editor'
+import { EditorService2 } from 'src/editor'
 
-export function mockPolyline() {
-  const schema = <ISchema>{}
+export function mockPolyline(editor: EditorService2) {
+  const schema = <S.Schema>{}
 
-  const meta = SchemaCreator.meta()
-  const client = SchemaCreator.client()
-  const page = SchemaCreator.page()
+  const meta = editor.schemaCreator.meta()
+  const client = editor.schemaCreator.client()
+  const page = editor.schemaCreator.page()
 
-  const star = SchemaCreator.star()
+  const star = editor.schemaCreator.star()
 
   star.points = [
-    SchemaCreator.point({ x: 0, y: 0, startPath: true }),
-    SchemaCreator.point({ x: 20, y: 90 }),
-    SchemaCreator.point({ x: 40, y: 60 }),
-    SchemaCreator.point({ x: 90, y: 10, endPath: true }),
+    editor.schemaCreator.point({ x: 0, y: 0, startPath: true }),
+    editor.schemaCreator.point({ x: 20, y: 90 }),
+    editor.schemaCreator.point({ x: 40, y: 60 }),
+    editor.schemaCreator.point({ x: 90, y: 10, endPath: true }),
   ]
   star.fills = []
-  star.strokes = [SchemaCreator.stroke()]
+  star.strokes = [editor.schemaCreator.stroke()]
 
   schema.meta = meta
   schema.client = client

@@ -11,7 +11,7 @@ import { HeaderComp } from './header'
 export const EditorComp = withSuspense(
   ({}) => {
     const { fileId } = useParams<{ fileId: string }>()
-    const { editor, dispose } = useMemo(EditorService2.initInstance, [])
+    const { editor, dispose } = useMemo(() => EditorService2.initInstance(), [])
 
     suspend(() => editor.yState.initSchema(fileId!), [fileId])
     suspend(() => editor.stageSurface.initTextBreaker(), ['initTextBreaker'])
