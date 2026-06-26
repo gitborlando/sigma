@@ -10,7 +10,6 @@ import {
   MRect,
 } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { createStageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectPageId, getZoom } from 'src/editor/utils/get'
 import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
 import { EditorService } from '../..'
@@ -33,7 +32,6 @@ export class StageCreateService extends EditorService {
   @observable createType: IStageCreateType = 'frame'
   private node!: S.Node
   private parent!: S.NodeParent
-  private stageDrag = createStageDrag(this.editor)
 
   startInteract() {
     const disposer = Disposer.combine(
@@ -50,7 +48,7 @@ export class StageCreateService extends EditorService {
   }
 
   private create() {
-    this.stageDrag
+    this.editor.stageDragger
       .onStart(this.onCreateStart)
       .onMove(this.onCreateMove)
       .onDestroy(this.onCreateEnd)

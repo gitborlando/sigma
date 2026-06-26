@@ -1,3 +1,4 @@
+import { Dragger } from '@gitborlando/toolkit/browser'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { EditorCommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
@@ -35,6 +36,11 @@ export class EditorService extends Service {
 export class EditorService2 {
   private inited = false
   private disposer = new Disposer()
+
+  stageDragger = new Dragger({
+    processXY: (xy) => this.stageViewport.toSceneXY(xy),
+    processShift: (shift) => this.stageViewport.toSceneShift(shift),
+  })
 
   handleNode = this.initService(HandleNodeService)
   handlePage = this.initService(HandlePageService)

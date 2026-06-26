@@ -8,7 +8,6 @@ import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { createStageDrag } from 'src/editor/stage/interact/drag'
 import {
   getSelectIdList,
   getSelectIdMap,
@@ -23,7 +22,6 @@ export class StageSelectService extends EditorService {
 
   private lastSelectIdMap = <Record<string, boolean>>{}
   private isPointerDown = false
-  private stageDrag = createStageDrag(this.editor)
 
   startInteract() {
     return Disposer.combine(
@@ -172,7 +170,7 @@ export class StageSelectService extends EditorService {
 
     this.editor.stageSurface.disablePointEvent()
 
-    this.stageDrag
+    this.editor.stageDragger
       .onMove(({ marquee }) => {
         this.marquee = marquee
         AABB.updateFromRect(marqueeAABB, marquee)

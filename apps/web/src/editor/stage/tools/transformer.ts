@@ -1,7 +1,6 @@
 import { iife } from '@gitborlando/utils'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { createStageDrag } from 'src/editor/stage/interact/drag'
 import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
 import { snapGridRound, TRBL } from 'src/editor/utils/misc'
 import { EditorService } from '../..'
@@ -19,7 +18,6 @@ export class StageTransformerService extends EditorService {
 
   private action: TransformerAction = 'move'
   isSelectOnlyLine = false
-  private stageDrag = createStageDrag(this.editor)
 
   setup(selectNodes: S.Node[]) {
     if (selectNodes.length === 1) {
@@ -40,7 +38,7 @@ export class StageTransformerService extends EditorService {
     const { startMRect, startMatrix } = this.onStartTransform()
     const startAABB = startMRect.aabb
 
-    this.stageDrag
+    this.editor.stageDragger
       .onMove(({ shift }) => {
         this.action = 'move'
         this.isMoving = true
@@ -76,7 +74,7 @@ export class StageTransformerService extends EditorService {
     const { startMRect, startMatrix } = this.onStartTransform()
     const endMatrix = Matrix.of(startMatrix)
 
-    this.stageDrag
+    this.editor.stageDragger
       .onMove(({ shift }) => {
         this.action = 'resize'
         shift = Matrix.of(startMRect.matrix).applyShift(shift, true)
@@ -123,7 +121,7 @@ export class StageTransformerService extends EditorService {
     const startRect = AABB.rect(startMRect.aabb)
     const startMatrix = Matrix.identity().shift(startRect)
 
-    this.stageDrag
+    this.editor.stageDragger
       .onMove(({ current, start }) => {
         this.action = 'rotate'
 
