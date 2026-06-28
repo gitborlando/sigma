@@ -94,6 +94,9 @@ importers:
       auto-bind:
         specifier: ^5.0.1
         version: 5.0.1
+      awilix:
+        specifier: ^13.0.5
+        version: 13.0.5
       axios:
         specifier: 1.10.0
         version: 1.10.0
@@ -3927,6 +3930,13 @@ packages:
         integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==,
       }
     engines: { node: '>= 0.4' }
+
+  awilix@13.0.5:
+    resolution:
+      {
+        integrity: sha512-ORtca6suBdYA1FyTzqHEZDvEuUwo3lPDDBRm7GrzHgi6STESzJKdBtpqfTzObdMj1NGQUWX6k26E3EbQaGJX5Q==,
+      }
+    engines: { node: '>=20.0.0' }
 
   aws-sign2@0.7.0:
     resolution:
@@ -12063,6 +12073,10 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
+
+  awilix@13.0.5:
+    dependencies:
+      fast-glob: 3.3.3
 
   aws-sign2@0.7.0: {}
 
