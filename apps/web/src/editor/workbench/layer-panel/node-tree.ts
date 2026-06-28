@@ -1,7 +1,9 @@
+import { makeObservable } from 'mobx'
+import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { EditorService } from 'src/editor/service'
-import { getSelectPageId } from 'src/editor/utils/get'
+import { YStateService } from 'src/editor/y-adapter/y-state'
+import { Service } from 'src/global/service'
 
 export type LayerPanelNodeInfo = {
   id: string
@@ -9,9 +11,18 @@ export type LayerPanelNodeInfo = {
   ancestorIds: string[]
 }
 
-export class LayerPanelNodeTreeService extends EditorService {
+export class LayerPanelNodeTreeService extends Service {
   private expandedNodeMap = observable.map<string, boolean>()
   @observable private nodeInfoVersion = 0
+
+  constructor(
+    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YStateService,
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
 
   @computed get nodeInfoList() {
     this.nodeInfoVersion
@@ -30,7 +41,7 @@ export class LayerPanelNodeTreeService extends EditorService {
   }
 
   getNodeExpanded(id: string) {
-    if (!SchemaHelper.isNodeParent(this.editor.find(id))) return
+    if (!SchemaHelper.isNodeParent(this.yState.find(id))) return
     return this.expandedNodeMap.get(id)
   }
 
@@ -40,19 +51,19 @@ export class LayerPanelNodeTreeService extends EditorService {
 
   toggleAllNodeExpanded(expanded: boolean) {
     const traverse = createSchemaTraverse({
-      schema: this.editor.yState.schema,
+      schema: this.yState.schema,
       enter: ({ item }) => {
         if (!SchemaHelper.isNodeParent(item)) return
         this.expandedNodeMap.set(item.id, expanded)
       },
     })
-    traverse(SchemaHelper.getPageChildIds(getSelectPageId(this.editor)))
+    traverse(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId))
   }
 
   private getNodeInfoList() {
     const nodeInfoList: LayerPanelNodeInfo[] = []
     const traverse = createSchemaTraverse({
-      schema: this.editor.yState.schema,
+      schema: this.yState.schema,
       enter: ({ item, ancestors }) => {
         const ancestorIds = ancestors.map((node) => node.id)
         nodeInfoList.push({
@@ -63,12 +74,12 @@ export class LayerPanelNodeTreeService extends EditorService {
         return !!this.expandedNodeMap.get(item.id)
       },
     })
-    traverse(SchemaHelper.getPageChildIds(getSelectPageId(this.editor)))
+    traverse(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId))
     return nodeInfoList
   }
 
   private onNodeHierarchyChange() {
-    return this.editor.yState.listen((patches) => {
+    return this.yState.listen((patches) => {
       patches.forEach((patch) => {
         const [id, prop] = patch.keys as [string, string]
         if (prop !== 'childIds') return

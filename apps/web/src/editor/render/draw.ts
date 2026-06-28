@@ -3,20 +3,31 @@ import { getSet, iife, loopFor } from '@gitborlando/utils'
 import { HitTest } from 'src/editor/geometry'
 import { max } from 'src/editor/geometry/base'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
+import { EditorSettingService } from 'src/editor/core/setting'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
-import { EditorService } from 'src/editor/service'
+import { StageSurfaceService } from 'src/editor/render/surface'
+import { StageViewportService } from 'src/editor/stage/viewport'
+import { Service } from 'src/global/service'
 import { Image } from 'src/global/service/image'
 import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
-import { getZoom } from '../utils/get'
 import { Elem } from './elem'
 
-export class ElemDrawerService extends EditorService {
+export class ElemDrawerService extends Service {
   private node!: S.Node
   private elem!: Elem
   private ctx!: CanvasRenderingContext2D
   private path2d!: Path2D
   private dirtyRects: AABB[] = []
+
+  constructor(
+    private readonly stageSurface: StageSurfaceService,
+    private readonly editorSetting: EditorSettingService,
+    private readonly stageViewport: StageViewportService,
+  ) {
+    super()
+    autoBind(this)
+  }
 
   draw = (elem: Elem, ctx: CanvasRenderingContext2D, path2d: Path2D) => {
     this.node = elem.node
@@ -28,14 +39,14 @@ export class ElemDrawerService extends EditorService {
     this.drawShapePath()
 
     this.node.fills.forEach((fill, i) => {
-      this.editor.stageSurface.ctxSaveRestore(() => {
+      this.stageSurface.ctxSaveRestore(() => {
         this.drawShadow(this.node.shadows[i])
         this.drawFill(fill)
       })
     })
 
     this.node.strokes.forEach((stroke, i) => {
-      this.editor.stageSurface.ctxSaveRestore(() => {
+      this.stageSurface.ctxSaveRestore(() => {
         this.drawShadow(this.node.shadows[i])
         this.drawStroke(stroke)
       })
@@ -185,7 +196,7 @@ export class ElemDrawerService extends EditorService {
       this.splitTextsCache,
       this.node.id,
       () =>
-        this.editor.stageSurface.textBreaker.breakText(
+        this.stageSurface.textBreaker.breakText(
           content,
           width,
           style,
@@ -200,9 +211,9 @@ export class ElemDrawerService extends EditorService {
     const { lineHeight } = style
 
     this.splitTexts.forEach(({ text, start, width }, i) => {
-      if (this.editor.editorSetting.setting.ignoreUnVisible) {
-        const visualWidth = width * getZoom(this.editor)
-        const visualHeight = lineHeight * getZoom(this.editor)
+      if (this.editorSetting.setting.ignoreUnVisible) {
+        const visualWidth = width * this.stageViewport.zoom
+        const visualHeight = lineHeight * this.stageViewport.zoom
         if (visualWidth / text.length < 2.5 || visualHeight < 2.5) {
           this.ctx.fillRect(start, i * lineHeight, width, lineHeight * 0.2)
           return
@@ -260,7 +271,7 @@ export class ElemDrawerService extends EditorService {
         const image = Image.getImage(fill.url)
         if (!image) {
           Image.getImageAsync(fill.url).then(() => {
-            this.editor.stageSurface.collectDirty(this.elem)
+            this.stageSurface.collectDirty(this.elem)
           })
         } else {
           const { width, height } = this.node
@@ -320,9 +331,9 @@ export class ElemDrawerService extends EditorService {
     if (!shadow?.visible) return
 
     let { fill, blur, offsetX, offsetY, spread } = shadow
-    offsetX = offsetX * getZoom(this.editor)
-    offsetY = offsetY * getZoom(this.editor)
-    blur = blur * getZoom(this.editor)
+    offsetX = offsetX * this.stageViewport.zoom
+    offsetY = offsetY * this.stageViewport.zoom
+    blur = blur * this.stageViewport.zoom
 
     this.ctx.shadowColor = (fill as S.FillColor).color
     this.ctx.shadowBlur = blur
@@ -346,7 +357,7 @@ export class ElemDrawerService extends EditorService {
     const { width, color } = this.node.outline
     if (width <= 0) return
 
-    this.editor.stageSurface.ctxSaveRestore(() => {
+    this.stageSurface.ctxSaveRestore(() => {
       this.ctx.lineWidth = width
       this.ctx.strokeStyle = color || themeColor()
       this.ctx.stroke(new Path2D(this.path2d))
@@ -370,7 +381,7 @@ export class ElemDrawerService extends EditorService {
       this.path2d.lineTo(p2.x, p2.y + fontSize / 2)
     }
 
-    this.editor.stageSurface.ctxSaveRestore(() => {
+    this.stageSurface.ctxSaveRestore(() => {
       this.ctx.lineWidth = width
       this.ctx.strokeStyle = color || themeColor()
       this.ctx.stroke(new Path2D(this.path2d))

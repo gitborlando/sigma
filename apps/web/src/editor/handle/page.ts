@@ -1,68 +1,83 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { IMatrix, Matrix } from 'src/editor/geometry'
-import { EditorService } from 'src/editor/service'
-import { getSelectPageId } from '../utils/get'
+import { HandleSelectService } from 'src/editor/handle/select'
+import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { StageViewportService } from 'src/editor/stage/viewport'
+import { Service } from 'src/global/service'
+import { UndoService } from '../core/undo'
+import { YStateService } from '../y-adapter/y-state'
 
-export class HandlePageService extends EditorService {
+export class HandlePageService extends Service {
   pageSceneMatrix = new Map<ID, IMatrix>()
 
-  subscribe() {
+  constructor(
+    private readonly schemaCreator: SchemaCreatorService,
+    private readonly yState: YStateService,
+    private readonly undo: UndoService,
+    private readonly handleSelect: HandleSelectService,
+    private readonly stageViewport: StageViewportService,
+  ) {
+    super()
+    autoBind(this)
+  }
+
+  subscribe = () => {
     return Disposer.combine(this.memoPageSceneMatrix())
   }
 
-  addPage(page = this.editor.schemaCreator.page()) {
-    this.editor.yState.transact(() => {
-      this.editor.yState.set<S.Page>([page.id], page)
-      this.editor.yState.insert(['meta', 'pageIds'], page.id)
+  addPage(page = this.schemaCreator.page()) {
+    this.yState.transact(() => {
+      this.yState.set<S.Page>([page.id], page)
+      this.yState.insert(['meta', 'pageIds'], page.id)
     })
 
-    this.editor.undo.untrack(() => this.editor.handleSelect.selectPage(page.id))
-    this.editor.undo.track('all', t('add and select page'))
+    this.undo.untrack(() => this.handleSelect.selectPage(page.id))
+    this.undo.track('all', t('add and select page'))
   }
 
-  removePage(page: S.Page) {
-    if (this.editor.yState.state.meta.pageIds.length === 1) return
+  removePage = (page: S.Page) => {
+    if (this.yState.state.meta.pageIds.length === 1) return
 
-    this.editor.yState.transact(() => {
-      this.editor.yState.delete<S.Page>([page.id])
-      this.editor.yState.delete([
+    this.yState.transact(() => {
+      this.yState.delete<S.Page>([page.id])
+      this.yState.delete([
         'meta',
         'pageIds',
-        this.editor.yState.state.meta.pageIds.indexOf(page.id),
+        this.yState.state.meta.pageIds.indexOf(page.id),
       ])
     })
 
-    this.editor.undo.untrack(() =>
-      this.editor.handleSelect.selectPage(this.editor.yState.state.meta.pageIds[0]),
+    this.undo.untrack(() =>
+      this.handleSelect.selectPage(this.yState.state.meta.pageIds[0]),
     )
-    this.editor.undo.track('all', t('delete page'))
+    this.undo.track('all', t('delete page'))
   }
 
-  private memoPageSceneMatrix() {
+  private memoPageSceneMatrix = () => {
     return reaction(
-      () => this.editor.stageViewport.sceneMatrix,
+      () => this.stageViewport.sceneMatrix,
       (matrix) => {
-        this.pageSceneMatrix.set(getSelectPageId(this.editor), Matrix.of(matrix))
+        this.pageSceneMatrix.set(this.handleSelect.selectPageId, Matrix.of(matrix))
       },
     )
   }
 
-  DEV_logPageSchema(id: ID) {
-    const curPage = this.editor.find<S.Page>(id)
+  DEV_logPageSchema = (id: ID) => {
+    const curPage = this.yState.find<S.Page>(id)
     const nodes: Record<ID, S.SchemaItem> = {}
     const findNodes = (id: string) => {
-      const node = this.editor.find<S.SchemaItem>(id)
+      const node = this.yState.find<S.SchemaItem>(id)
       nodes[node.id] = node
       if ('childIds' in node) {
         node.childIds
-          .map((id) => this.editor.find<S.SchemaItem>(id))
+          .map((id) => this.yState.find<S.SchemaItem>(id))
           .forEach((node) => (nodes[node.id] = node))
       }
     }
     curPage.childIds.forEach(findNodes)
 
     console.log({
-      meta: this.editor.yState.state.meta,
+      meta: this.yState.state.meta,
       page: curPage,
       ...nodes,
     })

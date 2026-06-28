@@ -3,11 +3,14 @@ import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import { MobxUndo } from 'src/editor/core/undo'
 import { Matrix } from 'src/editor/geometry'
-import { EditorService } from 'src/editor/service'
+import { HandleSelectService } from 'src/editor/handle/select'
+import { Service } from 'src/global/service'
 import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
+import { YSyncService } from './y-sync'
+import { YStateService } from './y-state'
 
-export class YClientsService extends EditorService {
+export class YClientsService extends Service {
   clientId!: number
 
   @observable client: S.Client = {
@@ -29,11 +32,21 @@ export class YClientsService extends EditorService {
     return others[this.observingClientId]
   }
 
-  subscribe() {
+  constructor(
+    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YStateService,
+    private readonly ySync: YSyncService,
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
+
+  subscribe = () => {
     const disposeSelect = reaction(
       () => ({
-        selectIdMap: this.editor.handleSelect.selectIdMap,
-        selectPageId: this.editor.handleSelect.selectPageId,
+        selectIdMap: this.handleSelect.selectIdMap,
+        selectPageId: this.handleSelect.selectPageId,
       }),
       () => this.syncSelectState(),
     )
@@ -42,21 +55,21 @@ export class YClientsService extends EditorService {
       this.client.userName = UserService.userName
       this.client.userAvatar = UserService.avatar
     })
-    this.editor.yState.inited$.hook(() => {
-      this.editor.handleSelect.selectPage(this.editor.yState.state.meta.pageIds[0])
+    this.yState.inited$.hook(() => {
+      this.handleSelect.selectPage(this.yState.state.meta.pageIds[0])
     })
     MobxUndo.rebase()
     this.syncSelectState()
     return Disposer.combine(this.onMouseMove(), disposeSelect)
   }
 
-  private syncSelectState() {
-    this.client.selectIdMap = this.editor.handleSelect.selectIdMap
-    this.client.selectPageId = this.editor.handleSelect.selectPageId
+  private syncSelectState = () => {
+    this.client.selectIdMap = this.handleSelect.selectIdMap
+    this.client.selectPageId = this.handleSelect.selectPageId
   }
 
-  syncSelf() {
-    this.editor.ySync.awareness.setLocalState(toJS(this.client))
+  syncSelf = () => {
+    this.ySync.awareness.setLocalState(toJS(this.client))
 
     const clientKeys = Object.keys(this.client) as (keyof S.Client)[]
     const commonKeys = clientKeys.filter(
@@ -69,32 +82,32 @@ export class YClientsService extends EditorService {
         reaction(
           () => this.client[key],
           (value) => {
-            this.editor.ySync.awareness.setLocalStateField(key, toJS(value))
+            this.ySync.awareness.setLocalStateField(key, toJS(value))
           },
         ),
       )
     })
     disposer.add(
-      this.editor.handleSelect.afterSelect.hook(() => {
-        this.editor.ySync.awareness.setLocalStateField(
+      this.handleSelect.afterSelect.hook(() => {
+        this.ySync.awareness.setLocalStateField(
           'selectIdMap',
-          toJS(this.editor.handleSelect.selectIdMap),
+          toJS(this.handleSelect.selectIdMap),
         )
-        this.editor.ySync.awareness.setLocalStateField(
+        this.ySync.awareness.setLocalStateField(
           'selectPageId',
-          toJS(this.editor.handleSelect.selectPageId),
+          toJS(this.handleSelect.selectPageId),
         )
       }),
     )
-    disposer.add(() => this.editor.ySync.awareness.destroy())
+    disposer.add(() => this.ySync.awareness.destroy())
 
     return disposer.dispose
   }
 
-  syncOthers() {
+  syncOthers = () => {
     let prev: S.Clients = this.others
     const onUpdate = () => {
-      const states = this.editor.ySync.awareness.getStates()
+      const states = this.ySync.awareness.getStates()
       states.delete(this.clientId)
       const others = Object.fromEntries(states.entries()) as S.Clients
       if (!equal(prev, others)) {
@@ -102,13 +115,13 @@ export class YClientsService extends EditorService {
         prev = others
       }
     }
-    this.editor.ySync.awareness.on('update', onUpdate)
+    this.ySync.awareness.on('update', onUpdate)
     return () => {
-      this.editor.ySync.awareness.off('update', onUpdate)
+      this.ySync.awareness.off('update', onUpdate)
     }
   }
 
-  private onMouseMove() {
+  private onMouseMove = () => {
     return listen('mousemove', (e) => (this.client.cursor = XY.client(e)))
   }
 }

@@ -2,21 +2,33 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
-import { EditorService } from 'src/editor/service'
+import { makeObservable } from 'mobx'
+import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
-import { type Editor } from '..'
-import { getSelectedNodes } from '../utils/get'
+import { UndoService } from '../core/undo'
+import { HandleSelectService } from '../handle/select'
+import { YStateService } from '../y-adapter/y-state'
 
-export class OperateFillService extends EditorService {
+export class OperateFillService extends Service {
   @observable.ref fills = <S.Fill[]>[]
   isMultiFills = false
 
+  constructor(
+    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YStateService,
+    private readonly schemaCreator: SchemaCreatorService,
+    private readonly undo: UndoService,
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
+
   subscribe() {
     return Disposer.combine(
-      this.editor.handleSelect.afterSelect.hook(() => {
-        this.setupFills()
-      }),
-      this.editor.yState.listen((patches) => {
+      this.handleSelect.afterSelect.hook(this.setupFills),
+      this.yState.listen((patches) => {
         if (!patches.some((p) => p.keys[1] === 'fills')) return
         this.updateFills()
       }),
@@ -27,7 +39,9 @@ export class OperateFillService extends EditorService {
   setupFills() {
     this.fills = []
     this.isMultiFills = false
-    const nodes = getSelectedNodes(this.editor)
+    const nodes = this.handleSelect.selectIdList.map((id) =>
+      this.yState.find<S.Node>(id),
+    )
     if (nodes.length === 1) return (this.fills = clone(nodes[0].fills))
     if (nodes.length > 1) {
       if (this.isSameFills(nodes)) return (this.fills = clone(nodes[0].fills))
@@ -36,15 +50,14 @@ export class OperateFillService extends EditorService {
   }
 
   updateFills() {
-    const nodes = getSelectedNodes(this.editor)
+    const nodes = this.handleSelect.selectIdList.map((id) =>
+      this.yState.find<S.Node>(id),
+    )
     this.fills = clone(nodes[0].fills)
   }
 
   newFill() {
-    return this.editor.schemaCreator.fillColor(
-      COLOR.gray,
-      this.fills.length ? 0.25 : 1,
-    )
+    return this.schemaCreator.fillColor(COLOR.gray, this.fills.length ? 0.25 : 1)
   }
 
   setFills(setter: (draft: S.Fill[]) => any) {
@@ -63,17 +76,19 @@ export class OperateFillService extends EditorService {
   }
 
   onAfterSetFills() {
-    this.editor.undo.track('state', t('change fill'))
+    this.undo.track('state', t('change fill'))
   }
 
   applyChangeToYState(patches: Patch[]) {
-    const nodes = getSelectedNodes(this.editor)
-    this.editor.yState.transact(() => {
+    const nodes = this.handleSelect.selectIdList.map((id) =>
+      this.yState.find<S.Node>(id),
+    )
+    this.yState.transact(() => {
       nodes.forEach((node) => {
         if (this.isMultiFills) {
-          this.editor.yState.set<S.Node>([node.id, 'fills'], [])
+          this.yState.set<S.Node>([node.id, 'fills'], [])
         }
-        applyFillPatches(this.editor, node.id, patches)
+        applyFillPatches(this.yState, node.id, patches)
       })
     })
   }
@@ -96,7 +111,7 @@ export class OperateFillService extends EditorService {
   }
 }
 
-function applyFillPatches(editor: Editor, id: ID, patches: Patch[]) {
+function applyFillPatches(yState: YStateService, id: ID, patches: Patch[]) {
   patches.forEach((patch) => {
     const path = [id, 'fills', ...patch.path] as [
       ID,
@@ -107,15 +122,15 @@ function applyFillPatches(editor: Editor, id: ID, patches: Patch[]) {
     switch (patch.op) {
       case 'add':
         if (!Number.isNaN(Number(path[path.length - 1]))) {
-          editor.yState.insert(path, clone(patch.value))
+          yState.insert(path, clone(patch.value))
         } else {
-          editor.yState.set(path, clone(patch.value))
+          yState.set(path, clone(patch.value))
         }
         return
       case 'replace':
-        return editor.yState.set(path, clone(patch.value))
+        return yState.set(path, clone(patch.value))
       case 'remove':
-        return editor.yState.delete(path)
+        return yState.delete(path)
     }
   })
 }

@@ -1,37 +1,53 @@
 import { type IRect } from '@gitborlando/geo'
+import { Dragger } from '@gitborlando/toolkit/browser'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone, firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
+import type { EditorServiceGetters } from 'src/editor'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
+import { HandleSelectService } from 'src/editor/handle/select'
 import { ElemMouseEvent } from 'src/editor/render/elem'
+import { StageSceneService } from 'src/editor/render/scene'
+import { StageSurfaceService } from 'src/editor/render/surface'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { EditorService } from 'src/editor/service'
-import {
-  getSelectIdList,
-  getSelectIdMap,
-  getSelectPageId,
-} from 'src/editor/utils/get'
+import { StageTransformerService } from 'src/editor/stage/tools/transformer'
+import { StageViewportService } from 'src/editor/stage/viewport'
+import { YStateService } from 'src/editor/y-adapter/y-state'
 import { ContextMenu } from 'src/global/context-menu'
+import { Service } from 'src/global/service'
+import { UndoService } from '../../core/undo'
 
-export class StageSelectService extends EditorService {
+export class StageSelectService extends Service {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
   @observable hoverId?: string
 
   private lastSelectIdMap = <Record<string, boolean>>{}
   private isPointerDown = false
 
+  constructor(
+    private readonly stageScene: StageSceneService,
+    private readonly stageSurface: StageSurfaceService,
+    private readonly stageTransformer: StageTransformerService,
+    private readonly handleSelect: HandleSelectService,
+    private readonly undo: UndoService,
+    private readonly yState: YStateService,
+    private readonly stageViewport: StageViewportService,
+    private readonly getEditorCommand: EditorServiceGetters['getEditorCommand'],
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
+
   startInteract() {
     return Disposer.combine(
-      this.editor.stageScene.sceneRoot.addEvent(
-        'mousedown',
-        this.onSceneRootMouseDown,
-      ),
-      this.editor.stageSurface.addEvent('dblclick', this.onDoubleClick),
-      this.editor.stageSurface.addEvent('mousemove', this.onHover),
-      this.editor.stageSurface.addEvent('contextmenu', this.onContextMenu),
+      this.stageScene.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
+      this.stageSurface.addEvent('dblclick', this.onDoubleClick),
+      this.stageSurface.addEvent('mousemove', this.onHover),
+      this.stageSurface.addEvent('contextmenu', this.onContextMenu),
       listen('pointerdown', () => (this.isPointerDown = true)),
       listen('pointerup', () => (this.isPointerDown = false)),
     )
@@ -39,16 +55,16 @@ export class StageSelectService extends EditorService {
 
   private onHover(e: MouseEvent) {
     if (this.isPointerDown) return
-    const hovered = firstOne(this.editor.stageScene.elemsFromPoint(XY.client(e)))
+    const hovered = firstOne(this.stageScene.elemsFromPoint(XY.client(e)))
     this.hoverId = hovered?.id
   }
 
   private onDoubleClick(e: Event) {
     if (!this.hoverId) return
 
-    const selectIdList = getSelectIdList(this.editor)
-    const hoverSelected = !!getSelectIdMap(this.editor)[this.hoverId]
-    const hoverNode = this.editor.find(this.hoverId)
+    const selectIdList = this.handleSelect.selectIdList
+    const hoverSelected = !!this.handleSelect.selectIdMap[this.hoverId]
+    const hoverNode = this.yState.find<S.Node>(this.hoverId)
 
     if (hoverSelected) {
       if (hoverNode.type === 'text') {
@@ -64,7 +80,7 @@ export class StageSelectService extends EditorService {
   }
 
   private onSceneRootMouseDown(e: ElemMouseEvent) {
-    this.lastSelectIdMap = clone(getSelectIdMap(this.editor))
+    this.lastSelectIdMap = clone(this.handleSelect.selectIdMap)
 
     if (!this.hoverId || SchemaHelper.isFirstLayerFrame(this.hoverId)) {
       this.clearSelect()
@@ -73,17 +89,17 @@ export class StageSelectService extends EditorService {
     }
 
     this.onStageSelect()
-    this.editor.stageTransformer.move(e.hostEvent)
+    this.stageTransformer.move(e.hostEvent)
   }
 
   private onContextMenu(e: MouseEvent) {
     if (this.hoverId) this.onStageSelect()
 
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
-      this.editor.editorCommand
+      this.getEditorCommand()
     const baseMenu = [copyPasteGroup, undoRedoGroup]
 
-    if (getSelectIdList(this.editor).length || this.hoverId) {
+    if (this.handleSelect.selectIdList.length || this.hoverId) {
       const menuOptions = [...baseMenu, nodeGroup, nodeReHierarchyGroup]
       ContextMenu.menus = menuOptions
       ContextMenu.openMenu(e as any)
@@ -95,7 +111,7 @@ export class StageSelectService extends EditorService {
 
   private clearSelect() {
     if (hotkeys.shift) return
-    this.editor.handleSelect.clearSelect()
+    this.handleSelect.clearSelect()
   }
 
   private onStageSelect() {
@@ -112,17 +128,24 @@ export class StageSelectService extends EditorService {
   }
 
   private onSingleSelect(id: ID, trackMsg?: string) {
-    if (getSelectIdMap(this.editor)[id]) return
+    if (this.handleSelect.selectIdMap[id]) return
 
     this.clearSelect()
-    this.editor.handleSelect.select(id)
+    this.handleSelect.select(id)
 
-    if (trackMsg) this.editor.undo.track('client', trackMsg)
+    if (trackMsg) this.undo.track('client', trackMsg)
   }
 
   private onDeepSelect() {
-    const hoverNode = this.editor.find(this.hoverId!)
+    const hoverNode = this.yState.find<S.Node>(this.hoverId!)
     if (hoverNode?.type !== 'text') return
+  }
+
+  private createStageDragger() {
+    return new Dragger({
+      processXY: (xy) => this.stageViewport.toSceneXY(xy),
+      processShift: (shift) => this.stageViewport.toSceneShift(shift),
+    })
   }
 
   private onMarqueeSelect() {
@@ -137,16 +160,16 @@ export class StageSelectService extends EditorService {
     }
 
     const traverser = createSchemaTraverse<{ matrix: IMatrix }>({
-      schema: this.editor.yState.schema,
+      schema: this.yState.schema,
       enter: (ctx) => {
         const { item, depth, childIds, forwardCtx } = ctx
-        const elem = this.editor.stageScene.findElem(item.id)
+        const elem = this.stageScene.findElem(item.id)
 
         if (!elem.visible) return false
 
         if (childIds?.length && depth === 0) {
           if (AABB.include(marqueeAABB, elem.aabb) === 1) {
-            this.editor.handleSelect.select(item.id)
+            this.handleSelect.select(item.id)
             return false
           }
           ctx.matrix = Matrix.of(elem.mrect.matrix)
@@ -159,7 +182,7 @@ export class StageSelectService extends EditorService {
           Matrix.of(forwardMatrix).append(elem.mrect.matrix).plain(),
         )
         if (hitTest(mrect)) {
-          this.editor.handleSelect.select(item.id)
+          this.handleSelect.select(item.id)
           ctx.matrix = Matrix.of(mrect.matrix)
           return
         }
@@ -168,22 +191,22 @@ export class StageSelectService extends EditorService {
       },
     })
 
-    this.editor.stageSurface.disablePointEvent()
+    this.stageSurface.disablePointEvent()
 
-    this.editor.stageDragger
+    this.createStageDragger()
       .onMove(({ marquee }) => {
         this.marquee = marquee
         AABB.updateFromRect(marqueeAABB, marquee)
         this.clearSelect()
         runInAction(() =>
-          traverser(SchemaHelper.getPageChildIds(getSelectPageId(this.editor))),
+          traverser(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId)),
         )
       })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
 
-        if (!equal(getSelectIdMap(this.editor), this.lastSelectIdMap)) {
-          this.editor.undo.track('client', t('select nodes with marquee'))
+        if (!equal(this.handleSelect.selectIdMap, this.lastSelectIdMap)) {
+          this.undo.track('client', t('select nodes with marquee'))
         }
       })
       .start()

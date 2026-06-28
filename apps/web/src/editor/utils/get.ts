@@ -13,7 +13,7 @@ export function getSelectIdMap(editor: Editor) {
 }
 
 export function getSelectIdList(editor: Editor) {
-  return editor.handleSelect.selectIdList.filter((id) => editor.yState.state[id])
+  return editor.handleSelect.selectIdList
 }
 
 export function getSelectPageId(editor: Editor) {

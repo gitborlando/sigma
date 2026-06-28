@@ -1,13 +1,13 @@
-import { Editor } from 'src/editor'
 import { MRect } from 'src/editor/geometry'
+import { SchemaCreatorService } from 'src/editor/schema/creator'
 
-export function mock_transform_v(editor: Editor) {
+export function mock_transform_v(schemaCreator: SchemaCreatorService) {
   const schema = <S.Schema>{}
 
-  const meta = editor.schemaCreator.meta()
-  const page = editor.schemaCreator.page()
-  editor.schemaCreator.addToSchema(schema, meta)
-  editor.schemaCreator.addToSchema(schema, page)
+  const meta = schemaCreator.meta()
+  const page = schemaCreator.page()
+  schemaCreator.addToSchema(schema, meta)
+  schemaCreator.addToSchema(schema, page)
   meta.pageIds.push(page.id)
 
   // const frame = editor.schemaCreator.frame({
@@ -24,11 +24,11 @@ export function mock_transform_v(editor: Editor) {
   // editor.schemaCreator.addToSchema(schema, line)
   // editor.schemaCreator.addChild(frame, line)
 
-  const rect = editor.schemaCreator.polygon({
+  const rect = schemaCreator.polygon({
     ...MRect.identity(100, 100).shift(XY.$(100, 100)).plain(),
   })
-  editor.schemaCreator.addToSchema(schema, rect)
-  editor.schemaCreator.addChild(page, rect)
+  schemaCreator.addToSchema(schema, rect)
+  schemaCreator.addChild(page, rect)
 
   // const polygon = editor.schemaCreator.polygon({
   //   x: 300,

@@ -13,8 +13,11 @@ export const EditorComp = withSuspense(
     const { fileId } = useParams<{ fileId: string }>()
     const { editor, dispose } = useMemo(() => Editor.initInstance(), [])
 
-    suspend(() => editor.yState.initSchema(fileId!), [fileId])
-    suspend(() => editor.stageSurface.initTextBreaker(), ['initTextBreaker'])
+    const yState = editor.resolve('yState')
+    const stageSurface = editor.resolve('stageSurface')
+
+    suspend(() => yState.initSchema(fileId!), [fileId])
+    suspend(() => stageSurface.initTextBreaker(), ['initTextBreaker'])
 
     useClean(() => {
       dispose()

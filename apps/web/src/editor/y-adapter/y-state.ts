@@ -2,19 +2,22 @@ import { Signal } from '@gitborlando/signal'
 import { clone, jsonParse } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
 import JSZip from 'jszip'
+import type { EditorServiceGetters } from 'src/editor'
+import { UndoService } from 'src/editor/core/undo'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { migrationSchema } from 'src/editor/schema/migration'
-import { EditorService } from 'src/editor/service'
 import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { FileService } from 'src/global/service/file'
+import { Service } from 'src/global/service'
 import * as Y from 'yjs'
 
 export type YStatePatch = YPlainPatch
 
 type YStateListener = (patches: YStatePatch[]) => void
 
-export class YStateService extends EditorService {
+export class YStateService extends Service {
   doc!: Y.Doc
   plain!: YPlain<S.Schema>
 
@@ -23,6 +26,15 @@ export class YStateService extends EditorService {
 
   private listeners = new Set<YStateListener>()
   private accumulatePatches: YStatePatch[] = []
+
+  constructor(
+    private readonly schemaCreator: SchemaCreatorService,
+    private readonly undo: UndoService,
+    private readonly getYClients: EditorServiceGetters['getYClients'],
+  ) {
+    super()
+    autoBind(this)
+  }
 
   get schema() {
     return this.state
@@ -80,7 +92,7 @@ export class YStateService extends EditorService {
     let schema: S.Schema | undefined
 
     if (fileId === 'mock') {
-      const mockSchema = mock_transform_v(this.editor)
+      const mockSchema = mock_transform_v(this.schemaCreator)
       if (mockSchema) schema = mockSchema
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)
@@ -108,10 +120,11 @@ export class YStateService extends EditorService {
     console.log('??')
     this.disposer.add(this.plain.observe())
     this.disposer.add(this.plain.subscribe(this.handlePlainChange))
-    this.disposer.add(this.editor.yClients.subscribe())
+    const yClients = this.getYClients()
+    this.disposer.add(yClients.subscribe())
 
-    this.editor.yClients.clientId = this.doc.clientID
-    this.editor.undo.initUndo({
+    yClients.clientId = this.doc.clientID
+    this.undo.initUndo({
       stateMap: this.ySchema as Y.Map<S.Schema>,
       getPatches: this.getPatches,
     })

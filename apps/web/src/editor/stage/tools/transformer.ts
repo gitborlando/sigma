@@ -1,23 +1,41 @@
 import { iife } from '@gitborlando/utils'
+import { makeObservable } from 'mobx'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
+import { EditorSettingService } from 'src/editor/core/setting'
+import { UndoService } from 'src/editor/core/undo'
+import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { EditorService } from 'src/editor/service'
-import { getSelectedNodes, getSelectIdList } from 'src/editor/utils/get'
-import { snapGridRound, TRBL } from 'src/editor/utils/misc'
+import { createStageDragger } from 'src/editor/stage/dragger'
+import { StageViewportService } from 'src/editor/stage/viewport'
+import { YStateService } from 'src/editor/y-adapter/y-state'
+import { Service } from 'src/global/service'
+import { snapGridRoundBySetting, TRBL } from 'src/editor/utils/misc'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
-export class StageTransformerService extends EditorService {
+export class StageTransformerService extends Service {
   @observable.ref mrect = MRect.identity()
   @observable.ref diffMatrix = Matrix.identity()
   @observable isMoving = false
 
   @computed get isSingleSelect() {
-    return getSelectIdList(this.editor).length === 1
+    return this.handleSelect.selectIdList.length === 1
   }
 
   private action: TransformerAction = 'move'
   isSelectOnlyLine = false
+
+  constructor(
+    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YStateService,
+    private readonly undo: UndoService,
+    private readonly stageViewport: StageViewportService,
+    private readonly editorSetting: EditorSettingService,
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
 
   setup(selectNodes: S.Node[]) {
     if (selectNodes.length === 1) {
@@ -38,15 +56,17 @@ export class StageTransformerService extends EditorService {
     const { startMRect, startMatrix } = this.onStartTransform()
     const startAABB = startMRect.aabb
 
-    this.editor.stageDragger
+    createStageDragger(this.stageViewport)
       .onMove(({ shift }) => {
         this.action = 'move'
         this.isMoving = true
 
         const aabb = AABB.shift(startAABB, shift)
         const snapDelta = XY.$(
-          snapGridRound(this.editor, aabb.minX) - aabb.minX,
-          snapGridRound(this.editor, aabb.minY) - aabb.minY,
+          snapGridRoundBySetting(this.editorSetting.setting.snapToGrid, aabb.minX) -
+            aabb.minX,
+          snapGridRoundBySetting(this.editorSetting.setting.snapToGrid, aabb.minY) -
+            aabb.minY,
         )
 
         const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)
@@ -58,7 +78,7 @@ export class StageTransformerService extends EditorService {
         this.isMoving = false
         this.onEndTransform()
         if (moved) {
-          this.editor.undo.track('state', t('move nodes'))
+          this.undo.track('state', t('move nodes'))
         }
       })
       .start(e)
@@ -74,7 +94,7 @@ export class StageTransformerService extends EditorService {
     const { startMRect, startMatrix } = this.onStartTransform()
     const endMatrix = Matrix.of(startMatrix)
 
-    this.editor.stageDragger
+    createStageDragger(this.stageViewport)
       .onMove(({ shift }) => {
         this.action = 'resize'
         shift = Matrix.of(startMRect.matrix).applyShift(shift, true)
@@ -110,7 +130,7 @@ export class StageTransformerService extends EditorService {
       .onDestroy(({ moved }) => {
         this.onEndTransform()
         if (moved) {
-          this.editor.undo.track('state', t('resize nodes'))
+          this.undo.track('state', t('resize nodes'))
         }
       })
       .start(options?.e)
@@ -121,7 +141,7 @@ export class StageTransformerService extends EditorService {
     const startRect = AABB.rect(startMRect.aabb)
     const startMatrix = Matrix.identity().shift(startRect)
 
-    this.editor.stageDragger
+    createStageDragger(this.stageViewport)
       .onMove(({ current, start }) => {
         this.action = 'rotate'
 
@@ -138,7 +158,7 @@ export class StageTransformerService extends EditorService {
       .onDestroy(({ moved }) => {
         this.onEndTransform()
         if (moved) {
-          this.editor.undo.track('state', t('rotate nodes'))
+          this.undo.track('state', t('rotate nodes'))
         }
       })
       .start()
@@ -147,9 +167,11 @@ export class StageTransformerService extends EditorService {
   private mrectCache = new Map<ID, IMRect>()
 
   private onStartTransform() {
-    getSelectedNodes(this.editor).forEach((node) => {
-      this.mrectCache.set(node.id, MRect.of(node))
-    })
+    this.handleSelect.selectIdList
+      .map((id) => this.yState.find<S.Node>(id))
+      .forEach((node) => {
+        this.mrectCache.set(node.id, MRect.of(node))
+      })
     const startMRect = this.mrect.clone()
     const startMatrix = this.isSingleSelect
       ? Matrix.identity()
@@ -163,8 +185,10 @@ export class StageTransformerService extends EditorService {
   }
 
   private transform() {
-    this.editor.yState.transact(() => {
-      getSelectedNodes(this.editor).forEach(this.applyToNode)
+    this.yState.transact(() => {
+      this.handleSelect.selectIdList
+        .map((id) => this.yState.find<S.Node>(id))
+        .forEach(this.applyToNode)
     })
   }
 
@@ -175,7 +199,7 @@ export class StageTransformerService extends EditorService {
     const startMRect = MRect.of(mrect)
     const forwardMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
 
-    if (getSelectIdList(this.editor).length === 1 && this.action === 'resize') {
+    if (this.handleSelect.selectIdList.length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
     } else {
       const localDiff = Matrix.of(forwardMatrix)
@@ -185,8 +209,8 @@ export class StageTransformerService extends EditorService {
       startMRect.transform(localDiff)
     }
 
-    this.editor.yState.set<S.Node>([node.id, 'width'], startMRect.width)
-    this.editor.yState.set<S.Node>([node.id, 'height'], startMRect.height)
-    this.editor.yState.set<S.Node>([node.id, 'matrix'], startMRect.matrix)
+    this.yState.set<S.Node>([node.id, 'width'], startMRect.width)
+    this.yState.set<S.Node>([node.id, 'height'], startMRect.height)
+    this.yState.set<S.Node>([node.id, 'matrix'], startMRect.matrix)
   }
 }

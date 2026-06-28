@@ -1,13 +1,14 @@
 import { Signal } from '@gitborlando/signal'
+import { makeObservable } from 'mobx'
 import { MobxUndo } from 'src/editor/core/undo'
-import { EditorService } from 'src/editor/service'
+import { Service } from 'src/global/service'
 
 export type HandleSelectState = {
   selectIdMap: Record<string, boolean>
   selectPageId: ID | ''
 }
 
-export class HandleSelectService extends EditorService {
+export class HandleSelectService extends Service {
   @observable.ref selectIdMap: Record<string, boolean> = {}
   @observable selectPageId: ID | '' = ''
   afterSelect = Signal.create<void>()
@@ -16,6 +17,12 @@ export class HandleSelectService extends EditorService {
     HandleSelectService,
     keyof HandleSelectState
   >('select', this, ['selectIdMap', 'selectPageId'])
+
+  constructor() {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
 
   subscribe() {
     return this.selectUndo.subscribe(() => {

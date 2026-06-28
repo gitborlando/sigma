@@ -2,6 +2,12 @@ import { IRect } from '@gitborlando/geo'
 import type { DragData } from '@gitborlando/toolkit/browser'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
+import { makeObservable } from 'mobx'
+import type { EditorServiceGetters } from 'src/editor'
+import { EditorSettingService } from 'src/editor/core/setting'
+import { UndoService } from 'src/editor/core/undo'
+import { HandleNodeService } from 'src/editor/handle/node'
+import { HandleSelectService } from 'src/editor/handle/select'
 import {
   createLine,
   createRegularPolygon,
@@ -9,10 +15,19 @@ import {
   Matrix,
   MRect,
 } from 'src/editor/geometry'
+import { StageSceneService } from 'src/editor/render/scene'
+import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { EditorService } from 'src/editor/service'
-import { getSelectPageId, getZoom } from 'src/editor/utils/get'
-import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
+import { createStageDragger } from 'src/editor/stage/dragger'
+import { StageCursorService } from 'src/editor/stage/cursor'
+import { StageSelectService } from 'src/editor/stage/interact/select'
+import { StageViewportService } from 'src/editor/stage/viewport'
+import { YStateService } from 'src/editor/y-adapter/y-state'
+import { Service } from 'src/global/service'
+import {
+  snapGridRoundRectBySetting,
+  snapGridRoundXYBySetting,
+} from 'src/editor/utils/misc'
 
 const createTypes = [
   'frame',
@@ -27,28 +42,47 @@ export type IStageCreateType = (typeof createTypes)[number]
 
 const defaultCreateSize = 100
 
-export class StageCreateService extends EditorService {
+export class StageCreateService extends Service {
   createTypes = createTypes
   @observable createType: IStageCreateType = 'frame'
   private node!: S.Node
   private parent!: S.NodeParent
 
+  constructor(
+    private readonly stageScene: StageSceneService,
+    private readonly stageCursor: StageCursorService,
+    private readonly handleNode: HandleNodeService,
+    private readonly stageSelect: StageSelectService,
+    private readonly getStageInteract: EditorServiceGetters['getStageInteract'],
+    private readonly undo: UndoService,
+    private readonly schemaCreator: SchemaCreatorService,
+    private readonly yState: YStateService,
+    private readonly handleSelect: HandleSelectService,
+    private readonly stageViewport: StageViewportService,
+    private readonly getStageSurface: EditorServiceGetters['getStageSurface'],
+    private readonly editorSetting: EditorSettingService,
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
+
   startInteract() {
     const disposer = Disposer.combine(
-      this.editor.stageScene.sceneRoot.addEvent('mousedown', this.create, {
+      this.stageScene.sceneRoot.addEvent('mousedown', this.create, {
         capture: true,
       }),
     )
-    this.editor.stageCursor.setCursor('add').lock()
+    this.stageCursor.setCursor('add').lock()
 
     return () => {
       disposer()
-      this.editor.stageCursor.unlock().setCursor('select')
+      this.stageCursor.unlock().setCursor('select')
     }
   }
 
   private create() {
-    this.editor.stageDragger
+    createStageDragger(this.stageViewport)
       .onStart(this.onCreateStart)
       .onMove(this.onCreateMove)
       .onDestroy(this.onCreateEnd)
@@ -56,7 +90,7 @@ export class StageCreateService extends EditorService {
   }
 
   private onCreateStart(dragData: DragData) {
-    const size = 0.01 / getZoom(this.editor)
+    const size = 0.01 / this.stageViewport.zoom
 
     dragData = clone(dragData)
     dragData.current = XY.of(dragData.start).plusNum(size)
@@ -66,40 +100,40 @@ export class StageCreateService extends EditorService {
     this.parent = this.findParent()
     this.node = this.createNode(dragData)
 
-    this.editor.yState.transact(() => {
-      this.editor.handleNode.addNodes([this.node])
-      this.editor.handleNode.insertChildAt(this.parent, this.node)
+    this.yState.transact(() => {
+      this.handleNode.addNodes([this.node])
+      this.handleNode.insertChildAt(this.parent, this.node)
     })
 
-    this.editor.stageSelect.onCreateSelect(this.node.id)
-    this.editor.stageSurface.disablePointEvent()
+    this.stageSelect.onCreateSelect(this.node.id)
+    this.getStageSurface().disablePointEvent()
 
     if (this.createType === 'line') {
-      this.editor.stageCursor.setCursor('move').lock().upReset()
+      this.stageCursor.setCursor('move').lock().upReset()
     }
   }
 
   private onCreateMove(dragData: DragData) {
-    this.editor.yState.transact(() => {
+    this.yState.transact(() => {
       this.updateNodeMRect(this.node, this.calcCreateMRect(dragData))
     })
   }
 
   private onCreateEnd({ moved }: DragData & { moved: boolean }) {
     if (!moved) {
-      this.editor.yState.transact(() => {
+      this.yState.transact(() => {
         this.updateNodeMRect(this.node, this.calcDefaultMRect())
       })
     }
-    this.editor.stageInteract.interaction = 'select'
-    this.editor.undo.track('all', t('create node'))
+    this.getStageInteract().interaction = 'select'
+    this.undo.track('all', t('create node'))
   }
 
   private createNode(dragData: DragData) {
     const length = XY.distance(dragData.current, dragData.start)
     const mrect = this.calcCreateMRect(dragData)
-    const node = this.editor.schemaCreator[this.createType]({
-      name: this.editor.schemaCreator.createNodeName(this.createType),
+    const node = this.schemaCreator[this.createType]({
+      name: this.schemaCreator.createNodeName(this.createType),
       ...mrect.plain(),
       ...(this.createType === 'line' && { width: length }),
     })
@@ -120,15 +154,21 @@ export class StageCreateService extends EditorService {
   }
 
   private calcNodeMRect(rect: IRect) {
-    const snapRect = snapGridRoundRect(this.editor, rect)
+    const snapRect = snapGridRoundRectBySetting(
+      this.editorSetting.setting.snapToGrid,
+      rect,
+    )
     const matrix = this.prependParentMatrix(Matrix.identity().shift(snapRect))
 
     return MRect.fromRect(snapRect, matrix)
   }
 
   private calcLineMRect(current: IXY, start: IXY) {
-    current = snapGridRoundXY(this.editor, current)
-    start = snapGridRoundXY(this.editor, start)
+    current = snapGridRoundXYBySetting(
+      this.editorSetting.setting.snapToGrid,
+      current,
+    )
+    start = snapGridRoundXYBySetting(this.editorSetting.setting.snapToGrid, start)
 
     const width = XY.distance(current, start)
     const rotation = Angle.sweep(XY.vector(current, start))
@@ -146,12 +186,12 @@ export class StageCreateService extends EditorService {
   }
 
   private updateNodeMRect(node: S.Node, mrect: MRect) {
-    this.editor.yState.set<S.Node>([node.id, 'width'], mrect.width)
-    this.editor.yState.set<S.Node>([node.id, 'height'], mrect.height)
-    this.editor.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
+    this.yState.set<S.Node>([node.id, 'width'], mrect.width)
+    this.yState.set<S.Node>([node.id, 'height'], mrect.height)
+    this.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
 
     const points = this.createNodePoints(node, mrect)
-    if (points) this.editor.yState.set<any>([node.id, 'points'], points)
+    if (points) this.yState.set<any>([node.id, 'points'], points)
   }
 
   private createNodePoints(node: S.Node, mrect: MRect) {
@@ -172,11 +212,11 @@ export class StageCreateService extends EditorService {
   }
 
   private findParent() {
-    const frame = this.editor.stageScene
+    const frame = this.stageScene
       .elemsFromPoint()
       .find((elem) => SchemaHelper.isById(elem.id, 'frame'))
 
-    if (frame) return this.editor.find<S.NodeParent>(frame.id)
-    return this.editor.find<S.Page>(getSelectPageId(this.editor))
+    if (frame) return this.yState.find<S.NodeParent>(frame.id)
+    return this.yState.find<S.Page>(this.handleSelect.selectPageId)
   }
 }

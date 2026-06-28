@@ -1,6 +1,7 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
+import { makeObservable } from 'mobx'
 import { defuOverrideArray } from '@sigma/utils/defu'
-import { EditorService } from 'src/editor/service'
+import { Service } from 'src/global/service'
 
 const initSetting = () => {
   return {
@@ -18,8 +19,14 @@ const initSetting = () => {
   }
 }
 
-export class EditorSettingService extends EditorService {
+export class EditorSettingService extends Service {
   @observable setting = initSetting()
+
+  constructor() {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
 
   subscribe() {
     this.loadSetting()

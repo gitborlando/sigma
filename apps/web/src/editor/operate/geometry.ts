@@ -1,9 +1,11 @@
 import { AnyObject, iife, objKeys } from '@gitborlando/utils'
 import { divide, floor, max, min } from 'src/editor/geometry/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
-import { EditorService } from 'src/editor/service'
+import { HandleNodeService } from 'src/editor/handle/node'
+import { HandleSelectService } from 'src/editor/handle/select'
+import { YStateService } from 'src/editor/y-adapter/y-state'
 import { MULTI_VALUE } from 'src/global/constant'
-import { getSelectedNodes } from '../utils/get'
+import { Service } from 'src/global/service'
 
 function createDesignGeoInfos() {
   return {
@@ -38,11 +40,20 @@ export function cleanObject(object: AnyObject) {
   for (const key in object) delete object[key]
 }
 
-export class DesignGeometryService extends EditorService {
+export class DesignGeometryService extends Service {
   currentGeometries = createDesignGeoInfos()
   currentKeys = createActiveKeys(new Set())
   changingKeys = createActiveKeys(new Set())
   isDelta = true
+
+  constructor(
+    private readonly handleNode: HandleNodeService,
+    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YStateService,
+  ) {
+    super()
+    autoBind(this)
+  }
 
   setupGeometries(selectedNodes: S.Node[]) {
     cleanObject(this.currentGeometries)
@@ -74,7 +85,7 @@ export class DesignGeometryService extends EditorService {
 
   getGeometryValue(node: S.Node, key: keyof DesignGeoInfo) {
     if (obbKeySet.has(key)) {
-      const mrect = this.editor.handleNode.getMRect(node)
+      const mrect = this.handleNode.getMRect(node)
       return mrect[key as 'x' | 'y' | 'width' | 'height' | 'rotation']
     }
     return T<any>(node)[key]
@@ -83,13 +94,15 @@ export class DesignGeometryService extends EditorService {
   private nodeGeoInfoCache = new Map<ID, Partial<DesignGeoInfo>>()
 
   onStartSetGeometries() {
-    getSelectedNodes(this.editor).forEach((node) => {
-      const geometries = <Partial<DesignGeoInfo>>{}
-      this.currentKeys.forEach((key) => {
-        geometries[key] = this.getGeometryValue(node, key)
+    this.handleSelect.selectIdList
+      .map((id) => this.yState.find<S.Node>(id))
+      .forEach((node) => {
+        const geometries = <Partial<DesignGeoInfo>>{}
+        this.currentKeys.forEach((key) => {
+          geometries[key] = this.getGeometryValue(node, key)
+        })
+        this.nodeGeoInfoCache.set(node.id, geometries)
       })
-      this.nodeGeoInfoCache.set(node.id, geometries)
-    })
   }
 
   setGeometries(
@@ -107,10 +120,12 @@ export class DesignGeometryService extends EditorService {
       this.currentGeometries[key] = geometries[key] as number
     }
 
-    this.editor.yState.transact(() => {
-      getSelectedNodes(this.editor).forEach((node) => {
-        this.applyChangeToNode(node)
-      })
+    this.yState.transact(() => {
+      this.handleSelect.selectIdList
+        .map((id) => this.yState.find<S.Node>(id))
+        .forEach((node) => {
+          this.applyChangeToNode(node)
+        })
     })
 
     this.changingKeys.clear()
@@ -141,13 +156,13 @@ export class DesignGeometryService extends EditorService {
       }
       if (key === 'radius') {
         const radius = max(0, T<any>(node).radius + this.delta(key, node))
-        this.editor.yState.set<any>([node.id, 'radius'], radius)
+        this.yState.set<any>([node.id, 'radius'], radius)
       }
       if (key === 'sides') {
         let { width, height, sides } = node as S.Polygon
         sides = max(3, sides + floor(this.delta(key, node)))
-        this.editor.yState.set<S.Polygon>([node.id, 'sides'], sides)
-        this.editor.yState.set<S.Polygon>(
+        this.yState.set<S.Polygon>([node.id, 'sides'], sides)
+        this.yState.set<S.Polygon>(
           [node.id, 'points'],
           createRegularPolygon(width, height, sides),
         )
@@ -156,9 +171,9 @@ export class DesignGeometryService extends EditorService {
         let { width, height, pointCount, innerRate } = node as S.Star
         pointCount = max(3, floor(pointCount))
         innerRate = min(1, max(0, innerRate))
-        this.editor.yState.set<S.Star>([node.id, 'pointCount'], pointCount)
-        this.editor.yState.set<S.Star>([node.id, 'innerRate'], innerRate)
-        this.editor.yState.set<S.Star>(
+        this.yState.set<S.Star>([node.id, 'pointCount'], pointCount)
+        this.yState.set<S.Star>([node.id, 'innerRate'], innerRate)
+        this.yState.set<S.Star>(
           [node.id, 'points'],
           createStarPolygon(width, height, pointCount, innerRate),
         )
@@ -170,16 +185,16 @@ export class DesignGeometryService extends EditorService {
     key: 'x' | 'y' | 'width' | 'height' | 'rotation',
     node: S.Node,
   ) {
-    const mrect = this.editor.handleNode.getMRect(node)
+    const mrect = this.handleNode.getMRect(node)
     if (this.isDelta) {
       mrect[key] = mrect[key] + this.currentGeometries[key]
     } else {
       mrect[key] = this.currentGeometries[key]
     }
     if (key === 'x' || key === 'y' || key === 'rotation') {
-      this.editor.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
+      this.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
     } else {
-      this.editor.yState.set<S.Node>([node.id, key], mrect[key])
+      this.yState.set<S.Node>([node.id, key], mrect[key])
     }
   }
 

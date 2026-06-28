@@ -1,11 +1,34 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
-import { EditorService } from 'src/editor/service'
+import { makeObservable } from 'mobx'
+import { EditorSettingService } from 'src/editor/core/setting'
+import { UndoService } from 'src/editor/core/undo'
+import { HandleNodeService } from 'src/editor/handle/node'
+import { HandlePageService } from 'src/editor/handle/page'
+import { HandleSelectService } from 'src/editor/handle/select'
+import { StageSceneService } from 'src/editor/render/scene'
+import { StageInteractService } from 'src/editor/stage/interact/interact'
+import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Command } from 'src/global/context-menu'
-import { getSelectIdList, getSetting } from '../utils/get'
+import { Service } from 'src/global/service'
 
-export class EditorCommandService extends EditorService {
+export class EditorCommandService extends Service {
+  constructor(
+    private readonly handleNode: HandleNodeService,
+    private readonly handlePage: HandlePageService,
+    private readonly handleSelect: HandleSelectService,
+    private readonly editorSetting: EditorSettingService,
+    private readonly undo: UndoService,
+    private readonly stageScene: StageSceneService,
+    private readonly stageInteract: StageInteractService,
+    private readonly yState: YStateService,
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
+
   subscribe() {
     return this.bindHotkeys()
   }
@@ -15,14 +38,14 @@ export class EditorCommandService extends EditorService {
       {
         name: t('copy'),
         shortcut: 'ctrl+c',
-        when: () => !!getSelectIdList(this.editor).length,
-        callback: () => this.editor.handleNode.copySelectedNodes(),
+        when: () => !!this.handleSelect.selectIdList.length,
+        callback: () => this.handleNode.copySelectedNodes(),
       },
       {
         name: t('paste'),
         shortcut: 'ctrl+v',
-        when: () => !!this.editor.handleNode.copiedIds.length,
-        callback: () => this.editor.handleNode.pasteNodes(),
+        when: () => !!this.handleNode.copiedIds.length,
+        callback: () => this.handleNode.pasteNodes(),
       },
     ]
   }
@@ -32,12 +55,12 @@ export class EditorCommandService extends EditorService {
       {
         name: t('undo'),
         shortcut: 'ctrl+z',
-        callback: () => this.editor.undo.undo(),
+        callback: () => this.undo.undo(),
       },
       {
         name: t('redo'),
         shortcut: 'ctrl+shift+z',
-        callback: () => this.editor.undo.redo(),
+        callback: () => this.undo.redo(),
       },
     ]
   }
@@ -47,16 +70,16 @@ export class EditorCommandService extends EditorService {
       {
         name: t('delete page'),
         callback: ({ id }: IDPayload) => {
-          this.editor.handlePage.removePage(this.editor.find<S.Page>(id))
+          this.handlePage.removePage(this.yState.find<S.Page>(id))
         },
       },
     ]
 
-    if (getSetting(this.editor).devMode) {
+    if (this.editorSetting.setting.devMode) {
       commands.push({
         name: t('print schema'),
         callback: ({ id }: IDPayload) => {
-          this.editor.handlePage.DEV_logPageSchema(id)
+          this.handlePage.DEV_logPageSchema(id)
         },
       })
     }
@@ -74,33 +97,31 @@ export class EditorCommandService extends EditorService {
       },
       {
         name: t('create frame'),
-        callback: () => this.editor.handleNode.wrapInFrame(),
+        callback: () => this.handleNode.wrapInFrame(),
       },
       {
         name: t('delete'),
         shortcut: 'del',
-        callback: () => this.editor.handleNode.deleteSelectedNodes(),
+        callback: () => this.handleNode.deleteSelectedNodes(),
       },
     ]
 
-    if (getSetting(this.editor).devMode) {
+    if (this.editorSetting.setting.devMode) {
       commands.push(
         {
           name: t('print schema'),
           callback: () => {
-            getSelectIdList(this.editor).forEach((id) => {
-              const node = this.editor.find<S.SchemaItem>(id)
-              console.log(node)
-            })
+            this.handleSelect.selectIdList.forEach((id) =>
+              console.log(this.yState.find<S.SchemaItem>(id)),
+            )
           },
         },
         {
           name: t('print element'),
           callback: () => {
-            getSelectIdList(this.editor).forEach((id) => {
-              const elem = this.editor.stageScene.findElem(id)
-              console.log(elem)
-            })
+            this.handleSelect.selectIdList.forEach((id) =>
+              console.log(this.stageScene.findElem(id)),
+            )
           },
         },
       )
@@ -114,22 +135,22 @@ export class EditorCommandService extends EditorService {
       {
         name: t('move up'),
         shortcut: 'ctrl+]',
-        callback: () => this.editor.handleNode.reHierarchySelectedNode('up'),
+        callback: () => this.handleNode.reHierarchySelectedNode('up'),
       },
       {
         name: t('move down'),
         shortcut: 'ctrl+[',
-        callback: () => this.editor.handleNode.reHierarchySelectedNode('down'),
+        callback: () => this.handleNode.reHierarchySelectedNode('down'),
       },
       {
         name: t('move to top'),
         shortcut: 'ctrl+alt+]',
-        callback: () => this.editor.handleNode.reHierarchySelectedNode('top'),
+        callback: () => this.handleNode.reHierarchySelectedNode('top'),
       },
       {
         name: t('move to bottom'),
         shortcut: 'ctrl+alt+[',
-        callback: () => this.editor.handleNode.reHierarchySelectedNode('bottom'),
+        callback: () => this.handleNode.reHierarchySelectedNode('bottom'),
       },
     ]
   }
@@ -139,12 +160,12 @@ export class EditorCommandService extends EditorService {
       {
         name: t('select'),
         shortcut: 'v',
-        callback: () => (this.editor.stageInteract.interaction = 'select'),
+        callback: () => (this.stageInteract.interaction = 'select'),
       },
       {
         name: t('move'),
         shortcut: 'h',
-        callback: () => (this.editor.stageInteract.interaction = 'move'),
+        callback: () => (this.stageInteract.interaction = 'move'),
       },
     ]
   }

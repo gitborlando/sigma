@@ -1,15 +1,21 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import { EditorService } from 'src/editor/service'
+import type { EditorServiceGetters } from 'src/editor'
+import { Service } from 'src/global/service'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 
-export class YSyncService extends EditorService {
+export class YSyncService extends Service {
   inited$ = Signal.create(false)
 
   provider!: HocuspocusProvider
   awareness!: Awareness
+
+  constructor(private readonly getYClients: EditorServiceGetters['getYClients']) {
+    super()
+    autoBind(this)
+  }
 
   init(fileId: string, document: Y.Doc) {
     this.provider = new HocuspocusProvider({
@@ -18,11 +24,9 @@ export class YSyncService extends EditorService {
       document,
     })
     this.awareness = this.provider.awareness!
+    const yClients = this.getYClients()
 
-    const disposer = Disposer.combine(
-      this.editor.yClients.syncSelf(),
-      this.editor.yClients.syncOthers(),
-    )
+    const disposer = Disposer.combine(yClients.syncSelf(), yClients.syncOthers())
     return disposer
   }
 }

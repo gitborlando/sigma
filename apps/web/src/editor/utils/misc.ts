@@ -11,14 +11,36 @@ export function snapGridRound(editor: Editor, value: number) {
   return value
 }
 
+export function snapGridRoundBySetting(snapToGrid: boolean, value: number) {
+  return snapToGrid ? Math.round(value) : value
+}
+
 export function snapGridRoundXY(editor: Editor, xy: IXY) {
   return XY.$(snapGridRound(editor, xy.x), snapGridRound(editor, xy.y))
+}
+
+export function snapGridRoundXYBySetting(snapToGrid: boolean, xy: IXY) {
+  return XY.$(
+    snapGridRoundBySetting(snapToGrid, xy.x),
+    snapGridRoundBySetting(snapToGrid, xy.y),
+  )
 }
 
 export function snapGridRoundRect(editor: Editor, rect: IRect): IRect {
   const { x, y, width, height } = rect
   const snapStart = snapGridRoundXY(editor, XY.$(x, y))
   const snapEnd = snapGridRoundXY(editor, XY.$(x + width, y + height))
+  return {
+    ...snapStart,
+    width: snapEnd.x - snapStart.x,
+    height: snapEnd.y - snapStart.y,
+  }
+}
+
+export function snapGridRoundRectBySetting(snapToGrid: boolean, rect: IRect): IRect {
+  const { x, y, width, height } = rect
+  const snapStart = snapGridRoundXYBySetting(snapToGrid, XY.$(x, y))
+  const snapEnd = snapGridRoundXYBySetting(snapToGrid, XY.$(x + width, y + height))
   return {
     ...snapStart,
     width: snapEnd.x - snapStart.x,

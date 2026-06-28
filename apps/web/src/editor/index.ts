@@ -1,6 +1,6 @@
 import { Disposer } from '@gitborlando/toolkit'
 import { objKeys } from '@gitborlando/utils'
-import { asClass, createContainer } from 'awilix'
+import { asClass, asValue, createContainer } from 'awilix'
 import { EditorCommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
@@ -62,6 +62,32 @@ type EditorServices = {
   [K in keyof typeof editorServices]: InstanceType<(typeof editorServices)[K]>
 }
 
+export type { EditorServices }
+
+export type EditorServiceGetters = {
+  getEditorCommand: () => EditorCommandService
+  getEditorSetting: () => EditorSettingService
+  getElemDrawer: () => ElemDrawerService
+  getStageInteract: () => StageInteractService
+  getStageScene: () => StageSceneService
+  getStageSurface: () => StageSurfaceService
+  getStageViewport: () => StageViewportService
+  getYClients: () => YClientsService
+}
+
+const createEditorServiceGetters = (
+  resolve: <T>(name: string) => T,
+): EditorServiceGetters => ({
+  getEditorCommand: () => resolve('editorCommand'),
+  getEditorSetting: () => resolve('editorSetting'),
+  getElemDrawer: () => resolve('elemDrawer'),
+  getStageInteract: () => resolve('stageInteract'),
+  getStageScene: () => resolve('stageScene'),
+  getStageSurface: () => resolve('stageSurface'),
+  getStageViewport: () => resolve('stageViewport'),
+  getYClients: () => resolve('yClients'),
+})
+
 export class Editor extends Service {
   private static editor: Editor
 
@@ -76,21 +102,42 @@ export class Editor extends Service {
     return { editor, dispose }
   }
 
-  container = createContainer<EditorServices>({ injectionMode: 'CLASSIC' })
+  private container = createContainer<EditorServices & EditorServiceGetters>({
+    injectionMode: 'CLASSIC',
+  })
+
+  resolve = <K extends keyof EditorServices>(key: K) =>
+    this.container.resolve<EditorServices[K]>(key)
 
   constructor() {
     super()
-    objKeys(editorServices).forEach((key) => {
-      const service = editorServices[key] as new () => any
-      this.container.register(key, asClass(service).singleton())
-    })
+    this.setupServices()
   }
 
   subscribe() {
     return Disposer.combine(
-      ...objKeys(editorServices).map((key) =>
-        this.container.resolve(key).subscribe(),
-      ),
+      ...objKeys(editorServices).map((key) => {
+        const instance = this.resolve(key)
+        if (instance instanceof Service) {
+          const unsubscribe = instance.subscribe()
+          return () => {
+            unsubscribe()
+            instance.dispose()
+          }
+        }
+        return () => {}
+      }),
     )
+  }
+
+  private setupServices() {
+    objKeys(editorServices).forEach((key) => {
+      this.container.register(key, asClass(editorServices[key]).singleton())
+    })
+    const editorServiceGetters = createEditorServiceGetters(this.resolve)
+    objKeys(editorServiceGetters).forEach((key) => {
+      this.container.register(key, asValue(editorServiceGetters[key]))
+    })
+    this.disposer.add(() => this.container.dispose())
   }
 }

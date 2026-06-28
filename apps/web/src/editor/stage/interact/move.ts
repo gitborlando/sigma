@@ -1,34 +1,47 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { Matrix } from 'src/editor/geometry'
-import { EditorService } from 'src/editor/service'
+import { StageSurfaceService } from 'src/editor/render/surface'
+import { StageCursorService } from 'src/editor/stage/cursor'
+import { StageViewportService } from 'src/editor/stage/viewport'
+import { Service } from 'src/global/service'
 import { Drag } from 'src/global/event/drag'
 
-export class StageMoveService extends EditorService {
+export class StageMoveService extends Service {
   @observable isMoving = false
+
+  constructor(
+    private readonly stageSurface: StageSurfaceService,
+    private readonly stageCursor: StageCursorService,
+    private readonly stageViewport: StageViewportService,
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+  }
 
   startInteract() {
     const disposer = Disposer.combine(
-      this.editor.stageSurface.addEvent('mousedown', this.onMoveStage),
-      this.editor.stageSurface.disablePointEvent(false),
+      this.stageSurface.addEvent('mousedown', this.onMoveStage),
+      this.stageSurface.disablePointEvent(false),
     )
-    this.editor.stageCursor.setCursor('hand').lock()
+    this.stageCursor.setCursor('hand').lock()
 
     return () => {
       disposer()
-      this.editor.stageCursor.unlock().setCursor('select', 0)
+      this.stageCursor.unlock().setCursor('select', 0)
     }
   }
 
   private onMoveStage() {
-    Drag.onStart(() => this.editor.stageCursor.unlock().setCursor('grab').lock())
+    Drag.onStart(() => this.stageCursor.unlock().setCursor('grab').lock())
       .onMove(({ delta }) => {
         this.isMoving = true
-        const matrix = Matrix.of(this.editor.stageViewport.sceneMatrix).shift(delta)
-        this.editor.stageViewport.sceneMatrix = matrix.clone()
+        const matrix = Matrix.of(this.stageViewport.sceneMatrix).shift(delta)
+        this.stageViewport.sceneMatrix = matrix.clone()
       })
       .onDestroy(() => {
         this.isMoving = false
-        this.editor.stageCursor.unlock().setCursor('hand').lock()
+        this.stageCursor.unlock().setCursor('hand').lock()
       })
       .start()
   }

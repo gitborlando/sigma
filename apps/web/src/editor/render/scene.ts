@@ -1,12 +1,15 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
+import type { EditorServiceGetters } from 'src/editor'
+import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { EditorService } from 'src/editor/service'
+import { Service } from 'src/global/service'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
-import { Elem } from './elem'
+import { YStateService } from 'src/editor/y-adapter/y-state'
+import { Elem, type ElemContext } from './elem'
 
-export class StageSceneService extends EditorService {
+export class StageSceneService extends Service {
   elements = new Map<string, Elem>()
 
   sceneRoot!: Elem
@@ -20,6 +23,18 @@ export class StageSceneService extends EditorService {
     return this.widgetRoot.children
   }
 
+  constructor(
+    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YStateService,
+    private readonly getEditorSetting: EditorServiceGetters['getEditorSetting'],
+    private readonly getElemDrawer: EditorServiceGetters['getElemDrawer'],
+    private readonly getStageSurface: EditorServiceGetters['getStageSurface'],
+    private readonly getStageViewport: EditorServiceGetters['getStageViewport'],
+  ) {
+    super()
+    autoBind(this)
+  }
+
   subscribe() {
     return Disposer.combine(this.setupElems(), this.hookRenderNode())
   }
@@ -29,15 +44,15 @@ export class StageSceneService extends EditorService {
   }
 
   elemsFromPoint(xy?: IXY) {
-    return this.editor.stageSurface
+    return this.getStageSurface()
       .getElemsFromPoint(xy)
       .filter((elem) => elem.type === 'sceneElem')
   }
 
   private setupElems() {
     this.elements.clear()
-    this.sceneRoot = new Elem(this.editor, 'sceneRoot', 'sceneElem')
-    this.widgetRoot = new Elem(this.editor, 'widgetRoot', 'widgetElem')
+    this.sceneRoot = new Elem(this.createElemContext(), 'sceneRoot', 'sceneElem')
+    this.widgetRoot = new Elem(this.createElemContext(), 'widgetRoot', 'widgetElem')
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
     this.rootElems.push(this.sceneRoot, this.widgetRoot)
@@ -49,36 +64,35 @@ export class StageSceneService extends EditorService {
   }
 
   private hookRenderNode() {
-    return Signal.merge(
-      this.editor.yState.inited$,
-      this.editor.stageSurface.inited,
-    ).hook(() => {
-      this.disposer.add(
-        autorun(() => {
-          const pageId = this.editor.handleSelect.selectPageId
-          if (pageId) this.firstRenderPage()
-        }),
-        this.hookPatchRender(),
-      )
-    })
+    return Signal.merge(this.yState.inited$, this.getStageSurface().inited).hook(
+      () => {
+        this.disposer.add(
+          autorun(() => {
+            const pageId = this.handleSelect.selectPageId
+            if (pageId) this.firstRenderPage()
+          }),
+          this.hookPatchRender(),
+        )
+      },
+    )
   }
 
   private firstRenderPage() {
-    this.editor.stageSurface.clearSurface()
+    this.getStageSurface().clearSurface()
     this.sceneRoot.children = []
 
     const traverse = (id: ID) => {
-      const node = this.editor.find<S.Node>(id)
+      const node = this.yState.find<S.Node>(id)
       this.render('add', [node.id])
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    const page = this.editor.find<S.Page>(this.editor.handleSelect.selectPageId)
+    const page = this.yState.find<S.Page>(this.handleSelect.selectPageId)
     page.childIds.forEach(traverse)
   }
 
   private hookPatchRender() {
-    return this.editor.yState.flushPatch$.hook((op) => {
+    return this.yState.flushPatch$.hook((op) => {
       const { type, keys } = op
       if (keys[1] === 'childIds') this.reHierarchy(op)
       else this.render(type, keys as string[])
@@ -89,7 +103,7 @@ export class StageSceneService extends EditorService {
     const id = keys[0]
     if (id === 'meta' || id === 'client') return
 
-    const node = this.editor.find<S.Node>(id)
+    const node = this.yState.find<S.Node>(id)
 
     switch (true) {
       case op === 'add' && keys.length === 1:
@@ -108,7 +122,7 @@ export class StageSceneService extends EditorService {
   private mountNode(node: S.Node) {
     const parent = this.elements.get(node.parentId) || this.sceneRoot
 
-    const elem = new Elem(this.editor, node.id, 'sceneElem')
+    const elem = new Elem(this.createElemContext(), node.id, 'sceneElem')
     this.elements.set(node.id, elem)
     parent.addChild(elem)
 
@@ -152,7 +166,16 @@ export class StageSceneService extends EditorService {
     }
 
     if (parent !== this.sceneRoot) {
-      this.editor.stageSurface.collectDirty(parent)
+      this.getStageSurface().collectDirty(parent)
+    }
+  }
+
+  private createElemContext(): ElemContext {
+    return {
+      getEditorSetting: this.getEditorSetting,
+      getElemDrawer: this.getElemDrawer,
+      getStageSurface: this.getStageSurface,
+      getStageViewport: this.getStageViewport,
     }
   }
 }

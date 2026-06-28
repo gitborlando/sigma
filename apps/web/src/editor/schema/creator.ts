@@ -8,14 +8,19 @@ import {
   createStarPolygon,
 } from 'src/editor/geometry/point'
 import { getLatestVersion } from 'src/editor/schema/migration'
-import { EditorService } from 'src/editor/service'
+import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
 import { T } from 'src/utils/common'
 import { Assets } from 'src/view/assets/assets'
 import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
 
-export class SchemaCreatorService extends EditorService {
+export class SchemaCreatorService extends Service {
+  constructor() {
+    super()
+    autoBind(this)
+  }
+
   schema(): S.Schema {
     const page = this.page()
     const meta = this.meta()

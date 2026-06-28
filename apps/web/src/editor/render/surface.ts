@@ -4,6 +4,8 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { createTraverser } from '@gitborlando/toolkit/traverser'
 import type { NoopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
+import type { EditorServiceGetters } from 'src/editor'
+import { EditorSettingService } from 'src/editor/core/setting'
 import { Matrix, max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
 import { IMatrix } from 'src/editor/geometry/matrix'
@@ -11,11 +13,10 @@ import {
   TextBreaker,
   createTextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
-import { EditorService } from 'src/editor/service'
 import { Raf, reverseFor } from 'src/editor/utils/misc'
+import { Service } from 'src/global/service'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
-import { getSetting, getZoom } from '../utils/get'
 import { Elem } from './elem'
 
 const dpr = devicePixelRatio
@@ -27,7 +28,7 @@ export type SurfaceRenderType =
   | 'nextFullRender'
   | 'partialRender'
 
-export class StageSurfaceService extends EditorService {
+export class StageSurfaceService extends Service {
   inited = Signal.create(false)
 
   private container!: HTMLDivElement
@@ -55,14 +56,6 @@ export class StageSurfaceService extends EditorService {
       this.DEV_showDirtyRect(),
       this.dispose,
     )
-  }
-
-  private dispose() {
-    this.inited.value = false
-    this.container = undefined as any
-    this.canvas = undefined as any
-    this.topCanvas = undefined as any
-    this.disposer.dispose()
   }
 
   setContainer = (container: HTMLDivElement) => {
@@ -115,6 +108,15 @@ export class StageSurfaceService extends EditorService {
   private renderTasks: NoopFunc[] = []
   private raf = new Raf()
 
+  constructor(
+    private readonly editorSetting: EditorSettingService,
+    private readonly getStageScene: EditorServiceGetters['getStageScene'],
+    private readonly getStageViewport: EditorServiceGetters['getStageViewport'],
+  ) {
+    super()
+    autoBind(this)
+  }
+
   private requestRender = (type: SurfaceRenderType) => {
     if (this.renderType === type) return
     this.renderType = type
@@ -125,10 +127,10 @@ export class StageSurfaceService extends EditorService {
     if (type !== 'nextFullRender') this.renderTasks.length = 0
 
     this.renderTasks.push(() => {
-      if (type === 'firstFullRender' || getSetting(this.editor).fullRender)
+      if (type === 'firstFullRender' || this.editorSetting.setting.fullRender)
         this.clearSurface()
       const isPartialRender =
-        type === 'partialRender' && !getSetting(this.editor).fullRender
+        type === 'partialRender' && !this.editorSetting.setting.fullRender
       isPartialRender ? this.partialRender() : this.fullRender()
     })
 
@@ -155,7 +157,7 @@ export class StageSurfaceService extends EditorService {
       this.ctxSaveRestore(() => {
         this.transformTopCanvas()
         this.onRenderTopCanvas.dispatch(this.topCtx)
-        this.editor.stageScene.widgetRoot.children.forEach((elem) =>
+        this.getStageScene().widgetRoot.children.forEach((elem) =>
           elem.traverseDraw(),
         )
       })
@@ -185,7 +187,7 @@ export class StageSurfaceService extends EditorService {
       // return a.selfIndex - b.selfIndex
     })
 
-    this.editor.stageScene.sceneRoot.children.forEach((elem, selfIndex) => {
+    this.getStageScene().sceneRoot.children.forEach((elem, selfIndex) => {
       if (!elem.visible) return
       this.fullRenderElemsMinHeap.push({ elem, selfIndex, layerIndex: 0 })
     })
@@ -195,12 +197,10 @@ export class StageSurfaceService extends EditorService {
     this.transformCanvas()
 
     if (
-      !getSetting(this.editor)
+      !this.editorSetting.setting
         .needSliceRender /*  || getEditorSetting().showDirtyRect */
     ) {
-      this.editor.stageScene.sceneRoot.children.forEach((elem) =>
-        elem.traverseDraw(),
-      )
+      this.getStageScene().sceneRoot.children.forEach((elem) => elem.traverseDraw())
       while (this.fullRenderElemsMinHeap.length) this.fullRenderElemsMinHeap.pop()
       return
     }
@@ -219,7 +219,7 @@ export class StageSurfaceService extends EditorService {
   private patchRender = (reRenderElems: Set<Elem>) => {
     this.transformCanvas()
 
-    this.editor.stageScene.sceneRoot.children.forEach((elem) => {
+    this.getStageScene().sceneRoot.children.forEach((elem) => {
       reRenderElems.has(elem) && elem.traverseDraw()
     })
   }
@@ -236,7 +236,7 @@ export class StageSurfaceService extends EditorService {
 
     const traverse = (elem: Elem) => {
       if (!elem.visible) return
-      if (AABB.include(this.editor.stageViewport.prevSceneAABB, elem.aabb) === 1)
+      if (AABB.include(this.getStageViewport().prevSceneAABB, elem.aabb) === 1)
         return
       reRenderElems.add(elem)
     }
@@ -266,7 +266,7 @@ export class StageSurfaceService extends EditorService {
     this.ctx.clearRect(0, 0, width, height)
     this.ctx.drawImage(this.bufferCanvas, 0, 0, width, height, 0, 0, width, height)
 
-    this.editor.stageScene.sceneRoot.children.forEach(traverse)
+    this.getStageScene().sceneRoot.children.forEach(traverse)
     this.ctxSaveRestore(() => this.patchRender(reRenderElems))
   }
 
@@ -305,7 +305,7 @@ export class StageSurfaceService extends EditorService {
     while (needReTest) {
       needReTest = false
       reRenderElems.clear()
-      traverser.traverse(this.editor.stageScene.sceneElems)
+      traverser.traverse(this.getStageScene().sceneElems)
     }
 
     this.ctxSaveRestore(() => {
@@ -325,7 +325,7 @@ export class StageSurfaceService extends EditorService {
 
   private DEV_showDirtyRect() {
     return this.onRenderTopCanvas.hook(() => {
-      if (!getSetting(this.editor).showDirtyRect) return
+      if (!this.editorSetting.setting.showDirtyRect) return
 
       this.ctxSaveRestore((ctx) => {
         if (!this.DEV_dirtyArea) return
@@ -333,7 +333,7 @@ export class StageSurfaceService extends EditorService {
         const path2d = new Path2D()
         const { minX, minY, maxX, maxY } = this.DEV_dirtyArea
         path2d.rect(minX, minY, maxX - minX, maxY - minY)
-        ctx.lineWidth = 2 / getZoom(this.editor)
+        ctx.lineWidth = 2 / this.getStageViewport().zoom
         ctx.strokeStyle = rgba(0, 255, 100, 1)
         ctx.stroke(path2d)
       })
@@ -344,25 +344,25 @@ export class StageSurfaceService extends EditorService {
 
   transformCanvas = () => {
     this.ctx.transform(...this.dprMatrix.tuple())
-    this.ctx.transform(...this.editor.stageViewport.sceneMatrix.tuple())
+    this.ctx.transform(...this.getStageViewport().sceneMatrix.tuple())
   }
 
   transformTopCanvas = () => {
     this.topCtx.transform(...this.dprMatrix.tuple())
-    this.topCtx.transform(...this.editor.stageViewport.sceneMatrix.tuple())
+    this.topCtx.transform(...this.getStageViewport().sceneMatrix.tuple())
   }
 
   private onZoomMove = () => {
     return Disposer.combine(
       reaction(
-        () => this.editor.stageViewport.zoom,
+        () => this.getStageViewport().zoom,
         () => {
           this.requestRender('firstFullRender')
           this.requestRenderTopCanvas()
         },
       ),
       reaction(
-        () => XY.of(this.editor.stageViewport.offset),
+        () => XY.of(this.getStageViewport().offset),
         (offset, prevOffset) => {
           this.translate(offset, prevOffset)
           this.requestRenderTopCanvas()
@@ -374,7 +374,7 @@ export class StageSurfaceService extends EditorService {
   private onResize() {
     return Disposer.combine(
       reaction(
-        () => ({ ...this.editor.stageViewport.bound }),
+        () => ({ ...this.getStageViewport().bound }),
         ({ width, height }) => {
           ;[this.canvas, this.topCanvas, this.bufferCanvas].forEach((canvas) => {
             canvas.width = width * dpr
@@ -388,14 +388,14 @@ export class StageSurfaceService extends EditorService {
         { fireImmediately: true },
       ),
       reaction(
-        () => ({ ...this.editor.stageViewport.bound }),
+        () => ({ ...this.getStageViewport().bound }),
         () => this.requestRender('firstFullRender'),
       ),
     )
   }
 
   getVisualSize = (aabb: AABB) => {
-    const zoom = getZoom(this.editor)
+    const zoom = this.getStageViewport().zoom
     return XY.$((aabb.maxX - aabb.minX) * zoom, (aabb.maxY - aabb.minY) * zoom)
   }
 
@@ -417,8 +417,9 @@ export class StageSurfaceService extends EditorService {
   private eventXY!: IXY
 
   private getEventXY = (xy: IXY) => {
-    xy = this.editor.stageViewport.toCanvasXY(xy)
-    this.eventXY = this.editor.stageViewport.sceneMatrix.invertXY(xy)
+    const stageViewport = this.getStageViewport()
+    xy = stageViewport.toCanvasXY(xy)
+    this.eventXY = stageViewport.sceneMatrix.invertXY(xy)
     this.elemsFromPoint = []
   }
 
@@ -470,7 +471,7 @@ export class StageSurfaceService extends EditorService {
       }
     }
 
-    reverseFor(this.editor.stageScene.rootElems, (elem, layerIndex) =>
+    reverseFor(this.getStageScene().rootElems, (elem, layerIndex) =>
       traverse({ layerIndex, elem, xy: this.eventXY, hitList: [] }),
     )
   }
@@ -493,7 +494,7 @@ export class StageSurfaceService extends EditorService {
     const onMouseEvent = (e: MouseEvent) => {
       if (this.isPointerEventNone) return
       if (
-        getSetting(this.editor).needSliceRender &&
+        this.editorSetting.setting.needSliceRender &&
         this.fullRenderElemsMinHeap.length
       )
         return

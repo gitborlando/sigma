@@ -1,8 +1,11 @@
 import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { EditorService } from 'src/editor/service'
+import { HandleSelectService } from 'src/editor/handle/select'
+import { StageSceneService } from 'src/editor/render/scene'
+import { Service } from 'src/global/service'
 import { SchemaHelper } from '../schema/helper'
-import { getSelectedNodes } from '../utils/get'
+import { UndoService } from '../core/undo'
+import { YStateService } from '../y-adapter/y-state'
 
 const alignTypes = <const>[
   'alignLeft',
@@ -15,7 +18,7 @@ const alignTypes = <const>[
 
 export type IAlignType = (typeof alignTypes)[number]
 
-export class OperateAlignService extends EditorService {
+export class OperateAlignService extends Service {
   alignTypes = alignTypes
   canAlign = Signal.create(false)
   currentAlign = Signal.create<IAlignType>()
@@ -23,21 +26,35 @@ export class OperateAlignService extends EditorService {
   private needAlign = false
   private toAlignNodes = <S.Node[]>[]
 
-  subscribe() {
+  constructor(
+    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YStateService,
+    private readonly undo: UndoService,
+    private readonly stageScene: StageSceneService,
+  ) {
+    super()
+    autoBind(this)
+  }
+
+  subscribe = () => {
     return Disposer.combine(
-      this.editor.handleSelect.afterSelect.hook(this.setupAlign),
+      this.handleSelect.afterSelect.hook(this.setupAlign),
       this.currentAlign.hook(this.autoAlign),
     )
   }
 
-  private setupAlign() {
-    const selectNodes = getSelectedNodes(this.editor)
+  private setupAlign = () => {
+    const selectNodes = this.handleSelect.selectIdList.map((id) =>
+      this.yState.find<S.Node>(id),
+    )
     if (selectNodes.length === 0) {
       this.canAlign.dispatch(false)
+      return
     }
     if (selectNodes.length > 1) {
       this.toAlignNodes = [...selectNodes]
       this.canAlign.dispatch(true)
+      return
     }
     if (
       selectNodes.length === 1 &&
@@ -45,15 +62,17 @@ export class OperateAlignService extends EditorService {
     ) {
       this.toAlignNodes = SchemaHelper.getChildren(<S.NodeParent>selectNodes[0])
       this.canAlign.dispatch(true)
+      return
     }
+    this.canAlign.dispatch(false)
   }
 
-  private autoAlign() {
-    this.editor.yState.transact(() => {
+  private autoAlign = () => {
+    this.yState.transact(() => {
       this[this.currentAlign.value]()
     })
     if (this.needAlign) {
-      this.editor.undo.track('state', t('set alignment'))
+      this.undo.track('state', t('set alignment'))
       this.needAlign = false
     }
   }
@@ -119,27 +138,27 @@ export class OperateAlignService extends EditorService {
   private horizontalAlign(node: S.Node, shift: number) {
     if (shift === 0) return
     this.needAlign = true
-    this.editor.yState.set<S.Node>([node.id, 'x'], node.x + shift)
+    this.yState.set<S.Node>([node.id, 'x'], node.x + shift)
   }
 
   private verticalAlign(node: S.Node, shift: number) {
     if (shift === 0) return
     this.needAlign = true
-    this.editor.yState.set<S.Node>([node.id, 'y'], node.y + shift)
+    this.yState.set<S.Node>([node.id, 'y'], node.y + shift)
   }
 
   private getAlignBound() {
-    if (getSelectedNodes(this.editor).length > 1) {
+    if (this.handleSelect.selectIdList.length > 1) {
       const aabbList = this.toAlignNodes.map((node) => this.getOBBAndBound(node))
       return AABB.merge(aabbList)
     }
 
-    const [node] = getSelectedNodes(this.editor)
-    return this.editor.stageScene.findElem(node.id).obb.aabb
+    const [node] = this.toAlignNodes
+    return this.stageScene.findElem(node.id).obb.aabb
   }
 
   private getOBBAndBound(node: S.Node) {
-    const nodeOBB = this.editor.stageScene.findElem(node.id).obb
+    const nodeOBB = this.stageScene.findElem(node.id).obb
     return nodeOBB.aabb
   }
 }

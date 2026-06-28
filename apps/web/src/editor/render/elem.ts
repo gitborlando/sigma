@@ -1,9 +1,11 @@
 import { type IXY } from '@gitborlando/geo'
 import { getSet, type NoopFunc } from '@gitborlando/utils'
 import { memorized } from '@sigma/utils/common'
+import type { EditorSettingService } from 'src/editor/core/setting'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import type { Editor } from '..'
-import { getSetting } from '../utils/get'
+import type { ElemDrawerService } from 'src/editor/render/draw'
+import type { StageSurfaceService } from 'src/editor/render/surface'
+import type { StageViewportService } from 'src/editor/stage/viewport'
 
 declare module 'react' {
   namespace JSX {
@@ -20,9 +22,16 @@ export type ElemProps = {
   children?: ReactNode[]
 }
 
+export type ElemContext = {
+  getEditorSetting: () => EditorSettingService
+  getElemDrawer: () => ElemDrawerService
+  getStageSurface: () => StageSurfaceService
+  getStageViewport: () => StageViewportService
+}
+
 export class Elem {
   constructor(
-    public editor: Editor,
+    public context: ElemContext,
     public id = '',
     public type: 'sceneElem' | 'widgetElem',
   ) {}
@@ -35,9 +44,9 @@ export class Elem {
     return this._node
   }
   set node(node: S.Node) {
-    this.editor.stageSurface.collectDirty(this)
+    this.context.getStageSurface().collectDirty(this)
     this._node = node
-    this.editor.stageSurface.collectDirty(this)
+    this.context.getStageSurface().collectDirty(this)
   }
 
   private _mrect = MRect.identity()
@@ -69,18 +78,19 @@ export class Elem {
   }
 
   private memoVisible = memorized(() => {
-    return AABB.collide(this.aabb, this.editor.stageViewport.sceneAABB)
+    return AABB.collide(this.aabb, this.context.getStageViewport().sceneAABB)
   })
   get visible() {
     if (this.hidden) return false
     if (this.id === 'sceneRoot') return true
     if (this.type === 'widgetElem') return true
+    const { sceneAABB } = this.context.getStageViewport()
     return this.memoVisible([
       this.aabb.minX,
       this.aabb.minY,
       this.aabb.maxX,
       this.aabb.maxY,
-      this.editor.stageViewport.sceneAABB,
+      sceneAABB,
     ])
   }
 
@@ -92,24 +102,27 @@ export class Elem {
   traverseDraw() {
     if (!this.visible) return
 
-    if (getSetting(this.editor).ignoreUnVisible && this.optimize) {
-      const visualSize = this.editor.stageSurface.getVisualSize(this.aabb)
+    const stageSurface = this.context.getStageSurface()
+    const stageViewport = this.context.getStageViewport()
+    const editorSetting = this.context.getEditorSetting()
+    const elemDrawer = this.context.getElemDrawer()
+
+    if (editorSetting.setting.ignoreUnVisible && this.optimize) {
+      const visualSize = stageSurface.getVisualSize(this.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
-    const resetCtx = this.editor.stageSurface.setCurrentCtxType(
+    const resetCtx = stageSurface.setCurrentCtxType(
       this.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
     )
 
-    this.editor.stageSurface.ctxSaveRestore((ctx) => {
+    stageSurface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
       let resetTransform = () => {}
 
       if (this.node) {
-        resetTransform = this.editor.stageSurface.setTransform(this.node.matrix)
-        this.editor.stageSurface.ctxSaveRestore(() =>
-          this.editor.elemDrawer.draw(this, ctx, path2d),
-        )
+        resetTransform = stageSurface.setTransform(this.node.matrix)
+        stageSurface.ctxSaveRestore(() => elemDrawer.draw(this, ctx, path2d))
       }
 
       if (this.children.length) {
@@ -171,7 +184,7 @@ export class Elem {
   destroy() {
     this.eventHandle.dispose()
     this.parent?.removeChild(this)
-    this.editor.stageSurface.collectDirty(this)
+    this.context.getStageSurface().collectDirty(this)
   }
 }
 
