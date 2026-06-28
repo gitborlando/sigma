@@ -1,4 +1,6 @@
-import { Dragger } from '@gitborlando/toolkit/browser'
+import { Disposer } from '@gitborlando/toolkit'
+import { objKeys } from '@gitborlando/utils'
+import { asClass, createContainer } from 'awilix'
 import { EditorCommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
@@ -12,7 +14,6 @@ import { ElemDrawerService } from 'src/editor/render/draw'
 import { StageSceneService } from 'src/editor/render/scene'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
-import { EditorService } from 'src/editor/service'
 import { StageCursorService } from 'src/editor/stage/cursor'
 import { StageCreateService } from 'src/editor/stage/interact/create'
 import { StageInteractService } from 'src/editor/stage/interact/interact'
@@ -28,6 +29,39 @@ import { YStateService } from 'src/editor/y-adapter/y-state'
 import { YSyncService } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
+const editorServices = {
+  handleNode: HandleNodeService,
+  handlePage: HandlePageService,
+  editorSetting: EditorSettingService,
+  editorCommand: EditorCommandService,
+  undo: UndoService,
+  handleSelect: HandleSelectService,
+  operateAlign: OperateAlignService,
+  operateFill: OperateFillService,
+  designGeometry: DesignGeometryService,
+  elemDrawer: ElemDrawerService,
+  stageScene: StageSceneService,
+  stageSurface: StageSurfaceService,
+  schemaCreator: SchemaCreatorService,
+  stageCreate: StageCreateService,
+  stageInteract: StageInteractService,
+  stageMove: StageMoveService,
+  stageSelect: StageSelectService,
+  stageTransformer: StageTransformerService,
+  stageCursor: StageCursorService,
+  stageViewport: StageViewportService,
+  stageToolGrid: StageToolGridService,
+  layerPanel: LayerPanelService,
+  layerPanelNodeTree: LayerPanelNodeTreeService,
+  yClients: YClientsService,
+  ySync: YSyncService,
+  yState: YStateService,
+}
+
+type EditorServices = {
+  [K in keyof typeof editorServices]: InstanceType<(typeof editorServices)[K]>
+}
+
 export class Editor extends Service {
   private static editor: Editor
 
@@ -42,56 +76,21 @@ export class Editor extends Service {
     return { editor, dispose }
   }
 
-  stageDragger = new Dragger({
-    processXY: (xy) => this.stageViewport.toSceneXY(xy),
-    processShift: (shift) => this.stageViewport.toSceneShift(shift),
-  })
+  container = createContainer<EditorServices>({ injectionMode: 'CLASSIC' })
 
-  services: EditorService[] = []
-
-  handleNode = this.initService(HandleNodeService)
-  handlePage = this.initService(HandlePageService)
-  editorSetting = this.initService(EditorSettingService)
-  editorCommand = this.initService(EditorCommandService)
-  undo = this.initService(UndoService)
-  handleSelect = this.initService(HandleSelectService)
-  operateAlign = this.initService(OperateAlignService)
-  operateFill = this.initService(OperateFillService)
-  designGeometry = this.initService(DesignGeometryService)
-  elemDrawer = this.initService(ElemDrawerService)
-  stageScene = this.initService(StageSceneService)
-  stageSurface = this.initService(StageSurfaceService)
-  schemaCreator = this.initService(SchemaCreatorService)
-  stageCreate = this.initService(StageCreateService)
-  stageInteract = this.initService(StageInteractService)
-  stageMove = this.initService(StageMoveService)
-  stageSelect = this.initService(StageSelectService)
-  stageTransformer = this.initService(StageTransformerService)
-  stageCursor = this.initService(StageCursorService)
-  stageViewport = this.initService(StageViewportService)
-  stageToolGrid = this.initService(StageToolGridService)
-  layerPanel = this.initService(LayerPanelService)
-  layerPanelNodeTree = this.initService(LayerPanelNodeTreeService)
-  yClients = this.initService(YClientsService)
-  ySync = this.initService(YSyncService)
-  yState = this.initService(YStateService)
-
-  private initService<T extends EditorService>(Service: new (editor: Editor) => T) {
-    const service = autoBind(makeObservable(new Service(this)))
-    this.services.push(service)
-    return service
+  constructor() {
+    super()
+    objKeys(editorServices).forEach((key) => {
+      const service = editorServices[key] as new () => any
+      this.container.register(key, asClass(service).singleton())
+    })
   }
 
   subscribe() {
-    this.disposer.add(...this.services.map((s) => s.subscribe()))
-    return () => {
-      this.yState.dispose()
-      this.disposer.dispose()
-    }
-  }
-
-  /** alias */
-  find = <T extends S.SchemaItem>(id: string) => {
-    return this.yState.find<T>(id)
+    return Disposer.combine(
+      ...objKeys(editorServices).map((key) =>
+        this.container.resolve(key).subscribe(),
+      ),
+    )
   }
 }

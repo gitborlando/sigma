@@ -4,8 +4,10 @@ export abstract class Service {
   protected disposer = new Disposer()
 
   subscribe() {
-    return () => {
-      this.disposer.dispose()
-    }
+    return () => {}
+  }
+
+  dispose() {
+    this.disposer.dispose()
   }
 }
