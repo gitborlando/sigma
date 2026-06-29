@@ -8,7 +8,7 @@ import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 import { suspend } from 'suspend-react'
 
 export const EditorRPOperateFillItemComp: FC<{
@@ -63,8 +63,7 @@ const HexInputComp: FC<{
   fill: S.Fill
   index: number
 }> = observer(({ fill, index }) => {
-  const editor = useEditor()
-  const { operateFill } = editor
+  const operateFill = useEditorService('operateFill')
   const isSolidFill = fill.type === 'color'
 
   const validateColor = (value: string) => {
@@ -106,8 +105,7 @@ const HexInputComp: FC<{
 
 const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
-    const editor = useEditor()
-    const { operateFill } = editor
+    const operateFill = useEditorService('operateFill')
 
     const setAlpha = (value: number) => {
       console.log('value: ', value)
@@ -133,8 +131,7 @@ const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
 
 const VisibleComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
-    const editor = useEditor()
-    const { operateFill } = editor
+    const operateFill = useEditorService('operateFill')
 
     const toggleVisible = () => {
       operateFill.setFill(index, (fill) => {

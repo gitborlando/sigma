@@ -1,12 +1,12 @@
 import { ChevronDown, Plus } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
 
 export const PageHeaderComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { handlePage, layerPanel } = editor
+  const handlePage = useEditorService('handlePage')
+  const layerPanel = useEditorService('layerPanel')
   const { pagePanelExpanded } = layerPanel
   const selectPage = useSelectPage()
   const addPage = () => {

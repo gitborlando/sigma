@@ -7,10 +7,10 @@ import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
 import { RulerComp } from 'src/view/editor/stage/ruler'
 import { EditorStageSurfaceComp } from 'src/view/editor/stage/surface'
 import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 export const StageComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
+  const stageScene = useEditorService('stageScene')
 
   useEffect(() => {
     return renderElem(
@@ -20,7 +20,7 @@ export const StageComp: FC<{}> = observer(({}) => {
         <EditorStageMarqueeComp />
         <EditorStageCursorsComp />
       </>,
-      editor.stageScene.widgetRoot,
+      stageScene.widgetRoot,
     )
   }, [])
 
@@ -35,11 +35,11 @@ export const StageComp: FC<{}> = observer(({}) => {
 })
 
 export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { observingClientId: observingUserId } = editor.yClients
+  const yClients = useEditorService('yClients')
+  const { observingClientId: observingUserId } = yClients
   if (!observingUserId) return null
 
-  const client = editor.yClients.others[observingUserId]
+  const client = yClients.others[observingUserId]
 
   return (
     <G

@@ -1,4 +1,4 @@
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 const getNearestIntMultiple = (number: number, rate: number) => {
   const n = Math.floor(number / rate)
@@ -20,10 +20,11 @@ export const RulerComp: FC<{}> = observer(({}) => {
 export const Ruler: FC<{
   type: 'horizontal' | 'vertical'
 }> = observer(({ type }) => {
-  const editor = useEditor()
+  const stageViewport = useEditorService('stageViewport')
+  const handleNode = useEditorService('handleNode')
   const isVertical = type === 'vertical'
-  const { bound, zoom, offset: offsetXY } = editor.stageViewport
-  const datumXY = editor.handleNode.datumXY
+  const { bound, zoom, offset: offsetXY } = stageViewport
+  const datumXY = handleNode.datumXY
 
   const getTicks = () => {
     const ticks: { offset: number; value: number }[] = []
@@ -31,7 +32,7 @@ export const Ruler: FC<{
     const offset =
       (type === 'horizontal' ? offsetXY.x + datumXY.x : offsetXY.y + datumXY.y) /
       zoom
-    const step = editor.stageViewport.getStepByZoom(zoom)
+    const step = stageViewport.getStepByZoom(zoom)
     const start = getNearestIntMultiple(-offset, step)
     const end = getNearestIntMultiple(length - offset, step)
     for (let i = start; i <= end; i += step) {

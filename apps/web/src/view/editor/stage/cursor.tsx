@@ -1,10 +1,10 @@
 import { values } from 'mobx'
 import { COLOR } from 'src/utils/color'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const others = editor.yClients.others
+  const yClients = useEditorService('yClients')
+  const others = yClients.others
   const cursors = values(others).map((other) => ({
     xy: other.cursor,
     name: other.userName,
@@ -19,8 +19,8 @@ export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
 })
 
 const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
-  const editor = useEditor()
-  const { schemaCreator, stageViewport } = editor
+  const schemaCreator = useEditorService('schemaCreator')
+  const stageViewport = useEditorService('stageViewport')
 
   xy = stageViewport.toStageXY(xy)
   const [color] = useState(() => COLOR.random())

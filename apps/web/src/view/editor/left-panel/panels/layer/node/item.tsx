@@ -7,14 +7,16 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { LayerPanelNodeInfo } from 'src/editor/workbench/layer-panel/node-tree'
 import { ContextMenu } from 'src/global/context-menu'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
 
 export const EditorLeftPanelLayerNodeItemComp: FC<{
   nodeInfo: LayerPanelNodeInfo
 }> = observer(({ nodeInfo }) => {
-  const editor = useEditor()
-  const { editorCommand, layerPanelNodeTree, stageSelect, yState } = editor
+  const editorCommand = useEditorService('editorCommand')
+  const layerPanelNodeTree = useEditorService('layerPanelNodeTree')
+  const stageSelect = useEditorService('stageSelect')
+  const yState = useEditorService('yState')
   const { id, indent, ancestorIds } = nodeInfo
   const { toggleNodeExpanded, getNodeExpanded } = layerPanelNodeTree
 

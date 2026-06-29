@@ -2,25 +2,21 @@ import { isLeftMouse } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
-import { getZoom } from 'src/editor/utils/get'
 import { arrayLoopGet, TRBL } from 'src/editor/utils/misc'
 import { COLOR } from 'src/utils/color'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
 let isSelectOnlyLine = false
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const {
-    schemaCreator,
-    stageInteract,
-    stageMove,
-    stageSurface,
-    stageTransformer,
-    stageViewport,
-  } = editor
+  const schemaCreator = useEditorService('schemaCreator')
+  const stageInteract = useEditorService('stageInteract')
+  const stageMove = useEditorService('stageMove')
+  const stageSurface = useEditorService('stageSurface')
+  const stageTransformer = useEditorService('stageTransformer')
+  const stageViewport = useEditorService('stageViewport')
   const selectNodes = useSelectNodes()
   const { mrect, isMoving } = stageTransformer
   const shouldHidden = isMoving || stageViewport.isZooming || stageMove.isMoving
@@ -73,9 +69,10 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 })
 
 const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) => {
-  const editor = useEditor()
-  const { schemaCreator, stageCursor, stageTransformer } = editor
-  const zoom = getZoom(editor)
+  const schemaCreator = useEditorService('schemaCreator')
+  const stageCursor = useEditorService('stageCursor')
+  const stageTransformer = useEditorService('stageTransformer')
+  const zoom = useEditorService('stageViewport').zoom
   const mrect = stageTransformer.mrect.clone()
   const p1 = arrayLoopGet(mrect.vertices, index)
   const p2 = arrayLoopGet(mrect.vertices, index + 1)
@@ -111,9 +108,10 @@ const VertexComp: FC<{
   index: number
   directions: TRBL[]
 }> = observer(({ type, index, directions }) => {
-  const editor = useEditor()
-  const { schemaCreator, stageCursor, stageTransformer } = editor
-  const zoom = getZoom(editor)
+  const schemaCreator = useEditorService('schemaCreator')
+  const stageCursor = useEditorService('stageCursor')
+  const stageTransformer = useEditorService('stageTransformer')
+  const zoom = useEditorService('stageViewport').zoom
   const mrect = stageTransformer.mrect
   const xy = arrayLoopGet(mrect.vertices, index)
   const size = 8 / zoom
@@ -163,9 +161,10 @@ const VertexComp: FC<{
 })
 
 const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
-  const editor = useEditor()
-  const { schemaCreator, stageCursor, stageTransformer } = editor
-  const zoom = getZoom(editor)
+  const schemaCreator = useEditorService('schemaCreator')
+  const stageCursor = useEditorService('stageCursor')
+  const stageTransformer = useEditorService('stageTransformer')
+  const zoom = useEditorService('stageViewport').zoom
   const mrect = stageTransformer.mrect
   const xy = arrayLoopGet(mrect.vertices, index)
   const size = 8 / zoom

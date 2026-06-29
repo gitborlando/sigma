@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { EditorLeftPanelLayerNodeHeaderComp } from 'src/view/editor/left-panel/panels/layer/node/header'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
 import { EditorLeftPanelLayerNodeListComp } from 'src/view/editor/left-panel/panels/layer/node/list'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 const dropAnimationConfig: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -26,8 +26,8 @@ const dropAnimationConfig: DropAnimation = {
 }
 
 export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { layerPanel, layerPanelNodeTree } = editor
+  const layerPanel = useEditorService('layerPanel')
+  const layerPanelNodeTree = useEditorService('layerPanelNodeTree')
   const { nodeInfoList } = layerPanelNodeTree
   const [activeId, setActiveId] = useState<string | null>(null)
 

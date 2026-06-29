@@ -1,11 +1,10 @@
 import { useSignal } from '@gitborlando/signal/react'
 import { Icon } from '@gitborlando/widget'
 import { Btn } from 'src/view/component/btn'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 export const AlignComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { alignTypes, canAlign, currentAlign } = editor.operateAlign
+  const { alignTypes, canAlign, currentAlign } = useEditorService('operateAlign')
   useSignal(canAlign)
 
   return (

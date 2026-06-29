@@ -8,10 +8,11 @@ import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 export const HeaderComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
+  const stageViewport = useEditorService('stageViewport')
+  const stageCreate = useEditorService('stageCreate')
   const navigate = useNavigate()
 
   return (
@@ -19,7 +20,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
       center
       horizontal='auto 1fr auto'
       className={cls()}
-      style={{ height: editor.stageViewport.bound.top }}>
+      style={{ height: stageViewport.bound.top }}>
       <G center horizontal gap={4}>
         <Btn
           size={32}
@@ -38,7 +39,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
           <StageOperateIcon type='move' />
         </G>
         <G center gap={4} horizontal>
-          {editor.stageCreate.createTypes.map((type) => (
+          {stageCreate.createTypes.map((type) => (
             <CreateShapeIcon key={type} type={type} />
           ))}
         </G>
@@ -54,8 +55,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
 })
 
 const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) => {
-  const editor = useEditor()
-  const { stageInteract } = editor
+  const stageInteract = useEditorService('stageInteract')
   const isActive = stageInteract.interaction === type
   const iconUrl = Assets.editor.header.stageOperate[type]
 
@@ -70,8 +70,8 @@ const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) =>
 })
 
 const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
-  const editor = useEditor()
-  const { stageCreate, stageInteract } = editor
+  const stageCreate = useEditorService('stageCreate')
+  const stageInteract = useEditorService('stageInteract')
   const isActive =
     stageInteract.interaction === 'create' && stageCreate.createType === type
   const iconUrl = Assets.editor.node[type as keyof typeof Assets.editor.node]
@@ -90,8 +90,7 @@ const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
 })
 
 const UndoGroup: FC<{}> = observer(() => {
-  const editor = useEditor()
-  const { undo } = editor
+  const undo = useEditorService('undo')
 
   return (
     <G horizontal gap={4}>

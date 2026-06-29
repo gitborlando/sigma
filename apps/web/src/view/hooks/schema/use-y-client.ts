@@ -1,23 +1,25 @@
-import {
-  getAllSelectIdMap,
-  getSelectIdList,
-  getSelectIdMap,
-  getSelectPageId,
-} from 'src/editor/utils/get'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 export function useSelectIds() {
-  return getSelectIdList(useEditor())
+  return useEditorService('handleSelect').selectIdList
 }
 
 export function useSelectIdMap() {
-  return getSelectIdMap(useEditor())
+  return useEditorService('handleSelect').selectIdMap
 }
 
 export function useAllSelectIdMap() {
-  return getAllSelectIdMap(useEditor())
+  const handleSelect = useEditorService('handleSelect')
+  const yClients = useEditorService('yClients')
+  return {
+    ...handleSelect.selectIdMap,
+    ...Object.values(yClients.others).reduce(
+      (acc, client) => ({ ...acc, ...client.selectIdMap }),
+      {},
+    ),
+  }
 }
 
 export function useSelectPageId() {
-  return getSelectPageId(useEditor())
+  return useEditorService('handleSelect').selectPageId
 }

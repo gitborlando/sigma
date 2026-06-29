@@ -1,6 +1,5 @@
-import { getZoom } from 'src/editor/utils/get'
 import { rgb } from 'src/utils/color'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 const getNearestIntMultiple = (number: number, rate: number) => {
   const n = Math.floor(number / rate)
@@ -21,15 +20,15 @@ export const EditorStageGridComp: FC<{}> = observer(({}) => {
 export const Lines: FC<{
   type: 'horizontal' | 'vertical'
 }> = observer(({ type }) => {
-  const editor = useEditor()
-  const { bound, offset: offsetXY, zoom } = editor.stageViewport
+  const stageViewport = useEditorService('stageViewport')
+  const { bound, offset: offsetXY, zoom } = stageViewport
 
   const getTicks = () => {
     const ticks: { x: number; y: number; length: number }[] = []
     const offset = XY.of(offsetXY).divide(zoom, zoom)
     const sceneWidth = bound.width / zoom
     const sceneHeight = bound.height / zoom
-    const step = editor.stageViewport.getStepByZoom(zoom)
+    const step = stageViewport.getStepByZoom(zoom)
     const hStart = getNearestIntMultiple(-offset.x, step)
     const hEnd = getNearestIntMultiple(sceneWidth - offset.x, step)
     const vStart = getNearestIntMultiple(-offset.y, step)
@@ -58,9 +57,8 @@ const Line: FC<{
   y: number
   length: number
 }> = observer(({ type, x, y, length }) => {
-  const editor = useEditor()
-  const { schemaCreator } = editor
-  const zoom = getZoom(editor)
+  const schemaCreator = useEditorService('schemaCreator')
+  const zoom = useEditorService('stageViewport').zoom
 
   const line = schemaCreator.line({
     x,

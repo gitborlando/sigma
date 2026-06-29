@@ -1,17 +1,16 @@
 import { Icon } from '@gitborlando/widget'
 import { twoDecimal } from '@sigma/utils/common'
 import { DesignGeoInfo } from 'src/editor/operate/geometry'
-import { getZoom } from 'src/editor/utils/get'
 import { MULTI_VALUE } from 'src/global/constant'
 import { InputNum } from 'src/view/component/input-num'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 
 export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { currentKeys, currentGeometries, setupGeometries } = editor.designGeometry
+  const { currentKeys, currentGeometries, setupGeometries } =
+    useEditorService('designGeometry')
   const nodes = useSelectNodes()
-  const zoom = getZoom(editor)
+  const zoom = useEditorService('stageViewport').zoom
 
   useMemo(() => setupGeometries(nodes), [nodes, setupGeometries])
 
@@ -96,9 +95,9 @@ const GeometryItemComp: FC<{
   value: number
   slideRate?: number
 }> = observer(({ label, operateKey, value, slideRate = 1 }) => {
-  const editor = useEditor()
-  const { designGeometry, handleNode, undo } = editor
-  const { setGeometries } = designGeometry
+  const { setGeometries } = useEditorService('designGeometry')
+  const handleNode = useEditorService('handleNode')
+  const undo = useEditorService('undo')
 
   const isMultiValue = T<any>(value) === MULTI_VALUE
   const inputValue = useRef(0)

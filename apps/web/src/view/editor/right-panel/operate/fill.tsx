@@ -7,11 +7,10 @@ import {
   OpFieldHeaderComp,
 } from 'src/view/editor/right-panel/operate/components/op-field'
 import { EditorRPOperateFillItemComp } from 'src/view/editor/right-panel/operate/fill-item'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 export const EditorRPOperateFillComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { fills, isMultiFills, setFills, newFill } = editor.operateFill
+  const { fills, isMultiFills, setFills, newFill } = useEditorService('operateFill')
 
   const addFill = () => {
     setFills((draft) => {

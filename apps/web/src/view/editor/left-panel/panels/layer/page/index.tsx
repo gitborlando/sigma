@@ -1,13 +1,13 @@
 import Scrollbars from 'react-custom-scrollbars-2'
 import { Drag } from 'src/global/event/drag'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
 
 export const PageComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { layerPanel, yState } = editor
+  const layerPanel = useEditorService('layerPanel')
+  const yState = useEditorService('yState')
   const { pagePanelHeight, pagePanelExpanded } = layerPanel
   const meta = useSchema((schema) => schema.meta)
 

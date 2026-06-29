@@ -1,15 +1,13 @@
 import { ChevronDown } from 'lucide-react'
-import { getSetting, getZoom } from 'src/editor/utils/get'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Divider } from 'src/view/component/divider'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
 import { Menu } from 'src/view/component/menu'
-import { useEditor } from 'src/view/hooks/editor'
+import { useEditorService } from 'src/view/hooks/editor'
 
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const zoom = ~~((getZoom(editor) || 0) * 100)
+  const zoom = ~~((useEditorService('stageViewport').zoom || 0) * 100)
   const [show, setShow] = useState(false)
 
   const cls = classes(css`
@@ -50,8 +48,8 @@ const PanelComp: FC<{}> = observer(({}) => {
 })
 
 const InputZoomComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { updateZoom } = editor.stageViewport
+  const stageViewport = useEditorService('stageViewport')
+  const { updateZoom } = stageViewport
 
   return (
     <InputNum
@@ -59,7 +57,7 @@ const InputZoomComp: FC<{}> = observer(({}) => {
         width: 160px;
         ${styles.borderRadiusSM}
       `}
-      value={~~((getZoom(editor) || 0) * 100)}
+      value={~~((stageViewport.zoom || 0) * 100)}
       onEnd={(value) => updateZoom((value || 0) / 100)}
       formatter={(value) => `${value}%`}
       parser={(value) => Number(value?.replace('%', ''))}
@@ -69,9 +67,8 @@ const InputZoomComp: FC<{}> = observer(({}) => {
 })
 
 const ZoomingOptionsComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const { updateZoom, handleZoomToFitAll, handleZoomToFitSelection } =
-    editor.stageViewport
+  const stageViewport = useEditorService('stageViewport')
+  const { updateZoom, handleZoomToFitAll, handleZoomToFitSelection } = stageViewport
 
   return (
     <>
@@ -86,8 +83,7 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
 })
 
 const OtherOptionsComp: FC<{}> = observer(({}) => {
-  const editor = useEditor()
-  const setting = getSetting(editor)
+  const setting = useEditorService('editorSetting').setting
 
   return (
     <OptionBalanceItem
