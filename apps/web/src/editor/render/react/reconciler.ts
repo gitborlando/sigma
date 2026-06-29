@@ -96,7 +96,7 @@ const hostConfig: HostConfig<
     return false
   },
   clearContainer(container) {
-    container.children.forEach((child) => {
+    container?.children.forEach((child) => {
       if (child.id !== 'outlineRoot') child.destroy()
     })
   },

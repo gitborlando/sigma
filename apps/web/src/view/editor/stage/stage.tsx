@@ -7,22 +7,23 @@ import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
 import { RulerComp } from 'src/view/editor/stage/ruler'
 import { EditorStageSurfaceComp } from 'src/view/editor/stage/surface'
 import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
-import { useEditorService } from 'src/view/hooks/editor'
+import { EditorContext, useEditor, useEditorService } from 'src/view/hooks/editor'
 
 export const StageComp: FC<{}> = observer(({}) => {
+  const editor = useEditor()
   const stageScene = useEditorService('stageScene')
 
   useEffect(() => {
     return renderElem(
-      <>
+      <EditorContext.Provider value={editor}>
         <EditorStageOutlineComp />
         <EditorStageTransformComp />
         <EditorStageMarqueeComp />
         <EditorStageCursorsComp />
-      </>,
+      </EditorContext.Provider>,
       stageScene.widgetRoot,
     )
-  }, [])
+  }, [editor, stageScene])
 
   return (
     <G onContextMenu={(e) => e.preventDefault()}>

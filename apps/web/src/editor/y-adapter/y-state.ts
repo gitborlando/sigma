@@ -4,13 +4,13 @@ import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plai
 import JSZip from 'jszip'
 import type { EditorServiceGetters } from 'src/editor'
 import { UndoService } from 'src/editor/core/undo'
-import { SchemaHelper } from 'src/editor/schema/helper'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
 import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
-import { FileService } from 'src/global/service/file'
 import { Service } from 'src/global/service'
+import { FileService } from 'src/global/service/file'
 import * as Y from 'yjs'
 
 export type YStatePatch = YPlainPatch
@@ -117,7 +117,6 @@ export class YStateService extends Service {
     // YSync.init(fileId, this.doc)
 
     this.plain = autoBind(new YPlain(this.ySchema, schema))
-    console.log('??')
     this.disposer.add(this.plain.observe())
     this.disposer.add(this.plain.subscribe(this.handlePlainChange))
     const yClients = this.getYClients()

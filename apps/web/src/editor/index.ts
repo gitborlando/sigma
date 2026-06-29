@@ -1,4 +1,3 @@
-import { Disposer } from '@gitborlando/toolkit'
 import { objKeys } from '@gitborlando/utils'
 import { asClass, asValue, createContainer } from 'awilix'
 import { EditorCommandService } from 'src/editor/core/command'
@@ -96,26 +95,36 @@ export class Editor extends Service {
     return this.editor
   }
 
-  static initInstance() {
-    const editor = (this.editor = autoBind(new Editor()))
-    const dispose = editor.subscribe()
-    return { editor, dispose }
+  private static initInstance() {
+    return (this.editor = autoBind(new Editor()))
   }
 
   private container = createContainer<EditorServices & EditorServiceGetters>({
     injectionMode: 'CLASSIC',
   })
 
-  resolve = <K extends keyof EditorServices>(key: K) =>
-    this.container.resolve<EditorServices[K]>(key)
-
   constructor() {
     super()
     this.setupServices()
   }
 
+  private setupServices() {
+    objKeys(editorServices).forEach((key) => {
+      this.container.register(key, asClass(editorServices[key]).singleton())
+    })
+    const editorServiceGetters = createEditorServiceGetters(this.resolve)
+    objKeys(editorServiceGetters).forEach((key) => {
+      this.container.register(key, asValue(editorServiceGetters[key]))
+    })
+  }
+
+  resolve = <K extends keyof EditorServices>(key: K) =>
+    this.container.resolve<EditorServices[K]>(key)
+
   subscribe() {
-    return Disposer.combine(
+    this.disposer.add(() => (Editor.editor = undefined!))
+    this.disposer.add(() => this.container.dispose())
+    this.disposer.add(
       ...objKeys(editorServices).map((key) => {
         const instance = this.resolve(key)
         if (instance instanceof Service) {
@@ -128,16 +137,6 @@ export class Editor extends Service {
         return () => {}
       }),
     )
-  }
-
-  private setupServices() {
-    objKeys(editorServices).forEach((key) => {
-      this.container.register(key, asClass(editorServices[key]).singleton())
-    })
-    const editorServiceGetters = createEditorServiceGetters(this.resolve)
-    objKeys(editorServiceGetters).forEach((key) => {
-      this.container.register(key, asValue(editorServiceGetters[key]))
-    })
-    this.disposer.add(() => this.container.dispose())
+    return () => {}
   }
 }
