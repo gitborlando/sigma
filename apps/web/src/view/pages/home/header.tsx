@@ -32,7 +32,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
           </Btn>
           <Btn
             variant='outline'
-            onClick={() => navigate('fileId/mock?applyRecord=true')}>
+            onClick={() => navigate('fileId/mock?applyRecord=true&maxError=10')}>
             Mock页
           </Btn>
           <Btn variant='solid'>{t('new file')}</Btn>
