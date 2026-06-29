@@ -1,28 +1,18 @@
-import { Disposer } from '@gitborlando/toolkit/disposer'
-import { IMatrix, Matrix } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
-import { StageViewportService } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 import { UndoService } from '../core/undo'
 import { YStateService } from '../y-adapter/y-state'
 
 export class HandlePageService extends Service {
-  pageSceneMatrix = new Map<ID, IMatrix>()
-
   constructor(
     private readonly schemaCreator: SchemaCreatorService,
     private readonly yState: YStateService,
     private readonly undo: UndoService,
     private readonly handleSelect: HandleSelectService,
-    private readonly stageViewport: StageViewportService,
   ) {
     super()
     autoBind(this)
-  }
-
-  subscribe = () => {
-    return Disposer.combine(this.memoPageSceneMatrix())
   }
 
   addPage(page = this.schemaCreator.page()) {
@@ -51,15 +41,6 @@ export class HandlePageService extends Service {
       this.handleSelect.selectPage(this.yState.state.meta.pageIds[0]),
     )
     this.undo.track('all', t('delete page'))
-  }
-
-  private memoPageSceneMatrix = () => {
-    return reaction(
-      () => this.stageViewport.sceneMatrix,
-      (matrix) => {
-        this.pageSceneMatrix.set(this.handleSelect.selectPageId, Matrix.of(matrix))
-      },
-    )
   }
 
   DEV_logPageSchema = (id: ID) => {

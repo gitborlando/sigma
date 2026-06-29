@@ -6,9 +6,8 @@ import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { makeObservable } from 'mobx'
 import type { EditorServiceGetters } from 'src/editor'
-import { HandlePageService } from 'src/editor/handle/page'
+import { IMatrix, Matrix, max, min } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
-import { Matrix, max, min } from 'src/editor/geometry'
 import { StageSceneService } from 'src/editor/render/scene'
 import { Service } from 'src/global/service'
 
@@ -31,6 +30,7 @@ export class StageViewportService extends Service {
 
   sceneAABB = new AABB(0, 0, 0, 0)
   prevSceneAABB = new AABB(0, 0, 0, 0)
+  pageSceneMatrix = new Map<ID, IMatrix>()
 
   private prevSceneMatrix = Matrix.identity()
   private boundAABB = new AABB(0, 0, 0, 0)
@@ -38,7 +38,6 @@ export class StageViewportService extends Service {
 
   constructor(
     private readonly handleSelect: HandleSelectService,
-    private readonly handlePage: HandlePageService,
     private readonly stageScene: StageSceneService,
     private readonly getStageSurface: EditorServiceGetters['getStageSurface'],
   ) {
@@ -164,6 +163,10 @@ export class StageViewportService extends Service {
         this.offset = XY.from(this.sceneMatrix.tx, this.sceneMatrix.ty)
         this.sceneAABB = this.sceneMatrix.invertAABB(this.boundAABB)
         this.prevSceneAABB = this.prevSceneMatrix.invertAABB(this.boundAABB)
+        this.pageSceneMatrix.set(
+          this.handleSelect.selectPageId,
+          Matrix.of(this.sceneMatrix),
+        )
       },
     )
   }
@@ -184,7 +187,7 @@ export class StageViewportService extends Service {
       () => this.handleSelect.selectPageId,
       (pageId) => {
         const getMatrix = () => Matrix.identity()
-        const matrix = getSet(this.handlePage.pageSceneMatrix, pageId, getMatrix)
+        const matrix = getSet(this.pageSceneMatrix, pageId, getMatrix)
         this.sceneMatrix = Matrix.of(matrix)
       },
     )
