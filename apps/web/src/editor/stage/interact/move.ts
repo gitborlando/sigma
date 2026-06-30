@@ -3,8 +3,8 @@ import { Matrix } from 'src/editor/geometry'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { StageCursorService } from 'src/editor/stage/cursor'
 import { StageViewportService } from 'src/editor/stage/viewport'
-import { Service } from 'src/global/service'
 import { Drag } from 'src/global/event/drag'
+import { Service } from 'src/global/service'
 
 export class StageMoveService extends Service {
   @observable isMoving = false
@@ -15,8 +15,7 @@ export class StageMoveService extends Service {
     private readonly stageViewport: StageViewportService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   startInteract() {

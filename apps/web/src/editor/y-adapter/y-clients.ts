@@ -36,8 +36,7 @@ export class YClientsService extends Service {
     private readonly ySync: YSyncService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   setup() {

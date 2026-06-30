@@ -58,7 +58,7 @@ export class StageSurfaceService extends Service {
   }
 
   onCanvasInited() {
-    this.disposer.add(this.onResize(), this.onZoomMove(), this.onPointerEvents())
+    this.effect(this.onResize(), this.onZoomMove(), this.onPointerEvents())
     this.requestRenderTopCanvas()
     this.getStageScene().renderTreeOnSurfaceInited()
     this.stageViewport.onWheelZoom(this)

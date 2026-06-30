@@ -51,7 +51,7 @@ export class StageSceneService extends Service {
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
     this.rootElems.push(this.sceneRoot, this.widgetRoot)
-    this.disposer.add(() => {
+    this.effect(() => {
       this.elements.clear()
       this.rootElems.forEach((elem) => elem.destroy())
       this.rootElems.length = 0
@@ -59,7 +59,7 @@ export class StageSceneService extends Service {
   }
 
   renderTreeOnSurfaceInited() {
-    this.disposer.add(
+    this.effect(
       autorun(() => {
         const pageId = this.handleSelect.selectPageId
         if (pageId) this.firstRenderPage()

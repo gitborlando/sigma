@@ -16,8 +16,7 @@ export class StageInteractService extends Service {
     private readonly stageCreate: StageCreateService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
     this.effect(autorun(this.onInteract))
   }
 

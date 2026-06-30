@@ -23,8 +23,7 @@ export class HandleSelectService extends Service {
 
   constructor() {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   @computed get selectIdList() {

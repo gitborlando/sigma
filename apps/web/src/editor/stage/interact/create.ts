@@ -64,8 +64,7 @@ export class StageCreateService extends Service {
     private readonly selectController: SelectControllerService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   startInteract() {

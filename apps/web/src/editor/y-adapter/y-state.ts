@@ -119,8 +119,8 @@ export class YStateService extends Service {
     // YSync.init(fileId, this.doc)
 
     this.plain = autoBind(new YPlain(this.ySchema, schema))
-    this.disposer.add(this.plain.observe())
-    this.disposer.add(this.plain.subscribe(this.handlePlainChange))
+    this.effect(this.plain.observe())
+    this.effect(this.plain.subscribe(this.handlePlainChange))
     const yClients = this.getYClients()
     yClients.setup()
 

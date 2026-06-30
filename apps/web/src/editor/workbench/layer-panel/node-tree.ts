@@ -32,8 +32,7 @@ export class LayerPanelNodeTreeService extends Service {
     private readonly yState: YStateService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
     this.effect(this.onNodeHierarchyChange())
   }
 

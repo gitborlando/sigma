@@ -1,9 +1,9 @@
 import { MobxUndoService, MobxUndoState } from '@gitborlando/mobx-undo'
 import { matchCase } from '@gitborlando/utils'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
-import { Service } from 'src/global/service'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
+import { Service } from 'src/global/service'
 import * as Y from 'yjs'
 
 export type UndoType = 'undo' | 'redo'
@@ -32,8 +32,7 @@ export class UndoService extends Service {
 
   constructor() {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   @computed get canUndo() {

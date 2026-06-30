@@ -25,8 +25,7 @@ export class EditorCommandService extends Service {
     private readonly nodeController: NodeControllerService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
     this.effect(this.bindHotkeys())
   }
 

@@ -111,8 +111,8 @@ export class Editor extends Service {
   constructor() {
     super()
     this.setupServices()
-    this.disposer.add(() => (Editor.editor = undefined!))
-    this.disposer.add(() => this.container.dispose())
+    this.effect(() => (Editor.editor = undefined!))
+    this.effect(() => this.container.dispose())
   }
 
   private setupServices() {

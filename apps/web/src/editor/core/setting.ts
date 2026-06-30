@@ -24,10 +24,9 @@ export class EditorSettingService extends Service {
 
   constructor() {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
     this.loadSetting()
-    this.disposer.add(this.autoSaveSetting())
+    this.effect(this.autoSaveSetting())
   }
 
   private loadSetting() {

@@ -7,8 +7,7 @@ export class LayerPanelService extends Service {
 
   constructor() {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
     this.effect(
       autorun(() => {
         this.pagePanelHeight = this.pagePanelExpanded ? 200 : 32

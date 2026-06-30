@@ -20,8 +20,7 @@ export class OperateFillService extends Service {
     private readonly undo: UndoService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
     this.effect(autorun(this.setupFills))
     this.effect(
       this.yState.listen((patches) => {

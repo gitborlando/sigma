@@ -40,8 +40,7 @@ export class StageSelectService extends Service {
     private readonly getEditorCommand: EditorServiceGetters['getEditorCommand'],
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   startInteract() {

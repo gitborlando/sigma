@@ -40,9 +40,8 @@ export class StageViewportService extends Service {
     private readonly stageScene: StageSceneService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
-    this.disposer.add(
+    autoBind(makeObservable(this))
+    this.effect(
       this.onBoundChange(),
       this.onMatrixChange(),
       this.onCurrentPageChange(),
@@ -134,7 +133,7 @@ export class StageViewportService extends Service {
   }
 
   onWheelZoom(stageSurface: StageSurfaceService) {
-    this.disposer.add(
+    this.effect(
       this.wheeler.beforeWheel.hook(() => (this.isZooming = true)),
       this.wheeler.duringWheel.hook(({ e }) => this.handleWheelZoom(e)),
       this.wheeler.afterWheel.hook(() => (this.isZooming = false)),

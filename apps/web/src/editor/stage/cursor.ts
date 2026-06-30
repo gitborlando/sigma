@@ -22,7 +22,7 @@ export class StageCursorService extends Service {
   constructor(private readonly stageSurface: StageSurfaceService) {
     super()
     autoBind(this)
-    this.disposer.add(listen('mouseup', () => (this.locked = false)))
+    this.effect(listen('mouseup', () => (this.locked = false)))
   }
 
   setCursor(type: StageCursorType, rotation = 0) {

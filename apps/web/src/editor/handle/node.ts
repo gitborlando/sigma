@@ -18,8 +18,7 @@ export class HandleNodeService extends Service {
     private readonly handleSelect: HandleSelectService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   getMRect(node: S.Node) {

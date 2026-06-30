@@ -1,15 +1,15 @@
 import { iife } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
-import { IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
+import { IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewportService } from 'src/editor/stage/viewport'
+import { snapGridRoundBySetting, TRBL } from 'src/editor/utils/misc'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
-import { snapGridRoundBySetting, TRBL } from 'src/editor/utils/misc'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
@@ -33,8 +33,7 @@ export class StageTransformerService extends Service {
     private readonly editorSetting: EditorSettingService,
   ) {
     super()
-    makeObservable(this)
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   setup(selectNodes: S.Node[]) {
