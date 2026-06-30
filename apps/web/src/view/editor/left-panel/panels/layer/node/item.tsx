@@ -16,6 +16,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
   const editorCommand = useEditorService('editorCommand')
   const layerPanelNodeTree = useEditorService('layerPanelNodeTree')
   const stageSelect = useEditorService('stageSelect')
+  const selectController = useEditorService('selectController')
   const yState = useEditorService('yState')
   const { id, indent, ancestorIds } = nodeInfo
   const { toggleNodeExpanded, getNodeExpanded } = layerPanelNodeTree
@@ -35,10 +36,10 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
     toggleNodeExpanded(id, !expanded)
   })
   const handleSelect = () => {
-    stageSelect.onPanelSelect(id)
+    selectController.onPanelSelect(id)
   }
   const handleDoubleClick = () => {
-    stageSelect.onPanelSelect(id)
+    selectController.onPanelSelect(id)
     toggleNodeExpanded(id, true)
   }
   const handleContextMenu = (e: React.MouseEvent) => {

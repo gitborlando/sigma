@@ -1,10 +1,10 @@
-import { Disposer } from '@gitborlando/toolkit/disposer'
+import { Disposer } from '@gitborlando/toolkit'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { makeObservable } from 'mobx'
+import { NodeControllerService } from 'src/editor/controller/node'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
-import { HandleNodeService } from 'src/editor/handle/node'
 import { HandlePageService } from 'src/editor/handle/page'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { StageSceneService } from 'src/editor/render/scene'
@@ -15,7 +15,6 @@ import { Service } from 'src/global/service'
 
 export class EditorCommandService extends Service {
   constructor(
-    private readonly handleNode: HandleNodeService,
     private readonly handlePage: HandlePageService,
     private readonly handleSelect: HandleSelectService,
     private readonly editorSetting: EditorSettingService,
@@ -23,14 +22,12 @@ export class EditorCommandService extends Service {
     private readonly stageScene: StageSceneService,
     private readonly stageInteract: StageInteractService,
     private readonly yState: YStateService,
+    private readonly nodeController: NodeControllerService,
   ) {
     super()
     makeObservable(this)
     autoBind(this)
-  }
-
-  subscribe() {
-    return this.bindHotkeys()
+    this.effect(this.bindHotkeys())
   }
 
   get copyPasteGroup(): Command[] {
@@ -39,13 +36,13 @@ export class EditorCommandService extends Service {
         name: t('copy'),
         shortcut: 'ctrl+c',
         when: () => !!this.handleSelect.selectIdList.length,
-        callback: () => this.handleNode.copySelectedNodes(),
+        callback: () => this.nodeController.copySelectedNodes(),
       },
       {
         name: t('paste'),
         shortcut: 'ctrl+v',
-        when: () => !!this.handleNode.copiedIds.length,
-        callback: () => this.handleNode.pasteNodes(),
+        when: () => !!this.nodeController.copiedIds.length,
+        callback: () => this.nodeController.pasteNodes(),
       },
     ]
   }
@@ -97,12 +94,12 @@ export class EditorCommandService extends Service {
       },
       {
         name: t('create frame'),
-        callback: () => this.handleNode.wrapInFrame(),
+        callback: () => this.nodeController.wrapInFrame(),
       },
       {
         name: t('delete'),
         shortcut: 'del',
-        callback: () => this.handleNode.deleteSelectedNodes(),
+        callback: () => this.nodeController.deleteSelectedNodes(),
       },
     ]
 
@@ -135,22 +132,22 @@ export class EditorCommandService extends Service {
       {
         name: t('move up'),
         shortcut: 'ctrl+]',
-        callback: () => this.handleNode.reHierarchySelectedNode('up'),
+        callback: () => this.nodeController.reHierarchySelectedNode('up'),
       },
       {
         name: t('move down'),
         shortcut: 'ctrl+[',
-        callback: () => this.handleNode.reHierarchySelectedNode('down'),
+        callback: () => this.nodeController.reHierarchySelectedNode('down'),
       },
       {
         name: t('move to top'),
         shortcut: 'ctrl+alt+]',
-        callback: () => this.handleNode.reHierarchySelectedNode('top'),
+        callback: () => this.nodeController.reHierarchySelectedNode('top'),
       },
       {
         name: t('move to bottom'),
         shortcut: 'ctrl+alt+[',
-        callback: () => this.handleNode.reHierarchySelectedNode('bottom'),
+        callback: () => this.nodeController.reHierarchySelectedNode('bottom'),
       },
     ]
   }

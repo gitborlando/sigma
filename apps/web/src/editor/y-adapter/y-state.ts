@@ -4,6 +4,7 @@ import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plai
 import JSZip from 'jszip'
 import type { EditorServiceGetters } from 'src/editor'
 import { UndoService } from 'src/editor/core/undo'
+import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
@@ -30,6 +31,7 @@ export class YStateService extends Service {
   constructor(
     private readonly schemaCreator: SchemaCreatorService,
     private readonly undo: UndoService,
+    private readonly handleSelect: HandleSelectService,
     private readonly getYClients: EditorServiceGetters['getYClients'],
   ) {
     super()
@@ -120,7 +122,7 @@ export class YStateService extends Service {
     this.disposer.add(this.plain.observe())
     this.disposer.add(this.plain.subscribe(this.handlePlainChange))
     const yClients = this.getYClients()
-    this.disposer.add(yClients.subscribe())
+    yClients.setup()
 
     yClients.clientId = this.doc.clientID
     this.undo.initUndo({
@@ -129,8 +131,9 @@ export class YStateService extends Service {
     })
 
     SchemaHelper.init({ find: this.find })
-
     this.inited$.dispatch(true)
+
+    this.handleSelect.selectPage(this.state.meta.pageIds[0])
   }
 
   dispose() {

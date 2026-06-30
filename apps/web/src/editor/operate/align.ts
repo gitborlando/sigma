@@ -1,10 +1,9 @@
 import { Signal } from '@gitborlando/signal'
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { StageSceneService } from 'src/editor/render/scene'
 import { Service } from 'src/global/service'
-import { SchemaHelper } from '../schema/helper'
 import { UndoService } from '../core/undo'
+import { SchemaHelper } from '../schema/helper'
 import { YStateService } from '../y-adapter/y-state'
 
 const alignTypes = <const>[
@@ -34,13 +33,8 @@ export class OperateAlignService extends Service {
   ) {
     super()
     autoBind(this)
-  }
-
-  subscribe = () => {
-    return Disposer.combine(
-      this.handleSelect.afterSelect.hook(this.setupAlign),
-      this.currentAlign.hook(this.autoAlign),
-    )
+    this.effect(autorun(this.setupAlign))
+    // this.currentAlign.hook(this.autoAlign),
   }
 
   private setupAlign = () => {

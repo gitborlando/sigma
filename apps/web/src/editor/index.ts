@@ -1,5 +1,7 @@
 import { objKeys } from '@gitborlando/utils'
 import { asClass, asValue, createContainer } from 'awilix'
+import { NodeControllerService } from 'src/editor/controller/node'
+import { SelectControllerService } from 'src/editor/controller/select'
 import { EditorCommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
@@ -29,6 +31,9 @@ import { YSyncService } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
 const editorServices = {
+  nodeController: NodeControllerService,
+  selectController: SelectControllerService,
+
   handleNode: HandleNodeService,
   handlePage: HandlePageService,
   editorSetting: EditorSettingService,
@@ -106,6 +111,8 @@ export class Editor extends Service {
   constructor() {
     super()
     this.setupServices()
+    this.disposer.add(() => (Editor.editor = undefined!))
+    this.disposer.add(() => this.container.dispose())
   }
 
   private setupServices() {
@@ -120,23 +127,4 @@ export class Editor extends Service {
 
   resolve = <K extends keyof EditorServices>(key: K) =>
     this.container.resolve<EditorServices[K]>(key)
-
-  subscribe() {
-    this.disposer.add(() => (Editor.editor = undefined!))
-    this.disposer.add(() => this.container.dispose())
-    this.disposer.add(
-      ...objKeys(editorServices).map((key) => {
-        const instance = this.resolve(key)
-        if (instance instanceof Service) {
-          const unsubscribe = instance.subscribe()
-          return () => {
-            unsubscribe()
-            instance.dispose()
-          }
-        }
-        return () => {}
-      }),
-    )
-    return () => {}
-  }
 }

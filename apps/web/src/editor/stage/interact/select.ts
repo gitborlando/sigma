@@ -1,18 +1,19 @@
 import { type IRect } from '@gitborlando/geo'
-import { Dragger } from '@gitborlando/toolkit/browser'
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { clone, firstOne } from '@gitborlando/utils'
+import { firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import type { EditorServiceGetters } from 'src/editor'
+import { SelectControllerService } from 'src/editor/controller/select'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import { HandleSelectService } from 'src/editor/handle/select'
+import { HandleSelectService, type Selection } from 'src/editor/handle/select'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageSceneService } from 'src/editor/render/scene'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageTransformerService } from 'src/editor/stage/tools/transformer'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { YStateService } from 'src/editor/y-adapter/y-state'
@@ -24,7 +25,7 @@ export class StageSelectService extends Service {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
   @observable hoverId?: string
 
-  private lastSelectIdMap = <Record<string, boolean>>{}
+  private lastSelection = <Selection>{}
   private isPointerDown = false
 
   constructor(
@@ -32,6 +33,7 @@ export class StageSelectService extends Service {
     private readonly stageSurface: StageSurfaceService,
     private readonly stageTransformer: StageTransformerService,
     private readonly handleSelect: HandleSelectService,
+    private readonly selectController: SelectControllerService,
     private readonly undo: UndoService,
     private readonly yState: YStateService,
     private readonly stageViewport: StageViewportService,
@@ -75,25 +77,27 @@ export class StageSelectService extends Service {
         this.hoverId,
         (node) => node.parentId === firstOne(selectIdList),
       )
-      this.onSingleSelect(ancestor.id, t('select nodes by clicking'))
+      this.selectController.onStageSelect(ancestor.id)
     }
   }
 
   private onSceneRootMouseDown(e: ElemMouseEvent) {
-    this.lastSelectIdMap = clone(this.handleSelect.selectIdMap)
+    this.lastSelection = { ...this.handleSelect.selectIdMap }
 
     if (!this.hoverId || SchemaHelper.isFirstLayerFrame(this.hoverId)) {
-      this.clearSelect()
+      this.selectController.clearSelect()
       this.onMarqueeSelect()
       return
     }
 
-    this.onStageSelect()
+    this.selectController.onStageSelect(this.hoverId)
     this.stageTransformer.move(e.hostEvent)
   }
 
   private onContextMenu(e: MouseEvent) {
-    if (this.hoverId) this.onStageSelect()
+    if (this.hoverId && !SchemaHelper.isFirstLayerFrame(this.hoverId)) {
+      this.selectController.onStageSelect(this.hoverId)
+    }
 
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
       this.getEditorCommand()
@@ -109,47 +113,9 @@ export class StageSelectService extends Service {
     }
   }
 
-  private clearSelect() {
-    if (hotkeys.shift) return
-    this.handleSelect.clearSelect()
-  }
-
-  private onStageSelect() {
-    if (SchemaHelper.isFirstLayerFrame(this.hoverId!)) return
-    this.onSingleSelect(this.hoverId!, t('select nodes by clicking'))
-  }
-
-  onPanelSelect(id: string) {
-    this.onSingleSelect(id, t('select nodes from panel'))
-  }
-
-  onCreateSelect(id: string) {
-    this.onSingleSelect(id)
-  }
-
-  private onSingleSelect(id: ID, trackMsg?: string) {
-    if (this.handleSelect.selectIdMap[id]) return
-
-    this.clearSelect()
-    this.handleSelect.select(id)
-
-    if (trackMsg) this.undo.track('client', trackMsg)
-  }
-
-  private onDeepSelect() {
-    const hoverNode = this.yState.find<S.Node>(this.hoverId!)
-    if (hoverNode?.type !== 'text') return
-  }
-
-  private createStageDragger() {
-    return new Dragger({
-      processXY: (xy) => this.stageViewport.toSceneXY(xy),
-      processShift: (shift) => this.stageViewport.toSceneShift(shift),
-    })
-  }
-
   private onMarqueeSelect() {
     const marqueeAABB = new AABB(0, 0, 0, 0)
+    let marqueeSelection = <Selection>{}
 
     const hitTest = (mrect: MRect) => {
       if (!AABB.collide(marqueeAABB, mrect.aabb)) return false
@@ -169,7 +135,7 @@ export class StageSelectService extends Service {
 
         if (childIds?.length && depth === 0) {
           if (AABB.include(marqueeAABB, elem.aabb) === 1) {
-            this.handleSelect.select(item.id)
+            marqueeSelection[item.id] = true
             return false
           }
           ctx.matrix = Matrix.of(elem.mrect.matrix)
@@ -182,7 +148,7 @@ export class StageSelectService extends Service {
           Matrix.of(forwardMatrix).append(elem.mrect.matrix).plain(),
         )
         if (hitTest(mrect)) {
-          this.handleSelect.select(item.id)
+          marqueeSelection[item.id] = true
           ctx.matrix = Matrix.of(mrect.matrix)
           return
         }
@@ -193,19 +159,22 @@ export class StageSelectService extends Service {
 
     this.stageSurface.disablePointEvent()
 
-    this.createStageDragger()
+    createStageDragger(this.stageViewport)
       .onMove(({ marquee }) => {
         this.marquee = marquee
         AABB.updateFromRect(marqueeAABB, marquee)
-        this.clearSelect()
-        runInAction(() =>
-          traverser(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId)),
+        marqueeSelection = {}
+        traverser(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId))
+        this.selectController.replaceSelection(
+          hotkeys.shift
+            ? { ...this.lastSelection, ...marqueeSelection }
+            : marqueeSelection,
         )
       })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
 
-        if (!equal(this.handleSelect.selectIdMap, this.lastSelectIdMap)) {
+        if (!equal(this.handleSelect.selectIdMap, this.lastSelection)) {
           this.undo.track('client', t('select nodes with marquee'))
         }
       })

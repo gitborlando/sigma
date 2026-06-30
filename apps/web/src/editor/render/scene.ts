@@ -1,12 +1,10 @@
-import { Signal } from '@gitborlando/signal'
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import type { EditorServiceGetters } from 'src/editor'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { Service } from 'src/global/service'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
 import { YStateService } from 'src/editor/y-adapter/y-state'
+import { Service } from 'src/global/service'
 import { Elem, type ElemContext } from './elem'
 
 export class StageSceneService extends Service {
@@ -33,10 +31,7 @@ export class StageSceneService extends Service {
   ) {
     super()
     autoBind(this)
-  }
-
-  subscribe() {
-    return Disposer.combine(this.setupElems(), this.hookRenderNode())
+    this.setupElems()
   }
 
   findElem(id: string) {
@@ -56,24 +51,20 @@ export class StageSceneService extends Service {
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
     this.rootElems.push(this.sceneRoot, this.widgetRoot)
-    return () => {
+    this.disposer.add(() => {
       this.elements.clear()
       this.rootElems.forEach((elem) => elem.destroy())
       this.rootElems.length = 0
-    }
+    })
   }
 
-  private hookRenderNode() {
-    return Signal.merge(this.yState.inited$, this.getStageSurface().inited).hook(
-      () => {
-        this.disposer.add(
-          autorun(() => {
-            const pageId = this.handleSelect.selectPageId
-            if (pageId) this.firstRenderPage()
-          }),
-          this.hookPatchRender(),
-        )
-      },
+  renderTreeOnSurfaceInited() {
+    this.disposer.add(
+      autorun(() => {
+        const pageId = this.handleSelect.selectPageId
+        if (pageId) this.firstRenderPage()
+      }),
+      this.hookPatchRender(),
     )
   }
 

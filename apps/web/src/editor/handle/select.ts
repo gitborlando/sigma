@@ -1,15 +1,18 @@
 import { Signal } from '@gitborlando/signal'
+import equal from 'fast-deep-equal'
 import { makeObservable } from 'mobx'
 import { MobxUndo } from 'src/editor/core/undo'
 import { Service } from 'src/global/service'
 
 export type HandleSelectState = {
-  selectIdMap: Record<string, boolean>
+  selectIdMap: Selection
   selectPageId: ID | ''
 }
 
+export type Selection = Record<string, boolean>
+
 export class HandleSelectService extends Service {
-  @observable.ref selectIdMap: Record<string, boolean> = {}
+  @observable.ref selectIdMap: Selection = {}
   @observable selectPageId: ID | '' = ''
   afterSelect = Signal.create<void>()
 
@@ -22,12 +25,6 @@ export class HandleSelectService extends Service {
     super()
     makeObservable(this)
     autoBind(this)
-  }
-
-  subscribe() {
-    return this.selectUndo.subscribe(() => {
-      this.afterSelect.dispatch()
-    })
   }
 
   @computed get selectIdList() {
@@ -56,6 +53,18 @@ export class HandleSelectService extends Service {
     this.selectUndo.set((state) => {
       state.selectIdMap = {}
     })
+  }
+
+  replaceSelection(selection: Selection) {
+    if (equal(this.selectIdMap, selection)) return
+
+    this.selectUndo.set((state) => {
+      state.selectIdMap = { ...selection }
+    })
+  }
+
+  appendSelection(selection: Selection) {
+    this.replaceSelection({ ...this.selectIdMap, ...selection })
   }
 
   selectPage(id: ID) {

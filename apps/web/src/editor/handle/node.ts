@@ -1,27 +1,21 @@
-import { Disposer } from '@gitborlando/toolkit/disposer'
-import { clampIndex, firstOne, getSet, iife } from '@gitborlando/utils'
+import { clampIndex, firstOne, getSet } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
 import { MRect } from 'src/editor/geometry'
+import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { Service } from 'src/global/service'
-import { UndoService } from '../core/undo'
-import { HandleSelectService } from './select'
 import { YStateService } from '../y-adapter/y-state'
 
 export class HandleNodeService extends Service {
-  datumId = ''
-  @observable.ref datumXY = XY.$(0, 0)
-  copiedIds = <ID[]>[]
+  @computed get datumXY() {
+    return this.getDatumXY()
+  }
 
   private mrectCache = new Map<ID, MRect>()
 
   constructor(
-    private readonly handleSelect: HandleSelectService,
     private readonly yState: YStateService,
-    private readonly undo: UndoService,
-    private readonly schemaCreator: SchemaCreatorService,
+    private readonly handleSelect: HandleSelectService,
   ) {
     super()
     makeObservable(this)
@@ -34,10 +28,6 @@ export class HandleNodeService extends Service {
       node.height,
       node.matrix,
     ])
-  }
-
-  subscribe() {
-    return Disposer.combine(this.handleSelect.afterSelect.hook(this.getDatum))
   }
 
   addNodes(nodes: S.Node[]) {
@@ -82,127 +72,26 @@ export class HandleNodeService extends Service {
     return OBB.fromRect(node, node.rotation).center
   }
 
-  deleteSelectedNodes() {
-    this.yState.transact(() => {
-      const traverse = createSchemaTraverse({
-        schema: this.yState.schema,
-        leave: ({ item, parent }) => {
-          if (!parent || !SchemaHelper.isNode(item)) return
-          this.deleteChild(parent, item)
-        },
-      })
-      traverse(this.handleSelect.selectIdList)
-
-      this.handleSelect.clearSelect()
-    })
-    this.undo.track('all', t('delete nodes'))
-  }
-
-  copySelectedNodes() {
-    this.copiedIds = [...this.handleSelect.selectIdList]
-  }
-
-  pasteNodes() {
-    if (!this.copiedIds.length) return
-
-    const newSelectIds = <ID[]>[]
-    this.yState.transact(() => {
-      const traverse = createSchemaTraverse<{ newNode?: S.Node | S.NodeParent }>({
-        schema: this.yState.schema,
-        enter: (ctx) => {
-          const { item, parent, forwardCtx, depth } = ctx
-          if (!parent || !SchemaHelper.isNode(item)) return false
-
-          const newParent = forwardCtx?.newNode || parent
-          const newNode = this.schemaCreator.clone(item, {
-            name: this.schemaCreator.createNodeName(item.type),
-          })
-          this.addNodes([newNode])
-          this.insertChildAt(newParent as S.NodeParent, newNode)
-          ctx.newNode = newNode
-          if (depth === 0) newSelectIds.push(newNode.id)
-        },
-      })
-      traverse(this.copiedIds)
-      this.copiedIds = []
-    })
-    this.undo.untrack(() => {
-      this.handleSelect.clearSelect()
-      newSelectIds.forEach((id) => this.handleSelect.select(id))
-    })
-    this.undo.track('all', `${t('paste nodes')}: ${newSelectIds.length}`)
-  }
-
-  reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
-    const selected = this.handleSelect.selectIdList.map((id) =>
-      this.yState.find<S.Node>(id),
-    )
-
-    this.yState.transact(() => {
-      selected.forEach((node) => {
-        const parent = this.yState.find<S.NodeParent>(node.parentId)
-        let index = parent.childIds.indexOf(node.id)
-        index = iife(() => {
-          if (type === 'up') return index - 1
-          if (type === 'down') return index + 1
-          if (type === 'top') return 0
-          return parent.childIds.length - 1
-        })
-        this.reHierarchy(parent, node, index)
-      })
-    })
-
-    this.undo.track('all', t('reorder nodes'))
-  }
-
-  wrapInFrame() {
-    const selected = this.handleSelect.selectIdList.map((id) =>
-      this.yState.find<S.Node>(id),
-    )
-    if (selected.length === 0) return
-
-    const frameOBB = this.getNodesMergedOBB(selected)
-    const frameNode = this.schemaCreator.frame({ ...frameOBB })
-    const oldParent = this.yState.find<S.NodeParent>(selected[0].parentId)
-    const index = oldParent.childIds.indexOf(selected[0].id)
-
-    this.yState.transact(() => {
-      this.addNodes([frameNode])
-      this.insertChildAt(oldParent, frameNode, index)
-      selected.forEach((node) => this.removeChild(oldParent, node))
-      selected.forEach((node) => this.insertChildAt(frameNode, node))
-    })
-    this.undo.untrack(
-      action(() => {
-        selected.forEach((node) => this.handleSelect.unselect(node.id))
-        this.handleSelect.select(frameNode.id)
-      }),
-    )
-    this.undo.track('all', t('create frame'))
-  }
-
-  private getDatum() {
+  private getDatumXY() {
     const selectIds = this.handleSelect.selectIdList
+    let datumId = ''
 
-    if (selectIds.length === 0) {
-      this.datumId = ''
-    }
     if (selectIds.length === 1) {
-      this.datumId = this.yState.find<S.Node>(firstOne(selectIds)!).parentId
+      datumId = this.yState.find<S.Node>(firstOne(selectIds)!).parentId
     }
     if (selectIds.length > 1) {
       const parentIds = new Set<string>()
       selectIds.forEach((id) => parentIds.add(this.yState.find<S.Node>(id).parentId))
-      if (parentIds.size === 1) this.datumId = firstOne(parentIds)!
-      if (parentIds.size > 1) this.datumId = ''
+      if (parentIds.size === 1) datumId = firstOne(parentIds)!
+      if (parentIds.size > 1) datumId = ''
     }
 
-    const datum = this.yState.find<S.Node>(this.datumId)
+    const datum = this.yState.find<S.Node>(datumId)
     if (datum && !SchemaHelper.isPageById(datum.id)) {
       const aabb = OBB.fromRect(datum, datum.rotation).aabb
-      this.datumXY = XY.$(aabb.minX, aabb.minY)
+      return XY.$(aabb.minX, aabb.minY)
     } else {
-      this.datumXY = XY.$(0, 0)
+      return XY.$(0, 0)
     }
   }
 }

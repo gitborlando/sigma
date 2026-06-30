@@ -1,4 +1,3 @@
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { floor } from 'src/editor/geometry/base'
@@ -23,13 +22,7 @@ export class StageCursorService extends Service {
   constructor(private readonly stageSurface: StageSurfaceService) {
     super()
     autoBind(this)
-  }
-
-  subscribe() {
-    return Disposer.combine(
-      this.stageSurface.inited.hook(() => this.setCursor('select')),
-      listen('mouseup', () => (this.locked = false)),
-    )
+    this.disposer.add(listen('mouseup', () => (this.locked = false)))
   }
 
   setCursor(type: StageCursorType, rotation = 0) {

@@ -8,7 +8,6 @@ import { Service } from 'src/global/service'
 import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
 import { YSyncService } from './y-sync'
-import { YStateService } from './y-state'
 
 export class YClientsService extends Service {
   clientId!: number
@@ -34,7 +33,6 @@ export class YClientsService extends Service {
 
   constructor(
     private readonly handleSelect: HandleSelectService,
-    private readonly yState: YStateService,
     private readonly ySync: YSyncService,
   ) {
     super()
@@ -42,25 +40,24 @@ export class YClientsService extends Service {
     autoBind(this)
   }
 
-  subscribe = () => {
-    const disposeSelect = reaction(
-      () => ({
-        selectIdMap: this.handleSelect.selectIdMap,
-        selectPageId: this.handleSelect.selectPageId,
-      }),
-      () => this.syncSelectState(),
+  setup() {
+    this.effect(
+      reaction(
+        () => ({
+          selectIdMap: this.handleSelect.selectIdMap,
+          selectPageId: this.handleSelect.selectPageId,
+        }),
+        () => this.syncSelectState(),
+      ),
     )
     runInAction(() => {
       this.client.userId = UserService.userId
       this.client.userName = UserService.userName
       this.client.userAvatar = UserService.avatar
     })
-    this.yState.inited$.hook(() => {
-      this.handleSelect.selectPage(this.yState.state.meta.pageIds[0])
-    })
     MobxUndo.rebase()
     this.syncSelectState()
-    return Disposer.combine(this.onMouseMove(), disposeSelect)
+    this.effect(this.onMouseMove())
   }
 
   private syncSelectState = () => {

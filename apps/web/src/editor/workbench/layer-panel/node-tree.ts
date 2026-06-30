@@ -15,15 +15,6 @@ export class LayerPanelNodeTreeService extends Service {
   private expandedNodeMap = observable.map<string, boolean>()
   @observable private nodeInfoVersion = 0
 
-  constructor(
-    private readonly handleSelect: HandleSelectService,
-    private readonly yState: YStateService,
-  ) {
-    super()
-    makeObservable(this)
-    autoBind(this)
-  }
-
   @computed get nodeInfoList() {
     this.nodeInfoVersion
     return this.getNodeInfoList()
@@ -36,8 +27,14 @@ export class LayerPanelNodeTreeService extends Service {
     return false
   }
 
-  subscribe() {
-    return this.onNodeHierarchyChange()
+  constructor(
+    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YStateService,
+  ) {
+    super()
+    makeObservable(this)
+    autoBind(this)
+    this.effect(this.onNodeHierarchyChange())
   }
 
   getNodeExpanded(id: string) {

@@ -9,11 +9,10 @@ export class LayerPanelService extends Service {
     super()
     makeObservable(this)
     autoBind(this)
-  }
-
-  subscribe() {
-    return autorun(() => {
-      this.pagePanelHeight = this.pagePanelExpanded ? 200 : 32
-    })
+    this.effect(
+      autorun(() => {
+        this.pagePanelHeight = this.pagePanelExpanded ? 200 : 32
+      }),
+    )
   }
 }

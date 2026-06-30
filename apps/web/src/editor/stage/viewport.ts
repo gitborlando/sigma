@@ -1,14 +1,13 @@
 import { AABB, IRect } from '@gitborlando/geo'
 import { Wheeler } from '@gitborlando/toolkit/browser'
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { makeObservable } from 'mobx'
-import type { EditorServiceGetters } from 'src/editor'
 import { IMatrix, Matrix, max, min } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { StageSceneService } from 'src/editor/render/scene'
+import { StageSurfaceService } from 'src/editor/render/surface'
 import { Service } from 'src/global/service'
 
 const createInitBound = () => ({
@@ -39,25 +38,19 @@ export class StageViewportService extends Service {
   constructor(
     private readonly handleSelect: HandleSelectService,
     private readonly stageScene: StageSceneService,
-    private readonly getStageSurface: EditorServiceGetters['getStageSurface'],
   ) {
     super()
     makeObservable(this)
     autoBind(this)
+    this.disposer.add(
+      this.onBoundChange(),
+      this.onMatrixChange(),
+      this.onCurrentPageChange(),
+    )
   }
 
   get boundCenter() {
     return XY.center(this.bound).divide(this.zoom)
-  }
-
-  subscribe() {
-    return Disposer.combine(
-      this.onBoundChange(),
-      this.onMatrixChange(),
-      this.onCurrentPageChange(),
-      this.getStageSurface().inited.hook(this.onWheelZoom),
-      this.disposer.dispose,
-    )
   }
 
   toCanvasXY(xy: IXY) {
@@ -140,14 +133,12 @@ export class StageViewportService extends Service {
     this.updateZoom(newZoom, this.toCanvasXY(XY.client(e)))
   }
 
-  private onWheelZoom() {
+  onWheelZoom(stageSurface: StageSurfaceService) {
     this.disposer.add(
       this.wheeler.beforeWheel.hook(() => (this.isZooming = true)),
       this.wheeler.duringWheel.hook(({ e }) => this.handleWheelZoom(e)),
       this.wheeler.afterWheel.hook(() => (this.isZooming = false)),
-      this.getStageSurface().addEvent('wheel', (e) =>
-        this.wheeler.onWheel(e as WheelEvent),
-      ),
+      stageSurface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent)),
       listen('wheel', { passive: false, capture: true }, (e) => {
         e.ctrlKey && e.preventDefault()
       }),

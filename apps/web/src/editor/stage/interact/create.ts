@@ -4,10 +4,9 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
 import type { EditorServiceGetters } from 'src/editor'
+import { SelectControllerService } from 'src/editor/controller/select'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
-import { HandleNodeService } from 'src/editor/handle/node'
-import { HandleSelectService } from 'src/editor/handle/select'
 import {
   createLine,
   createRegularPolygon,
@@ -15,19 +14,20 @@ import {
   Matrix,
   MRect,
 } from 'src/editor/geometry'
+import { HandleNodeService } from 'src/editor/handle/node'
+import { HandleSelectService } from 'src/editor/handle/select'
 import { StageSceneService } from 'src/editor/render/scene'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageCursorService } from 'src/editor/stage/cursor'
-import { StageSelectService } from 'src/editor/stage/interact/select'
+import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewportService } from 'src/editor/stage/viewport'
-import { YStateService } from 'src/editor/y-adapter/y-state'
-import { Service } from 'src/global/service'
 import {
   snapGridRoundRectBySetting,
   snapGridRoundXYBySetting,
 } from 'src/editor/utils/misc'
+import { YStateService } from 'src/editor/y-adapter/y-state'
+import { Service } from 'src/global/service'
 
 const createTypes = [
   'frame',
@@ -45,6 +45,7 @@ const defaultCreateSize = 100
 export class StageCreateService extends Service {
   createTypes = createTypes
   @observable createType: IStageCreateType = 'frame'
+
   private node!: S.Node
   private parent!: S.NodeParent
 
@@ -52,7 +53,6 @@ export class StageCreateService extends Service {
     private readonly stageScene: StageSceneService,
     private readonly stageCursor: StageCursorService,
     private readonly handleNode: HandleNodeService,
-    private readonly stageSelect: StageSelectService,
     private readonly getStageInteract: EditorServiceGetters['getStageInteract'],
     private readonly undo: UndoService,
     private readonly schemaCreator: SchemaCreatorService,
@@ -61,6 +61,7 @@ export class StageCreateService extends Service {
     private readonly stageViewport: StageViewportService,
     private readonly getStageSurface: EditorServiceGetters['getStageSurface'],
     private readonly editorSetting: EditorSettingService,
+    private readonly selectController: SelectControllerService,
   ) {
     super()
     makeObservable(this)
@@ -105,7 +106,7 @@ export class StageCreateService extends Service {
       this.handleNode.insertChildAt(this.parent, this.node)
     })
 
-    this.stageSelect.onCreateSelect(this.node.id)
+    this.selectController.onCreateSelect(this.node.id)
     this.getStageSurface().disablePointEvent()
 
     if (this.createType === 'line') {

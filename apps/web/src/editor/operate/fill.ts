@@ -1,4 +1,3 @@
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
@@ -23,11 +22,8 @@ export class OperateFillService extends Service {
     super()
     makeObservable(this)
     autoBind(this)
-  }
-
-  subscribe() {
-    return Disposer.combine(
-      this.handleSelect.afterSelect.hook(this.setupFills),
+    this.effect(autorun(this.setupFills))
+    this.effect(
       this.yState.listen((patches) => {
         if (!patches.some((p) => p.keys[1] === 'fills')) return
         this.updateFills()

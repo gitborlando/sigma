@@ -1,4 +1,3 @@
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
@@ -13,10 +12,7 @@ export class StageToolGridService extends Service {
   ) {
     super()
     autoBind(this)
-  }
-
-  subscribe() {
-    return Disposer.combine(this.stageSurface.onRenderTopCanvas.hook(this.draw))
+    this.effect(this.stageSurface.onRenderTopCanvas.hook(this.draw))
   }
 
   private draw() {

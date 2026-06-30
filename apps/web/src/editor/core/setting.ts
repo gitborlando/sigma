@@ -1,6 +1,6 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
-import { makeObservable } from 'mobx'
 import { defuOverrideArray } from '@sigma/utils/defu'
+import { makeObservable } from 'mobx'
 import { Service } from 'src/global/service'
 
 const initSetting = () => {
@@ -26,11 +26,8 @@ export class EditorSettingService extends Service {
     super()
     makeObservable(this)
     autoBind(this)
-  }
-
-  subscribe() {
     this.loadSetting()
-    return this.autoSaveSetting()
+    this.disposer.add(this.autoSaveSetting())
   }
 
   private loadSetting() {

@@ -15,14 +15,16 @@ export const EditorComp = withSuspense(
 
     const yState = editor.resolve('yState')
     const stageSurface = editor.resolve('stageSurface')
+    const stageCursor = editor.resolve('stageCursor')
 
     suspend(() => yState.initSchema(fileId!), [fileId])
     suspend(() => stageSurface.initTextBreaker(), ['initTextBreaker'])
 
     useEffect(() => {
-      const unsubscribe = editor.subscribe()
+      stageSurface.onCanvasInited()
+      stageCursor.setCursor('select')
+
       return () => {
-        unsubscribe()
         editor.dispose()
         clear([fileId])
       }

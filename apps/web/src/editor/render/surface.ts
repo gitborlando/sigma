@@ -13,6 +13,7 @@ import {
   TextBreaker,
   createTextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
+import { StageViewportService } from 'src/editor/stage/viewport'
 import { Raf, reverseFor } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
 import { rgba } from 'src/utils/color'
@@ -42,20 +43,25 @@ export class StageSurfaceService extends Service {
   private bufferCanvas = new OffscreenCanvas(0, 0)
   private bufferCtx = this.bufferCanvas.getContext('2d')!
 
+  constructor(
+    private readonly editorSetting: EditorSettingService,
+    private readonly stageViewport: StageViewportService,
+    private readonly getStageScene: EditorServiceGetters['getStageScene'],
+  ) {
+    super()
+    autoBind(this)
+  }
+
   textBreaker!: TextBreaker
   async initTextBreaker() {
     this.textBreaker = await createTextBreaker()
   }
 
-  subscribe() {
-    return Disposer.combine(
-      this.inited.hook(() => {
-        this.disposer.add(this.onResize(), this.onZoomMove(), this.onPointerEvents())
-        this.requestRenderTopCanvas()
-      }),
-      this.DEV_showDirtyRect(),
-      this.dispose,
-    )
+  onCanvasInited() {
+    this.disposer.add(this.onResize(), this.onZoomMove(), this.onPointerEvents())
+    this.requestRenderTopCanvas()
+    this.getStageScene().renderTreeOnSurfaceInited()
+    this.stageViewport.onWheelZoom(this)
   }
 
   setContainer = (container: HTMLDivElement) => {
@@ -107,15 +113,6 @@ export class StageSurfaceService extends Service {
   private renderType?: SurfaceRenderType
   private renderTasks: NoopFunc[] = []
   private raf = new Raf()
-
-  constructor(
-    private readonly editorSetting: EditorSettingService,
-    private readonly getStageScene: EditorServiceGetters['getStageScene'],
-    private readonly getStageViewport: EditorServiceGetters['getStageViewport'],
-  ) {
-    super()
-    autoBind(this)
-  }
 
   private requestRender = (type: SurfaceRenderType) => {
     if (this.renderType === type) return
@@ -236,8 +233,7 @@ export class StageSurfaceService extends Service {
 
     const traverse = (elem: Elem) => {
       if (!elem.visible) return
-      if (AABB.include(this.getStageViewport().prevSceneAABB, elem.aabb) === 1)
-        return
+      if (AABB.include(this.stageViewport.prevSceneAABB, elem.aabb) === 1) return
       reRenderElems.add(elem)
     }
 
@@ -333,7 +329,7 @@ export class StageSurfaceService extends Service {
         const path2d = new Path2D()
         const { minX, minY, maxX, maxY } = this.DEV_dirtyArea
         path2d.rect(minX, minY, maxX - minX, maxY - minY)
-        ctx.lineWidth = 2 / this.getStageViewport().zoom
+        ctx.lineWidth = 2 / this.stageViewport.zoom
         ctx.strokeStyle = rgba(0, 255, 100, 1)
         ctx.stroke(path2d)
       })
@@ -344,25 +340,25 @@ export class StageSurfaceService extends Service {
 
   transformCanvas = () => {
     this.ctx.transform(...this.dprMatrix.tuple())
-    this.ctx.transform(...this.getStageViewport().sceneMatrix.tuple())
+    this.ctx.transform(...this.stageViewport.sceneMatrix.tuple())
   }
 
   transformTopCanvas = () => {
     this.topCtx.transform(...this.dprMatrix.tuple())
-    this.topCtx.transform(...this.getStageViewport().sceneMatrix.tuple())
+    this.topCtx.transform(...this.stageViewport.sceneMatrix.tuple())
   }
 
   private onZoomMove = () => {
     return Disposer.combine(
       reaction(
-        () => this.getStageViewport().zoom,
+        () => this.stageViewport.zoom,
         () => {
           this.requestRender('firstFullRender')
           this.requestRenderTopCanvas()
         },
       ),
       reaction(
-        () => XY.of(this.getStageViewport().offset),
+        () => XY.of(this.stageViewport.offset),
         (offset, prevOffset) => {
           this.translate(offset, prevOffset)
           this.requestRenderTopCanvas()
@@ -374,7 +370,7 @@ export class StageSurfaceService extends Service {
   private onResize() {
     return Disposer.combine(
       reaction(
-        () => ({ ...this.getStageViewport().bound }),
+        () => ({ ...this.stageViewport.bound }),
         ({ width, height }) => {
           ;[this.canvas, this.topCanvas, this.bufferCanvas].forEach((canvas) => {
             canvas.width = width * dpr
@@ -388,14 +384,14 @@ export class StageSurfaceService extends Service {
         { fireImmediately: true },
       ),
       reaction(
-        () => ({ ...this.getStageViewport().bound }),
+        () => ({ ...this.stageViewport.bound }),
         () => this.requestRender('firstFullRender'),
       ),
     )
   }
 
   getVisualSize = (aabb: AABB) => {
-    const zoom = this.getStageViewport().zoom
+    const zoom = this.stageViewport.zoom
     return XY.$((aabb.maxX - aabb.minX) * zoom, (aabb.maxY - aabb.minY) * zoom)
   }
 
@@ -417,7 +413,7 @@ export class StageSurfaceService extends Service {
   private eventXY!: IXY
 
   private getEventXY = (xy: IXY) => {
-    const stageViewport = this.getStageViewport()
+    const stageViewport = this.stageViewport
     xy = stageViewport.toCanvasXY(xy)
     this.eventXY = stageViewport.sceneMatrix.invertXY(xy)
     this.elemsFromPoint = []
