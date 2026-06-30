@@ -1,17 +1,23 @@
-const OperateFill = {} as any
+import { OperateFillService } from 'src/editor/operate/fill'
+import { Service } from 'src/global/service'
 
-class FillPickerStateService {
+export class FillPickerService extends Service {
   @observable pickerPos = XY.$()
   @observable fillIndex = -1
   @observable isShowPicker = false
   @observable fillType: S.Fill['type'] = 'color'
+
+  constructor(private readonly operateFill: OperateFillService) {
+    super()
+    autoBind(makeObservable(this))
+  }
 
   @action
   showPicker(fillIndex: number, pos: IXY) {
     this.fillIndex = fillIndex
     this.pickerPos = pos
     this.isShowPicker = true
-    this.fillType = OperateFill.fills[fillIndex].type
+    this.fillType = this.operateFill.fills[fillIndex].type
   }
 
   @action
@@ -21,7 +27,7 @@ class FillPickerStateService {
   }
 
   changeFill(newFill: S.Fill) {
-    OperateFill.setFill(this.fillIndex, () => newFill)
+    this.operateFill.setFill(this.fillIndex, () => newFill)
   }
 
   getRgbaFromSolidFill(fill: S.FillColor) {
@@ -30,16 +36,10 @@ class FillPickerStateService {
   }
 
   setRgbaToSolidFill(color: string, alpha: number) {
-    OperateFill.setFill(this.fillIndex, (draft) => {
+    this.operateFill.setFill(this.fillIndex, (draft) => {
       if (draft.type !== 'color') return draft
       draft.color = color
       draft.alpha = alpha
     })
   }
-
-  onColorChange(color: string, alpha: number) {}
-
-  onAfterPick(color: string, alpha: number) {}
 }
-
-export const FillPickerState = autoBind(makeObservable(new FillPickerStateService()))

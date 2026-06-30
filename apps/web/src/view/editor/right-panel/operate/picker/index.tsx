@@ -8,7 +8,6 @@ import { Segments } from 'src/view/component/segments'
 import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
 import { PickerImageComp } from 'src/view/editor/right-panel/operate/picker/image'
 import { PickerLinearGradientComp } from 'src/view/editor/right-panel/operate/picker/linear-gradient'
-import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
 import { useEditorService } from 'src/view/hooks/editor'
 
 const createFillCache = (
@@ -23,11 +22,12 @@ const fillCache = new Map<S.Fill['type'], S.Fill>()
 
 export const FillPickerComp: FC<{}> = observer(({}) => {
   const { t } = useTranslation()
+  const fillPicker = useEditorService('fillPicker')
   const operateFill = useEditorService('operateFill')
   const schemaCreator = useEditorService('schemaCreator')
   const undo = useEditorService('undo')
 
-  const { fillIndex, fillType, pickerPos, changeFill } = FillPickerState
+  const { fillIndex, fillType, pickerPos, changeFill } = fillPicker
   const fill = operateFill.fills[fillIndex]
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
   // })
 
   const handleChangeFill = (value: S.Fill['type']) => {
-    FillPickerState.fillType = value
+    fillPicker.fillType = value
     changeFill(getSet(fillCache, value, () => createFillCache(schemaCreator, value)))
     undo.track('state', t('change fill type'))
   }
@@ -55,7 +55,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
       clickAwayClose={true}
       xy={pickerPos}
       className={cls()}
-      showFunc={(show) => !show && FillPickerState.hidePicker()}>
+      showFunc={(show) => !show && fillPicker.hidePicker()}>
       <G vertical className={cls('content')} gap={12}>
         <Segments
           options={[

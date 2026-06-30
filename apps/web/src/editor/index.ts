@@ -23,6 +23,7 @@ import { StageSelectService } from 'src/editor/stage/interact/select'
 import { StageToolGridService } from 'src/editor/stage/tools/grid'
 import { StageTransformerService } from 'src/editor/stage/tools/transformer'
 import { StageViewportService } from 'src/editor/stage/viewport'
+import { FillPickerService } from 'src/editor/workbench/design-panel/fill-picker'
 import { LayerPanelService } from 'src/editor/workbench/layer-panel'
 import { LayerPanelNodeTreeService } from 'src/editor/workbench/layer-panel/node-tree'
 import { YClientsService } from 'src/editor/y-adapter/y-clients'
@@ -55,6 +56,7 @@ const editorServices = {
   stageCursor: StageCursorService,
   stageViewport: StageViewportService,
   stageToolGrid: StageToolGridService,
+  fillPicker: FillPickerService,
   layerPanel: LayerPanelService,
   layerPanelNodeTree: LayerPanelNodeTreeService,
   yClients: YClientsService,
@@ -115,6 +117,9 @@ export class Editor extends Service {
     this.effect(() => this.container.dispose())
   }
 
+  resolve = <K extends keyof EditorServices>(key: K) =>
+    this.container.resolve<EditorServices[K]>(key)
+
   private setupServices() {
     objKeys(editorServices).forEach((key) => {
       this.container.register(key, asClass(editorServices[key]).singleton())
@@ -124,7 +129,4 @@ export class Editor extends Service {
       this.container.register(key, asValue(editorServiceGetters[key]))
     })
   }
-
-  resolve = <K extends keyof EditorServices>(key: K) =>
-    this.container.resolve<EditorServices[K]>(key)
 }

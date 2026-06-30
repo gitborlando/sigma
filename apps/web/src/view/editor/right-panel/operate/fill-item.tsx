@@ -7,7 +7,6 @@ import { Image } from 'src/global/service/image'
 import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
-import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
 import { useEditorService } from 'src/view/hooks/editor'
 import { suspend } from 'suspend-react'
 
@@ -15,6 +14,7 @@ export const EditorRPOperateFillItemComp: FC<{
   fill: S.Fill
   index: number
 }> = ({ fill, index }) => {
+  const fillPicker = useEditorService('fillPicker')
   const isColorType = fill.type === 'color'
   const isLinearType = fill.type === 'linearGradient'
   const isImageType = fill.type === 'image'
@@ -23,7 +23,7 @@ export const EditorRPOperateFillItemComp: FC<{
 
   const openPicker = () => {
     const outerRefBound = outerRef.current!.getBoundingClientRect()
-    FillPickerState.showPicker(index, XY.of(outerRefBound).plus(XY.$(-240 - 24, 0)))
+    fillPicker.showPicker(index, XY.of(outerRefBound).plus(XY.$(-240 - 24, 0)))
   }
 
   return (
