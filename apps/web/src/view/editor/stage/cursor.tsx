@@ -3,8 +3,8 @@ import { COLOR } from 'src/utils/color'
 import { useEditorService } from 'src/view/hooks/editor'
 
 export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
-  const yClients = useEditorService('yClients')
-  const others = yClients.others
+  const yAware = useEditorService('yAware')
+  const others = yAware.others
   const cursors = values(others).map((other) => ({
     xy: other.cursor,
     name: other.userName,

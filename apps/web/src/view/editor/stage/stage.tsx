@@ -1,5 +1,7 @@
 import { CSSProperties } from 'react'
 import { renderElem } from 'src/editor/render/react/reconciler'
+import { SchemaHelper } from 'src/editor/schema/helper'
+import { ContextMenu } from 'src/global/context-menu'
 import { EditorStageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
 import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'
@@ -11,7 +13,11 @@ import { EditorContext, useEditor, useEditorService } from 'src/view/hooks/edito
 
 export const StageComp: FC<{}> = observer(({}) => {
   const editor = useEditor()
+  const editorCommand = useEditorService('editorCommand')
+  const selectController = useEditorService('selectController')
   const stageScene = useEditorService('stageScene')
+  const stageSelect = useEditorService('stageSelect')
+  const handleSelect = useEditorService('handleSelect')
 
   useEffect(() => {
     return renderElem(
@@ -25,8 +31,31 @@ export const StageComp: FC<{}> = observer(({}) => {
     )
   }, [editor, stageScene])
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    const { hoverId } = stageSelect
+    const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
+      editorCommand
+    const baseMenus = [copyPasteGroup, undoRedoGroup]
+
+    if (
+      !hoverId ||
+      !handleSelect.selectIdList.length ||
+      SchemaHelper.isFirstLayerFrame(hoverId)
+    ) {
+      ContextMenu.context = {}
+      ContextMenu.menus = baseMenus
+      ContextMenu.openMenu(e)
+      return
+    }
+
+    selectController.onStageSelect(hoverId)
+    ContextMenu.context = { id: hoverId }
+    ContextMenu.menus = [...baseMenus, nodeGroup, nodeReHierarchyGroup]
+    ContextMenu.openMenu(e)
+  }
+
   return (
-    <G onContextMenu={(e) => e.preventDefault()}>
+    <G onContextMenu={handleContextMenu}>
       <EditorStageSurfaceComp />
       <RulerComp />
       <FPSComp />
@@ -36,11 +65,11 @@ export const StageComp: FC<{}> = observer(({}) => {
 })
 
 export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
-  const yClients = useEditorService('yClients')
-  const { observingClientId: observingUserId } = yClients
+  const yAware = useEditorService('yAware')
+  const { observingClientId: observingUserId } = yAware
   if (!observingUserId) return null
 
-  const client = yClients.others[observingUserId]
+  const client = yAware.others[observingUserId]
 
   return (
     <G

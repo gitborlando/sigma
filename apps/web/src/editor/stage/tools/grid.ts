@@ -1,3 +1,4 @@
+import { StageRendererService } from 'src/editor/render/renderer'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
@@ -7,12 +8,13 @@ export class StageToolGridService extends Service {
   private ctx!: CanvasRenderingContext2D
 
   constructor(
+    private readonly stageRenderer: StageRendererService,
     private readonly stageSurface: StageSurfaceService,
     private readonly stageViewport: StageViewportService,
   ) {
     super()
     autoBind(this)
-    this.effect(this.stageSurface.onRenderTopCanvas.hook(this.draw))
+    this.effect(this.stageRenderer.onRenderTopCanvas.hook(this.draw))
   }
 
   private draw() {

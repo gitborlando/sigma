@@ -10,10 +10,10 @@ export function useSelectIdMap() {
 
 export function useAllSelectIdMap() {
   const handleSelect = useEditorService('handleSelect')
-  const yClients = useEditorService('yClients')
+  const yAware = useEditorService('yAware')
   return {
     ...handleSelect.selectIdMap,
-    ...Object.values(yClients.others).reduce(
+    ...Object.values(yAware.others).reduce(
       (acc, client) => ({ ...acc, ...client.selectIdMap }),
       {},
     ),

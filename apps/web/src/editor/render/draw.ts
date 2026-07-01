@@ -1,11 +1,15 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
+import { EditorSettingService } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
 import { max } from 'src/editor/geometry/base'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
-import { EditorSettingService } from 'src/editor/core/setting'
-import { ISplitText } from 'src/editor/render/text-break/text-breaker'
-import { StageSurfaceService } from 'src/editor/render/surface'
+import { RenderInvalidatorService } from 'src/editor/render/invalidator'
+import {
+  createTextBreaker,
+  ISplitText,
+  TextBreaker,
+} from 'src/editor/render/text-break/text-breaker'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 import { Image } from 'src/global/service/image'
@@ -21,12 +25,26 @@ export class ElemDrawerService extends Service {
   private dirtyRects: AABB[] = []
 
   constructor(
-    private readonly stageSurface: StageSurfaceService,
     private readonly editorSetting: EditorSettingService,
     private readonly stageViewport: StageViewportService,
+    private readonly renderInvalidator: RenderInvalidatorService,
   ) {
     super()
     autoBind(this)
+  }
+
+  private textBreaker?: TextBreaker
+  private initTextBreakerTask?: Promise<void>
+
+  initTextBreaker() {
+    if (this.textBreaker) return Promise.resolve()
+    if (this.initTextBreakerTask) return this.initTextBreakerTask
+
+    this.initTextBreakerTask = createTextBreaker().then((textBreaker) => {
+      this.textBreaker = textBreaker
+    })
+
+    return this.initTextBreakerTask
   }
 
   draw = (elem: Elem, ctx: CanvasRenderingContext2D, path2d: Path2D) => {
@@ -39,17 +57,17 @@ export class ElemDrawerService extends Service {
     this.drawShapePath()
 
     this.node.fills.forEach((fill, i) => {
-      this.stageSurface.ctxSaveRestore(() => {
-        this.drawShadow(this.node.shadows[i])
-        this.drawFill(fill)
-      })
+      this.ctx.save()
+      this.drawShadow(this.node.shadows[i])
+      this.drawFill(fill)
+      this.ctx.restore()
     })
 
     this.node.strokes.forEach((stroke, i) => {
-      this.stageSurface.ctxSaveRestore(() => {
-        this.drawShadow(this.node.shadows[i])
-        this.drawStroke(stroke)
-      })
+      this.ctx.save()
+      this.drawShadow(this.node.shadows[i])
+      this.drawStroke(stroke)
+      this.ctx.restore()
     })
 
     // this.drawOutline()
@@ -195,13 +213,10 @@ export class ElemDrawerService extends Service {
     this.splitTexts = getSet(
       this.splitTextsCache,
       this.node.id,
-      () =>
-        this.stageSurface.textBreaker.breakText(
-          content,
-          width,
-          style,
-          letterSpacing,
-        ),
+      () => {
+        if (!this.textBreaker) throw new Error('TextBreaker not initialized')
+        return this.textBreaker.breakText(content, width, style, letterSpacing)
+      },
       [content, width, style],
     )
   }
@@ -271,7 +286,7 @@ export class ElemDrawerService extends Service {
         const image = Image.getImage(fill.url)
         if (!image) {
           Image.getImageAsync(fill.url).then(() => {
-            this.stageSurface.collectDirty(this.elem)
+            this.renderInvalidator.collectDirty(this.elem)
           })
         } else {
           const { width, height } = this.node
@@ -357,11 +372,11 @@ export class ElemDrawerService extends Service {
     const { width, color } = this.node.outline
     if (width <= 0) return
 
-    this.stageSurface.ctxSaveRestore(() => {
-      this.ctx.lineWidth = width
-      this.ctx.strokeStyle = color || themeColor()
-      this.ctx.stroke(new Path2D(this.path2d))
-    })
+    this.ctx.save()
+    this.ctx.lineWidth = width
+    this.ctx.strokeStyle = color || themeColor()
+    this.ctx.stroke(new Path2D(this.path2d))
+    this.ctx.restore()
   }
 
   private drawTextDecoration() {
@@ -381,11 +396,11 @@ export class ElemDrawerService extends Service {
       this.path2d.lineTo(p2.x, p2.y + fontSize / 2)
     }
 
-    this.stageSurface.ctxSaveRestore(() => {
-      this.ctx.lineWidth = width
-      this.ctx.strokeStyle = color || themeColor()
-      this.ctx.stroke(new Path2D(this.path2d))
-    })
+    this.ctx.save()
+    this.ctx.lineWidth = width
+    this.ctx.strokeStyle = color || themeColor()
+    this.ctx.stroke(new Path2D(this.path2d))
+    this.ctx.restore()
   }
 
   private updateHitTest = () => {

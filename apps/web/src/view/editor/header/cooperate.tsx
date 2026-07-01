@@ -14,10 +14,10 @@ type CooperateInfo = {
 }
 
 export const CooperateComp: FC<{}> = observer(({}) => {
-  const yClients = useEditorService('yClients')
+  const yAware = useEditorService('yAware')
   const [show, setShow] = useState(false)
 
-  const cooperates = entries(yClients.others).map(([clientId, other]) => ({
+  const cooperates = entries(yAware.others).map(([clientId, other]) => ({
     clientId: Number(clientId),
     userId: other.userId,
     name: other.userName,
@@ -47,7 +47,7 @@ export const CooperateComp: FC<{}> = observer(({}) => {
 
 const CooperatePopup: FC<{ cooperates: CooperateInfo[] }> = observer(
   ({ cooperates }) => {
-    const yClients = useEditorService('yClients')
+    const yAware = useEditorService('yAware')
 
     return (
       <PopoverCard>
@@ -62,7 +62,7 @@ const CooperatePopup: FC<{ cooperates: CooperateInfo[] }> = observer(
                 center
                 className={cls('popup-item')}
                 onClick={() => {
-                  yClients.observingClientId = cooperate.clientId
+                  yAware.observingClientId = cooperate.clientId
                 }}>
                 <img src={cooperate.avatar} />
                 <Text style={{ alignSelf: 'center' }}>{cooperate.name}</Text>

@@ -3,7 +3,7 @@ import { UndoService } from 'src/editor/core/undo'
 import { HandleSelectService, type Selection } from 'src/editor/handle/select'
 import { Service } from 'src/global/service'
 
-export class SelectControllerService extends Service {
+export class SelectController extends Service {
   constructor(
     private readonly handleSelect: HandleSelectService,
     private readonly undo: UndoService,

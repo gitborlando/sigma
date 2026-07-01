@@ -4,7 +4,7 @@ export const EditorStageSurfaceComp: FC<{}> = observer(({}) => {
   const stageSurface = useEditorService('stageSurface')
 
   useLayoutEffect(() => {
-    stageSurface.onCanvasInited()
+    // stageSurface.onCanvasInited()
     return stageSurface.inited.dispatch(true)
   }, [])
 

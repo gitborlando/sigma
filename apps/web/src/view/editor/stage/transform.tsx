@@ -13,8 +13,8 @@ let isSelectOnlyLine = false
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const schemaCreator = useEditorService('schemaCreator')
   const stageInteract = useEditorService('stageInteract')
+  const stageEvent = useEditorService('stageEvent')
   const stageMove = useEditorService('stageMove')
-  const stageSurface = useEditorService('stageSurface')
   const stageTransformer = useEditorService('stageTransformer')
   const stageViewport = useEditorService('stageViewport')
   const selectNodes = useSelectNodes()
@@ -39,7 +39,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const mousedown = (e: ElemMouseEvent) => {
     if (stageInteract.interaction !== 'select') return
 
-    stageSurface.disablePointEvent(true)
+    stageEvent.disablePointEvent(true)
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()
       stageTransformer.move(e.hostEvent)

@@ -8,7 +8,7 @@ import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
-export class NodeControllerService extends Service {
+export class NodeController extends Service {
   constructor(
     private readonly handleNode: HandleNodeService,
     private readonly handleSelect: HandleSelectService,

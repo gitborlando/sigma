@@ -21,7 +21,7 @@ type StateUndoConfig = {
 }
 
 export const MobxUndo = autoBind(new MobxUndoService())
-export let YUndo: Y.UndoManager
+export let YUndo: Y.UndoManager | undefined
 
 export class UndoService extends Service {
   @observable.shallow stack: UndoInfo[] = []
@@ -50,6 +50,14 @@ export class UndoService extends Service {
     YUndo = new Y.UndoManager(stateMap, {
       trackedOrigins: new Set([null, Y_STATE_LOCAL_ORIGIN]),
     })
+  }
+
+  destroyUndo() {
+    YUndo?.destroy()
+    YUndo = undefined
+    this.stack = []
+    this.next = 0
+    this.getStatePatches = undefined
   }
 
   undo() {

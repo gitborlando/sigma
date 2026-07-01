@@ -24,9 +24,9 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
 export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
   const stageSelect = useEditorService('stageSelect')
   const handleSelect = useEditorService('handleSelect')
-  const yClients = useEditorService('yClients')
+  const yAware = useEditorService('yAware')
   const { hoverId } = stageSelect
-  const others = yClients.others
+  const others = yAware.others
 
   const outlineInfoLMap = iife(() => {
     const map: Record<string, OutlineInfo> = {}

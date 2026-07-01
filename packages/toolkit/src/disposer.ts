@@ -1,10 +1,10 @@
 export type DisposerFunc = () => void
 
 export class Disposer {
-  private disposers: DisposerFunc[] = []
+  private disposers = new Set<DisposerFunc>()
 
   add = (...disposers: DisposerFunc[]) => {
-    this.disposers.push(...disposers)
+    disposers.forEach((d) => this.disposers.add(d))
   }
 
   dispose = () => {
@@ -12,11 +12,11 @@ export class Disposer {
   }
 
   static combine(...disposers: DisposerFunc[]) {
-    return () => flushDisposers(disposers)
+    return () => flushDisposers(new Set(disposers))
   }
 }
 
-export const flushDisposers = (disposers: DisposerFunc[]) => {
+const flushDisposers = (disposers: Set<DisposerFunc>) => {
   disposers.forEach((dispose) => dispose())
-  disposers.length = 0
+  disposers.clear()
 }

@@ -2,7 +2,7 @@ import { Disposer } from '@gitborlando/toolkit'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { makeObservable } from 'mobx'
-import { NodeControllerService } from 'src/editor/controller/node'
+import { NodeController } from 'src/editor/controller/node'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import { HandlePageService } from 'src/editor/handle/page'
@@ -22,7 +22,7 @@ export class EditorCommandService extends Service {
     private readonly stageScene: StageSceneService,
     private readonly stageInteract: StageInteractService,
     private readonly yState: YStateService,
-    private readonly nodeController: NodeControllerService,
+    private readonly nodeController: NodeController,
   ) {
     super()
     autoBind(makeObservable(this))

@@ -1,10 +1,9 @@
 import { IRect } from '@gitborlando/geo'
+import { Signal } from '@gitborlando/signal'
 import type { DragData } from '@gitborlando/toolkit/browser'
-import { Disposer } from '@gitborlando/toolkit/disposer'
 import { clone } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
-import type { EditorServiceGetters } from 'src/editor'
-import { SelectControllerService } from 'src/editor/controller/select'
+import { SelectController } from 'src/editor/controller/select'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import {
@@ -21,6 +20,7 @@ import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageCursorService } from 'src/editor/stage/cursor'
 import { createStageDragger } from 'src/editor/stage/dragger'
+import { StageEventService } from 'src/editor/stage/event'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import {
   snapGridRoundRectBySetting,
@@ -49,30 +49,29 @@ export class StageCreateService extends Service {
   private node!: S.Node
   private parent!: S.NodeParent
 
+  finishCreate$ = Signal.create<void>()
+
   constructor(
     private readonly stageScene: StageSceneService,
+    private readonly stageEvent: StageEventService,
     private readonly stageCursor: StageCursorService,
     private readonly handleNode: HandleNodeService,
-    private readonly getStageInteract: EditorServiceGetters['getStageInteract'],
     private readonly undo: UndoService,
     private readonly schemaCreator: SchemaCreatorService,
     private readonly yState: YStateService,
     private readonly handleSelect: HandleSelectService,
     private readonly stageViewport: StageViewportService,
-    private readonly getStageSurface: EditorServiceGetters['getStageSurface'],
     private readonly editorSetting: EditorSettingService,
-    private readonly selectController: SelectControllerService,
+    private readonly selectController: SelectController,
   ) {
     super()
     autoBind(makeObservable(this))
   }
 
   startInteract() {
-    const disposer = Disposer.combine(
-      this.stageScene.sceneRoot.addEvent('mousedown', this.create, {
-        capture: true,
-      }),
-    )
+    const disposer = this.stageScene.sceneRoot.addEvent('mousedown', this.create, {
+      capture: true,
+    })
     this.stageCursor.setCursor('add').lock()
 
     return () => {
@@ -106,7 +105,7 @@ export class StageCreateService extends Service {
     })
 
     this.selectController.onCreateSelect(this.node.id)
-    this.getStageSurface().disablePointEvent()
+    this.stageEvent.disablePointEvent()
 
     if (this.createType === 'line') {
       this.stageCursor.setCursor('move').lock().upReset()
@@ -125,7 +124,7 @@ export class StageCreateService extends Service {
         this.updateNodeMRect(this.node, this.calcDefaultMRect())
       })
     }
-    this.getStageInteract().interaction = 'select'
+    this.finishCreate$.dispatch()
     this.undo.track('all', t('create node'))
   }
 
@@ -212,8 +211,9 @@ export class StageCreateService extends Service {
   }
 
   private findParent() {
-    const frame = this.stageScene
-      .elemsFromPoint()
+    const frame = this.stageEvent
+      .getElemsFromPoint()
+      .filter((elem) => elem.type === 'sceneElem')
       .find((elem) => SchemaHelper.isById(elem.id, 'frame'))
 
     if (frame) return this.yState.find<S.NodeParent>(frame.id)

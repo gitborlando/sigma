@@ -1,11 +1,11 @@
 import { clone } from '@gitborlando/utils'
-import type { EditorServiceGetters } from 'src/editor'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
-import { Elem, type ElemContext } from './elem'
+import { Elem } from './elem'
+import { RenderInvalidatorService } from './invalidator'
 
 export class StageSceneService extends Service {
   elements = new Map<string, Elem>()
@@ -24,10 +24,7 @@ export class StageSceneService extends Service {
   constructor(
     private readonly handleSelect: HandleSelectService,
     private readonly yState: YStateService,
-    private readonly getEditorSetting: EditorServiceGetters['getEditorSetting'],
-    private readonly getElemDrawer: EditorServiceGetters['getElemDrawer'],
-    private readonly getStageSurface: EditorServiceGetters['getStageSurface'],
-    private readonly getStageViewport: EditorServiceGetters['getStageViewport'],
+    private readonly renderInvalidator: RenderInvalidatorService,
   ) {
     super()
     autoBind(this)
@@ -38,16 +35,11 @@ export class StageSceneService extends Service {
     return this.elements.get(id)!
   }
 
-  elemsFromPoint(xy?: IXY) {
-    return this.getStageSurface()
-      .getElemsFromPoint(xy)
-      .filter((elem) => elem.type === 'sceneElem')
-  }
-
   private setupElems() {
     this.elements.clear()
-    this.sceneRoot = new Elem(this.createElemContext(), 'sceneRoot', 'sceneElem')
-    this.widgetRoot = new Elem(this.createElemContext(), 'widgetRoot', 'widgetElem')
+    this.rootElems.length = 0
+    this.sceneRoot = this.createElem('sceneRoot', 'sceneElem')
+    this.widgetRoot = this.createElem('widgetRoot', 'widgetElem')
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
     this.rootElems.push(this.sceneRoot, this.widgetRoot)
@@ -58,19 +50,8 @@ export class StageSceneService extends Service {
     })
   }
 
-  renderTreeOnSurfaceInited() {
-    this.effect(
-      autorun(() => {
-        const pageId = this.handleSelect.selectPageId
-        if (pageId) this.firstRenderPage()
-      }),
-      this.hookPatchRender(),
-    )
-  }
-
-  private firstRenderPage() {
-    this.getStageSurface().clearSurface()
-    this.sceneRoot.children = []
+  firstRenderPage() {
+    ;[...this.sceneRoot.children].forEach((child) => this.unmountNode(child.id))
 
     const traverse = (id: ID) => {
       const node = this.yState.find<S.Node>(id)
@@ -82,7 +63,7 @@ export class StageSceneService extends Service {
     page.childIds.forEach(traverse)
   }
 
-  private hookPatchRender() {
+  hookPatchRender() {
     return this.yState.flushPatch$.hook((op) => {
       const { type, keys } = op
       if (keys[1] === 'childIds') this.reHierarchy(op)
@@ -113,7 +94,7 @@ export class StageSceneService extends Service {
   private mountNode(node: S.Node) {
     const parent = this.elements.get(node.parentId) || this.sceneRoot
 
-    const elem = new Elem(this.createElemContext(), node.id, 'sceneElem')
+    const elem = this.createElem(node.id, 'sceneElem')
     this.elements.set(node.id, elem)
     parent.addChild(elem)
 
@@ -134,8 +115,7 @@ export class StageSceneService extends Service {
   private unmountNode(id: ID) {
     const elem = this.findElem(id)
     if (!elem) return
-
-    elem.children.forEach((child) => {
+    ;[...elem.children].forEach((child) => {
       this.unmountNode(child.id)
     })
 
@@ -156,17 +136,10 @@ export class StageSceneService extends Service {
       parent.children.splice(index, 0, elem)
     }
 
-    if (parent !== this.sceneRoot) {
-      this.getStageSurface().collectDirty(parent)
-    }
+    if (parent !== this.sceneRoot) parent.dirty()
   }
 
-  private createElemContext(): ElemContext {
-    return {
-      getEditorSetting: this.getEditorSetting,
-      getElemDrawer: this.getElemDrawer,
-      getStageSurface: this.getStageSurface,
-      getStageViewport: this.getStageViewport,
-    }
+  private createElem(id = '', type: 'sceneElem' | 'widgetElem') {
+    return new Elem({ renderInvalidator: this.renderInvalidator }, id, type)
   }
 }

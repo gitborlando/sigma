@@ -68,15 +68,19 @@ const InputZoomComp: FC<{}> = observer(({}) => {
 
 const ZoomingOptionsComp: FC<{}> = observer(({}) => {
   const stageViewport = useEditorService('stageViewport')
-  const { updateZoom, handleZoomToFitAll, handleZoomToFitSelection } = stageViewport
+  const viewportController = useEditorService('viewportController')
+  const { zoomToFitAll, zoomToFitSelection } = viewportController
 
   return (
     <>
-      <OptionBalanceItem label={t('zoom to 100')} onClick={() => updateZoom(1)} />
-      <OptionBalanceItem label={t('zoom to fit all')} onClick={handleZoomToFitAll} />
+      <OptionBalanceItem
+        label={t('zoom to 100')}
+        onClick={() => stageViewport.updateZoom(1)}
+      />
+      <OptionBalanceItem label={t('zoom to fit all')} onClick={zoomToFitAll} />
       <OptionBalanceItem
         label={t('zoom to fit selection')}
-        onClick={handleZoomToFitSelection}
+        onClick={zoomToFitSelection}
       />
     </>
   )

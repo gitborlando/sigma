@@ -4,9 +4,8 @@ import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { makeObservable } from 'mobx'
-import { IMatrix, Matrix, max, min } from 'src/editor/geometry'
+import { IMatrix, Matrix } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
-import { StageSceneService } from 'src/editor/render/scene'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { Service } from 'src/global/service'
 
@@ -35,17 +34,12 @@ export class StageViewportService extends Service {
   private boundAABB = new AABB(0, 0, 0, 0)
   private wheeler = new Wheeler()
 
-  constructor(
-    private readonly handleSelect: HandleSelectService,
-    private readonly stageScene: StageSceneService,
-  ) {
+  constructor(private readonly handleSelect: HandleSelectService) {
     super()
     autoBind(makeObservable(this))
-    this.effect(
-      this.onBoundChange(),
-      this.onMatrixChange(),
-      this.onCurrentPageChange(),
-    )
+    this.effect(this.onBoundChange())
+    this.effect(this.onMatrixChange())
+    this.effect(this.onCurrentPageChange())
   }
 
   get boundCenter() {
@@ -104,7 +98,7 @@ export class StageViewportService extends Service {
       .translate(center.x, center.y)
   }
 
-  private limitZoom(zoom: number) {
+  limitZoom(zoom: number) {
     return clamp(zoom, 0.015625, 256)
   }
 
@@ -181,35 +175,5 @@ export class StageViewportService extends Service {
         this.sceneMatrix = Matrix.of(matrix)
       },
     )
-  }
-
-  handleZoomToFitAll() {
-    this.zoomToFit(this.stageScene.sceneElems.map((elem) => elem.aabb))
-  }
-
-  handleZoomToFitSelection() {
-    this.zoomToFit(
-      this.handleSelect.selectIdList.map((id) => this.stageScene.findElem(id).aabb),
-    )
-  }
-
-  private zoomToFit(aabbList: AABB[]) {
-    if (!aabbList.length) return
-
-    let aabb = AABB.merge(aabbList)
-    let rect = AABB.rect(aabb)
-
-    aabb = AABB.extend(aabb, max(rect.width / 10, rect.height / 10))
-    rect = AABB.rect(aabb)
-
-    const zoom = this.limitZoom(
-      min(this.bound.width / rect.width, this.bound.height / rect.height),
-    )
-    const offset = XY.center(rect).plus(rect).minus(this.boundCenter)
-
-    runInAction(() => {
-      this.sceneMatrix = Matrix.identity().shift(offset.multiplyNum(-1))
-      this.updateZoom(zoom, this.boundCenter)
-    })
   }
 }

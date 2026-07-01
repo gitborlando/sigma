@@ -13,15 +13,16 @@ export const EditorComp = withSuspense(
     const { fileId } = useParams<{ fileId: string }>()
     const editor = Editor.getInstance()
 
-    const yState = editor.resolve('yState')
-    const stageSurface = editor.resolve('stageSurface')
+    const schemaController = editor.resolve('schemaController')
     const stageCursor = editor.resolve('stageCursor')
+    const stageController = editor.resolve('stageController')
+    const elemDrawer = editor.resolve('elemDrawer')
 
-    suspend(() => yState.initSchema(fileId!), [fileId])
-    suspend(() => stageSurface.initTextBreaker(), ['initTextBreaker'])
+    suspend(() => schemaController.initSchemaSession(fileId!), [fileId])
+    suspend(() => elemDrawer.initTextBreaker(), ['elemDrawer.initTextBreaker'])
 
     useEffect(() => {
-      stageSurface.onCanvasInited()
+      stageController.onCanvasInited()
       stageCursor.setCursor('select')
 
       return () => {

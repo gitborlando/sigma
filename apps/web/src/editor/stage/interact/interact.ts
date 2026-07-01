@@ -18,6 +18,7 @@ export class StageInteractService extends Service {
     super()
     autoBind(makeObservable(this))
     this.effect(autorun(this.onInteract))
+    this.effect(this.onFinishCreate())
   }
 
   private onInteract() {
@@ -30,5 +31,11 @@ export class StageInteractService extends Service {
     })
 
     this.offInteract = interact?.()
+  }
+
+  private onFinishCreate() {
+    return this.stageCreate.finishCreate$.hook(() => {
+      this.interaction = 'select'
+    })
   }
 }

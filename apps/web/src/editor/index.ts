@@ -1,7 +1,10 @@
 import { objKeys } from '@gitborlando/utils'
-import { asClass, asValue, createContainer } from 'awilix'
-import { NodeControllerService } from 'src/editor/controller/node'
-import { SelectControllerService } from 'src/editor/controller/select'
+import { asClass, createContainer } from 'awilix'
+import { NodeController } from 'src/editor/controller/node'
+import { StageController } from 'src/editor/controller/render'
+import { SchemaController } from 'src/editor/controller/schema'
+import { SelectController } from 'src/editor/controller/select'
+import { ViewportController } from 'src/editor/controller/viewport'
 import { EditorCommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
@@ -12,10 +15,13 @@ import { OperateAlignService } from 'src/editor/operate/align'
 import { OperateFillService } from 'src/editor/operate/fill'
 import { DesignGeometryService } from 'src/editor/operate/geometry'
 import { ElemDrawerService } from 'src/editor/render/draw'
+import { RenderInvalidatorService } from 'src/editor/render/invalidator'
+import { StageRendererService } from 'src/editor/render/renderer'
 import { StageSceneService } from 'src/editor/render/scene'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { StageCursorService } from 'src/editor/stage/cursor'
+import { StageEventService } from 'src/editor/stage/event'
 import { StageCreateService } from 'src/editor/stage/interact/create'
 import { StageInteractService } from 'src/editor/stage/interact/interact'
 import { StageMoveService } from 'src/editor/stage/interact/move'
@@ -26,14 +32,17 @@ import { StageViewportService } from 'src/editor/stage/viewport'
 import { FillPickerService } from 'src/editor/workbench/design-panel/fill-picker'
 import { LayerPanelService } from 'src/editor/workbench/layer-panel'
 import { LayerPanelNodeTreeService } from 'src/editor/workbench/layer-panel/node-tree'
-import { YClientsService } from 'src/editor/y-adapter/y-clients'
+import { YAwareService } from 'src/editor/y-adapter/y-aware'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { YSyncService } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
 const editorServices = {
-  nodeController: NodeControllerService,
-  selectController: SelectControllerService,
+  nodeController: NodeController,
+  selectController: SelectController,
+  viewportController: ViewportController,
+  stageController: StageController,
+  schemaController: SchemaController,
 
   handleNode: HandleNodeService,
   handlePage: HandlePageService,
@@ -44,14 +53,17 @@ const editorServices = {
   operateAlign: OperateAlignService,
   operateFill: OperateFillService,
   designGeometry: DesignGeometryService,
+  renderInvalidator: RenderInvalidatorService,
   elemDrawer: ElemDrawerService,
   stageScene: StageSceneService,
   stageSurface: StageSurfaceService,
+  stageRenderer: StageRendererService,
   schemaCreator: SchemaCreatorService,
   stageCreate: StageCreateService,
   stageInteract: StageInteractService,
   stageMove: StageMoveService,
   stageSelect: StageSelectService,
+  stageEvent: StageEventService,
   stageTransformer: StageTransformerService,
   stageCursor: StageCursorService,
   stageViewport: StageViewportService,
@@ -59,40 +71,14 @@ const editorServices = {
   fillPicker: FillPickerService,
   layerPanel: LayerPanelService,
   layerPanelNodeTree: LayerPanelNodeTreeService,
-  yClients: YClientsService,
+  yAware: YAwareService,
   ySync: YSyncService,
   yState: YStateService,
 }
 
-type EditorServices = {
+export type EditorServices = {
   [K in keyof typeof editorServices]: InstanceType<(typeof editorServices)[K]>
 }
-
-export type { EditorServices }
-
-export type EditorServiceGetters = {
-  getEditorCommand: () => EditorCommandService
-  getEditorSetting: () => EditorSettingService
-  getElemDrawer: () => ElemDrawerService
-  getStageInteract: () => StageInteractService
-  getStageScene: () => StageSceneService
-  getStageSurface: () => StageSurfaceService
-  getStageViewport: () => StageViewportService
-  getYClients: () => YClientsService
-}
-
-const createEditorServiceGetters = (
-  resolve: <T>(name: string) => T,
-): EditorServiceGetters => ({
-  getEditorCommand: () => resolve('editorCommand'),
-  getEditorSetting: () => resolve('editorSetting'),
-  getElemDrawer: () => resolve('elemDrawer'),
-  getStageInteract: () => resolve('stageInteract'),
-  getStageScene: () => resolve('stageScene'),
-  getStageSurface: () => resolve('stageSurface'),
-  getStageViewport: () => resolve('stageViewport'),
-  getYClients: () => resolve('yClients'),
-})
 
 export class Editor extends Service {
   private static editor: Editor
@@ -106,27 +92,26 @@ export class Editor extends Service {
     return (this.editor = autoBind(new Editor()))
   }
 
-  private container = createContainer<EditorServices & EditorServiceGetters>({
+  private container = createContainer<EditorServices>({
     injectionMode: 'CLASSIC',
   })
 
   constructor() {
     super()
-    this.setupServices()
+    this.registerServices()
     this.effect(() => (Editor.editor = undefined!))
     this.effect(() => this.container.dispose())
   }
 
-  resolve = <K extends keyof EditorServices>(key: K) =>
-    this.container.resolve<EditorServices[K]>(key)
+  resolve = <K extends keyof EditorServices>(key: K) => {
+    const service = this.container.resolve<EditorServices[K]>(key)
+    this.effect(() => service.dispose())
+    return service
+  }
 
-  private setupServices() {
-    objKeys(editorServices).forEach((key) => {
-      this.container.register(key, asClass(editorServices[key]).singleton())
-    })
-    const editorServiceGetters = createEditorServiceGetters(this.resolve)
-    objKeys(editorServiceGetters).forEach((key) => {
-      this.container.register(key, asValue(editorServiceGetters[key]))
+  private registerServices() {
+    ;(objKeys(editorServices) as (keyof typeof editorServices)[]).forEach((key) => {
+      this.container.register(key, asClass(editorServices[key] as any).singleton())
     })
   }
 }

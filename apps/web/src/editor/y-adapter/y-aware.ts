@@ -7,21 +7,13 @@ import { HandleSelectService } from 'src/editor/handle/select'
 import { Service } from 'src/global/service'
 import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
-import { YSyncService } from './y-sync'
+import { Awareness } from 'y-protocols/awareness.js'
 
-export class YClientsService extends Service {
-  clientId!: number
+export class YAwareService extends Service {
+  clientId?: number
+  awareness?: Awareness
 
-  @observable client: S.Client = {
-    selectIdMap: {},
-    selectPageId: '',
-    cursor: XY.$(0, 0),
-    color: COLOR.random(),
-    sceneMatrix: Matrix.identity(),
-    userId: '',
-    userName: '',
-    userAvatar: '',
-  }
+  @observable client: S.Client = this.createClient()
   @observable others: S.Clients = {}
   @observable observingClientId?: number
 
@@ -31,15 +23,23 @@ export class YClientsService extends Service {
     return others[this.observingClientId]
   }
 
-  constructor(
-    private readonly handleSelect: HandleSelectService,
-    private readonly ySync: YSyncService,
-  ) {
+  constructor(private readonly handleSelect: HandleSelectService) {
     super()
     autoBind(makeObservable(this))
   }
 
-  setup() {
+  init(option: { clientId: number; awareness?: Awareness }) {
+    this.destroyAware()
+    this.clientId = option.clientId
+    this.awareness = option.awareness
+
+    runInAction(() => {
+      this.client = this.createClient()
+      this.client.userId = UserService.userId
+      this.client.userName = UserService.userName
+      this.client.userAvatar = UserService.avatar
+    })
+
     this.effect(
       reaction(
         () => ({
@@ -48,15 +48,40 @@ export class YClientsService extends Service {
         }),
         () => this.syncSelectState(),
       ),
+      this.onMouseMove(),
+      this.syncSelf(),
+      this.syncOthers(),
     )
-    runInAction(() => {
-      this.client.userId = UserService.userId
-      this.client.userName = UserService.userName
-      this.client.userAvatar = UserService.avatar
-    })
+
     MobxUndo.rebase()
     this.syncSelectState()
-    this.effect(this.onMouseMove())
+  }
+
+  destroyAware() {
+    this.awareness?.setLocalState(null)
+    this.clientId = undefined
+    this.awareness = undefined
+    this.others = {}
+    this.observingClientId = undefined
+    this.disposer.dispose()
+  }
+
+  dispose() {
+    this.destroyAware()
+    super.dispose()
+  }
+
+  private createClient(): S.Client {
+    return {
+      selectIdMap: {},
+      selectPageId: '',
+      cursor: XY.$(0, 0),
+      color: COLOR.random(),
+      sceneMatrix: Matrix.identity(),
+      userId: '',
+      userName: '',
+      userAvatar: '',
+    }
   }
 
   private syncSelectState = () => {
@@ -64,8 +89,11 @@ export class YClientsService extends Service {
     this.client.selectPageId = this.handleSelect.selectPageId
   }
 
-  syncSelf = () => {
-    this.ySync.awareness.setLocalState(toJS(this.client))
+  private syncSelf = () => {
+    const awareness = this.awareness
+    if (!awareness) return () => {}
+
+    awareness.setLocalState(toJS(this.client))
 
     const clientKeys = Object.keys(this.client) as (keyof S.Client)[]
     const commonKeys = clientKeys.filter(
@@ -77,44 +105,42 @@ export class YClientsService extends Service {
       disposer.add(
         reaction(
           () => this.client[key],
-          (value) => {
-            this.ySync.awareness.setLocalStateField(key, toJS(value))
-          },
+          (value) => awareness.setLocalStateField(key, toJS(value)),
         ),
       )
     })
     disposer.add(
       this.handleSelect.afterSelect.hook(() => {
-        this.ySync.awareness.setLocalStateField(
+        awareness.setLocalStateField(
           'selectIdMap',
           toJS(this.handleSelect.selectIdMap),
         )
-        this.ySync.awareness.setLocalStateField(
+        awareness.setLocalStateField(
           'selectPageId',
           toJS(this.handleSelect.selectPageId),
         )
       }),
     )
-    disposer.add(() => this.ySync.awareness.destroy())
 
     return disposer.dispose
   }
 
-  syncOthers = () => {
+  private syncOthers = () => {
+    const awareness = this.awareness
+    if (!awareness) return () => {}
+
     let prev: S.Clients = this.others
     const onUpdate = () => {
-      const states = this.ySync.awareness.getStates()
-      states.delete(this.clientId)
+      const states = awareness.getStates()
+      if (this.clientId) states.delete(this.clientId)
       const others = Object.fromEntries(states.entries()) as S.Clients
       if (!equal(prev, others)) {
         this.others = others
         prev = others
       }
     }
-    this.ySync.awareness.on('update', onUpdate)
-    return () => {
-      this.ySync.awareness.off('update', onUpdate)
-    }
+    awareness.on('update', onUpdate)
+    return () => awareness.off('update', onUpdate)
   }
 
   private onMouseMove = () => {

@@ -1,22 +1,9 @@
 import { IRect } from '@gitborlando/geo'
-import type { Editor } from '..'
-import { getSetting } from './get'
 
 export type TRBL = 'top' | 'right' | 'bottom' | 'left'
 
-export function snapGridRound(editor: Editor, value: number) {
-  if (getSetting(editor).snapToGrid) {
-    return Math.round(value)
-  }
-  return value
-}
-
 export function snapGridRoundBySetting(snapToGrid: boolean, value: number) {
   return snapToGrid ? Math.round(value) : value
-}
-
-export function snapGridRoundXY(editor: Editor, xy: IXY) {
-  return XY.$(snapGridRound(editor, xy.x), snapGridRound(editor, xy.y))
 }
 
 export function snapGridRoundXYBySetting(snapToGrid: boolean, xy: IXY) {
@@ -24,17 +11,6 @@ export function snapGridRoundXYBySetting(snapToGrid: boolean, xy: IXY) {
     snapGridRoundBySetting(snapToGrid, xy.x),
     snapGridRoundBySetting(snapToGrid, xy.y),
   )
-}
-
-export function snapGridRoundRect(editor: Editor, rect: IRect): IRect {
-  const { x, y, width, height } = rect
-  const snapStart = snapGridRoundXY(editor, XY.$(x, y))
-  const snapEnd = snapGridRoundXY(editor, XY.$(x + width, y + height))
-  return {
-    ...snapStart,
-    width: snapEnd.x - snapStart.x,
-    height: snapEnd.y - snapStart.y,
-  }
 }
 
 export function snapGridRoundRectBySetting(snapToGrid: boolean, rect: IRect): IRect {

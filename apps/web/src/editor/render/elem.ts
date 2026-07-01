@@ -1,11 +1,8 @@
-import { type IXY } from '@gitborlando/geo'
+import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, type NoopFunc } from '@gitborlando/utils'
 import { memorized } from '@sigma/utils/common'
-import type { EditorSettingService } from 'src/editor/core/setting'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import type { ElemDrawerService } from 'src/editor/render/draw'
-import type { StageSurfaceService } from 'src/editor/render/surface'
-import type { StageViewportService } from 'src/editor/stage/viewport'
+import type { RenderInvalidatorService } from 'src/editor/render/invalidator'
 
 declare module 'react' {
   namespace JSX {
@@ -23,10 +20,7 @@ export type ElemProps = {
 }
 
 export type ElemContext = {
-  getEditorSetting: () => EditorSettingService
-  getElemDrawer: () => ElemDrawerService
-  getStageSurface: () => StageSurfaceService
-  getStageViewport: () => StageViewportService
+  renderInvalidator: RenderInvalidatorService
 }
 
 export class Elem {
@@ -44,9 +38,9 @@ export class Elem {
     return this._node
   }
   set node(node: S.Node) {
-    this.context.getStageSurface().collectDirty(this)
+    this.dirty()
     this._node = node
-    this.context.getStageSurface().collectDirty(this)
+    this.dirty()
   }
 
   private _mrect = MRect.identity()
@@ -77,63 +71,20 @@ export class Elem {
     return this.memoGlobalMatrix([this.node.matrix, this.parent.globalMatrix])
   }
 
-  private memoVisible = memorized(() => {
-    return AABB.collide(this.aabb, this.context.getStageViewport().sceneAABB)
-  })
-  get visible() {
+  getVisible(sceneAABB: AABB) {
     if (this.hidden) return false
     if (this.id === 'sceneRoot') return true
     if (this.type === 'widgetElem') return true
-    const { sceneAABB } = this.context.getStageViewport()
-    return this.memoVisible([
-      this.aabb.minX,
-      this.aabb.minY,
-      this.aabb.maxX,
-      this.aabb.maxY,
-      sceneAABB,
-    ])
+    return AABB.collide(this.aabb, sceneAABB)
+  }
+
+  dirty() {
+    this.context.renderInvalidator.collectDirty(this)
   }
 
   getDirtyRect() {
     if (!this.node) return null
     return this.aabb
-  }
-
-  traverseDraw() {
-    if (!this.visible) return
-
-    const stageSurface = this.context.getStageSurface()
-    const stageViewport = this.context.getStageViewport()
-    const editorSetting = this.context.getEditorSetting()
-    const elemDrawer = this.context.getElemDrawer()
-
-    if (editorSetting.setting.ignoreUnVisible && this.optimize) {
-      const visualSize = stageSurface.getVisualSize(this.aabb)
-      if (visualSize.x < 2 && visualSize.y < 2) return
-    }
-
-    const resetCtx = stageSurface.setCurrentCtxType(
-      this.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
-    )
-
-    stageSurface.ctxSaveRestore((ctx) => {
-      const path2d = new Path2D()
-      let resetTransform = () => {}
-
-      if (this.node) {
-        resetTransform = stageSurface.setTransform(this.node.matrix)
-        stageSurface.ctxSaveRestore(() => elemDrawer.draw(this, ctx, path2d))
-      }
-
-      if (this.children.length) {
-        if (this.clip) ctx.clip(path2d)
-        this.children.forEach((child) => child.traverseDraw())
-      }
-
-      resetTransform()
-    })
-
-    resetCtx()
   }
 
   parent!: Elem
@@ -184,7 +135,7 @@ export class Elem {
   destroy() {
     this.eventHandle.dispose()
     this.parent?.removeChild(this)
-    this.context.getStageSurface().collectDirty(this)
+    this.context.renderInvalidator.collectDirty(this)
   }
 }
 

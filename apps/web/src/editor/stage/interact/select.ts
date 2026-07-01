@@ -4,8 +4,7 @@ import { firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
-import type { EditorServiceGetters } from 'src/editor'
-import { SelectControllerService } from 'src/editor/controller/select'
+import { SelectController } from 'src/editor/controller/select'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
 import { HandleSelectService, type Selection } from 'src/editor/handle/select'
 import { ElemMouseEvent } from 'src/editor/render/elem'
@@ -14,10 +13,10 @@ import { StageSurfaceService } from 'src/editor/render/surface'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { createStageDragger } from 'src/editor/stage/dragger'
+import { StageEventService } from 'src/editor/stage/event'
 import { StageTransformerService } from 'src/editor/stage/tools/transformer'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { YStateService } from 'src/editor/y-adapter/y-state'
-import { ContextMenu } from 'src/global/context-menu'
 import { Service } from 'src/global/service'
 import { UndoService } from '../../core/undo'
 
@@ -31,13 +30,13 @@ export class StageSelectService extends Service {
   constructor(
     private readonly stageScene: StageSceneService,
     private readonly stageSurface: StageSurfaceService,
+    private readonly stageEvent: StageEventService,
     private readonly stageTransformer: StageTransformerService,
     private readonly handleSelect: HandleSelectService,
-    private readonly selectController: SelectControllerService,
+    private readonly selectController: SelectController,
     private readonly undo: UndoService,
     private readonly yState: YStateService,
     private readonly stageViewport: StageViewportService,
-    private readonly getEditorCommand: EditorServiceGetters['getEditorCommand'],
   ) {
     super()
     autoBind(makeObservable(this))
@@ -48,7 +47,7 @@ export class StageSelectService extends Service {
       this.stageScene.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
       this.stageSurface.addEvent('dblclick', this.onDoubleClick),
       this.stageSurface.addEvent('mousemove', this.onHover),
-      this.stageSurface.addEvent('contextmenu', this.onContextMenu),
+      // this.stageSurface.addEvent('contextmenu', this.onContextMenu),
       listen('pointerdown', () => (this.isPointerDown = true)),
       listen('pointerup', () => (this.isPointerDown = false)),
     )
@@ -56,7 +55,11 @@ export class StageSelectService extends Service {
 
   private onHover(e: MouseEvent) {
     if (this.isPointerDown) return
-    const hovered = firstOne(this.stageScene.elemsFromPoint(XY.client(e)))
+    const hovered = firstOne(
+      this.stageEvent
+        .getElemsFromPoint(XY.client(e))
+        .filter((elem) => elem.type === 'sceneElem'),
+    )
     this.hoverId = hovered?.id
   }
 
@@ -93,25 +96,6 @@ export class StageSelectService extends Service {
     this.stageTransformer.move(e.hostEvent)
   }
 
-  private onContextMenu(e: MouseEvent) {
-    if (this.hoverId && !SchemaHelper.isFirstLayerFrame(this.hoverId)) {
-      this.selectController.onStageSelect(this.hoverId)
-    }
-
-    const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
-      this.getEditorCommand()
-    const baseMenu = [copyPasteGroup, undoRedoGroup]
-
-    if (this.handleSelect.selectIdList.length || this.hoverId) {
-      const menuOptions = [...baseMenu, nodeGroup, nodeReHierarchyGroup]
-      ContextMenu.menus = menuOptions
-      ContextMenu.openMenu(e as any)
-    } else {
-      ContextMenu.menus = baseMenu
-      ContextMenu.openMenu(e as any)
-    }
-  }
-
   private onMarqueeSelect() {
     const marqueeAABB = new AABB(0, 0, 0, 0)
     let marqueeSelection = <Selection>{}
@@ -130,7 +114,7 @@ export class StageSelectService extends Service {
         const { item, depth, childIds, forwardCtx } = ctx
         const elem = this.stageScene.findElem(item.id)
 
-        if (!elem.visible) return false
+        if (!this.stageEvent.isElemVisible(elem)) return false
 
         if (childIds?.length && depth === 0) {
           if (AABB.include(marqueeAABB, elem.aabb) === 1) {
@@ -156,7 +140,7 @@ export class StageSelectService extends Service {
       },
     })
 
-    this.stageSurface.disablePointEvent()
+    this.stageEvent.disablePointEvent()
 
     createStageDragger(this.stageViewport)
       .onMove(({ marquee }) => {

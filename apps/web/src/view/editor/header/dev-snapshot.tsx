@@ -262,11 +262,8 @@ function restoreUndo(
 }
 
 function resetUndo(yState: YStateService, undo: UndoService) {
-  const ySchema = yState.doc?.getMap<S.Schema>('schema')
-  if (!ySchema) return false
-
   undo.initUndo({
-    stateMap: ySchema,
+    stateMap: yState.doc.getMap<S.Schema>('schema'),
     getPatches: yState.getPatches,
   })
   return true

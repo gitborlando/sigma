@@ -2,6 +2,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { Matrix } from 'src/editor/geometry'
 import { StageSurfaceService } from 'src/editor/render/surface'
 import { StageCursorService } from 'src/editor/stage/cursor'
+import { StageEventService } from 'src/editor/stage/event'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
 import { Service } from 'src/global/service'
@@ -11,6 +12,7 @@ export class StageMoveService extends Service {
 
   constructor(
     private readonly stageSurface: StageSurfaceService,
+    private readonly stageEvent: StageEventService,
     private readonly stageCursor: StageCursorService,
     private readonly stageViewport: StageViewportService,
   ) {
@@ -21,7 +23,7 @@ export class StageMoveService extends Service {
   startInteract() {
     const disposer = Disposer.combine(
       this.stageSurface.addEvent('mousedown', this.onMoveStage),
-      this.stageSurface.disablePointEvent(false),
+      this.stageEvent.disablePointEvent(false),
     )
     this.stageCursor.setCursor('hand').lock()
 
