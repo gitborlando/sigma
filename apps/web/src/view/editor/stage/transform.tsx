@@ -4,19 +4,21 @@ import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { arrayLoopGet, TRBL } from 'src/editor/utils/misc'
 import { COLOR } from 'src/utils/color'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
 let isSelectOnlyLine = false
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
-  const schemaCreator = useEditorService('schemaCreator')
-  const stageInteract = useEditorService('stageInteract')
-  const stageEvent = useEditorService('stageEvent')
-  const stageMove = useEditorService('stageMove')
-  const stageTransformer = useEditorService('stageTransformer')
-  const stageViewport = useEditorService('stageViewport')
+  const {
+    schemaCreator,
+    stageInteract,
+    stageEvent,
+    stageMove,
+    stageTransformer,
+    stageViewport,
+  } = useEditorServices()
   const selectNodes = useSelectNodes()
   const { mrect, isMoving } = stageTransformer
   const shouldHidden = isMoving || stageViewport.isZooming || stageMove.isMoving
@@ -69,10 +71,9 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 })
 
 const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) => {
-  const schemaCreator = useEditorService('schemaCreator')
-  const stageCursor = useEditorService('stageCursor')
-  const stageTransformer = useEditorService('stageTransformer')
-  const zoom = useEditorService('stageViewport').zoom
+  const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
+    useEditorServices()
+  const zoom = stageViewport.zoom
   const mrect = stageTransformer.mrect.clone()
   const p1 = arrayLoopGet(mrect.vertices, index)
   const p2 = arrayLoopGet(mrect.vertices, index + 1)
@@ -108,10 +109,9 @@ const VertexComp: FC<{
   index: number
   directions: TRBL[]
 }> = observer(({ type, index, directions }) => {
-  const schemaCreator = useEditorService('schemaCreator')
-  const stageCursor = useEditorService('stageCursor')
-  const stageTransformer = useEditorService('stageTransformer')
-  const zoom = useEditorService('stageViewport').zoom
+  const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
+    useEditorServices()
+  const zoom = stageViewport.zoom
   const mrect = stageTransformer.mrect
   const xy = arrayLoopGet(mrect.vertices, index)
   const size = 8 / zoom
@@ -161,10 +161,9 @@ const VertexComp: FC<{
 })
 
 const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
-  const schemaCreator = useEditorService('schemaCreator')
-  const stageCursor = useEditorService('stageCursor')
-  const stageTransformer = useEditorService('stageTransformer')
-  const zoom = useEditorService('stageViewport').zoom
+  const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
+    useEditorServices()
+  const zoom = stageViewport.zoom
   const mrect = stageTransformer.mrect
   const xy = arrayLoopGet(mrect.vertices, index)
   const size = 8 / zoom

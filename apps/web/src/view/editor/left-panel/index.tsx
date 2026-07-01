@@ -4,7 +4,7 @@ import { Btn } from 'src/view/component/btn'
 
 import { Lucide } from 'src/view/component/lucide'
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 export const EditorLeftPanelIds = ['layer'] as const
 
@@ -13,7 +13,7 @@ export const EditorLeftPanelState = observable({
 })
 
 export const LeftPanelComp: FC<{}> = observer(({}) => {
-  const stageViewport = useEditorService('stageViewport')
+  const { stageViewport } = useEditorServices()
   const { currentTabId } = EditorLeftPanelState
 
   return (

@@ -7,7 +7,7 @@ import { Drag } from 'src/global/event/drag'
 import { IRGBA } from 'src/utils/color'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 const Context = createContext({
   hue: 0,
@@ -72,7 +72,7 @@ export const ColorPicker: FC<{
 })
 
 const SquareComp: FC<{}> = observer(({}) => {
-  const undo = useEditorService('undo')
+  const { undo } = useEditorServices()
   const { hue, saturation, value, setSaturation, setValue } = useContext(Context)
 
   const [x, setX] = useState(saturation / 100)
@@ -141,7 +141,7 @@ function useSlider(
   init: number,
   onValueChange: (value: number) => void,
 ) {
-  const undo = useEditorService('undo')
+  const { undo } = useEditorServices()
   const [x, setX] = useState(init)
   const lastValue = useRef(init)
 

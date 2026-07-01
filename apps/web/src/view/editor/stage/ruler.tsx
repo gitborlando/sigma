@@ -1,4 +1,4 @@
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 const getNearestIntMultiple = (number: number, rate: number) => {
   const n = Math.floor(number / rate)
@@ -20,8 +20,7 @@ export const RulerComp: FC<{}> = observer(({}) => {
 export const Ruler: FC<{
   type: 'horizontal' | 'vertical'
 }> = observer(({ type }) => {
-  const stageViewport = useEditorService('stageViewport')
-  const handleNode = useEditorService('handleNode')
+  const { stageViewport, handleNode } = useEditorServices()
   const isVertical = type === 'vertical'
   const { bound, zoom, offset: offsetXY } = stageViewport
   const datumXY = handleNode.datumXY

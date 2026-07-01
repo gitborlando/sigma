@@ -4,7 +4,7 @@ import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Lucide } from 'src/view/component/lucide'
 import { Segments } from 'src/view/component/segments'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
 
 export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
@@ -41,7 +41,8 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
 })
 
 export const CommonSettingComp: FC<{}> = observer(({}) => {
-  const setting = useEditorService('editorSetting').setting
+  const { editorSetting } = useEditorServices()
+  const setting = editorSetting.setting
   const {
     autosave,
     showFPS,

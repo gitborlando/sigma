@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
 import { ContextMenu } from 'src/global/context-menu'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
 
 type IPageItemComp = {
@@ -9,10 +9,7 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const editorCommand = useEditorService('editorCommand')
-  const handleSelect = useEditorService('handleSelect')
-  const undo = useEditorService('undo')
-
+  const { editorCommand, handleSelect, undo } = useEditorServices()
   const openMenu = (e: React.MouseEvent) => {
     ContextMenu.context = { id }
     ContextMenu.menus = [editorCommand.pageGroup]

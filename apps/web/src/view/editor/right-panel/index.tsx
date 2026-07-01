@@ -1,9 +1,8 @@
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 import { OperatePanelComp } from './operate'
 
 export const RightPanelComp: FC<{}> = observer(({}) => {
-  const stageViewport = useEditorService('stageViewport')
-
+  const { stageViewport } = useEditorServices()
   return (
     <G className={cls()} style={{ width: stageViewport.bound.right }}>
       <OperatePanelComp />

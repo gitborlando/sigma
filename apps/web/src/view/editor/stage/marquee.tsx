@@ -1,12 +1,11 @@
 import { Matrix } from 'src/editor/geometry'
 import { rgbToRgba } from 'src/utils/color'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 import { themeColor } from 'src/view/styles/color'
 
 export const EditorStageMarqueeComp: FC<{}> = observer(({}) => {
-  const stageSelect = useEditorService('stageSelect')
-  const schemaCreator = useEditorService('schemaCreator')
-  const zoom = useEditorService('stageViewport').zoom
+  const { stageSelect, schemaCreator, stageViewport } = useEditorServices()
+  const zoom = stageViewport.zoom
   const { marquee } = stageSelect
 
   if (marquee.width <= 0 || marquee.height <= 0) {

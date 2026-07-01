@@ -3,14 +3,15 @@ import { twoDecimal } from '@sigma/utils/common'
 import { DesignGeoInfo } from 'src/editor/operate/geometry'
 import { MULTI_VALUE } from 'src/global/constant'
 import { InputNum } from 'src/view/component/input-num'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 
 export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
-  const { currentKeys, currentGeometries, setupGeometries } =
-    useEditorService('designGeometry')
+  const { designGeometry } = useEditorServices()
+  const { currentKeys, currentGeometries, setupGeometries } = designGeometry
   const nodes = useSelectNodes()
-  const zoom = useEditorService('stageViewport').zoom
+  const { stageViewport } = useEditorServices()
+  const zoom = stageViewport.zoom
 
   useMemo(() => setupGeometries(nodes), [nodes, setupGeometries])
 
@@ -95,10 +96,9 @@ const GeometryItemComp: FC<{
   value: number
   slideRate?: number
 }> = observer(({ label, operateKey, value, slideRate = 1 }) => {
-  const { setGeometries } = useEditorService('designGeometry')
-  const handleNode = useEditorService('handleNode')
-  const undo = useEditorService('undo')
-
+  const { designGeometry } = useEditorServices()
+  const { setGeometries } = designGeometry
+  const { handleNode, undo } = useEditorServices()
   const isMultiValue = T<any>(value) === MULTI_VALUE
   const inputValue = useRef(0)
 

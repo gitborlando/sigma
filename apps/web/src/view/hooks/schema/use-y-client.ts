@@ -1,16 +1,17 @@
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 export function useSelectIds() {
-  return useEditorService('handleSelect').selectIdList
+  const { handleSelect } = useEditorServices()
+  return handleSelect.selectIdList
 }
 
 export function useSelectIdMap() {
-  return useEditorService('handleSelect').selectIdMap
+  const { handleSelect } = useEditorServices()
+  return handleSelect.selectIdMap
 }
 
 export function useAllSelectIdMap() {
-  const handleSelect = useEditorService('handleSelect')
-  const yAware = useEditorService('yAware')
+  const { handleSelect, yAware } = useEditorServices()
   return {
     ...handleSelect.selectIdMap,
     ...Object.values(yAware.others).reduce(
@@ -21,5 +22,6 @@ export function useAllSelectIdMap() {
 }
 
 export function useSelectPageId() {
-  return useEditorService('handleSelect').selectPageId
+  const { handleSelect } = useEditorServices()
+  return handleSelect.selectPageId
 }

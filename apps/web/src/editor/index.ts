@@ -76,8 +76,10 @@ const editorServices = {
   yState: YStateService,
 }
 
+export type EditorServiceId = keyof typeof editorServices
+
 export type EditorServices = {
-  [K in keyof typeof editorServices]: InstanceType<(typeof editorServices)[K]>
+  [K in EditorServiceId]: InstanceType<(typeof editorServices)[K]>
 }
 
 export class Editor extends Service {
@@ -110,8 +112,8 @@ export class Editor extends Service {
   }
 
   private registerServices() {
-    ;(objKeys(editorServices) as (keyof typeof editorServices)[]).forEach((key) => {
-      this.container.register(key, asClass(editorServices[key] as any).singleton())
+    objKeys(editorServices).forEach((key: EditorServiceId) => {
+      this.container.register(key, asClass(<any>editorServices[key]).singleton())
     })
   }
 }

@@ -1,5 +1,5 @@
 import { rgb } from 'src/utils/color'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 const getNearestIntMultiple = (number: number, rate: number) => {
   const n = Math.floor(number / rate)
@@ -20,7 +20,7 @@ export const EditorStageGridComp: FC<{}> = observer(({}) => {
 export const Lines: FC<{
   type: 'horizontal' | 'vertical'
 }> = observer(({ type }) => {
-  const stageViewport = useEditorService('stageViewport')
+  const { stageViewport } = useEditorServices()
   const { bound, offset: offsetXY, zoom } = stageViewport
 
   const getTicks = () => {
@@ -57,8 +57,8 @@ const Line: FC<{
   y: number
   length: number
 }> = observer(({ type, x, y, length }) => {
-  const schemaCreator = useEditorService('schemaCreator')
-  const zoom = useEditorService('stageViewport').zoom
+  const { schemaCreator, stageViewport } = useEditorServices()
+  const zoom = stageViewport.zoom
 
   const line = schemaCreator.line({
     x,

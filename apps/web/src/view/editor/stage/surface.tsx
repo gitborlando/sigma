@@ -1,8 +1,7 @@
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 export const EditorStageSurfaceComp: FC<{}> = observer(({}) => {
-  const stageSurface = useEditorService('stageSurface')
-
+  const { stageSurface } = useEditorServices()
   useLayoutEffect(() => {
     // stageSurface.onCanvasInited()
     return stageSurface.inited.dispatch(true)

@@ -3,7 +3,7 @@ import { Popover } from 'react-tiny-popover'
 import { PopoverCard } from 'src/view/component/popover-card'
 import { AvatarCircles } from 'src/view/component/shadcn/ui/avatar-circles'
 import { Text } from 'src/view/component/text'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 type CooperateInfo = {
   clientId: number
@@ -14,7 +14,7 @@ type CooperateInfo = {
 }
 
 export const CooperateComp: FC<{}> = observer(({}) => {
-  const yAware = useEditorService('yAware')
+  const { yAware } = useEditorServices()
   const [show, setShow] = useState(false)
 
   const cooperates = entries(yAware.others).map(([clientId, other]) => ({
@@ -47,8 +47,7 @@ export const CooperateComp: FC<{}> = observer(({}) => {
 
 const CooperatePopup: FC<{ cooperates: CooperateInfo[] }> = observer(
   ({ cooperates }) => {
-    const yAware = useEditorService('yAware')
-
+    const { yAware } = useEditorServices()
     return (
       <PopoverCard>
         <G vertical='auto 1fr'>

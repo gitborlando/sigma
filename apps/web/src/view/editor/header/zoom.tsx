@@ -4,10 +4,11 @@ import { Divider } from 'src/view/component/divider'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
 import { Menu } from 'src/view/component/menu'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
-  const zoom = ~~((useEditorService('stageViewport').zoom || 0) * 100)
+  const { stageViewport } = useEditorServices()
+  const zoom = ~~((stageViewport.zoom || 0) * 100)
   const [show, setShow] = useState(false)
 
   const cls = classes(css`
@@ -48,7 +49,7 @@ const PanelComp: FC<{}> = observer(({}) => {
 })
 
 const InputZoomComp: FC<{}> = observer(({}) => {
-  const stageViewport = useEditorService('stageViewport')
+  const { stageViewport } = useEditorServices()
   const { updateZoom } = stageViewport
 
   return (
@@ -67,8 +68,7 @@ const InputZoomComp: FC<{}> = observer(({}) => {
 })
 
 const ZoomingOptionsComp: FC<{}> = observer(({}) => {
-  const stageViewport = useEditorService('stageViewport')
-  const viewportController = useEditorService('viewportController')
+  const { stageViewport, viewportController } = useEditorServices()
   const { zoomToFitAll, zoomToFitSelection } = viewportController
 
   return (
@@ -87,7 +87,8 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
 })
 
 const OtherOptionsComp: FC<{}> = observer(({}) => {
-  const setting = useEditorService('editorSetting').setting
+  const { editorSetting } = useEditorServices()
+  const setting = editorSetting.setting
 
   return (
     <OptionBalanceItem

@@ -7,13 +7,10 @@ import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
-  const handlePage = useEditorService('handlePage')
-  const handleSelect = useEditorService('handleSelect')
-  const undo = useEditorService('undo')
-  const editorSetting = useEditorService('editorSetting')
+  const { handlePage, handleSelect, undo, editorSetting } = useEditorServices()
   const [showHistory, setShowHistory] = useState(false)
   const { next, stack } = undo
   return (

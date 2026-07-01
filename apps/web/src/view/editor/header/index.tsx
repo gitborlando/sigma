@@ -8,11 +8,10 @@ import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 export const HeaderComp: FC<{}> = observer(({}) => {
-  const stageViewport = useEditorService('stageViewport')
-  const stageCreate = useEditorService('stageCreate')
+  const { stageViewport, stageCreate } = useEditorServices()
   const navigate = useNavigate()
 
   return (
@@ -55,7 +54,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
 })
 
 const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) => {
-  const stageInteract = useEditorService('stageInteract')
+  const { stageInteract } = useEditorServices()
   const isActive = stageInteract.interaction === type
   const iconUrl = Assets.editor.header.stageOperate[type]
 
@@ -70,8 +69,7 @@ const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) =>
 })
 
 const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
-  const stageCreate = useEditorService('stageCreate')
-  const stageInteract = useEditorService('stageInteract')
+  const { stageCreate, stageInteract } = useEditorServices()
   const isActive =
     stageInteract.interaction === 'create' && stageCreate.createType === type
   const iconUrl = Assets.editor.node[type as keyof typeof Assets.editor.node]
@@ -90,8 +88,7 @@ const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
 })
 
 const UndoGroup: FC<{}> = observer(() => {
-  const undo = useEditorService('undo')
-
+  const { undo } = useEditorServices()
   return (
     <G horizontal gap={4}>
       <Btn

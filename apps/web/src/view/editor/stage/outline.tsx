@@ -1,7 +1,7 @@
 import { iife } from '@gitborlando/utils'
 import { entries } from 'mobx'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
@@ -12,9 +12,7 @@ type OutlineInfo = {
 }
 
 export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
-  const stageTransformer = useEditorService('stageTransformer')
-  const stageViewport = useEditorService('stageViewport')
-  const stageMove = useEditorService('stageMove')
+  const { stageTransformer, stageViewport, stageMove } = useEditorServices()
   if (stageTransformer.isMoving) return null
   if (stageViewport.isZooming) return null
   if (stageMove.isMoving) return null
@@ -22,9 +20,7 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
 })
 
 export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
-  const stageSelect = useEditorService('stageSelect')
-  const handleSelect = useEditorService('handleSelect')
-  const yAware = useEditorService('yAware')
+  const { stageSelect, handleSelect, yAware } = useEditorServices()
   const { hoverId } = stageSelect
   const others = yAware.others
 
@@ -59,8 +55,8 @@ export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
 
 const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
   ({ id, outlineInfo }) => {
-    const schemaCreator = useEditorService('schemaCreator')
-    const zoom = useEditorService('stageViewport').zoom
+    const { schemaCreator, stageViewport } = useEditorServices()
+    const zoom = stageViewport.zoom
     const { color, hovered, selected } = outlineInfo
     const node = T<S.Node>(useSchema((schema) => schema[id]))
     const strokeColor = hovered || selected ? themeColor() : color

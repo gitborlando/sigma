@@ -9,16 +9,12 @@ import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
 import { RulerComp } from 'src/view/editor/stage/ruler'
 import { EditorStageSurfaceComp } from 'src/view/editor/stage/surface'
 import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
-import { EditorContext, useEditor, useEditorService } from 'src/view/hooks/editor'
+import { EditorContext, useEditor, useEditorServices } from 'src/view/hooks/editor'
 
 export const StageComp: FC<{}> = observer(({}) => {
   const editor = useEditor()
-  const editorCommand = useEditorService('editorCommand')
-  const selectController = useEditorService('selectController')
-  const stageScene = useEditorService('stageScene')
-  const stageSelect = useEditorService('stageSelect')
-  const handleSelect = useEditorService('handleSelect')
-
+  const { editorCommand, selectController, stageScene, stageSelect, handleSelect } =
+    useEditorServices()
   useEffect(() => {
     return renderElem(
       <EditorContext.Provider value={editor}>
@@ -65,7 +61,7 @@ export const StageComp: FC<{}> = observer(({}) => {
 })
 
 export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
-  const yAware = useEditorService('yAware')
+  const { yAware } = useEditorServices()
   const { observingClientId: observingUserId } = yAware
   if (!observingUserId) return null
 

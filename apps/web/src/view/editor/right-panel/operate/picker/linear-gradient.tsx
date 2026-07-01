@@ -2,13 +2,13 @@ import { max, min } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
 import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'
 import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 export const PickerLinearGradientComp: FC<{
   fill: S.FillLinearGradient
   index: number
 }> = memo(({ fill, index }) => {
-  const operateFill = useEditorService('operateFill')
+  const { operateFill } = useEditorServices()
   const [stopIndex, setStopIndex] = useState(0)
   useEffect(() => setStopIndex(0), [index])
 
@@ -40,8 +40,7 @@ const StopsBar: FC<{
   stopIndex: number
   setStopIndex: (index: number) => void
 }> = ({ fill, index, stopIndex, setStopIndex }) => {
-  const operateFill = useEditorService('operateFill')
-  const undo = useEditorService('undo')
+  const { operateFill, undo } = useEditorServices()
   const stopBarRef = useRef<HTMLDivElement>(null)
 
   const handleMove = (e: React.MouseEvent, stopIndex: number) => {

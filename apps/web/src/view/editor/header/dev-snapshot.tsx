@@ -5,7 +5,7 @@ import type { EditorServices } from 'src/editor'
 import { MobxUndo, UndoInfo } from 'src/editor/core/undo'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 type SnapshotState = {
   schema: S.Schema
@@ -24,8 +24,7 @@ type UndoService = EditorServices['undo']
 const STORAGE_KEY_PREFIX = 'sigma:dev-snapshot'
 
 export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
-  const yState = useEditorService('yState')
-  const undo = useEditorService('undo')
+  const { yState, undo } = useEditorServices()
   const { fileId } = useParams<{ fileId: string }>()
   const [searchParams] = useSearchParams()
   const applyRecord = searchParams.get('applyRecord') === 'true'

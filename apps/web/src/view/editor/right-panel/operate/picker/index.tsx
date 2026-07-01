@@ -8,7 +8,7 @@ import { Segments } from 'src/view/component/segments'
 import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
 import { PickerImageComp } from 'src/view/editor/right-panel/operate/picker/image'
 import { PickerLinearGradientComp } from 'src/view/editor/right-panel/operate/picker/linear-gradient'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 const createFillCache = (
   schemaCreator: SchemaCreatorService,
@@ -22,11 +22,7 @@ const fillCache = new Map<S.Fill['type'], S.Fill>()
 
 export const FillPickerComp: FC<{}> = observer(({}) => {
   const { t } = useTranslation()
-  const fillPicker = useEditorService('fillPicker')
-  const operateFill = useEditorService('operateFill')
-  const schemaCreator = useEditorService('schemaCreator')
-  const undo = useEditorService('undo')
-
+  const { fillPicker, operateFill, schemaCreator, undo } = useEditorServices()
   const { fillIndex, fillType, pickerPos, changeFill } = fillPicker
   const fill = operateFill.fills[fillIndex]
 
@@ -92,8 +88,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
 
 export const PickerSolidComp: FC<{ fill: S.FillColor; index: number }> = memo(
   ({ fill, index }) => {
-    const operateFill = useEditorService('operateFill')
-
+    const { operateFill } = useEditorServices()
     const getRgbaFromSolidFill = (fill: S.FillColor) => {
       const { color, alpha } = fill
       return Color(color).alpha(alpha).toString()

@@ -1,8 +1,8 @@
 import { optionalSet } from '@gitborlando/utils'
-import { useEditorService } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/editor'
 
 export const FPSComp: FC<{}> = observer(({}) => {
-  const editorSetting = useEditorService('editorSetting')
+  const { editorSetting } = useEditorServices()
   const { showFPS } = editorSetting.setting
   const ref = useRef<HTMLDivElement>(null)
 
