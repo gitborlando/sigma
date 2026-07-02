@@ -8,8 +8,8 @@ import { SelectController } from 'src/editor/controller/select'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
 import { HandleSelectService, type Selection } from 'src/editor/handle/select'
 import { ElemMouseEvent } from 'src/editor/render/elem'
-import { StageSceneService } from 'src/editor/render/scene'
-import { StageSurfaceService } from 'src/editor/render/surface'
+import { RenderSurfaceService } from 'src/editor/render/surface'
+import { RenderTreeService } from 'src/editor/render/tree'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { createStageDragger } from 'src/editor/stage/dragger'
@@ -28,8 +28,8 @@ export class StageSelectService extends Service {
   private isPointerDown = false
 
   constructor(
-    private readonly stageScene: StageSceneService,
-    private readonly stageSurface: StageSurfaceService,
+    private readonly renderTree: RenderTreeService,
+    private readonly renderSurface: RenderSurfaceService,
     private readonly stageEvent: StageEventService,
     private readonly stageTransformer: StageTransformerService,
     private readonly handleSelect: HandleSelectService,
@@ -44,10 +44,10 @@ export class StageSelectService extends Service {
 
   startInteract() {
     return Disposer.combine(
-      this.stageScene.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
-      this.stageSurface.addEvent('dblclick', this.onDoubleClick),
-      this.stageSurface.addEvent('mousemove', this.onHover),
-      // this.stageSurface.addEvent('contextmenu', this.onContextMenu),
+      this.renderTree.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
+      this.renderSurface.addEvent('dblclick', this.onDoubleClick),
+      this.renderSurface.addEvent('mousemove', this.onHover),
+      // this.renderSurface.addEvent('contextmenu', this.onContextMenu),
       listen('pointerdown', () => (this.isPointerDown = true)),
       listen('pointerup', () => (this.isPointerDown = false)),
     )
@@ -112,7 +112,7 @@ export class StageSelectService extends Service {
       schema: this.yState.schema,
       enter: (ctx) => {
         const { item, depth, childIds, forwardCtx } = ctx
-        const elem = this.stageScene.findElem(item.id)
+        const elem = this.renderTree.findElem(item.id)
 
         if (!this.stageEvent.isElemVisible(elem)) return false
 

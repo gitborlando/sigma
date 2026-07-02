@@ -7,19 +7,19 @@ import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import { HandlePageService } from 'src/editor/handle/page'
 import { HandleSelectService } from 'src/editor/handle/select'
-import { StageSceneService } from 'src/editor/render/scene'
+import { RenderTreeService } from 'src/editor/render/tree'
 import { StageInteractService } from 'src/editor/stage/interact/interact'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Command } from 'src/global/context-menu'
 import { Service } from 'src/global/service'
 
-export class EditorCommandService extends Service {
+export class CommandService extends Service {
   constructor(
     private readonly handlePage: HandlePageService,
     private readonly handleSelect: HandleSelectService,
     private readonly editorSetting: EditorSettingService,
     private readonly undo: UndoService,
-    private readonly stageScene: StageSceneService,
+    private readonly renderTree: RenderTreeService,
     private readonly stageInteract: StageInteractService,
     private readonly yState: YStateService,
     private readonly nodeController: NodeController,
@@ -116,7 +116,7 @@ export class EditorCommandService extends Service {
           name: t('print element'),
           callback: () => {
             this.handleSelect.selectIdList.forEach((id) =>
-              console.log(this.stageScene.findElem(id)),
+              console.log(this.renderTree.findElem(id)),
             )
           },
         },

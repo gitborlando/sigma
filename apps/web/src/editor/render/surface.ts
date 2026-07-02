@@ -1,5 +1,4 @@
 import { AABB } from '@gitborlando/geo'
-import { Signal } from '@gitborlando/signal'
 import { Matrix } from 'src/editor/geometry'
 import { IMatrix } from 'src/editor/geometry/matrix'
 import { StageViewportService } from 'src/editor/stage/viewport'
@@ -9,9 +8,7 @@ const dpr = devicePixelRatio
 
 export type SurfaceCanvasType = 'mainCanvas' | 'topCanvas'
 
-export class StageSurfaceService extends Service {
-  inited = Signal.create(false)
-
+export class RenderSurfaceService extends Service {
   private container!: HTMLDivElement
 
   private canvas!: HTMLCanvasElement
@@ -121,13 +118,7 @@ export class StageSurfaceService extends Service {
     listener: (this: HTMLDivElement, ev: HTMLElementEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions,
   ) => {
-    if (this.inited.value) {
-      this.container.addEventListener(type, listener, options)
-    } else {
-      this.inited.hook(() =>
-        this.container.addEventListener(type, listener, options),
-      )
-    }
+    this.container.addEventListener(type, listener, options)
     return () => this.container?.removeEventListener(type, listener, options)
   }
 }

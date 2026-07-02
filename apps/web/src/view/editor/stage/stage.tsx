@@ -7,14 +7,14 @@ import { FPSComp } from 'src/view/editor/stage/fps'
 import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
 import { RulerComp } from 'src/view/editor/stage/ruler'
-import { EditorStageSurfaceComp } from 'src/view/editor/stage/surface'
 import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
 import { EditorContext, useEditor, useEditorServices } from 'src/view/hooks/editor'
 
 export const StageComp: FC<{}> = observer(({}) => {
   const editor = useEditor()
-  const { editorCommand, selectController, stageScene, stageSelect, handleSelect } =
+  const { command, selectController, renderTree, stageSelect, handleSelect } =
     useEditorServices()
+
   useEffect(() => {
     return renderElem(
       <EditorContext.Provider value={editor}>
@@ -23,14 +23,14 @@ export const StageComp: FC<{}> = observer(({}) => {
         <EditorStageMarqueeComp />
         <EditorStageCursorsComp />
       </EditorContext.Provider>,
-      stageScene.widgetRoot,
+      renderTree.widgetRoot,
     )
-  }, [editor, stageScene])
+  }, [editor, renderTree])
 
   const handleContextMenu = (e: React.MouseEvent) => {
     const { hoverId } = stageSelect
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
-      editorCommand
+      command
     const baseMenus = [copyPasteGroup, undoRedoGroup]
 
     if (
@@ -52,7 +52,7 @@ export const StageComp: FC<{}> = observer(({}) => {
 
   return (
     <G onContextMenu={handleContextMenu}>
-      <EditorStageSurfaceComp />
+      <SurfaceComp />
       <RulerComp />
       <FPSComp />
       <CooperateObservingBorderComp />
@@ -60,25 +60,37 @@ export const StageComp: FC<{}> = observer(({}) => {
   )
 })
 
-export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
-  const { yAware } = useEditorServices()
-  const { observingClientId: observingUserId } = yAware
-  if (!observingUserId) return null
+const SurfaceComp: FC<{}> = observer(({}) => {
+  const { renderSurface } = useEditorServices()
 
-  const client = yAware.others[observingUserId]
+  const cls = classes(css`
+    /* background-color: #f7f8fa; */
+    background-color: var(--gray-bg);
+  `)
 
   return (
-    <G
-      className={cls('cooperate-observing-border')}
-      style={{ '--color': client.color } as CSSProperties}></G>
+    <G className={cls()} ref={renderSurface.setContainer}>
+      <canvas ref={renderSurface.setCanvas} />
+      <canvas style={{ position: 'absolute' }} ref={renderSurface.setTopCanvas} />
+    </G>
   )
 })
 
-const cls = classes(css`
-  &-cooperate-observing-border {
+const CooperateObservingBorderComp = observer<{}>(({}) => {
+  const { yAware } = useEditorServices()
+  const { observingClientId } = yAware
+  if (!observingClientId) return null
+
+  const client = yAware.others[observingClientId]
+
+  const cls = classes(css`
     position: absolute;
     top: 0;
     left: 0;
     border: 2px solid var(--color);
-  }
-`)
+  `)
+
+  return (
+    <G className={cls()} style={{ '--color': client.color } as CSSProperties}></G>
+  )
+})

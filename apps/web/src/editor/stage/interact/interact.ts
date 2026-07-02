@@ -17,20 +17,19 @@ export class StageInteractService extends Service {
   ) {
     super()
     autoBind(makeObservable(this))
-    this.effect(autorun(this.onInteract))
     this.effect(this.onFinishCreate())
   }
 
-  private onInteract() {
-    this.offInteract?.()
-
-    const interact = matchCase(this.interaction, {
-      select: () => this.stageSelect.startInteract(),
-      move: () => this.stageMove.startInteract(),
-      create: () => this.stageCreate.startInteract(),
+  onInteract() {
+    const dispose = autorun(() => {
+      this.offInteract?.()
+      this.offInteract = matchCase(this.interaction, {
+        select: () => this.stageSelect.startInteract(),
+        move: () => this.stageMove.startInteract(),
+        create: () => this.stageCreate.startInteract(),
+      })?.()
     })
-
-    this.offInteract = interact?.()
+    this.effect(dispose, () => this.offInteract?.())
   }
 
   private onFinishCreate() {

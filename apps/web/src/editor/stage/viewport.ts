@@ -6,7 +6,7 @@ import { clamp } from 'es-toolkit'
 import { makeObservable } from 'mobx'
 import { IMatrix, Matrix } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
-import { StageSurfaceService } from 'src/editor/render/surface'
+import { RenderSurfaceService } from 'src/editor/render/surface'
 import { Service } from 'src/global/service'
 
 const createInitBound = () => ({
@@ -126,12 +126,12 @@ export class StageViewportService extends Service {
     this.updateZoom(newZoom, this.toCanvasXY(XY.client(e)))
   }
 
-  onWheelZoom(stageSurface: StageSurfaceService) {
+  onWheelZoom(renderSurface: RenderSurfaceService) {
     this.effect(
       this.wheeler.beforeWheel.hook(() => (this.isZooming = true)),
       this.wheeler.duringWheel.hook(({ e }) => this.handleWheelZoom(e)),
       this.wheeler.afterWheel.hook(() => (this.isZooming = false)),
-      stageSurface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent)),
+      renderSurface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent)),
       listen('wheel', { passive: false, capture: true }, (e) => {
         e.ctrlKey && e.preventDefault()
       }),

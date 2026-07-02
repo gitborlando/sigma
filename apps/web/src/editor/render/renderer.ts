@@ -6,11 +6,11 @@ import type { NoopFunc } from '@gitborlando/utils'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
-import { ElemDrawerService } from 'src/editor/render/draw'
+import { ElemDrawerService } from 'src/editor/render/drawer'
 import { Elem } from 'src/editor/render/elem'
 import { RenderInvalidatorService } from 'src/editor/render/invalidator'
-import { StageSceneService } from 'src/editor/render/scene'
-import { StageSurfaceService } from 'src/editor/render/surface'
+import { RenderSurfaceService } from 'src/editor/render/surface'
+import { RenderTreeService } from 'src/editor/render/tree'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { Raf } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
@@ -24,7 +24,7 @@ export type SurfaceRenderType =
   | 'nextFullRender'
   | 'partialRender'
 
-export class StageRendererService extends Service {
+export class RendererService extends Service {
   onRenderTopCanvas = Signal.create<CanvasRenderingContext2D>()
 
   private bufferCanvas = new OffscreenCanvas(0, 0)
@@ -48,8 +48,8 @@ export class StageRendererService extends Service {
 
   constructor(
     private readonly editorSetting: EditorSettingService,
-    private readonly stageScene: StageSceneService,
-    private readonly stageSurface: StageSurfaceService,
+    private readonly renderTree: RenderTreeService,
+    private readonly renderSurface: RenderSurfaceService,
     private readonly stageViewport: StageViewportService,
     private readonly elemDrawer: ElemDrawerService,
     private readonly renderInvalidator: RenderInvalidatorService,
@@ -71,7 +71,7 @@ export class StageRendererService extends Service {
       this.onViewportChange(),
       this.DEV_showDirtyRect(),
     )
-    this.stageViewport.onWheelZoom(this.stageSurface)
+    this.stageViewport.onWheelZoom(this.renderSurface)
     this.requestRenderTopCanvas()
   }
 
@@ -142,7 +142,7 @@ export class StageRendererService extends Service {
 
     this.renderTasks.push(() => {
       if (type === 'firstFullRender' || this.editorSetting.setting.fullRender) {
-        this.stageSurface.clearSurface()
+        this.renderSurface.clearSurface()
       }
       const isPartialRender =
         type === 'partialRender' && !this.editorSetting.setting.fullRender
@@ -150,7 +150,7 @@ export class StageRendererService extends Service {
     })
 
     this.raf.cancelAll().request((next) => {
-      this.stageSurface.ctxSaveRestore(() => this.renderTasks.pop()?.())
+      this.renderSurface.ctxSaveRestore(() => this.renderTasks.pop()?.())
       this.renderType = undefined
       if (this.renderTasks.length) next()
     })
@@ -163,12 +163,12 @@ export class StageRendererService extends Service {
     requestAnimationFrame(() => {
       this.hasRequestedRenderTopCanvas = false
 
-      const resetCtx = this.stageSurface.setCurrentCtxType('topCanvas')
-      this.stageSurface.clearSurface()
-      this.stageSurface.ctxSaveRestore((ctx) => {
-        this.stageSurface.transformTopCanvas()
+      const resetCtx = this.renderSurface.setCurrentCtxType('topCanvas')
+      this.renderSurface.clearSurface()
+      this.renderSurface.ctxSaveRestore((ctx) => {
+        this.renderSurface.transformTopCanvas()
         this.onRenderTopCanvas.dispatch(ctx)
-        this.stageScene.widgetRoot.children.forEach(this.drawElem)
+        this.renderTree.widgetRoot.children.forEach(this.drawElem)
       })
       resetCtx()
     })
@@ -189,7 +189,7 @@ export class StageRendererService extends Service {
       return aLane - bLane
     })
 
-    this.stageScene.sceneRoot.children.forEach((elem, selfIndex) => {
+    this.renderTree.sceneRoot.children.forEach((elem, selfIndex) => {
       if (!this.isElemVisible(elem)) return
       this.fullRenderElemsMinHeap.push({ elem, selfIndex, layerIndex: 0 })
     })
@@ -199,21 +199,21 @@ export class StageRendererService extends Service {
     if (!this.isElemVisible(elem)) return
 
     if (this.editorSetting.setting.ignoreUnVisible && elem.optimize) {
-      const visualSize = this.stageSurface.getVisualSize(elem.aabb)
+      const visualSize = this.renderSurface.getVisualSize(elem.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
-    const resetCtx = this.stageSurface.setCurrentCtxType(
+    const resetCtx = this.renderSurface.setCurrentCtxType(
       elem.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
     )
 
-    this.stageSurface.ctxSaveRestore((ctx) => {
+    this.renderSurface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
       let resetTransform = () => {}
 
       if (elem.node) {
-        resetTransform = this.stageSurface.setTransform(elem.node.matrix)
-        this.stageSurface.ctxSaveRestore(() =>
+        resetTransform = this.renderSurface.setTransform(elem.node.matrix)
+        this.renderSurface.ctxSaveRestore(() =>
           this.elemDrawer.draw(elem, ctx, path2d),
         )
       }
@@ -230,10 +230,10 @@ export class StageRendererService extends Service {
   }
 
   private fullRender() {
-    this.stageSurface.transformCanvas()
+    this.renderSurface.transformCanvas()
 
     if (!this.editorSetting.setting.needSliceRender) {
-      this.stageScene.sceneRoot.children.forEach(this.drawElem)
+      this.renderTree.sceneRoot.children.forEach(this.drawElem)
       while (this.fullRenderElemsMinHeap.length) this.fullRenderElemsMinHeap.pop()
       return
     }
@@ -250,9 +250,9 @@ export class StageRendererService extends Service {
   }
 
   private patchRender(reRenderElems: Set<Elem>) {
-    this.stageSurface.transformCanvas()
+    this.renderSurface.transformCanvas()
 
-    this.stageScene.sceneRoot.children.forEach((elem) => {
+    this.renderTree.sceneRoot.children.forEach((elem) => {
       if (reRenderElems.has(elem)) this.drawElem(elem)
     })
   }
@@ -280,7 +280,7 @@ export class StageRendererService extends Service {
 
     this.bufferCtx.clearRect(0, 0, width, height)
     this.bufferCtx.drawImage(
-      this.stageSurface.getCanvas(),
+      this.renderSurface.getCanvas(),
       0,
       0,
       width,
@@ -291,12 +291,12 @@ export class StageRendererService extends Service {
       height,
     )
 
-    const ctx = this.stageSurface.getMainCtx()
+    const ctx = this.renderSurface.getMainCtx()
     ctx.clearRect(0, 0, width, height)
     ctx.drawImage(this.bufferCanvas, 0, 0, width, height, 0, 0, width, height)
 
-    this.stageScene.sceneRoot.children.forEach(traverse)
-    this.stageSurface.ctxSaveRestore(() => this.patchRender(reRenderElems))
+    this.renderTree.sceneRoot.children.forEach(traverse)
+    this.renderSurface.ctxSaveRestore(() => this.patchRender(reRenderElems))
   }
 
   private partialRender() {
@@ -322,18 +322,18 @@ export class StageRendererService extends Service {
     while (needReTest) {
       needReTest = false
       reRenderElems.clear()
-      traverser.traverse(this.stageScene.sceneElems)
+      traverser.traverse(this.renderTree.sceneElems)
     }
 
-    this.stageSurface.ctxSaveRestore(() => {
-      this.stageSurface.transformCanvas()
+    this.renderSurface.ctxSaveRestore(() => {
+      this.renderSurface.transformCanvas()
       const { minX, minY, maxX, maxY } = dirtyArea
-      this.stageSurface.getMainCtx().clearRect(minX, minY, maxX - minX, maxY - minY)
+      this.renderSurface.getMainCtx().clearRect(minX, minY, maxX - minX, maxY - minY)
       this.dirtyRects.clear()
       this.DEV_dirtyArea = dirtyArea
     })
 
-    this.stageSurface.ctxSaveRestore(() => this.patchRender(reRenderElems))
+    this.renderSurface.ctxSaveRestore(() => this.patchRender(reRenderElems))
   }
 
   private DEV_showDirtyRect() {

@@ -15,7 +15,7 @@ import {
 } from 'src/editor/geometry'
 import { HandleNodeService } from 'src/editor/handle/node'
 import { HandleSelectService } from 'src/editor/handle/select'
-import { StageSceneService } from 'src/editor/render/scene'
+import { RenderTreeService } from 'src/editor/render/tree'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageCursorService } from 'src/editor/stage/cursor'
@@ -52,7 +52,7 @@ export class StageCreateService extends Service {
   finishCreate$ = Signal.create<void>()
 
   constructor(
-    private readonly stageScene: StageSceneService,
+    private readonly renderTree: RenderTreeService,
     private readonly stageEvent: StageEventService,
     private readonly stageCursor: StageCursorService,
     private readonly handleNode: HandleNodeService,
@@ -69,7 +69,7 @@ export class StageCreateService extends Service {
   }
 
   startInteract() {
-    const disposer = this.stageScene.sceneRoot.addEvent('mousedown', this.create, {
+    const disposer = this.renderTree.sceneRoot.addEvent('mousedown', this.create, {
       capture: true,
     })
     this.stageCursor.setCursor('add').lock()

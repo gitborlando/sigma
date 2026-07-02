@@ -1,5 +1,5 @@
-import { StageRendererService } from 'src/editor/render/renderer'
-import { StageSurfaceService } from 'src/editor/render/surface'
+import { RendererService } from 'src/editor/render/renderer'
+import { RenderSurfaceService } from 'src/editor/render/surface'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
@@ -8,20 +8,20 @@ export class StageToolGridService extends Service {
   private ctx!: CanvasRenderingContext2D
 
   constructor(
-    private readonly stageRenderer: StageRendererService,
-    private readonly stageSurface: StageSurfaceService,
+    private readonly renderer: RendererService,
+    private readonly renderSurface: RenderSurfaceService,
     private readonly stageViewport: StageViewportService,
   ) {
     super()
     autoBind(this)
-    this.effect(this.stageRenderer.onRenderTopCanvas.hook(this.draw))
+    this.effect(this.renderer.onRenderTopCanvas.hook(this.draw))
   }
 
   private draw() {
     const zoom = this.stageViewport.zoom
     if (zoom < 10.96) return
 
-    this.stageSurface.ctxSaveRestore((ctx) => {
+    this.renderSurface.ctxSaveRestore((ctx) => {
       ctx.transform(...this.stageViewport.sceneMatrix.invert().tuple())
       ctx.strokeStyle = '#cccccc55'
       ctx.lineWidth = 1

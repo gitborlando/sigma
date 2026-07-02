@@ -4,9 +4,9 @@ import type { NoopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { Matrix } from 'src/editor/geometry'
 import { Elem } from 'src/editor/render/elem'
-import { StageRendererService } from 'src/editor/render/renderer'
-import { StageSceneService } from 'src/editor/render/scene'
-import { StageSurfaceService } from 'src/editor/render/surface'
+import { RendererService } from 'src/editor/render/renderer'
+import { RenderSurfaceService } from 'src/editor/render/surface'
+import { RenderTreeService } from 'src/editor/render/tree'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { reverseFor } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
@@ -17,10 +17,10 @@ export class StageEventService extends Service {
   private isPointerEventNone = false
 
   constructor(
-    private readonly stageScene: StageSceneService,
-    private readonly stageSurface: StageSurfaceService,
+    private readonly renderTree: RenderTreeService,
+    private readonly renderSurface: RenderSurfaceService,
     private readonly stageViewport: StageViewportService,
-    private readonly stageRenderer: StageRendererService,
+    private readonly renderer: RendererService,
   ) {
     super()
     autoBind(this)
@@ -64,7 +64,7 @@ export class StageEventService extends Service {
     const canvasXY = this.stageViewport.toCanvasXY(xy)
     this.eventXY = this.stageViewport.sceneMatrix.invertXY(canvasXY)
     this.elemsFromPoint.length = 0
-    this.stageRenderer.updateRenderPriorityXY(this.eventXY)
+    this.renderer.updateRenderPriorityXY(this.eventXY)
   }
 
   private traverseLayerList(
@@ -116,14 +116,14 @@ export class StageEventService extends Service {
       }
     }
 
-    reverseFor(this.stageScene.rootElems, (elem, layerIndex) =>
+    reverseFor(this.renderTree.rootElems, (elem, layerIndex) =>
       traverse({ layerIndex, elem, xy: this.eventXY, hitList: [] }),
     )
   }
 
   private onPointerEvents() {
     const onMouseEvent = (e: MouseEvent) => {
-      if (this.isPointerEventNone || this.stageRenderer.isSliceRendering) return
+      if (this.isPointerEventNone || this.renderer.isSliceRendering) return
 
       const point = XY.client(e)
       this.prepareHitTest(point)
@@ -140,8 +140,8 @@ export class StageEventService extends Service {
     }
 
     return Disposer.combine(
-      this.stageSurface.addEvent('mousedown', onMouseEvent, { capture: true }),
-      this.stageSurface.addEvent('mousemove', onMouseEvent, { capture: true }),
+      this.renderSurface.addEvent('mousedown', onMouseEvent, { capture: true }),
+      this.renderSurface.addEvent('mousemove', onMouseEvent, { capture: true }),
     )
   }
 }

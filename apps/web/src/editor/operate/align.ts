@@ -1,6 +1,6 @@
 import { Signal } from '@gitborlando/signal'
 import { HandleSelectService } from 'src/editor/handle/select'
-import { StageSceneService } from 'src/editor/render/scene'
+import { RenderTreeService } from 'src/editor/render/tree'
 import { Service } from 'src/global/service'
 import { UndoService } from '../core/undo'
 import { SchemaHelper } from '../schema/helper'
@@ -29,7 +29,7 @@ export class OperateAlignService extends Service {
     private readonly handleSelect: HandleSelectService,
     private readonly yState: YStateService,
     private readonly undo: UndoService,
-    private readonly stageScene: StageSceneService,
+    private readonly renderTree: RenderTreeService,
   ) {
     super()
     autoBind(this)
@@ -148,11 +148,10 @@ export class OperateAlignService extends Service {
     }
 
     const [node] = this.toAlignNodes
-    return this.stageScene.findElem(node.id).obb.aabb
+    return this.renderTree.findElem(node.id).aabb
   }
 
   private getOBBAndBound(node: S.Node) {
-    const nodeOBB = this.stageScene.findElem(node.id).obb
-    return nodeOBB.aabb
+    return this.renderTree.findElem(node.id).aabb
   }
 }

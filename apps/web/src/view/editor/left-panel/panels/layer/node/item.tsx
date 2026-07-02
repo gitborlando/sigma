@@ -13,13 +13,8 @@ import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
 export const EditorLeftPanelLayerNodeItemComp: FC<{
   nodeInfo: LayerPanelNodeInfo
 }> = observer(({ nodeInfo }) => {
-  const {
-    editorCommand,
-    layerPanelNodeTree,
-    stageSelect,
-    selectController,
-    yState,
-  } = useEditorServices()
+  const { command, layerPanelNodeTree, stageSelect, selectController, yState } =
+    useEditorServices()
   const { id, indent, ancestorIds } = nodeInfo
   const { toggleNodeExpanded, getNodeExpanded } = layerPanelNodeTree
 
@@ -46,7 +41,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
   }
   const handleContextMenu = (e: React.MouseEvent) => {
     ContextMenu.context = { id }
-    ContextMenu.menus = [editorCommand.nodeGroup, editorCommand.copyPasteGroup]
+    ContextMenu.menus = [command.nodeGroup, command.copyPasteGroup]
     ContextMenu.openMenu(e)
   }
   const handleMouseEnter = () => {

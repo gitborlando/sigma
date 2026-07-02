@@ -18,7 +18,7 @@ export class HandlePageService extends Service {
   addPage(page = this.schemaCreator.page()) {
     this.yState.transact(() => {
       this.yState.set<S.Page>([page.id], page)
-      this.yState.insert(['meta', 'pageIds'], page.id)
+      this.yState.insert<S.Meta>(['meta', 'pageIds'], page.id)
     })
 
     this.undo.untrack(() => this.handleSelect.selectPage(page.id))
@@ -30,7 +30,7 @@ export class HandlePageService extends Service {
 
     this.yState.transact(() => {
       this.yState.delete<S.Page>([page.id])
-      this.yState.delete([
+      this.yState.delete<S.Meta>([
         'meta',
         'pageIds',
         this.yState.state.meta.pageIds.indexOf(page.id),

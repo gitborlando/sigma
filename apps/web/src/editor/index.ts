@@ -1,11 +1,11 @@
 import { objKeys } from '@gitborlando/utils'
 import { asClass, createContainer } from 'awilix'
 import { NodeController } from 'src/editor/controller/node'
-import { StageController } from 'src/editor/controller/render'
 import { SchemaController } from 'src/editor/controller/schema'
 import { SelectController } from 'src/editor/controller/select'
+import { StageController } from 'src/editor/controller/stage'
 import { ViewportController } from 'src/editor/controller/viewport'
-import { EditorCommandService } from 'src/editor/core/command'
+import { CommandService } from 'src/editor/core/command'
 import { EditorSettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import { HandleNodeService } from 'src/editor/handle/node'
@@ -14,11 +14,11 @@ import { HandleSelectService } from 'src/editor/handle/select'
 import { OperateAlignService } from 'src/editor/operate/align'
 import { OperateFillService } from 'src/editor/operate/fill'
 import { DesignGeometryService } from 'src/editor/operate/geometry'
-import { ElemDrawerService } from 'src/editor/render/draw'
+import { ElemDrawerService } from 'src/editor/render/drawer'
 import { RenderInvalidatorService } from 'src/editor/render/invalidator'
-import { StageRendererService } from 'src/editor/render/renderer'
-import { StageSceneService } from 'src/editor/render/scene'
-import { StageSurfaceService } from 'src/editor/render/surface'
+import { RendererService } from 'src/editor/render/renderer'
+import { RenderSurfaceService } from 'src/editor/render/surface'
+import { RenderTreeService } from 'src/editor/render/tree'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { StageCursorService } from 'src/editor/stage/cursor'
 import { StageEventService } from 'src/editor/stage/event'
@@ -38,39 +38,57 @@ import { YSyncService } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
 const editorServices = {
+  /** controller */
   nodeController: NodeController,
   selectController: SelectController,
   viewportController: ViewportController,
   stageController: StageController,
   schemaController: SchemaController,
 
+  /** core */
+  editorSetting: EditorSettingService,
+  command: CommandService,
+  undo: UndoService,
+
+  /** handle */
   handleNode: HandleNodeService,
   handlePage: HandlePageService,
-  editorSetting: EditorSettingService,
-  editorCommand: EditorCommandService,
-  undo: UndoService,
   handleSelect: HandleSelectService,
-  operateAlign: OperateAlignService,
-  operateFill: OperateFillService,
-  designGeometry: DesignGeometryService,
+
+  /** render */
   renderInvalidator: RenderInvalidatorService,
   elemDrawer: ElemDrawerService,
-  stageScene: StageSceneService,
-  stageSurface: StageSurfaceService,
-  stageRenderer: StageRendererService,
+  renderTree: RenderTreeService,
+  renderSurface: RenderSurfaceService,
+  renderer: RendererService,
+
+  /** schema */
   schemaCreator: SchemaCreatorService,
+
+  /** stage */
   stageCreate: StageCreateService,
   stageInteract: StageInteractService,
   stageMove: StageMoveService,
   stageSelect: StageSelectService,
   stageEvent: StageEventService,
-  stageTransformer: StageTransformerService,
+
+  /** tools */
   stageCursor: StageCursorService,
   stageViewport: StageViewportService,
+  stageTransformer: StageTransformerService,
   stageToolGrid: StageToolGridService,
+
+  /** workbench.design */
   fillPicker: FillPickerService,
+  operateAlign: OperateAlignService,
+  operateFill: OperateFillService,
+  designGeometry: DesignGeometryService,
+
+  /** workbench.layer */
   layerPanel: LayerPanelService,
   layerPanelNodeTree: LayerPanelNodeTreeService,
+
+  /** yjs */
   yAware: YAwareService,
   ySync: YSyncService,
   yState: YStateService,
@@ -105,15 +123,16 @@ export class Editor extends Service {
     this.effect(() => this.container.dispose())
   }
 
-  resolve = <K extends keyof EditorServices>(key: K) => {
-    const service = this.container.resolve<EditorServices[K]>(key)
-    this.effect(() => service.dispose())
-    return service
+  resolve = <K extends EditorServiceId>(key: K) => {
+    return this.container.resolve<EditorServices[K]>(key)
   }
 
   private registerServices() {
-    objKeys(editorServices).forEach((key: EditorServiceId) => {
-      this.container.register(key, asClass(<any>editorServices[key]).singleton())
+    objKeys(editorServices).forEach((id) => {
+      this.container.register(id, asClass(<any>editorServices[id]).singleton())
+    })
+    objKeys(editorServices).forEach((id) => {
+      this.effect(() => this.container.resolve(id).dispose())
     })
   }
 }

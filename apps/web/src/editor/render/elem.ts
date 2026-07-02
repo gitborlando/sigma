@@ -91,10 +91,24 @@ export class Elem {
   children: Elem[] = []
 
   addChild(elem: Elem, index?: number) {
-    if (elem.parent === this) return
+    if (elem.parent === this) {
+      const oldIndex = this.children.indexOf(elem)
+      const nextIndex = index ?? this.children.length - 1
+      if (oldIndex !== -1 && oldIndex !== nextIndex) {
+        this.children.splice(oldIndex, 1)
+        this.children.splice(nextIndex, 0, elem)
+        this.dirty()
+      }
+      return
+    }
 
+    elem.parent?.removeChild(elem)
     elem.parent = this
+
     this.children.splice(index ?? this.children.length, 0, elem)
+
+    elem.dirty()
+    this.dirty()
   }
 
   insertBefore(elem: Elem, beforeElem: Elem) {
@@ -104,7 +118,12 @@ export class Elem {
 
   removeChild(elem: Elem) {
     const index = this.children.indexOf(elem)
-    if (index !== -1) this.children.splice(index, 1)
+    if (index === -1) return
+
+    this.children.splice(index, 1)
+    elem.parent = undefined!
+    elem.dirty()
+    this.dirty()
   }
 
   eventHandle = new ElemEventHandler(this)
@@ -133,9 +152,9 @@ export class Elem {
   }
 
   destroy() {
+    this.dirty()
     this.eventHandle.dispose()
     this.parent?.removeChild(this)
-    this.context.renderInvalidator.collectDirty(this)
   }
 }
 

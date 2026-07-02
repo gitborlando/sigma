@@ -1,4 +1,5 @@
 import { clone } from '@gitborlando/utils'
+import type { YPlainPath } from '@gitborlando/y-plain'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
 import { makeObservable } from 'mobx'
@@ -8,6 +9,12 @@ import { COLOR } from 'src/utils/color'
 import { UndoService } from '../core/undo'
 import { HandleSelectService } from '../handle/select'
 import { YStateService } from '../y-adapter/y-state'
+
+type DynamicYStateMutation = {
+  insert: (path: YPlainPath, value: unknown) => boolean
+  set: (path: YPlainPath, value: unknown) => boolean
+  delete: (path: YPlainPath) => boolean
+}
 
 export class OperateFillService extends Service {
   @observable.ref fills = <S.Fill[]>[]
@@ -107,25 +114,23 @@ export class OperateFillService extends Service {
 }
 
 function applyFillPatches(yState: YStateService, id: ID, patches: Patch[]) {
+  const mutation = yState as unknown as DynamicYStateMutation
+
   patches.forEach((patch) => {
-    const path = [id, 'fills', ...patch.path] as [
-      ID,
-      'fills',
-      ...(string | number)[],
-    ]
+    const path: YPlainPath = [id, 'fills', ...patch.path]
 
     switch (patch.op) {
       case 'add':
         if (!Number.isNaN(Number(path[path.length - 1]))) {
-          yState.insert(path, clone(patch.value))
+          mutation.insert(path, clone(patch.value))
         } else {
-          yState.set(path, clone(patch.value))
+          mutation.set(path, clone(patch.value))
         }
         return
       case 'replace':
-        return yState.set(path, clone(patch.value))
+        return mutation.set(path, clone(patch.value))
       case 'remove':
-        return yState.delete(path)
+        return mutation.delete(path)
     }
   })
 }

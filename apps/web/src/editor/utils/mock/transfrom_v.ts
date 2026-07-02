@@ -6,7 +6,7 @@ export function mock_transform_v(schemaCreator: SchemaCreatorService) {
 
   const meta = schemaCreator.meta()
   const page = schemaCreator.page()
-  schemaCreator.addToSchema(schema, meta)
+  schema.meta = meta
   schemaCreator.addToSchema(schema, page)
   meta.pageIds.push(page.id)
 

@@ -1,7 +1,7 @@
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { floor } from 'src/editor/geometry/base'
-import { StageSurfaceService } from 'src/editor/render/surface'
+import { RenderSurfaceService } from 'src/editor/render/surface'
 import { Service } from 'src/global/service'
 
 export type StageCursorType =
@@ -19,7 +19,7 @@ export class StageCursorService extends Service {
   private rotation = 0
   private locked = false
 
-  constructor(private readonly stageSurface: StageSurfaceService) {
+  constructor(private readonly renderSurface: RenderSurfaceService) {
     super()
     autoBind(this)
     this.effect(listen('mouseup', () => (this.locked = false)))
@@ -30,7 +30,7 @@ export class StageCursorService extends Service {
 
     this.type = type
     this.rotation = floor(rotation)
-    this.stageSurface.setCursor(this.getSvgUrl())
+    this.renderSurface.setCursor(this.getSvgUrl())
     return this
   }
 

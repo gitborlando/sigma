@@ -1,7 +1,7 @@
 import { AABB } from '@gitborlando/geo'
 import { Matrix } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
-import { StageSceneService } from 'src/editor/render/scene'
+import { RenderTreeService } from 'src/editor/render/tree'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 
@@ -9,19 +9,19 @@ export class ViewportController extends Service {
   constructor(
     private readonly stageViewport: StageViewportService,
     private readonly handleSelect: HandleSelectService,
-    private readonly stageScene: StageSceneService,
+    private readonly renderTree: RenderTreeService,
   ) {
     super()
     autoBind(this)
   }
 
   zoomToFitAll() {
-    this.zoomToFit(this.stageScene.sceneElems.map((elem) => elem.aabb))
+    this.zoomToFit(this.renderTree.sceneElems.map((elem) => elem.aabb))
   }
 
   zoomToFitSelection() {
     this.zoomToFit(
-      this.handleSelect.selectIdList.map((id) => this.stageScene.findElem(id).aabb),
+      this.handleSelect.selectIdList.map((id) => this.renderTree.findElem(id).aabb),
     )
   }
 

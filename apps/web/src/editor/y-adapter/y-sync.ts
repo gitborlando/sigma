@@ -23,11 +23,15 @@ export class YSyncService extends Service {
     this.awareness = this.provider.awareness!
 
     const provider = this.provider
-    provider.on('synced', () => {})
-    provider.on('status', () => {})
+    provider.on('synced', this.synced)
+    provider.on('status', this.status)
     this.effect(() => {
-      provider.off('synced', () => {})
-      provider.off('status', () => {})
+      provider.off('synced', this.synced)
+      provider.off('status', this.status)
     })
   }
+
+  private synced() {}
+
+  private status() {}
 }

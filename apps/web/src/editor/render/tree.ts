@@ -7,7 +7,7 @@ import { Service } from 'src/global/service'
 import { Elem } from './elem'
 import { RenderInvalidatorService } from './invalidator'
 
-export class StageSceneService extends Service {
+export class RenderTreeService extends Service {
   elements = new Map<string, Elem>()
 
   sceneRoot!: Elem
@@ -124,19 +124,27 @@ export class StageSceneService extends Service {
   }
 
   private reHierarchy(patch: YStatePatch) {
-    const { type, keys } = patch
-    const [id, _, index] = keys as [ID, string, number]
+    const [id] = patch.keys as [ID, string, number]
+    const parentNode = this.yState.find<S.NodeParent>(id)
+    if (!parentNode) return
+
     const parent = this.findElem(id) || this.sceneRoot
+    const nextChildren: Elem[] = []
 
-    if (type === 'add') {
-      const value = patch.value
-      const elem = this.findElem(value)
-      const oldIndex = parent.children.indexOf(elem)
-      if (oldIndex !== -1) parent.children.splice(oldIndex, 1)
-      parent.children.splice(index, 0, elem)
-    }
+    parentNode.childIds.forEach((childId) => {
+      const childElem = this.findElem(childId)
+      if (!childElem) return
 
-    if (parent !== this.sceneRoot) parent.dirty()
+      if (childElem.parent && childElem.parent !== parent) {
+        childElem.parent.removeChild(childElem)
+      }
+
+      childElem.parent = parent
+      nextChildren.push(childElem)
+    })
+
+    parent.children = nextChildren
+    parent.dirty()
   }
 
   private createElem(id = '', type: 'sceneElem' | 'widgetElem') {

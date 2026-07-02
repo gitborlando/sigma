@@ -9,10 +9,10 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const { editorCommand, handleSelect, undo } = useEditorServices()
+  const { command, handleSelect, undo } = useEditorServices()
   const openMenu = (e: React.MouseEvent) => {
     ContextMenu.context = { id }
-    ContextMenu.menus = [editorCommand.pageGroup]
+    ContextMenu.menus = [command.pageGroup]
     ContextMenu.openMenu(e)
   }
   const selectPage = () => {
