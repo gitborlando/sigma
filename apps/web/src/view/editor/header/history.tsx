@@ -10,7 +10,7 @@ import { Text } from 'src/view/component/text'
 import { useEditorServices } from 'src/view/hooks/editor'
 
 export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
-  const { handlePage, handleSelect, undo, editorSetting } = useEditorServices()
+  const { handlePage, handleSelect, undo, setting } = useEditorServices()
   const [showHistory, setShowHistory] = useState(false)
   const { next, stack } = undo
   return (
@@ -41,9 +41,9 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
           isDEV && (
             <OptionBalanceItem
               label='Log undo/redo info'
-              checked={editorSetting.setting.dev.logUndoRedoInfo}
+              checked={setting.dev.logUndoRedoInfo}
               onChecked={(value) => {
-                editorSetting.setting.dev.logUndoRedoInfo = value
+                setting.dev.logUndoRedoInfo = value
               }}
             />
           )

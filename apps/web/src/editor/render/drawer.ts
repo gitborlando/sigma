@@ -1,6 +1,6 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
-import { EditorSettingService } from 'src/editor/core/setting'
+import { SettingService } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
 import { max } from 'src/editor/geometry/base'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
@@ -25,7 +25,7 @@ export class ElemDrawerService extends Service {
   private dirtyRects: AABB[] = []
 
   constructor(
-    private readonly editorSetting: EditorSettingService,
+    private readonly setting: SettingService,
     private readonly stageViewport: StageViewportService,
     private readonly renderInvalidator: RenderInvalidatorService,
   ) {
@@ -226,7 +226,7 @@ export class ElemDrawerService extends Service {
     const { lineHeight } = style
 
     this.splitTexts.forEach(({ text, start, width }, i) => {
-      if (this.editorSetting.setting.ignoreUnVisible) {
+      if (this.setting.ignoreUnVisible) {
         const visualWidth = width * this.stageViewport.zoom
         const visualHeight = lineHeight * this.stageViewport.zoom
         if (visualWidth / text.length < 2.5 || visualHeight < 2.5) {

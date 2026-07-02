@@ -87,15 +87,15 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
 })
 
 const OtherOptionsComp: FC<{}> = observer(({}) => {
-  const { editorSetting } = useEditorServices()
-  const setting = editorSetting.setting
+  const { setting } = useEditorServices()
+  const settings = setting
 
   return (
     <OptionBalanceItem
       label={t('snap to grid')}
-      checked={setting.snapToGrid}
+      checked={settings.snapToGrid}
       onChecked={(value) => {
-        setting.snapToGrid = value
+        settings.snapToGrid = value
       }}
     />
   )

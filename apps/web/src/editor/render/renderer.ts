@@ -3,7 +3,7 @@ import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { createTraverser } from '@gitborlando/toolkit/traverser'
 import type { NoopFunc } from '@gitborlando/utils'
-import { EditorSettingService } from 'src/editor/core/setting'
+import { SettingService } from 'src/editor/core/setting'
 import { max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
 import { ElemDrawerService } from 'src/editor/render/drawer'
@@ -47,7 +47,7 @@ export class RendererService extends Service {
   private accumulatedErrorY = 0
 
   constructor(
-    private readonly editorSetting: EditorSettingService,
+    private readonly setting: SettingService,
     private readonly renderTree: RenderTreeService,
     private readonly renderSurface: RenderSurfaceService,
     private readonly stageViewport: StageViewportService,
@@ -59,10 +59,7 @@ export class RendererService extends Service {
   }
 
   get isSliceRendering() {
-    return (
-      this.editorSetting.setting.needSliceRender &&
-      this.fullRenderElemsMinHeap.length > 0
-    )
+    return this.setting.needSliceRender && this.fullRenderElemsMinHeap.length > 0
   }
 
   onCanvasInited() {
@@ -141,11 +138,10 @@ export class RendererService extends Service {
     if (type !== 'nextFullRender') this.renderTasks.length = 0
 
     this.renderTasks.push(() => {
-      if (type === 'firstFullRender' || this.editorSetting.setting.fullRender) {
+      if (type === 'firstFullRender' || this.setting.fullRender) {
         this.renderSurface.clearSurface()
       }
-      const isPartialRender =
-        type === 'partialRender' && !this.editorSetting.setting.fullRender
+      const isPartialRender = type === 'partialRender' && !this.setting.fullRender
       isPartialRender ? this.partialRender() : this.fullRender()
     })
 
@@ -198,7 +194,7 @@ export class RendererService extends Service {
   private drawElem(elem: Elem) {
     if (!this.isElemVisible(elem)) return
 
-    if (this.editorSetting.setting.ignoreUnVisible && elem.optimize) {
+    if (this.setting.ignoreUnVisible && elem.optimize) {
       const visualSize = this.renderSurface.getVisualSize(elem.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
@@ -232,7 +228,7 @@ export class RendererService extends Service {
   private fullRender() {
     this.renderSurface.transformCanvas()
 
-    if (!this.editorSetting.setting.needSliceRender) {
+    if (!this.setting.needSliceRender) {
       this.renderTree.sceneRoot.children.forEach(this.drawElem)
       while (this.fullRenderElemsMinHeap.length) this.fullRenderElemsMinHeap.pop()
       return
@@ -338,7 +334,7 @@ export class RendererService extends Service {
 
   private DEV_showDirtyRect() {
     return this.onRenderTopCanvas.hook((ctx) => {
-      if (!this.editorSetting.setting.showDirtyRect) return
+      if (!this.setting.showDirtyRect) return
       if (!this.DEV_dirtyArea) return
 
       ctx.save()

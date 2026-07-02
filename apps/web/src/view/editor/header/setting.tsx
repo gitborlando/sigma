@@ -32,7 +32,7 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
           value={settingType}
           onChange={(value) => setSettingType(value as 'common' | 'dev')}
         /> */}
-        <G className={editorSettingCls()} gap={8}>
+        <G className={settingCls()} gap={8}>
           <CommonSettingComp x-if={settingType === 'common'} />
         </G>
       </DragPanel>
@@ -41,8 +41,8 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
 })
 
 export const CommonSettingComp: FC<{}> = observer(({}) => {
-  const { editorSetting } = useEditorServices()
-  const setting = editorSetting.setting
+  const { setting } = useEditorServices()
+  const settings = setting
   const {
     autosave,
     showFPS,
@@ -51,7 +51,7 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
     needSliceRender,
     showDirtyRect,
     fullRender,
-  } = setting
+  } = settings
 
   return (
     <G gap={8}>
@@ -68,37 +68,37 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
       <BooleanSettingComp
         label={t('auto save')}
         value={autosave}
-        onChange={(value) => (setting.autosave = value)}
+        onChange={(value) => (settings.autosave = value)}
       />
       <BooleanSettingComp
         label={t('dev mode')}
         value={devMode}
-        onChange={(value) => (setting.devMode = value)}
+        onChange={(value) => (settings.devMode = value)}
       />
       <BooleanSettingComp
         label={t('full render')}
         value={fullRender}
-        onChange={(value) => (setting.fullRender = value)}
+        onChange={(value) => (settings.fullRender = value)}
       />
       <BooleanSettingComp
         label={t('show dirty rect')}
         value={showDirtyRect}
-        onChange={(value) => (setting.showDirtyRect = value)}
+        onChange={(value) => (settings.showDirtyRect = value)}
       />
       <BooleanSettingComp
         label={t('skip render unrecognizable node')}
         value={ignoreUnVisible}
-        onChange={(value) => (setting.ignoreUnVisible = value)}
+        onChange={(value) => (settings.ignoreUnVisible = value)}
       />
       <BooleanSettingComp
         label={t('slice render optimization when zoom')}
         value={needSliceRender}
-        onChange={(value) => (setting.needSliceRender = value)}
+        onChange={(value) => (settings.needSliceRender = value)}
       />
       <BooleanSettingComp
         label={t('show FPS')}
         value={showFPS}
-        onChange={(value) => (setting.showFPS = value)}
+        onChange={(value) => (settings.showFPS = value)}
       />
     </G>
   )
@@ -127,7 +127,7 @@ const SwitchComp: FC<{
   )
 }
 
-export const editorSettingCls = classes(css`
+export const settingCls = classes(css`
   padding: 12px;
   height: fit-content;
 `)

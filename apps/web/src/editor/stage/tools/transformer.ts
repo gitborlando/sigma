@@ -1,6 +1,6 @@
 import { iife } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
-import { EditorSettingService } from 'src/editor/core/setting'
+import { SettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
@@ -30,7 +30,7 @@ export class StageTransformerService extends Service {
     private readonly yState: YStateService,
     private readonly undo: UndoService,
     private readonly stageViewport: StageViewportService,
-    private readonly editorSetting: EditorSettingService,
+    private readonly setting: SettingService,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -62,10 +62,8 @@ export class StageTransformerService extends Service {
 
         const aabb = AABB.shift(startAABB, shift)
         const snapDelta = XY.$(
-          snapGridRoundBySetting(this.editorSetting.setting.snapToGrid, aabb.minX) -
-            aabb.minX,
-          snapGridRoundBySetting(this.editorSetting.setting.snapToGrid, aabb.minY) -
-            aabb.minY,
+          snapGridRoundBySetting(this.setting.snapToGrid, aabb.minX) - aabb.minX,
+          snapGridRoundBySetting(this.setting.snapToGrid, aabb.minY) - aabb.minY,
         )
 
         const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)

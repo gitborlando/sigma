@@ -4,7 +4,7 @@ import type { DragData } from '@gitborlando/toolkit/browser'
 import { clone } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
 import { SelectController } from 'src/editor/controller/select'
-import { EditorSettingService } from 'src/editor/core/setting'
+import { SettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import {
   createLine,
@@ -61,7 +61,7 @@ export class StageCreateService extends Service {
     private readonly yState: YStateService,
     private readonly handleSelect: HandleSelectService,
     private readonly stageViewport: StageViewportService,
-    private readonly editorSetting: EditorSettingService,
+    private readonly setting: SettingService,
     private readonly selectController: SelectController,
   ) {
     super()
@@ -153,21 +153,15 @@ export class StageCreateService extends Service {
   }
 
   private calcNodeMRect(rect: IRect) {
-    const snapRect = snapGridRoundRectBySetting(
-      this.editorSetting.setting.snapToGrid,
-      rect,
-    )
+    const snapRect = snapGridRoundRectBySetting(this.setting.snapToGrid, rect)
     const matrix = this.prependParentMatrix(Matrix.identity().shift(snapRect))
 
     return MRect.fromRect(snapRect, matrix)
   }
 
   private calcLineMRect(current: IXY, start: IXY) {
-    current = snapGridRoundXYBySetting(
-      this.editorSetting.setting.snapToGrid,
-      current,
-    )
-    start = snapGridRoundXYBySetting(this.editorSetting.setting.snapToGrid, start)
+    current = snapGridRoundXYBySetting(this.setting.snapToGrid, current)
+    start = snapGridRoundXYBySetting(this.setting.snapToGrid, start)
 
     const width = XY.distance(current, start)
     const rotation = Angle.sweep(XY.vector(current, start))

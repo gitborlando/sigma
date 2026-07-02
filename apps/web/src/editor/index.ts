@@ -6,7 +6,7 @@ import { SelectController } from 'src/editor/controller/select'
 import { StageController } from 'src/editor/controller/stage'
 import { ViewportController } from 'src/editor/controller/viewport'
 import { CommandService } from 'src/editor/core/command'
-import { EditorSettingService } from 'src/editor/core/setting'
+import { SettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import { HandleNodeService } from 'src/editor/handle/node'
 import { HandlePageService } from 'src/editor/handle/page'
@@ -46,7 +46,7 @@ const editorServices = {
   schemaController: SchemaController,
 
   /** core */
-  editorSetting: EditorSettingService,
+  setting: SettingService,
   command: CommandService,
   undo: UndoService,
 

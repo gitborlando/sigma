@@ -3,7 +3,7 @@ import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { makeObservable } from 'mobx'
 import { NodeController } from 'src/editor/controller/node'
-import { EditorSettingService } from 'src/editor/core/setting'
+import { SettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
 import { HandlePageService } from 'src/editor/handle/page'
 import { HandleSelectService } from 'src/editor/handle/select'
@@ -17,7 +17,7 @@ export class CommandService extends Service {
   constructor(
     private readonly handlePage: HandlePageService,
     private readonly handleSelect: HandleSelectService,
-    private readonly editorSetting: EditorSettingService,
+    private readonly setting: SettingService,
     private readonly undo: UndoService,
     private readonly renderTree: RenderTreeService,
     private readonly stageInteract: StageInteractService,
@@ -71,7 +71,7 @@ export class CommandService extends Service {
       },
     ]
 
-    if (this.editorSetting.setting.devMode) {
+    if (this.setting.devMode) {
       commands.push({
         name: t('print schema'),
         callback: ({ id }: IDPayload) => {
@@ -102,7 +102,7 @@ export class CommandService extends Service {
       },
     ]
 
-    if (this.editorSetting.setting.devMode) {
+    if (this.setting.devMode) {
       commands.push(
         {
           name: t('print schema'),
