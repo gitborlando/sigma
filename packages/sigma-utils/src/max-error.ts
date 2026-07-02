@@ -1,4 +1,6 @@
-export function setupConsoleMaxError(query = 'maxError') {
+export function setupConsoleMaxError(enable: boolean, query = 'maxError') {
+  if (!enable) return
+
   const This = globalThis as any
   const urlParams = new URLSearchParams(globalThis.location.search)
   const maxErrors = parseInt(urlParams.get(query) || '10', 10)
