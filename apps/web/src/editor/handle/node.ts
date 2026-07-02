@@ -22,11 +22,8 @@ export class HandleNodeService extends Service {
   }
 
   getMRect(node: S.Node) {
-    return getSet(this.mrectCache, node.id, () => MRect.of(node), [
-      node.width,
-      node.height,
-      node.matrix,
-    ])
+    const compare = [node.width, node.height, node.matrix]
+    return getSet(this.mrectCache, node.id, () => MRect.of(node), compare)
   }
 
   addNodes(nodes: S.Node[]) {

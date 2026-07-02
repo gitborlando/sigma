@@ -11,12 +11,12 @@ import editorNodePolygon from './editor/node/polygon.svg'
 import editorNodeRect from './editor/node/rect.svg'
 import editorNodeStar from './editor/node/star.svg'
 import editorNodeText from './editor/node/text.svg'
-import editorRPOperateAlignAlignCenter from './editor/RP/operate/align/align-center.svg'
-import editorRPOperateAlignAlignLeft from './editor/RP/operate/align/align-left.svg'
-import editorRPOperateAlignAlignRight from './editor/RP/operate/align/align-right.svg'
-import editorRPOperateAlignVerticalBottom from './editor/RP/operate/align/vertical-bottom.svg'
-import editorRPOperateAlignVerticalCenter from './editor/RP/operate/align/vertical-center.svg'
-import editorRPOperateAlignVerticalTop from './editor/RP/operate/align/vertical-top.svg'
+import editorRPDesignAlignAlignCenter from './editor/RP/design/align/align-center.svg'
+import editorRPDesignAlignAlignLeft from './editor/RP/design/align/align-left.svg'
+import editorRPDesignAlignAlignRight from './editor/RP/design/align/align-right.svg'
+import editorRPDesignAlignVerticalBottom from './editor/RP/design/align/vertical-bottom.svg'
+import editorRPDesignAlignVerticalCenter from './editor/RP/design/align/vertical-center.svg'
+import editorRPDesignAlignVerticalTop from './editor/RP/design/align/vertical-top.svg'
 import editorRPOperateFillNone from './editor/RP/operate/fill/none.png'
 import editorRPOperateGeoH from './editor/RP/operate/geo/h.svg'
 import editorRPOperateGeoRadius from './editor/RP/operate/geo/radius.svg'
@@ -54,15 +54,17 @@ export const Assets = {
       text: editorNodeText,
     },
     RP: {
-      operate: {
+      design: {
         align: {
-          alignCenter: editorRPOperateAlignAlignCenter,
-          alignLeft: editorRPOperateAlignAlignLeft,
-          alignRight: editorRPOperateAlignAlignRight,
-          verticalBottom: editorRPOperateAlignVerticalBottom,
-          verticalCenter: editorRPOperateAlignVerticalCenter,
-          verticalTop: editorRPOperateAlignVerticalTop,
+          alignCenter: editorRPDesignAlignAlignCenter,
+          alignLeft: editorRPDesignAlignAlignLeft,
+          alignRight: editorRPDesignAlignAlignRight,
+          verticalBottom: editorRPDesignAlignVerticalBottom,
+          verticalCenter: editorRPDesignAlignVerticalCenter,
+          verticalTop: editorRPDesignAlignVerticalTop,
         },
+      },
+      operate: {
         fill: {
           none: editorRPOperateFillNone,
         },

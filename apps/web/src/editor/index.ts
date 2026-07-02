@@ -11,7 +11,6 @@ import { UndoService } from 'src/editor/core/undo'
 import { HandleNodeService } from 'src/editor/handle/node'
 import { HandlePageService } from 'src/editor/handle/page'
 import { HandleSelectService } from 'src/editor/handle/select'
-import { OperateAlignService } from 'src/editor/operate/align'
 import { OperateFillService } from 'src/editor/operate/fill'
 import { DesignGeometryService } from 'src/editor/operate/geometry'
 import { ElemDrawerService } from 'src/editor/render/drawer'
@@ -29,6 +28,7 @@ import { StageSelectService } from 'src/editor/stage/interact/select'
 import { StageToolGridService } from 'src/editor/stage/tools/grid'
 import { StageTransformerService } from 'src/editor/stage/tools/transformer'
 import { StageViewportService } from 'src/editor/stage/viewport'
+import { DesignAlignService } from 'src/editor/workbench/design-panel/align'
 import { FillPickerService } from 'src/editor/workbench/design-panel/fill-picker'
 import { LayerPanelService } from 'src/editor/workbench/layer-panel'
 import { LayerPanelNodeTreeService } from 'src/editor/workbench/layer-panel/node-tree'
@@ -80,7 +80,7 @@ const editorServices = {
 
   /** workbench.design */
   fillPicker: FillPickerService,
-  operateAlign: OperateAlignService,
+  designAlign: DesignAlignService,
   operateFill: OperateFillService,
   designGeometry: DesignGeometryService,
 

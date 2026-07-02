@@ -20,6 +20,10 @@ export class NodeController extends Service {
     autoBind(this)
   }
 
+  @computed get selectNodes() {
+    return this.handleSelect.selectIdList.map((id) => this.yState.find<S.Node>(id))
+  }
+
   deleteSelectedNodes() {
     this.yState.transact(() => {
       const traverse = createSchemaTraverse({

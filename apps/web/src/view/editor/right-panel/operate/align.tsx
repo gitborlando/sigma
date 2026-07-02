@@ -1,21 +1,19 @@
-import { useSignal } from '@gitborlando/signal/react'
 import { Icon } from '@gitborlando/widget'
 import { Btn } from 'src/view/component/btn'
 import { useEditorServices } from 'src/view/hooks/editor'
 
 export const AlignComp: FC<{}> = observer(({}) => {
-  const { operateAlign } = useEditorServices()
-  const { alignTypes, canAlign, currentAlign } = operateAlign
-  useSignal(canAlign)
+  const { designAlign } = useEditorServices()
+  const { alignTypes, canAlign, setAlign } = designAlign
 
   return (
     <G center horizontal className={cls()}>
       {alignTypes.map((type) => (
         <Btn
           key={type}
-          disabled={!canAlign.value}
-          onClick={() => currentAlign.dispatch(type)}
-          icon={<Icon url={Assets.editor.RP.operate.align[type]} />}
+          disabled={!canAlign}
+          onClick={() => setAlign(type)}
+          icon={<Icon url={Assets.editor.RP.design.align[type]} />}
         />
       ))}
     </G>

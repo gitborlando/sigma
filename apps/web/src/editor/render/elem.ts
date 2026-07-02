@@ -57,7 +57,7 @@ export class Elem {
       maxY: this.node.height,
     }),
   )
-  get aabb() {
+  get aabb(): AABB {
     return this.memoAABB([this.globalMatrix, this.node.width, this.node.height])
   }
 
