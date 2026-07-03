@@ -1,7 +1,6 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
-import { MobxUndo } from 'src/editor/core/undo'
 import { Matrix } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { Service } from 'src/global/service'
@@ -53,7 +52,6 @@ export class YAwareService extends Service {
       this.syncOthers(),
     )
 
-    MobxUndo.rebase()
     this.syncSelectState()
   }
 

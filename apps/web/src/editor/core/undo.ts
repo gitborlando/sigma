@@ -20,12 +20,12 @@ type StateUndoConfig = {
   getPatches: () => YStatePatch[]
 }
 
-export const MobxUndo = autoBind(new MobxUndoService())
-export let YUndo: Y.UndoManager | undefined
-
 export class UndoService extends Service {
   @observable.shallow stack: UndoInfo[] = []
   @observable next = 0
+
+  mobxUndo = autoBind(new MobxUndoService())
+  yUndo?: Y.UndoManager
 
   private getStatePatches?: () => YStatePatch[]
   private shouldTrack = true
@@ -33,6 +33,8 @@ export class UndoService extends Service {
   constructor() {
     super()
     autoBind(makeObservable(this))
+    this.effect(() => this.mobxUndo.dispose())
+    this.effect(() => this.yUndo?.destroy())
   }
 
   @computed get canUndo() {
@@ -43,21 +45,15 @@ export class UndoService extends Service {
     return this.next < this.stack.length
   }
 
-  initUndo({ stateMap, getPatches }: StateUndoConfig) {
+  init({ stateMap, getPatches }: StateUndoConfig) {
+    this.mobxUndo.rebase()
+    this.yUndo?.destroy()
     this.stack = []
     this.next = 0
     this.getStatePatches = getPatches
-    YUndo = new Y.UndoManager(stateMap, {
+    this.yUndo = new Y.UndoManager(stateMap, {
       trackedOrigins: new Set([null, Y_STATE_LOCAL_ORIGIN]),
     })
-  }
-
-  destroyUndo() {
-    YUndo?.destroy()
-    YUndo = undefined
-    this.stack = []
-    this.next = 0
-    this.getStatePatches = undefined
   }
 
   undo() {
@@ -80,12 +76,12 @@ export class UndoService extends Service {
     const info: UndoInfo = { type, description }
 
     if (type === 'state' || type === 'all') {
-      YUndo?.stopCapturing()
+      this.yUndo?.stopCapturing()
       info.statePatches = this.getStatePatches?.()
     }
     if (type === 'client' || type === 'all') {
-      MobxUndo.archive()
-      info.clientState = toJS(MobxUndo.state)
+      this.mobxUndo.archive()
+      info.clientState = toJS(this.mobxUndo.state)
     }
 
     this.stack.splice(this.next, this.stack.length - this.next, info)
@@ -111,8 +107,8 @@ export class UndoService extends Service {
   private replayInfo(type: UndoType, info: UndoInfo | undefined) {
     if (!info) return
 
-    const replayYState = () => YUndo?.[type]()
-    const replayClientState = () => MobxUndo[type]()
+    const replayYState = () => this.yUndo?.[type]()
+    const replayClientState = () => this.mobxUndo[type]()
 
     matchCase(info.type, {
       state: () => replayYState(),

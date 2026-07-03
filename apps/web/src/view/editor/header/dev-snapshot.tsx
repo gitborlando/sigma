@@ -1,8 +1,9 @@
-import { MobxUndoState } from '@gitborlando/mobx-undo'
+import type { MobxUndoState } from '@gitborlando/mobx-undo'
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import type { EditorServices } from 'src/editor'
-import { MobxUndo, UndoInfo } from 'src/editor/core/undo'
+import type { UndoInfo } from 'src/editor/core/undo'
+import type { HandleSelectState } from 'src/editor/handle/select'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 import { useEditorServices } from 'src/view/hooks/editor'
@@ -234,7 +235,6 @@ function restoreReplayableSnapshot(
   replaceSchema(yState, base.schema)
   if (!resetUndo(yState, undo)) return
 
-  MobxUndo.rebase()
   replayHistoryFromBase(yState, undo, snapshot, base)
 }
 
@@ -261,7 +261,7 @@ function restoreUndo(
 }
 
 function resetUndo(yState: YStateService, undo: UndoService) {
-  undo.initUndo({
+  undo.init({
     stateMap: yState.doc.getMap<S.Schema>('schema'),
     getPatches: yState.getPatches,
   })
@@ -289,33 +289,33 @@ function replayHistoryInfo(
   info: UndoInfo,
 ) {
   if (info.type === 'client') {
-    applyReplayLocalState(yState, info)
+    applyReplayLocalState(yState, undo, info)
     undo.track(info.type, info.description)
     return
   }
 
   yState.transact(() => applyStatePatches(yState, info.statePatches))
-  if (info.type === 'all') applyReplayLocalState(yState, info)
+  if (info.type === 'all') applyReplayLocalState(yState, undo, info)
 
   undo.track(info.type, info.description)
 }
 
-function applyReplayLocalState(yState: YStateService, info: UndoInfo) {
+function applyReplayLocalState(
+  yState: YStateService,
+  undo: UndoService,
+  info: UndoInfo,
+) {
+  const { mobxUndo } = undo
   const localState = info.clientState
   if (localState) {
-    MobxUndo.applyState(normalizeLocalState(yState, localState))
+    mobxUndo.applyState(normalizeLocalState(yState, localState))
     return
   }
 
-  if (MobxUndo.has('select')) {
-    const select = MobxUndo.get<HandleSelectState>('select')
-    MobxUndo.applyState({ select: normalizeSelectState(yState, select) })
+  if (mobxUndo.has('select')) {
+    const select = mobxUndo.get<HandleSelectState>('select')
+    mobxUndo.applyState({ select: normalizeSelectState(yState, select) })
   }
-}
-
-type HandleSelectState = {
-  selectIdMap: Record<string, boolean>
-  selectPageId: string
 }
 
 function normalizeLocalState(yState: YStateService, state: MobxUndoState) {

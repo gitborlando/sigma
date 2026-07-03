@@ -1,43 +1,39 @@
-import { action, toJS } from 'mobx'
+import { runInAction, toJS } from 'mobx'
 import { createTravels, type TravelMetadata } from 'travels'
 
 export type MobxUndoState = Record<string, unknown>
 export type MobxUndoMetadata = TravelMetadata
 export type MobxUndoUpdater<T> = (state: T) => void
-type MobxUndoListener = (state: MobxUndoState) => void
-export type MobxUndoSliceListener<T> = (state: T) => void
+type MobxUndoSliceSetter<T> = (
+  updater: MobxUndoUpdater<T>,
+  metadata?: MobxUndoMetadata,
+) => void
+type MobxUndoDisposer = () => void
 type MobxUndoTarget = Record<string, unknown>
 
 export class MobxUndoSlice<T extends object> {
   state: T
-  private listeners = new Set<MobxUndoSliceListener<T>>()
 
   constructor(
-    private mobxUndo: MobxUndoService,
-    private key: string,
+    private setState: MobxUndoSliceSetter<T>,
+    private target: MobxUndoTarget,
+    private fields: string[],
     state: T,
   ) {
     this.state = state
   }
 
   set(updater: MobxUndoUpdater<T>, metadata?: MobxUndoMetadata) {
-    this.mobxUndo.set(this.key, updater, metadata)
+    this.setState(updater, metadata)
     return this
-  }
-
-  replace(state: T, metadata?: MobxUndoMetadata) {
-    this.mobxUndo.replace(this.key, state, metadata)
-    return this
-  }
-
-  subscribe(listener: MobxUndoSliceListener<T>) {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
   }
 
   sync(state: T) {
     this.state = state
-    this.listeners.forEach((listener) => listener(state))
+    runInAction(() => {
+      const nextState = state as MobxUndoTarget
+      this.fields.forEach((field) => (this.target[field] = nextState[field]))
+    })
   }
 }
 
@@ -48,9 +44,10 @@ export class MobxUndoService {
   )
   private slices = new Map<string, MobxUndoSlice<object>>()
   private syncedState = this.travels.getState()
+  private unsubscribe?: MobxUndoDisposer
 
   constructor() {
-    this.travels.subscribe((state) => {
+    this.unsubscribe = this.travels.subscribe((state) => {
       if (state !== this.syncedState) {
         this.syncedState = state
         this.syncSlices(state)
@@ -62,6 +59,18 @@ export class MobxUndoService {
     return this.travels.getState()
   }
 
+  private get canUndo() {
+    return this.travels.canBack() || this.travels.canArchive()
+  }
+
+  private get canRedo() {
+    return this.travels.canForward()
+  }
+
+  private get canArchive() {
+    return this.travels.canArchive()
+  }
+
   register<TTarget extends object, TField extends keyof TTarget & string>(
     key: string,
     target: TTarget,
@@ -69,20 +78,21 @@ export class MobxUndoService {
   ) {
     const slice = this.slices.get(key)
     if (slice) {
-      const existSlice = slice as MobxUndoSlice<Pick<TTarget, TField>>
-      this.syncTargetWithSlice(existSlice, target, fields)
-      return existSlice
+      return slice as MobxUndoSlice<Pick<TTarget, TField>>
     }
 
     this.assertCanRegister()
-    const initialState = this.getTargetState(target, fields)
-    const state = this.clone(initialState)
+    const initialState = this.clone(this.getTargetState(target, fields))
     this.travels.replaceStateWithoutHistory((state) => {
-      state[key] = this.clone(initialState)
+      state[key] = initialState
     })
 
-    const newSlice = new MobxUndoSlice(this, key, state)
-    this.syncTargetWithSlice(newSlice, target, fields)
+    const newSlice = new MobxUndoSlice(
+      (updater, metadata) => this.set(key, updater, metadata),
+      target as MobxUndoTarget,
+      fields,
+      initialState,
+    )
     this.slices.set(key, newSlice as MobxUndoSlice<object>)
     return newSlice
   }
@@ -96,7 +106,7 @@ export class MobxUndoService {
     return this.state[key] as T
   }
 
-  set<T extends object>(
+  private set<T extends object>(
     key: string,
     updater: MobxUndoUpdater<T>,
     metadata?: MobxUndoMetadata,
@@ -107,25 +117,11 @@ export class MobxUndoService {
     }, metadata)
   }
 
-  replace<T extends object>(key: string, value: T, metadata?: MobxUndoMetadata) {
-    this.assertRegistered(key)
-    this.travels.setState((state) => {
-      state[key] = value
-    }, metadata)
-  }
-
   applyState(state: MobxUndoState | undefined, metadata?: MobxUndoMetadata) {
     if (!state) return
 
     this.assertRegisteredState(state)
     this.travels.setState(() => state, metadata)
-  }
-
-  applyStateWithoutHistory(state: MobxUndoState | undefined) {
-    if (!state) return
-
-    this.assertRegisteredState(state)
-    this.travels.replaceStateWithoutHistory(() => state)
   }
 
   archive(metadata?: MobxUndoMetadata) {
@@ -143,44 +139,12 @@ export class MobxUndoService {
     this.travels.forward()
   }
 
-  reset() {
-    this.travels.reset()
-  }
-
   rebase() {
     this.travels.rebase()
   }
 
-  getPatches() {
-    return this.travels.getPatches()
-  }
-
-  getHistory() {
-    return this.travels.getHistory()
-  }
-
-  getMetadata() {
-    return this.travels.getMetadata()
-  }
-
-  batch(metadata: MobxUndoMetadata, callback: () => void) {
-    this.travels.transaction(metadata, callback)
-  }
-
-  subscribe(listener: MobxUndoListener) {
-    return this.travels.subscribe((state) => listener(state))
-  }
-
-  get canUndo() {
-    return this.travels.canBack() || this.travels.canArchive()
-  }
-
-  get canRedo() {
-    return this.travels.canForward()
-  }
-
-  get canArchive() {
-    return this.travels.canArchive()
+  dispose() {
+    this.unsubscribe?.()
   }
 
   private syncSlices(state: MobxUndoState) {
@@ -190,17 +154,6 @@ export class MobxUndoService {
 
       slice.sync(nextState)
     })
-  }
-
-  private syncTargetWithSlice<
-    TTarget extends object,
-    TField extends keyof TTarget & string,
-  >(slice: MobxUndoSlice<Pick<TTarget, TField>>, target: TTarget, fields: TField[]) {
-    slice.subscribe(
-      action((state) => {
-        fields.forEach((field) => (target[field] = state[field]))
-      }),
-    )
   }
 
   private getTargetState<

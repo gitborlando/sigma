@@ -39,7 +39,7 @@ export class SchemaController extends Service {
       clientId: this.yState.doc.clientID,
       awareness: this.ySync.awareness,
     })
-    this.undo.initUndo({
+    this.undo.init({
       stateMap: this.yState.doc.getMap('schema'),
       getPatches: this.yState.getPatches,
     })

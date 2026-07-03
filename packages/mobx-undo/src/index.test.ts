@@ -1,5 +1,5 @@
 import { makeObservable, observable } from 'mobx'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { MobxUndoService, type MobxUndoSlice } from './index'
 
 type DraftState = {
@@ -60,12 +60,10 @@ describe('MobxUndoService', () => {
     expect(store.flags).toEqual({ selected: true, hovered: true })
   })
 
-  it('clones observable state when registering and notifies slice listeners', () => {
+  it('clones observable state when registering and syncs slice changes', () => {
     const mobxUndo = new MobxUndoService()
     const store = new DraftStore(mobxUndo)
-    const listener = vi.fn()
 
-    store.slice.subscribe(listener)
     store.flags.selected = false
 
     expect(mobxUndo.get<DraftState>('draft')).toEqual({
@@ -78,10 +76,6 @@ describe('MobxUndoService', () => {
       state.count = 1
     })
 
-    expect(listener).toHaveBeenCalledWith({
-      count: 1,
-      title: 'Untitled',
-      flags: { selected: true },
-    })
+    expect(store.count).toBe(1)
   })
 })

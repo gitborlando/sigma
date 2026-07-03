@@ -1,7 +1,8 @@
+import { MobxUndoSlice } from '@gitborlando/mobx-undo'
 import { Signal } from '@gitborlando/signal'
 import equal from 'fast-deep-equal'
 import { makeObservable } from 'mobx'
-import { MobxUndo } from 'src/editor/core/undo'
+import { UndoService } from 'src/editor/core/undo'
 import { Service } from 'src/global/service'
 
 export type HandleSelectState = {
@@ -16,14 +17,16 @@ export class HandleSelectService extends Service {
   @observable selectPageId: ID | '' = ''
   afterSelect = Signal.create<void>()
 
-  private selectUndo = MobxUndo.register<
-    HandleSelectService,
-    keyof HandleSelectState
-  >('select', this, ['selectIdMap', 'selectPageId'])
+  private selectUndo: MobxUndoSlice<HandleSelectState>
 
-  constructor() {
+  constructor(private readonly undo: UndoService) {
     super()
     autoBind(makeObservable(this))
+
+    this.selectUndo = this.undo.mobxUndo.register('select', this, [
+      'selectIdMap',
+      'selectPageId',
+    ])
   }
 
   @computed get selectIdList() {
