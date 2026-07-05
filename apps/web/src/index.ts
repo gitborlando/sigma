@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { setupConsoleMaxError } from '@sigma/utils'
 import { enablePatches } from 'immer'
 import { configure } from 'mobx'

@@ -1,4 +1,5 @@
 import { matchCase, NoopFunc } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { Service } from 'src/global/service'
 import { StageCreateService } from './create'
 import { StageMoveService } from './move'
@@ -6,6 +7,7 @@ import { StageSelectService } from './select'
 
 export type IStageInteraction = 'select' | 'move' | 'create'
 
+@reflection
 export class StageInteractService extends Service {
   @observable interaction: IStageInteraction = 'select'
   private offInteract?: NoopFunc

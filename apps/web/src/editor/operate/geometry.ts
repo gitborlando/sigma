@@ -1,4 +1,5 @@
 import { AnyObject, iife, objKeys } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { divide, floor, max, min } from 'src/editor/geometry/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
 import { HandleNodeService } from 'src/editor/handle/node'
@@ -40,6 +41,7 @@ export function cleanObject(object: AnyObject) {
   for (const key in object) delete object[key]
 }
 
+@reflection
 export class DesignGeometryService extends Service {
   currentGeometries = createDesignGeoInfos()
   currentKeys = createActiveKeys(new Set())

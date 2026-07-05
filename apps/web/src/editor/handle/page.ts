@@ -1,9 +1,11 @@
+import { reflection } from 'first-di'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
 import { Service } from 'src/global/service'
 import { UndoService } from '../core/undo'
 import { YStateService } from '../y-adapter/y-state'
 
+@reflection
 export class HandlePageService extends Service {
   constructor(
     private readonly schemaCreator: SchemaCreatorService,

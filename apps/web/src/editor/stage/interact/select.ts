@@ -3,6 +3,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { firstOne } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
+import { reflection } from 'first-di'
 import hotkeys from 'hotkeys-js'
 import { SelectController } from 'src/editor/controller/select'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
@@ -20,6 +21,7 @@ import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 import { UndoService } from '../../core/undo'
 
+@reflection
 export class StageSelectService extends Service {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
   @observable hoverId?: string

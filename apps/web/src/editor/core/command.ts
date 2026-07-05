@@ -1,5 +1,6 @@
 import { Disposer } from '@gitborlando/toolkit'
 import { listen } from '@gitborlando/utils/browser'
+import { reflection } from 'first-di'
 import hotkeys from 'hotkeys-js'
 import { makeObservable } from 'mobx'
 import { NodeController } from 'src/editor/controller/node'
@@ -13,6 +14,7 @@ import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Command } from 'src/global/context-menu'
 import { Service } from 'src/global/service'
 
+@reflection
 export class CommandService extends Service {
   constructor(
     private readonly handlePage: HandlePageService,

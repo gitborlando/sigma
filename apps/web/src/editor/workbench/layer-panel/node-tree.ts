@@ -1,3 +1,4 @@
+import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
@@ -11,6 +12,7 @@ export type LayerPanelNodeInfo = {
   ancestorIds: string[]
 }
 
+@reflection
 export class LayerPanelNodeTreeService extends Service {
   private expandedNodeMap = observable.map<string, boolean>()
   @observable private nodeInfoVersion = 0

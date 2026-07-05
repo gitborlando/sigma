@@ -1,4 +1,5 @@
 import { AABB } from '@gitborlando/geo'
+import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import { IMatrix } from 'src/editor/geometry/matrix'
 import { StageViewportService } from 'src/editor/stage/viewport'
@@ -8,6 +9,7 @@ const dpr = devicePixelRatio
 
 export type SurfaceCanvasType = 'mainCanvas' | 'topCanvas'
 
+@reflection
 export class RenderSurfaceService extends Service {
   private container!: HTMLDivElement
 

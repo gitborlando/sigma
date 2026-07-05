@@ -1,4 +1,5 @@
 import { AABB } from '@gitborlando/geo'
+import { reflection } from 'first-di'
 import { NodeController } from 'src/editor/controller/node'
 import { MRect } from 'src/editor/geometry'
 import { HandleNodeService } from 'src/editor/handle/node'
@@ -19,6 +20,7 @@ const alignTypes = <const>[
 
 export type IAlignType = (typeof alignTypes)[number]
 
+@reflection
 export class DesignAlignService extends Service {
   alignTypes = alignTypes
   @observable canAlign = false

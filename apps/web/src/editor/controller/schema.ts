@@ -1,4 +1,5 @@
 import { jsonParse } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import JSZip from 'jszip'
 import { UndoService } from 'src/editor/core/undo'
 import { HandleSelectService } from 'src/editor/handle/select'
@@ -12,6 +13,7 @@ import { YSyncService } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 import { FileService } from 'src/global/service/file'
 
+@reflection
 export class SchemaController extends Service {
   private loadingFileId = ''
 

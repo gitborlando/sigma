@@ -1,10 +1,12 @@
 import { AABB } from '@gitborlando/geo'
 import { Matrix } from 'src/editor/geometry'
+import { reflection } from 'first-di'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { RenderTreeService } from 'src/editor/render/tree'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 
+@reflection
 export class ViewportController extends Service {
   constructor(
     private readonly stageViewport: StageViewportService,

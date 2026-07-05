@@ -1,4 +1,5 @@
 import { iife, objKeys } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { UndoService } from 'src/editor/core/undo'
 import { HandleNodeService } from 'src/editor/handle/node'
 import { HandleSelectService, type Selection } from 'src/editor/handle/select'
@@ -8,6 +9,7 @@ import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
+@reflection
 export class NodeController extends Service {
   constructor(
     private readonly handleNode: HandleNodeService,

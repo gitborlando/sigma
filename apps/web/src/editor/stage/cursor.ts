@@ -1,5 +1,6 @@
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
+import { reflection } from 'first-di'
 import { floor } from 'src/editor/geometry/base'
 import { RenderSurfaceService } from 'src/editor/render/surface'
 import { Service } from 'src/global/service'
@@ -14,6 +15,7 @@ export type StageCursorType =
   | 'hand'
   | 'grab'
 
+@reflection
 export class StageCursorService extends Service {
   private type: StageCursorType = 'select'
   private rotation = 0

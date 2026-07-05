@@ -1,4 +1,5 @@
 import { iife } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { SettingService } from 'src/editor/core/setting'
 import { UndoService } from 'src/editor/core/undo'
@@ -13,6 +14,7 @@ import { Service } from 'src/global/service'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
+@reflection
 export class StageTransformerService extends Service {
   @observable.ref mrect = MRect.identity()
   @observable.ref diffMatrix = Matrix.identity()

@@ -1,4 +1,5 @@
 import { clampIndex, firstOne, getSet } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { MRect } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
@@ -6,6 +7,7 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { Service } from 'src/global/service'
 import { YStateService } from '../y-adapter/y-state'
 
+@reflection
 export class HandleNodeService extends Service {
   @computed get datumXY() {
     return this.getDatumXY()

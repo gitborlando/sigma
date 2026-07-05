@@ -1,5 +1,6 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
 import { defuOverrideArray } from '@sigma/utils/defu'
+import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { Service } from 'src/global/service'
 
@@ -19,6 +20,7 @@ const initSetting = () => ({
 
 export interface SettingService extends ReturnType<typeof initSetting> {}
 
+@reflection
 export class SettingService extends Service {
   @observable private settings = initSetting()
 

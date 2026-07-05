@@ -1,6 +1,7 @@
 import { clone } from '@gitborlando/utils'
 import type { YPlainPath } from '@gitborlando/y-plain'
 import equal from 'fast-deep-equal'
+import { reflection } from 'first-di'
 import { Patch, produceWithPatches } from 'immer'
 import { makeObservable } from 'mobx'
 import { SchemaCreatorService } from 'src/editor/schema/creator'
@@ -16,6 +17,7 @@ type DynamicYStateMutation = {
   delete: (path: YPlainPath) => boolean
 }
 
+@reflection
 export class OperateFillService extends Service {
   @observable.ref fills = <S.Fill[]>[]
   isMultiFills = false

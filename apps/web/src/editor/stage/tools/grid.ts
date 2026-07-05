@@ -1,9 +1,11 @@
+import { reflection } from 'first-di'
 import { RendererService } from 'src/editor/render/renderer'
 import { RenderSurfaceService } from 'src/editor/render/surface'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { expandOneStep, snapHalfPixel } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
 
+@reflection
 export class StageToolGridService extends Service {
   private ctx!: CanvasRenderingContext2D
 

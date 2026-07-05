@@ -1,10 +1,12 @@
 import { HocuspocusProvider } from '@hocuspocus/provider'
+import { reflection } from 'first-di'
 import { Service } from 'src/global/service'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 
 const DEFAULT_PROVIDER_URL = 'wss://api.gitborlando.com'
 
+@reflection
 export class YSyncService extends Service {
   provider?: HocuspocusProvider
   awareness?: Awareness

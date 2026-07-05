@@ -1,6 +1,7 @@
 import { Signal } from '@gitborlando/signal'
 import { clone } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
+import { reflection } from 'first-di'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { Service } from 'src/global/service'
 import * as Y from 'yjs'
@@ -9,6 +10,7 @@ export type YStatePatch = YPlainPatch
 
 type YStateListener = (patches: YStatePatch[]) => void
 
+@reflection
 export class YStateService extends Service {
   doc!: Y.Doc
   plain!: YPlain<S.Schema>

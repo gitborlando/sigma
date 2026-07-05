@@ -2,6 +2,7 @@ import { IRect } from '@gitborlando/geo'
 import { Signal } from '@gitborlando/signal'
 import type { DragData } from '@gitborlando/toolkit/browser'
 import { clone } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { SelectController } from 'src/editor/controller/select'
 import { SettingService } from 'src/editor/core/setting'
@@ -42,6 +43,7 @@ export type IStageCreateType = (typeof createTypes)[number]
 
 const defaultCreateSize = 100
 
+@reflection
 export class StageCreateService extends Service {
   createTypes = createTypes
   @observable createType: IStageCreateType = 'frame'

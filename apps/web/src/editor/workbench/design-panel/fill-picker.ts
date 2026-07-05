@@ -1,6 +1,8 @@
+import { reflection } from 'first-di'
 import { OperateFillService } from 'src/editor/operate/fill'
 import { Service } from 'src/global/service'
 
+@reflection
 export class FillPickerService extends Service {
   @observable pickerPos = XY.$()
   @observable fillIndex = -1

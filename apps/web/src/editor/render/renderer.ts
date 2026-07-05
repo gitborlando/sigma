@@ -3,6 +3,7 @@ import { Signal } from '@gitborlando/signal'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { createTraverser } from '@gitborlando/toolkit/traverser'
 import type { NoopFunc } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { SettingService } from 'src/editor/core/setting'
 import { max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
@@ -24,6 +25,7 @@ export type SurfaceRenderType =
   | 'nextFullRender'
   | 'partialRender'
 
+@reflection
 export class RendererService extends Service {
   onRenderTopCanvas = Signal.create<CanvasRenderingContext2D>()
 

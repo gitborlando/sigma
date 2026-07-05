@@ -1,5 +1,6 @@
 import { MobxUndoSlice } from '@gitborlando/mobx-undo'
 import { Signal } from '@gitborlando/signal'
+import { reflection } from 'first-di'
 import equal from 'fast-deep-equal'
 import { makeObservable } from 'mobx'
 import { UndoService } from 'src/editor/core/undo'
@@ -12,6 +13,7 @@ export type HandleSelectState = {
 
 export type Selection = Record<string, boolean>
 
+@reflection
 export class HandleSelectService extends Service {
   @observable.ref selectIdMap: Selection = {}
   @observable selectPageId: ID | '' = ''

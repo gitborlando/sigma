@@ -1,6 +1,7 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
+import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { Service } from 'src/global/service'
@@ -8,15 +9,16 @@ import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
 import { Awareness } from 'y-protocols/awareness.js'
 
+@reflection
 export class YAwareService extends Service {
   clientId?: number
   awareness?: Awareness
 
-  @observable client: S.Client = this.createClient()
-  @observable others: S.Clients = {}
-  @observable observingClientId?: number
+  client: S.Client = this.createClient()
+  others: S.Clients = {}
+  observingClientId?: number
 
-  @computed get observingClient() {
+  get observingClient() {
     const others = this.others
     if (!this.observingClientId) return
     return others[this.observingClientId]
@@ -24,7 +26,13 @@ export class YAwareService extends Service {
 
   constructor(private readonly handleSelect: HandleSelectService) {
     super()
-    autoBind(makeObservable(this))
+    makeObservable(this, {
+      client: observable,
+      others: observable,
+      observingClientId: observable,
+      observingClient: computed,
+    })
+    autoBind(this)
   }
 
   init(option: { clientId: number; awareness?: Awareness }) {

@@ -1,4 +1,5 @@
 import { clone } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
@@ -7,6 +8,7 @@ import { Service } from 'src/global/service'
 import { Elem } from './elem'
 import { RenderInvalidatorService } from './invalidator'
 
+@reflection
 export class RenderTreeService extends Service {
   elements = new Map<string, Elem>()
 

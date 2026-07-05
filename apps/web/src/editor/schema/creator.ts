@@ -1,6 +1,7 @@
 import { XY } from '@gitborlando/geo'
 import { clone, getSet, miniId } from '@gitborlando/utils'
 import { defuOverrideArray } from '@sigma/utils/defu'
+import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import {
   createLine,
@@ -15,6 +16,7 @@ import { Assets } from 'src/view/assets/assets'
 import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
 
+@reflection
 export class SchemaCreatorService extends Service {
   constructor() {
     super()

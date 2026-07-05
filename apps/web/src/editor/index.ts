@@ -1,5 +1,4 @@
-import { objKeys } from '@gitborlando/utils'
-import { asClass, createContainer } from 'awilix'
+import { DI, type ClassConstructor } from 'first-di'
 import { NodeController } from 'src/editor/controller/node'
 import { SchemaController } from 'src/editor/controller/schema'
 import { SelectController } from 'src/editor/controller/select'
@@ -112,27 +111,24 @@ export class Editor extends Service {
     return (this.editor = autoBind(new Editor()))
   }
 
-  private container = createContainer<EditorServices>({
-    injectionMode: 'CLASSIC',
-  })
+  private container = new (class EditorDI extends DI {
+    dispose() {
+      ;[...this.singletonsList.values()]
+        .filter((s) => s instanceof Service)
+        .forEach((s) => s.dispose())
+      this.reset()
+    }
+  })()
 
   constructor() {
     super()
-    this.registerServices()
-    this.effect(() => (Editor.editor = undefined!))
     this.effect(() => this.container.dispose())
+    this.effect(() => (Editor.editor = undefined!))
   }
 
   resolve = <K extends EditorServiceId>(key: K) => {
-    return this.container.resolve<EditorServices[K]>(key)
-  }
-
-  private registerServices() {
-    objKeys(editorServices).forEach((id) => {
-      this.container.register(id, asClass(<any>editorServices[id]).singleton())
-    })
-    objKeys(editorServices).forEach((id) => {
-      this.effect(() => this.container.resolve(id).dispose())
-    })
+    return this.container.singleton(
+      editorServices[key] as ClassConstructor<EditorServices[K]>,
+    )
   }
 }

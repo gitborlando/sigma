@@ -1,4 +1,5 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
+import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import { RenderSurfaceService } from 'src/editor/render/surface'
 import { StageCursorService } from 'src/editor/stage/cursor'
@@ -7,6 +8,7 @@ import { StageViewportService } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
 import { Service } from 'src/global/service'
 
+@reflection
 export class StageMoveService extends Service {
   @observable isMoving = false
 

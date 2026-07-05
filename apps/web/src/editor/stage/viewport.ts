@@ -3,6 +3,7 @@ import { Wheeler } from '@gitborlando/toolkit/browser'
 import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
+import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { IMatrix, Matrix } from 'src/editor/geometry'
 import { HandleSelectService } from 'src/editor/handle/select'
@@ -18,6 +19,7 @@ const createInitBound = () => ({
   height: window.innerHeight - 48 - 0,
 })
 
+@reflection
 export class StageViewportService extends Service {
   @observable.ref sceneMatrix = Matrix.identity()
   @observable bound = createInitBound()

@@ -1,5 +1,6 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
+import { reflection } from 'first-di'
 import { SettingService } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
 import { max } from 'src/editor/geometry/base'
@@ -17,6 +18,7 @@ import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
 import { Elem } from './elem'
 
+@reflection
 export class ElemDrawerService extends Service {
   private node!: S.Node
   private elem!: Elem
