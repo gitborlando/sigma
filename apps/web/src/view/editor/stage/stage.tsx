@@ -4,6 +4,7 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { ContextMenu } from 'src/global/context-menu'
 import { EditorStageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
+import { EditorStageGridComp } from 'src/view/editor/stage/grid'
 import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
 import { RulerComp } from 'src/view/editor/stage/ruler'
@@ -18,6 +19,7 @@ export const StageComp: FC<{}> = observer(({}) => {
   useEffect(() => {
     return renderElem(
       <EditorContext.Provider value={editor}>
+        <EditorStageGridComp />
         <EditorStageOutlineComp />
         <EditorStageTransformComp />
         <EditorStageMarqueeComp />

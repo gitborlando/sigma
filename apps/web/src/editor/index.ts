@@ -24,7 +24,6 @@ import { StageCreateService } from 'src/editor/stage/interact/create'
 import { StageInteractService } from 'src/editor/stage/interact/interact'
 import { StageMoveService } from 'src/editor/stage/interact/move'
 import { StageSelectService } from 'src/editor/stage/interact/select'
-import { StageToolGridService } from 'src/editor/stage/tools/grid'
 import { StageTransformerService } from 'src/editor/stage/tools/transformer'
 import { StageViewportService } from 'src/editor/stage/viewport'
 import { DesignAlignService } from 'src/editor/workbench/design-panel/align'
@@ -75,7 +74,6 @@ const editorServices = {
   stageCursor: StageCursorService,
   stageViewport: StageViewportService,
   stageTransformer: StageTransformerService,
-  stageToolGrid: StageToolGridService,
 
   /** workbench.design */
   fillPicker: FillPickerService,
