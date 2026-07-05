@@ -4,7 +4,7 @@ export abstract class Service {
   protected disposer = new Disposer()
 
   protected effect(...disposers: DisposerFunc[]) {
-    return this.disposer.add(...disposers)
+    return this.disposer.register(...disposers)
   }
 
   dispose() {

@@ -108,14 +108,14 @@ export class YAwareService extends Service {
     const disposer = new Disposer()
 
     commonKeys.map((key) => {
-      disposer.add(
+      disposer.register(
         reaction(
           () => this.client[key],
           (value) => awareness.setLocalStateField(key, toJS(value)),
         ),
       )
     })
-    disposer.add(
+    disposer.register(
       this.handleSelect.afterSelect.hook(() => {
         awareness.setLocalStateField(
           'selectIdMap',
