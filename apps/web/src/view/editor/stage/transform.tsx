@@ -33,9 +33,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const node = schemaCreator.rect({
     id: 'transform',
     fills: [],
-    width: mrect.width,
-    height: mrect.height,
-    matrix: Matrix.identity(),
+    ...mrect.plain(),
   })
 
   const mousedown = (e: ElemMouseEvent) => {
@@ -74,7 +72,8 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
   const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
     useEditorServices()
   const zoom = stageViewport.zoom
-  const mrect = stageTransformer.mrect.clone()
+  const { width, height } = stageTransformer.mrect.plain()
+  const mrect = MRect.identity(width, height)
   const p1 = arrayLoopGet(mrect.vertices, index)
   const p2 = arrayLoopGet(mrect.vertices, index + 1)
 
@@ -112,7 +111,8 @@ const VertexComp: FC<{
   const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
     useEditorServices()
   const zoom = stageViewport.zoom
-  const mrect = stageTransformer.mrect
+  const { width, height } = stageTransformer.mrect.plain()
+  const mrect = MRect.identity(width, height)
   const xy = arrayLoopGet(mrect.vertices, index)
   const size = 8 / zoom
 
@@ -164,7 +164,8 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
   const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
     useEditorServices()
   const zoom = stageViewport.zoom
-  const mrect = stageTransformer.mrect
+  const { width, height } = stageTransformer.mrect.plain()
+  const mrect = MRect.identity(width, height)
   const xy = arrayLoopGet(mrect.vertices, index)
   const size = 8 / zoom
 
