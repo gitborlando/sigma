@@ -23,10 +23,7 @@ import { StageCursorService } from 'src/editor/stage/cursor'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageEventService } from 'src/editor/stage/event'
 import { StageViewportService } from 'src/editor/stage/viewport'
-import {
-  snapGridRoundRectBySetting,
-  snapGridRoundXYBySetting,
-} from 'src/editor/utils/misc'
+import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
@@ -155,15 +152,15 @@ export class StageCreateService extends Service {
   }
 
   private calcNodeMRect(rect: IRect) {
-    const snapRect = snapGridRoundRectBySetting(this.setting.snapToGrid, rect)
+    const snapRect = snapGridRoundRect(rect, this.setting.snapToGrid)
     const matrix = this.prependParentMatrix(Matrix.identity().shift(snapRect))
 
     return MRect.fromRect(snapRect, matrix)
   }
 
   private calcLineMRect(current: IXY, start: IXY) {
-    current = snapGridRoundXYBySetting(this.setting.snapToGrid, current)
-    start = snapGridRoundXYBySetting(this.setting.snapToGrid, start)
+    current = snapGridRoundXY(current, this.setting.snapToGrid)
+    start = snapGridRoundXY(start, this.setting.snapToGrid)
 
     const width = XY.distance(current, start)
     const rotation = Angle.sweep(XY.vector(current, start))

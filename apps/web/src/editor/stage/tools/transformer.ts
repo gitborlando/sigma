@@ -8,7 +8,7 @@ import { HandleSelectService } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewportService } from 'src/editor/stage/viewport'
-import { snapGridRoundBySetting, TRBL } from 'src/editor/utils/misc'
+import { snapGridRound, TRBL } from 'src/editor/utils/misc'
 import { YStateService } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
@@ -64,8 +64,8 @@ export class StageTransformerService extends Service {
 
         const aabb = AABB.shift(startAABB, shift)
         const snapDelta = XY.$(
-          snapGridRoundBySetting(this.setting.snapToGrid, aabb.minX) - aabb.minX,
-          snapGridRoundBySetting(this.setting.snapToGrid, aabb.minY) - aabb.minY,
+          snapGridRound(aabb.minX, this.setting.snapToGrid) - aabb.minX,
+          snapGridRound(aabb.minY, this.setting.snapToGrid) - aabb.minY,
         )
 
         const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)

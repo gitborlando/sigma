@@ -2,21 +2,18 @@ import { IRect } from '@gitborlando/geo'
 
 export type TRBL = 'top' | 'right' | 'bottom' | 'left'
 
-export function snapGridRoundBySetting(snapToGrid: boolean, value: number) {
+export function snapGridRound(value: number, snapToGrid: boolean) {
   return snapToGrid ? Math.round(value) : value
 }
 
-export function snapGridRoundXYBySetting(snapToGrid: boolean, xy: IXY) {
-  return XY.$(
-    snapGridRoundBySetting(snapToGrid, xy.x),
-    snapGridRoundBySetting(snapToGrid, xy.y),
-  )
+export function snapGridRoundXY(xy: IXY, snapToGrid: boolean) {
+  return XY.$(snapGridRound(xy.x, snapToGrid), snapGridRound(xy.y, snapToGrid))
 }
 
-export function snapGridRoundRectBySetting(snapToGrid: boolean, rect: IRect): IRect {
+export function snapGridRoundRect(rect: IRect, snapToGrid: boolean): IRect {
   const { x, y, width, height } = rect
-  const snapStart = snapGridRoundXYBySetting(snapToGrid, XY.$(x, y))
-  const snapEnd = snapGridRoundXYBySetting(snapToGrid, XY.$(x + width, y + height))
+  const snapStart = snapGridRoundXY(XY.$(x, y), snapToGrid)
+  const snapEnd = snapGridRoundXY(XY.$(x + width, y + height), snapToGrid)
   return {
     ...snapStart,
     width: snapEnd.x - snapStart.x,
