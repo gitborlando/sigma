@@ -152,7 +152,11 @@ doc.transact(() => {
 }, 'remote-lock-selection')
 
 logSection('Invalid writes return false')
-console.log('insert into non-array:', plain.insert(['document', 'title'], 'Nope'))
+console.log(
+  'insert into non-array:',
+  //@ts-ignore
+  plain.insert(['document', 'title'], 'Nope'),
+)
 console.log(
   'replace missing shape:',
   plain.replace(['shapes', 'missing'], undefined),

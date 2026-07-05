@@ -1,5 +1,5 @@
-import * as Y from 'yjs'
 import { describe, expect, it, vi } from 'vitest'
+import * as Y from 'yjs'
 import { joinYPlainPath, YPlain } from './index'
 
 type EditorState = {
@@ -292,6 +292,7 @@ describe('YPlain', () => {
         plain.insert(['nodes'], { id: 'node-1', name: 'Header', flags: [] }),
       ).toBe(true)
       expect(plain.get(['nodes', 0, 'flags'])).toEqual([])
+      //@ts-ignore
       expect(plain.insert(['nodes', 0, 'flags'], 'selected')).toBe(true)
     })
 
