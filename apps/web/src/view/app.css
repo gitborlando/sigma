@@ -1,6 +1,5 @@
 @layer floor, theme, base, components, local-components, utilities;
 
-@import 'tailwindcss';
 @import './styles/misc.css';
 
 @layer floor {

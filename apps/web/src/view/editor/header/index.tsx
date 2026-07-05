@@ -3,7 +3,6 @@ import { ChevronLeft, Redo, Undo as UndoIcon } from 'lucide-react'
 import { IStageCreateType } from 'src/editor/stage/interact/create'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { CooperateComp } from 'src/view/editor/header/cooperate'
 import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot'
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
@@ -45,7 +44,6 @@ export const HeaderComp: FC<{}> = observer(({}) => {
         <EditorHeaderZoomComp />
       </G>
       <G center horizontal gap={8} className={cls('rightGroup')}>
-        <CooperateComp />
         <EditorHeaderHistoryComp />
         <EditorHeaderSettingComp />
       </G>

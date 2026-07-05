@@ -1,6 +1,5 @@
 import { miniId } from '@gitborlando/utils'
 import vitePluginNestedAssets from '../../packages/nested-assets/src'
-import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import wywInJs from '@wyw-in-js/vite'
 import path from 'path'
@@ -29,7 +28,6 @@ export default defineConfig(() => {
         },
       }),
       reactXIf(),
-      tailwindcss(),
     ],
     resolve: {
       alias: {
