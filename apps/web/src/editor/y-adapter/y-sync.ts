@@ -30,6 +30,7 @@ export class YSyncService extends Service {
     this.effect(() => {
       provider.off('synced', this.synced)
       provider.off('status', this.status)
+      provider.destroy()
     })
   }
 
