@@ -1,3 +1,4 @@
+import { Dragger } from '@gitborlando/toolkit/browser'
 import { iife } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
@@ -27,6 +28,8 @@ export class StageTransformerService extends Service {
   private action: TransformerAction = 'move'
   isSelectOnlyLine = false
 
+  private dragger!: Dragger
+
   constructor(
     private readonly handleSelect: HandleSelectService,
     private readonly yState: YStateService,
@@ -36,6 +39,7 @@ export class StageTransformerService extends Service {
   ) {
     super()
     autoBind(makeObservable(this))
+    this.dragger = createStageDragger(stageViewport)
   }
 
   setup(selectNodes: S.Node[]) {
@@ -57,7 +61,7 @@ export class StageTransformerService extends Service {
     const { startMRect, startMatrix } = this.onStartTransform()
     const startAABB = startMRect.aabb
 
-    createStageDragger(this.stageViewport)
+    this.dragger
       .onMove(({ shift }) => {
         this.action = 'move'
         this.isMoving = true
@@ -93,7 +97,7 @@ export class StageTransformerService extends Service {
     const { startMRect, startMatrix } = this.onStartTransform()
     const endMatrix = Matrix.of(startMatrix)
 
-    createStageDragger(this.stageViewport)
+    this.dragger
       .onMove(({ shift }) => {
         this.action = 'resize'
         shift = Matrix.of(startMRect.matrix).applyShift(shift, true)
@@ -140,7 +144,7 @@ export class StageTransformerService extends Service {
     const startRect = AABB.rect(startMRect.aabb)
     const startMatrix = Matrix.identity().shift(startRect)
 
-    createStageDragger(this.stageViewport)
+    this.dragger
       .onMove(({ current, start }) => {
         this.action = 'rotate'
 
