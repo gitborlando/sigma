@@ -1,6 +1,5 @@
-import defu from 'defu'
+import { merge } from 'es-toolkit'
 import type { ZodType } from 'zod'
-import { defuOverrideArray } from './defu'
 
 type StoragePartial<T> = T extends readonly (infer Item)[]
   ? StoragePartial<Item>[]
@@ -44,18 +43,6 @@ export const writeStorage = (key: string, value: unknown) => {
 }
 
 export const createZodStorage = <T>(key: string, schema: ZodType<T>) => {
-  const filterEmptyKey = <V>(value: V): V => {
-    if (Array.isArray(value)) return value.map(filterEmptyKey) as V
-    if (!value || typeof value !== 'object') return value
-
-    return Object.fromEntries(
-      Object.entries(value).flatMap(([itemKey, item]) => {
-        if (!itemKey) return []
-        return [[itemKey, filterEmptyKey(item)]]
-      }),
-    ) as V
-  }
-
   return {
     read() {
       const result = schema.safeParse(readStorage(key))
@@ -68,13 +55,11 @@ export const createZodStorage = <T>(key: string, schema: ZodType<T>) => {
       writeStorage(key, result.data)
       return true
     },
-    savePartial(value: StoragePartial<T>, overrideArray = false) {
-      const filteredValue = filterEmptyKey(value)
-      const fallback = Array.isArray(filteredValue) ? [] : {}
-      const merge = overrideArray ? defuOverrideArray : defu
+    savePartial(value: StoragePartial<T>) {
+      const fallback = Array.isArray(value) ? [] : {}
       const nextValue = merge(
-        filteredValue as never,
         (this.read() ?? fallback) as never,
+        value as never,
       ) as T
       return this.save(nextValue)
     },

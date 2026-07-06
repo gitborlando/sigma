@@ -1,5 +1,5 @@
+import { createZodStorage } from '@gitborlando/toolkit'
 import { listen, stopPropagation } from '@gitborlando/utils/browser'
-import { createZodStorage, z } from '@sigma/utils'
 import { EllipsisVertical, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { Drag } from 'src/global/event/drag'
@@ -10,6 +10,7 @@ import {
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 import { Menu } from 'src/view/component/menu'
+import { z } from 'zod'
 
 type DragPanelProps = {
   id?: string

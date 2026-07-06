@@ -1,8 +1,8 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
-import { defuOverrideArray } from '@sigma/utils/defu'
 import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { Service } from 'src/global/service'
+import { mergeOverrideArray } from 'src/utils/export'
 
 const initSetting = () => ({
   autosave: true,
@@ -70,7 +70,7 @@ export class SettingService extends Service {
 
   private loadSetting() {
     const savedSetting = jsonParse(localStorage.getItem('editor.setting'))
-    this.settings = defuOverrideArray(savedSetting, initSetting())
+    this.settings = mergeOverrideArray(initSetting(), savedSetting)
   }
 
   private autoSaveSetting() {

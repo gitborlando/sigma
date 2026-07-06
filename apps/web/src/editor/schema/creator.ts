@@ -1,6 +1,5 @@
 import { XY } from '@gitborlando/geo'
 import { clone, getSet, miniId } from '@gitborlando/utils'
-import { defuOverrideArray } from '@sigma/utils/defu'
 import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import {
@@ -12,6 +11,7 @@ import { getLatestVersion } from 'src/editor/schema/migration'
 import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
 import { T } from 'src/utils/common'
+import { mergeOverrideArray } from 'src/utils/export'
 import { Assets } from 'src/view/assets/assets'
 import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
@@ -178,12 +178,9 @@ export class SchemaCreatorService extends Service {
   text(option?: NestPartial<S.Text>): S.Text {
     const nodeBase = this.createNodeBase()
     return T<S.Text>(
-      defuOverrideArray(
+      mergeOverrideArray(
         {
           ...nodeBase,
-          ...option,
-        },
-        {
           type: 'text',
           content: '文本1',
           style: {
@@ -196,6 +193,9 @@ export class SchemaCreatorService extends Service {
             lineHeight: 16,
           },
           fills: [this.fillColor(COLOR.black, 1)],
+        },
+        {
+          ...option,
         },
       ),
     )
@@ -332,6 +332,6 @@ export class SchemaCreatorService extends Service {
     const newItem = clone(item)
     newItem.id = item.type === 'page' ? `page_${miniId(8)}` : miniId(8)
     if ('childIds' in newItem) newItem.childIds = []
-    return defuOverrideArray(option || {}, newItem) as T
+    return mergeOverrideArray(newItem, option || {}) as T
   }
 }

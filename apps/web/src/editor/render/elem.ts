@@ -1,8 +1,8 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, type NoopFunc } from '@gitborlando/utils'
-import { memorized } from '@sigma/utils/common'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
 import type { RenderInvalidatorService } from 'src/editor/render/invalidator'
+import { memorized } from 'src/utils/export'
 
 declare module 'react' {
   namespace JSX {

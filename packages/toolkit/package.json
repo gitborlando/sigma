@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./disposer": "./src/disposer.ts",
+    "./storage": "./src/storage.ts",
     "./traverser": "./src/traverser.ts",
     "./browser": "./src/browser/index.ts"
   },
@@ -16,5 +17,13 @@
   "dependencies": {
     "@gitborlando/geo": "^5.2.0",
     "@gitborlando/signal": "^1.0.2"
+  },
+  "peerDependencies": {
+    "es-toolkit": "^1.44.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "es-toolkit": "^1.44.0",
+    "zod": "3.25.76"
   }
 }

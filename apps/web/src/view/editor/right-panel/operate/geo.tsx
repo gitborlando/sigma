@@ -1,5 +1,5 @@
+import { twoDecimal } from '@gitborlando/geo'
 import { Icon } from '@gitborlando/widget'
-import { twoDecimal } from '@sigma/utils/common'
 import { DesignGeoInfo } from 'src/editor/operate/geometry'
 import { MULTI_VALUE } from 'src/global/constant'
 import { InputNum } from 'src/view/component/input-num'
