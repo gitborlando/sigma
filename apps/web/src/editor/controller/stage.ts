@@ -1,21 +1,21 @@
-import { HandleSelectService } from 'src/editor/handle/select'
-import { RendererService } from 'src/editor/render/renderer'
+import { HandleSelect } from 'src/editor/handle/select'
+import { Renderer } from 'src/editor/render/renderer'
 import { reflection } from 'first-di'
-import { RenderSurfaceService } from 'src/editor/render/surface'
-import { RenderTreeService } from 'src/editor/render/tree'
-import { StageEventService } from 'src/editor/stage/event'
-import { StageInteractService } from 'src/editor/stage/interact/interact'
+import { RenderSurface } from 'src/editor/render/surface'
+import { RenderTree } from 'src/editor/render/tree'
+import { StageEvent } from 'src/editor/stage/event'
+import { StageInteract } from 'src/editor/stage/interact/interact'
 import { Service } from 'src/global/service'
 
 @reflection
 export class StageController extends Service {
   constructor(
-    private readonly renderSurface: RenderSurfaceService,
-    private readonly renderer: RendererService,
-    private readonly stageEvent: StageEventService,
-    private readonly renderTree: RenderTreeService,
-    private readonly handleSelect: HandleSelectService,
-    private readonly stageInteract: StageInteractService,
+    private readonly renderSurface: RenderSurface,
+    private readonly renderer: Renderer,
+    private readonly stageEvent: StageEvent,
+    private readonly renderTree: RenderTree,
+    private readonly handleSelect: HandleSelect,
+    private readonly stageInteract: StageInteract,
   ) {
     super()
     autoBind(this)

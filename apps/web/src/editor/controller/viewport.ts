@@ -1,17 +1,17 @@
 import { AABB } from '@gitborlando/geo'
 import { Matrix } from 'src/editor/geometry'
 import { reflection } from 'first-di'
-import { HandleSelectService } from 'src/editor/handle/select'
-import { RenderTreeService } from 'src/editor/render/tree'
-import { StageViewportService } from 'src/editor/stage/viewport'
+import { HandleSelect } from 'src/editor/handle/select'
+import { RenderTree } from 'src/editor/render/tree'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 
 @reflection
 export class ViewportController extends Service {
   constructor(
-    private readonly stageViewport: StageViewportService,
-    private readonly handleSelect: HandleSelectService,
-    private readonly renderTree: RenderTreeService,
+    private readonly stageViewport: StageViewport,
+    private readonly handleSelect: HandleSelect,
+    private readonly renderTree: RenderTree,
   ) {
     super()
     autoBind(this)

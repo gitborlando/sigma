@@ -1,15 +1,15 @@
 import { clone } from '@gitborlando/utils'
 import { reflection } from 'first-di'
-import { HandleSelectService } from 'src/editor/handle/select'
+import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
-import { YStateService } from 'src/editor/y-adapter/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 import { Elem } from './elem'
-import { RenderInvalidatorService } from './invalidator'
+import { RenderInvalidator } from './invalidator'
 
 @reflection
-export class RenderTreeService extends Service {
+export class RenderTree extends Service {
   elements = new Map<string, Elem>()
 
   sceneRoot!: Elem
@@ -24,9 +24,9 @@ export class RenderTreeService extends Service {
   }
 
   constructor(
-    private readonly handleSelect: HandleSelectService,
-    private readonly yState: YStateService,
-    private readonly renderInvalidator: RenderInvalidatorService,
+    private readonly handleSelect: HandleSelect,
+    private readonly yState: YState,
+    private readonly renderInvalidator: RenderInvalidator,
   ) {
     super()
     autoBind(this)

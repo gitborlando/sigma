@@ -2,9 +2,9 @@ import { AnyObject, iife, objKeys } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { divide, floor, max, min } from 'src/editor/geometry/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
-import { HandleNodeService } from 'src/editor/handle/node'
-import { HandleSelectService } from 'src/editor/handle/select'
-import { YStateService } from 'src/editor/y-adapter/y-state'
+import { HandleNode } from 'src/editor/handle/node'
+import { HandleSelect } from 'src/editor/handle/select'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { MULTI_VALUE } from 'src/global/constant'
 import { Service } from 'src/global/service'
 
@@ -42,16 +42,16 @@ export function cleanObject(object: AnyObject) {
 }
 
 @reflection
-export class DesignGeometryService extends Service {
+export class DesignGeometry extends Service {
   currentGeometries = createDesignGeoInfos()
   currentKeys = createActiveKeys(new Set())
   changingKeys = createActiveKeys(new Set())
   isDelta = true
 
   constructor(
-    private readonly handleNode: HandleNodeService,
-    private readonly handleSelect: HandleSelectService,
-    private readonly yState: YStateService,
+    private readonly handleNode: HandleNode,
+    private readonly handleSelect: HandleSelect,
+    private readonly yState: YState,
   ) {
     super()
     autoBind(this)

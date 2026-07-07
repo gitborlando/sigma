@@ -19,8 +19,8 @@ type DevSnapshot = SnapshotState & {
   base?: SnapshotState
 }
 
-type YStateService = EditorServices['yState']
-type UndoService = EditorServices['undo']
+type YState = EditorServices['yState']
+type Undo = EditorServices['undo']
 
 const STORAGE_KEY_PREFIX = 'sigma:dev-snapshot'
 
@@ -203,10 +203,7 @@ function readSnapshot(storageKey: string) {
   }
 }
 
-function createSnapshotState(
-  yState: YStateService,
-  undo: UndoService,
-): SnapshotState {
+function createSnapshotState(yState: YState, undo: Undo): SnapshotState {
   return {
     schema: toPlain(yState.schema),
     undoStack: toPlain(undo.stack),
@@ -215,18 +212,14 @@ function createSnapshotState(
   }
 }
 
-function restoreFinalSnapshot(
-  yState: YStateService,
-  undo: UndoService,
-  snapshot: SnapshotState,
-) {
+function restoreFinalSnapshot(yState: YState, undo: Undo, snapshot: SnapshotState) {
   replaceSchema(yState, snapshot.schema)
   restoreUndo(yState, undo, snapshot)
 }
 
 function restoreReplayableSnapshot(
-  yState: YStateService,
-  undo: UndoService,
+  yState: YState,
+  undo: Undo,
   snapshot: DevSnapshot,
 ) {
   const base = snapshot.base
@@ -238,7 +231,7 @@ function restoreReplayableSnapshot(
   replayHistoryFromBase(yState, undo, snapshot, base)
 }
 
-function replaceSchema(yState: YStateService, schema: S.Schema) {
+function replaceSchema(yState: YState, schema: S.Schema) {
   const currentKeys = Object.keys(yState.state)
   const nextKeys = Object.keys(schema)
 
@@ -250,17 +243,13 @@ function replaceSchema(yState: YStateService, schema: S.Schema) {
   })
 }
 
-function restoreUndo(
-  yState: YStateService,
-  undo: UndoService,
-  snapshot: SnapshotState,
-) {
+function restoreUndo(yState: YState, undo: Undo, snapshot: SnapshotState) {
   if (!resetUndo(yState, undo)) return
 
   undo.restoreHistory(toPlain(snapshot.undoStack || []), snapshot.undoNext || 0)
 }
 
-function resetUndo(yState: YStateService, undo: UndoService) {
+function resetUndo(yState: YState, undo: Undo) {
   undo.init({
     stateMap: yState.doc.getMap<S.Schema>('schema'),
     getPatches: yState.getPatches,
@@ -269,8 +258,8 @@ function resetUndo(yState: YStateService, undo: UndoService) {
 }
 
 function replayHistoryFromBase(
-  yState: YStateService,
-  undo: UndoService,
+  yState: YState,
+  undo: Undo,
   snapshot: DevSnapshot,
   base: SnapshotState,
 ) {
@@ -283,11 +272,7 @@ function replayHistoryFromBase(
   undo.restoreHistory(toPlain(stack), end)
 }
 
-function replayHistoryInfo(
-  yState: YStateService,
-  undo: UndoService,
-  info: UndoInfo,
-) {
+function replayHistoryInfo(yState: YState, undo: Undo, info: UndoInfo) {
   if (info.type === 'client') {
     applyReplayLocalState(yState, undo, info)
     undo.track(info.type, info.description)
@@ -300,11 +285,7 @@ function replayHistoryInfo(
   undo.track(info.type, info.description)
 }
 
-function applyReplayLocalState(
-  yState: YStateService,
-  undo: UndoService,
-  info: UndoInfo,
-) {
+function applyReplayLocalState(yState: YState, undo: Undo, info: UndoInfo) {
   const { mobxUndo } = undo
   const localState = info.clientState
   if (localState) {
@@ -318,7 +299,7 @@ function applyReplayLocalState(
   }
 }
 
-function normalizeLocalState(yState: YStateService, state: MobxUndoState) {
+function normalizeLocalState(yState: YState, state: MobxUndoState) {
   if (!state.select) return state
 
   return {
@@ -327,7 +308,7 @@ function normalizeLocalState(yState: YStateService, state: MobxUndoState) {
   }
 }
 
-function normalizeSelectState(yState: YStateService, state: HandleSelectState) {
+function normalizeSelectState(yState: YState, state: HandleSelectState) {
   return {
     ...state,
     selectIdMap: Object.fromEntries(
@@ -337,15 +318,12 @@ function normalizeSelectState(yState: YStateService, state: HandleSelectState) {
   }
 }
 
-function getValidPageId(yState: YStateService, pageId: string) {
+function getValidPageId(yState: YState, pageId: string) {
   if (pageId && yState.state[pageId]) return pageId
   return yState.state.meta?.pageIds[0] || ''
 }
 
-function applyStatePatches(
-  yState: YStateService,
-  patches: UndoInfo['statePatches'],
-) {
+function applyStatePatches(yState: YState, patches: UndoInfo['statePatches']) {
   patches?.forEach((patch) => {
     const plainYState = yState as any
     const keys = patch.keys as [string, ...Array<string | number>]
@@ -364,17 +342,14 @@ function applyStatePatches(
   })
 }
 
-function shouldInsertPatch(
-  yState: YStateService,
-  keys: readonly (string | number)[],
-) {
+function shouldInsertPatch(yState: YState, keys: readonly (string | number)[]) {
   const lastIndex = Number(keys[keys.length - 1])
   if (Number.isNaN(lastIndex)) return false
 
   return Array.isArray(getSchemaValue(yState, keys.slice(0, -1)))
 }
 
-function getSchemaValue(yState: YStateService, keys: readonly (string | number)[]) {
+function getSchemaValue(yState: YState, keys: readonly (string | number)[]) {
   let current: any = yState.state
   keys.forEach((key) => {
     current = current?.[key]

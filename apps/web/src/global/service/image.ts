@@ -8,7 +8,7 @@ export type IImage = {
   image: HTMLImageElement
 }
 
-class ImageService {
+class ImageClass {
   private imageCache = new LRU<IImage>(300)
 
   getImage(url: string) {
@@ -41,4 +41,4 @@ class ImageService {
   }
 }
 
-export const Image = autoBind(new ImageService())
+export const Image = autoBind(new ImageClass())

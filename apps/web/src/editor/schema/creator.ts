@@ -17,7 +17,7 @@ import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
 
 @reflection
-export class SchemaCreatorService extends Service {
+export class SchemaCreator extends Service {
   constructor() {
     super()
     autoBind(this)

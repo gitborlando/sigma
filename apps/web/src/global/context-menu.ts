@@ -12,7 +12,7 @@ export type MenuItem = Command & {
   children?: MenuItem[][]
 }
 
-class ContextMenuService {
+class ContextMenuClass {
   @observable menus: MenuItem[][] = []
   context = <AnyObject>{}
   triggered = false
@@ -38,4 +38,4 @@ class ContextMenuService {
   }
 }
 
-export const ContextMenu = autoBind(makeObservable(new ContextMenuService()))
+export const ContextMenu = autoBind(makeObservable(new ContextMenuClass()))

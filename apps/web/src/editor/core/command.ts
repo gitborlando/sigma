@@ -4,26 +4,26 @@ import { reflection } from 'first-di'
 import hotkeys from 'hotkeys-js'
 import { makeObservable } from 'mobx'
 import { NodeController } from 'src/editor/controller/node'
-import { SettingService } from 'src/editor/core/setting'
-import { UndoService } from 'src/editor/core/undo'
-import { HandlePageService } from 'src/editor/handle/page'
-import { HandleSelectService } from 'src/editor/handle/select'
-import { RenderTreeService } from 'src/editor/render/tree'
-import { StageInteractService } from 'src/editor/stage/interact/interact'
-import { YStateService } from 'src/editor/y-adapter/y-state'
+import { Setting } from 'src/editor/core/setting'
+import { Undo } from 'src/editor/core/undo'
+import { HandlePage } from 'src/editor/handle/page'
+import { HandleSelect } from 'src/editor/handle/select'
+import { RenderTree } from 'src/editor/render/tree'
+import { StageInteract } from 'src/editor/stage/interact/interact'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Command } from 'src/global/context-menu'
 import { Service } from 'src/global/service'
 
 @reflection
-export class CommandService extends Service {
+export class EditorCommand extends Service {
   constructor(
-    private readonly handlePage: HandlePageService,
-    private readonly handleSelect: HandleSelectService,
-    private readonly setting: SettingService,
-    private readonly undo: UndoService,
-    private readonly renderTree: RenderTreeService,
-    private readonly stageInteract: StageInteractService,
-    private readonly yState: YStateService,
+    private readonly handlePage: HandlePage,
+    private readonly handleSelect: HandleSelect,
+    private readonly setting: Setting,
+    private readonly undo: Undo,
+    private readonly renderTree: RenderTree,
+    private readonly stageInteract: StageInteract,
+    private readonly yState: YState,
     private readonly nodeController: NodeController,
   ) {
     super()

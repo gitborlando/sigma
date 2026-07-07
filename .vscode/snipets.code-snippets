@@ -43,7 +43,7 @@
     "body": [
       "import { Service } from 'src/global/service'",
       "",
-      "export class $1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g}Service extends Service {",
+      "export class $1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g} extends Service {",
       "  constructor() {",
       "     super()",
       "     autoBind(this)",
@@ -57,7 +57,7 @@
   "Private Readonly Service Dependency Injection": {
     "prefix": "prsr",
     "scope": "typescript",
-    "body": ["private readonly $1: ${1/([a-z])(.*)/${1:/upcase}${2}/}Service,"],
+    "body": ["private readonly $1: ${1/([a-z])(.*)/${1:/upcase}${2}/},"],
     "description": "快速生成 private readonly 服务注入",
   },
 }

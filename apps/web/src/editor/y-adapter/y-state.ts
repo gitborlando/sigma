@@ -11,7 +11,7 @@ export type YStatePatch = YPlainPatch
 type YStateListener = (patches: YStatePatch[]) => void
 
 @reflection
-export class YStateService extends Service {
+export class YState extends Service {
   doc!: Y.Doc
   plain!: YPlain<S.Schema>
 

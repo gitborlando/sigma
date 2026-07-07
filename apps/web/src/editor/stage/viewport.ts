@@ -6,8 +6,8 @@ import { clamp } from 'es-toolkit'
 import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { IMatrix, Matrix } from 'src/editor/geometry'
-import { HandleSelectService } from 'src/editor/handle/select'
-import { RenderSurfaceService } from 'src/editor/render/surface'
+import { HandleSelect } from 'src/editor/handle/select'
+import { RenderSurface } from 'src/editor/render/surface'
 import { Service } from 'src/global/service'
 
 const createInitBound = () => ({
@@ -20,7 +20,7 @@ const createInitBound = () => ({
 })
 
 @reflection
-export class StageViewportService extends Service {
+export class StageViewport extends Service {
   @observable.ref sceneMatrix = Matrix.identity()
   @observable bound = createInitBound()
 
@@ -36,7 +36,7 @@ export class StageViewportService extends Service {
   private boundAABB = new AABB(0, 0, 0, 0)
   private wheeler = new Wheeler()
 
-  constructor(private readonly handleSelect: HandleSelectService) {
+  constructor(private readonly handleSelect: HandleSelect) {
     super()
     autoBind(makeObservable(this))
     this.effect(this.onBoundChange())
@@ -128,7 +128,7 @@ export class StageViewportService extends Service {
     this.updateZoom(newZoom, this.toCanvasXY(XY.client(e)))
   }
 
-  onWheelZoom(renderSurface: RenderSurfaceService) {
+  onWheelZoom(renderSurface: RenderSurface) {
     this.effect(
       this.wheeler.beforeWheel.hook(() => (this.isZooming = true)),
       this.wheeler.duringWheel.hook(({ e }) => this.handleWheelZoom(e)),

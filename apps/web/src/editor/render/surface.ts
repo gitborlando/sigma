@@ -2,7 +2,7 @@ import { AABB } from '@gitborlando/geo'
 import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import { IMatrix } from 'src/editor/geometry/matrix'
-import { StageViewportService } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 
 const dpr = devicePixelRatio
@@ -10,7 +10,7 @@ const dpr = devicePixelRatio
 export type SurfaceCanvasType = 'mainCanvas' | 'topCanvas'
 
 @reflection
-export class RenderSurfaceService extends Service {
+export class RenderSurface extends Service {
   private container!: HTMLDivElement
 
   private canvas!: HTMLCanvasElement
@@ -19,7 +19,7 @@ export class RenderSurfaceService extends Service {
   private topCanvas!: HTMLCanvasElement
   private topCtx!: CanvasRenderingContext2D
 
-  constructor(private readonly stageViewport: StageViewportService) {
+  constructor(private readonly stageViewport: StageViewport) {
     super()
     autoBind(this)
   }

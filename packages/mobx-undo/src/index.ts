@@ -37,7 +37,7 @@ export class MobxUndoSlice<T extends object> {
   }
 }
 
-export class MobxUndoService {
+export class MobxUndo {
   private travels = createTravels<MobxUndoState>(
     {},
     { autoArchive: false, maxHistory: 100 },

@@ -6,24 +6,24 @@ import { reflection } from 'first-di'
 import { untracked } from 'mobx'
 import { Matrix } from 'src/editor/geometry'
 import { Elem } from 'src/editor/render/elem'
-import { RendererService } from 'src/editor/render/renderer'
-import { RenderSurfaceService } from 'src/editor/render/surface'
-import { RenderTreeService } from 'src/editor/render/tree'
-import { StageViewportService } from 'src/editor/stage/viewport'
+import { Renderer } from 'src/editor/render/renderer'
+import { RenderSurface } from 'src/editor/render/surface'
+import { RenderTree } from 'src/editor/render/tree'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { reverseFor } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
 
 @reflection
-export class StageEventService extends Service {
+export class StageEvent extends Service {
   private eventXY = XY.$(0, 0)
   private elemsFromPoint: Elem[] = []
   private isPointerEventNone = false
 
   constructor(
-    private readonly renderTree: RenderTreeService,
-    private readonly renderSurface: RenderSurfaceService,
-    private readonly stageViewport: StageViewportService,
-    private readonly renderer: RendererService,
+    private readonly renderTree: RenderTree,
+    private readonly renderSurface: RenderSurface,
+    private readonly stageViewport: StageViewport,
+    private readonly renderer: Renderer,
   ) {
     super()
     autoBind(this)

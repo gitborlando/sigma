@@ -2,12 +2,12 @@ import { AABB } from '@gitborlando/geo'
 import { reflection } from 'first-di'
 import { NodeController } from 'src/editor/controller/node'
 import { MRect } from 'src/editor/geometry'
-import { HandleNodeService } from 'src/editor/handle/node'
-import { RenderTreeService } from 'src/editor/render/tree'
+import { HandleNode } from 'src/editor/handle/node'
+import { RenderTree } from 'src/editor/render/tree'
 import { Service } from 'src/global/service'
-import { UndoService } from '../../core/undo'
+import { Undo } from '../../core/undo'
 import { SchemaHelper } from '../../schema/helper'
-import { YStateService } from '../../y-adapter/y-state'
+import { YState } from '../../y-adapter/y-state'
 
 const alignTypes = <const>[
   'alignLeft',
@@ -21,18 +21,18 @@ const alignTypes = <const>[
 export type IAlignType = (typeof alignTypes)[number]
 
 @reflection
-export class DesignAlignService extends Service {
+export class DesignAlign extends Service {
   alignTypes = alignTypes
   @observable canAlign = false
 
   private toAlignNodes = <S.Node[]>[]
 
   constructor(
-    private readonly yState: YStateService,
-    private readonly undo: UndoService,
-    private readonly renderTree: RenderTreeService,
+    private readonly yState: YState,
+    private readonly undo: Undo,
+    private readonly renderTree: RenderTree,
     private readonly nodeController: NodeController,
-    private readonly handleNode: HandleNodeService,
+    private readonly handleNode: HandleNode,
   ) {
     super()
     autoBind(makeObservable(this))

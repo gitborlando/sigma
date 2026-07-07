@@ -1,21 +1,21 @@
 import { matchCase, NoopFunc } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { Service } from 'src/global/service'
-import { StageCreateService } from './create'
-import { StageMoveService } from './move'
-import { StageSelectService } from './select'
+import { StageCreate } from './create'
+import { StageMove } from './move'
+import { StageSelect } from './select'
 
 export type IStageInteraction = 'select' | 'move' | 'create'
 
 @reflection
-export class StageInteractService extends Service {
+export class StageInteract extends Service {
   @observable interaction: IStageInteraction = 'select'
   private offInteract?: NoopFunc
 
   constructor(
-    private readonly stageSelect: StageSelectService,
-    private readonly stageMove: StageMoveService,
-    private readonly stageCreate: StageCreateService,
+    private readonly stageSelect: StageSelect,
+    private readonly stageMove: StageMove,
+    private readonly stageCreate: StageCreate,
   ) {
     super()
     autoBind(makeObservable(this))

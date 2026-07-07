@@ -1,14 +1,14 @@
 import hotkeys from 'hotkeys-js'
 import { reflection } from 'first-di'
-import { UndoService } from 'src/editor/core/undo'
-import { HandleSelectService, type Selection } from 'src/editor/handle/select'
+import { Undo } from 'src/editor/core/undo'
+import { HandleSelect, type Selection } from 'src/editor/handle/select'
 import { Service } from 'src/global/service'
 
 @reflection
 export class SelectController extends Service {
   constructor(
-    private readonly handleSelect: HandleSelectService,
-    private readonly undo: UndoService,
+    private readonly handleSelect: HandleSelect,
+    private readonly undo: Undo,
   ) {
     super()
     autoBind(this)

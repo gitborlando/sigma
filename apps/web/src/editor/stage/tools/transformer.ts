@@ -2,21 +2,21 @@ import { Dragger } from '@gitborlando/toolkit/browser'
 import { iife } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
-import { SettingService } from 'src/editor/core/setting'
-import { UndoService } from 'src/editor/core/undo'
+import { Setting } from 'src/editor/core/setting'
+import { Undo } from 'src/editor/core/undo'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
-import { HandleSelectService } from 'src/editor/handle/select'
+import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createStageDragger } from 'src/editor/stage/dragger'
-import { StageViewportService } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRound, TRBL } from 'src/editor/utils/misc'
-import { YStateService } from 'src/editor/y-adapter/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
 @reflection
-export class StageTransformerService extends Service {
+export class StageTransformer extends Service {
   @observable.ref mrect = MRect.identity()
   @observable.ref diffMatrix = Matrix.identity()
   @observable isMoving = false
@@ -31,11 +31,11 @@ export class StageTransformerService extends Service {
   private dragger!: Dragger
 
   constructor(
-    private readonly handleSelect: HandleSelectService,
-    private readonly yState: YStateService,
-    private readonly undo: UndoService,
-    private readonly stageViewport: StageViewportService,
-    private readonly setting: SettingService,
+    private readonly handleSelect: HandleSelect,
+    private readonly yState: YState,
+    private readonly undo: Undo,
+    private readonly stageViewport: StageViewport,
+    private readonly setting: Setting,
   ) {
     super()
     autoBind(makeObservable(this))

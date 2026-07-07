@@ -1,22 +1,22 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
-import { RenderSurfaceService } from 'src/editor/render/surface'
-import { StageCursorService } from 'src/editor/stage/cursor'
-import { StageEventService } from 'src/editor/stage/event'
-import { StageViewportService } from 'src/editor/stage/viewport'
+import { RenderSurface } from 'src/editor/render/surface'
+import { StageCursor } from 'src/editor/stage/cursor'
+import { StageEvent } from 'src/editor/stage/event'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
 import { Service } from 'src/global/service'
 
 @reflection
-export class StageMoveService extends Service {
+export class StageMove extends Service {
   @observable isMoving = false
 
   constructor(
-    private readonly renderSurface: RenderSurfaceService,
-    private readonly stageEvent: StageEventService,
-    private readonly stageCursor: StageCursorService,
-    private readonly stageViewport: StageViewportService,
+    private readonly renderSurface: RenderSurface,
+    private readonly stageEvent: StageEvent,
+    private readonly stageCursor: StageCursor,
+    private readonly stageViewport: StageViewport,
   ) {
     super()
     autoBind(makeObservable(this))

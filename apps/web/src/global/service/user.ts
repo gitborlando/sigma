@@ -2,7 +2,7 @@ import { miniId } from '@gitborlando/utils'
 import multiavatar from '@multiavatar/multiavatar/esm'
 import { nickName } from 'src/utils/nick-name'
 
-class UserServiceClass {
+class UserClass {
   userId = miniId(8)
   avatar = multiavatar(this.userId)
   userName = nickName.getNickName()
@@ -10,4 +10,4 @@ class UserServiceClass {
   constructor() {}
 }
 
-export const UserService = autoBind(new UserServiceClass())
+export const UserService = autoBind(new UserClass())

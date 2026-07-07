@@ -1,15 +1,15 @@
 import { jsonParse } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import JSZip from 'jszip'
-import { UndoService } from 'src/editor/core/undo'
-import { HandleSelectService } from 'src/editor/handle/select'
-import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { Undo } from 'src/editor/core/undo'
+import { HandleSelect } from 'src/editor/handle/select'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
 import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
-import { YAwareService } from 'src/editor/y-adapter/y-aware'
-import { YStateService } from 'src/editor/y-adapter/y-state'
-import { YSyncService } from 'src/editor/y-adapter/y-sync'
+import { YAware } from 'src/editor/y-adapter/y-aware'
+import { YState } from 'src/editor/y-adapter/y-state'
+import { YSync } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 import { FileService } from 'src/global/service/file'
 
@@ -18,12 +18,12 @@ export class SchemaController extends Service {
   private loadingFileId = ''
 
   constructor(
-    private readonly schemaCreator: SchemaCreatorService,
-    private readonly yState: YStateService,
-    private readonly ySync: YSyncService,
-    private readonly yAware: YAwareService,
-    private readonly undo: UndoService,
-    private readonly handleSelect: HandleSelectService,
+    private readonly schemaCreator: SchemaCreator,
+    private readonly yState: YState,
+    private readonly ySync: YSync,
+    private readonly yAware: YAware,
+    private readonly undo: Undo,
+    private readonly handleSelect: HandleSelect,
   ) {
     super()
     autoBind(this)

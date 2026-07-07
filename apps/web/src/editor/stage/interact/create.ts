@@ -5,8 +5,8 @@ import { clone } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { SelectController } from 'src/editor/controller/select'
-import { SettingService } from 'src/editor/core/setting'
-import { UndoService } from 'src/editor/core/undo'
+import { Setting } from 'src/editor/core/setting'
+import { Undo } from 'src/editor/core/undo'
 import {
   createLine,
   createRegularPolygon,
@@ -14,17 +14,17 @@ import {
   Matrix,
   MRect,
 } from 'src/editor/geometry'
-import { HandleNodeService } from 'src/editor/handle/node'
-import { HandleSelectService } from 'src/editor/handle/select'
-import { RenderTreeService } from 'src/editor/render/tree'
-import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { HandleNode } from 'src/editor/handle/node'
+import { HandleSelect } from 'src/editor/handle/select'
+import { RenderTree } from 'src/editor/render/tree'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { StageCursorService } from 'src/editor/stage/cursor'
+import { StageCursor } from 'src/editor/stage/cursor'
 import { createStageDragger } from 'src/editor/stage/dragger'
-import { StageEventService } from 'src/editor/stage/event'
-import { StageViewportService } from 'src/editor/stage/viewport'
+import { StageEvent } from 'src/editor/stage/event'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
-import { YStateService } from 'src/editor/y-adapter/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
 const createTypes = [
@@ -41,7 +41,7 @@ export type IStageCreateType = (typeof createTypes)[number]
 const defaultCreateSize = 100
 
 @reflection
-export class StageCreateService extends Service {
+export class StageCreate extends Service {
   createTypes = createTypes
   @observable createType: IStageCreateType = 'frame'
 
@@ -51,16 +51,16 @@ export class StageCreateService extends Service {
   finishCreate$ = Signal.create<void>()
 
   constructor(
-    private readonly renderTree: RenderTreeService,
-    private readonly stageEvent: StageEventService,
-    private readonly stageCursor: StageCursorService,
-    private readonly handleNode: HandleNodeService,
-    private readonly undo: UndoService,
-    private readonly schemaCreator: SchemaCreatorService,
-    private readonly yState: YStateService,
-    private readonly handleSelect: HandleSelectService,
-    private readonly stageViewport: StageViewportService,
-    private readonly setting: SettingService,
+    private readonly renderTree: RenderTree,
+    private readonly stageEvent: StageEvent,
+    private readonly stageCursor: StageCursor,
+    private readonly handleNode: HandleNode,
+    private readonly undo: Undo,
+    private readonly schemaCreator: SchemaCreator,
+    private readonly yState: YState,
+    private readonly handleSelect: HandleSelect,
+    private readonly stageViewport: StageViewport,
+    private readonly setting: Setting,
     private readonly selectController: SelectController,
   ) {
     super()

@@ -1,6 +1,6 @@
 export type IUploadFileAcceptType = 'image/*' | (string & {})
 
-class UploaderService {
+class UploaderClass {
   private inputRef!: HTMLInputElement
 
   setInputRef(input: HTMLInputElement) {
@@ -45,4 +45,4 @@ class UploaderService {
   }
 }
 
-export const Uploader = autoBind(new UploaderService())
+export const Uploader = autoBind(new UploaderClass())

@@ -2,13 +2,13 @@ import { clampIndex, firstOne, getSet } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { MRect } from 'src/editor/geometry'
-import { HandleSelectService } from 'src/editor/handle/select'
+import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { Service } from 'src/global/service'
-import { YStateService } from '../y-adapter/y-state'
+import { YState } from '../y-adapter/y-state'
 
 @reflection
-export class HandleNodeService extends Service {
+export class HandleNode extends Service {
   @computed get datumXY() {
     return this.getDatumXY()
   }
@@ -16,8 +16,8 @@ export class HandleNodeService extends Service {
   private mrectCache = new Map<ID, MRect>()
 
   constructor(
-    private readonly yState: YStateService,
-    private readonly handleSelect: HandleSelectService,
+    private readonly yState: YState,
+    private readonly handleSelect: HandleSelect,
   ) {
     super()
     autoBind(makeObservable(this))

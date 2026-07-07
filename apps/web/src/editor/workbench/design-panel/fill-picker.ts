@@ -1,15 +1,15 @@
 import { reflection } from 'first-di'
-import { OperateFillService } from 'src/editor/operate/fill'
+import { OperateFill } from 'src/editor/operate/fill'
 import { Service } from 'src/global/service'
 
 @reflection
-export class FillPickerService extends Service {
+export class FillPicker extends Service {
   @observable pickerPos = XY.$()
   @observable fillIndex = -1
   @observable isShowPicker = false
   @observable fillType: S.Fill['type'] = 'color'
 
-  constructor(private readonly operateFill: OperateFillService) {
+  constructor(private readonly operateFill: OperateFill) {
     super()
     autoBind(makeObservable(this))
   }

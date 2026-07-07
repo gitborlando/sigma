@@ -1,7 +1,7 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, type NoopFunc } from '@gitborlando/utils'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import type { RenderInvalidatorService } from 'src/editor/render/invalidator'
+import type { RenderInvalidator } from 'src/editor/render/invalidator'
 import { memorized } from 'src/utils/export'
 
 declare module 'react' {
@@ -20,7 +20,7 @@ export type ElemProps = {
 }
 
 export type ElemContext = {
-  renderInvalidator: RenderInvalidatorService
+  renderInvalidator: RenderInvalidator
 }
 
 export class Elem {

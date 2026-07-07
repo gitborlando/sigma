@@ -1,9 +1,9 @@
 import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
-import { HandleSelectService } from 'src/editor/handle/select'
+import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { YStateService } from 'src/editor/y-adapter/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
 export type LayerPanelNodeInfo = {
@@ -13,7 +13,7 @@ export type LayerPanelNodeInfo = {
 }
 
 @reflection
-export class LayerPanelNodeTreeService extends Service {
+export class LayerPanelNodeTree extends Service {
   private expandedNodeMap = observable.map<string, boolean>()
   @observable private nodeInfoVersion = 0
 
@@ -30,8 +30,8 @@ export class LayerPanelNodeTreeService extends Service {
   }
 
   constructor(
-    private readonly handleSelect: HandleSelectService,
-    private readonly yState: YStateService,
+    private readonly handleSelect: HandleSelect,
+    private readonly yState: YState,
   ) {
     super()
     autoBind(makeObservable(this))

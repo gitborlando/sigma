@@ -1,6 +1,6 @@
 import { makeObservable, observable } from 'mobx'
 import { describe, expect, it } from 'vitest'
-import { MobxUndoService, type MobxUndoSlice } from './index'
+import { MobxUndo, type MobxUndoSlice } from './index'
 
 type DraftState = {
   count: number
@@ -14,7 +14,7 @@ class DraftStore {
   flags: Record<string, boolean> = { selected: true }
   slice: MobxUndoSlice<DraftState>
 
-  constructor(private mobxUndo: MobxUndoService) {
+  constructor(private mobxUndo: MobxUndo) {
     makeObservable(this, {
       count: observable.ref,
       title: observable.ref,
@@ -24,9 +24,9 @@ class DraftStore {
   }
 }
 
-describe('MobxUndoService', () => {
+describe('MobxUndo', () => {
   it('syncs registered observable fields through undo and redo', () => {
-    const mobxUndo = new MobxUndoService()
+    const mobxUndo = new MobxUndo()
     const store = new DraftStore(mobxUndo)
 
     store.slice.set((state) => {
@@ -61,7 +61,7 @@ describe('MobxUndoService', () => {
   })
 
   it('clones observable state when registering and syncs slice changes', () => {
-    const mobxUndo = new MobxUndoService()
+    const mobxUndo = new MobxUndo()
     const store = new DraftStore(mobxUndo)
 
     store.flags.selected = false

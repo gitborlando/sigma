@@ -18,10 +18,10 @@ const initSetting = () => ({
   },
 })
 
-export interface SettingService extends ReturnType<typeof initSetting> {}
+export interface Setting extends ReturnType<typeof initSetting> {}
 
 @reflection
-export class SettingService extends Service {
+export class Setting extends Service {
   @observable private settings = initSetting()
 
   constructor() {

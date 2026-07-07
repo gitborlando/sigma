@@ -2,7 +2,7 @@ import axios from 'axios'
 import type { Database } from '@sigma/api-types/supabase'
 import { supabase } from '../sdk/supabase'
 
-class FileServiceClass {
+class FileClass {
   async getFiles() {
     try {
       const { data } = await supabase.from('files').select()
@@ -47,4 +47,4 @@ class FileServiceClass {
   }
 }
 
-export const FileService = autoBind(new FileServiceClass())
+export const FileService = autoBind(new FileClass())

@@ -5,15 +5,15 @@ import { createTraverser } from '@gitborlando/toolkit/traverser'
 import type { NoopFunc } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { untracked } from 'mobx'
-import { SettingService } from 'src/editor/core/setting'
+import { Setting } from 'src/editor/core/setting'
 import { max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
-import { ElemDrawerService } from 'src/editor/render/drawer'
+import { ElemDrawer } from 'src/editor/render/drawer'
 import { Elem } from 'src/editor/render/elem'
-import { RenderInvalidatorService } from 'src/editor/render/invalidator'
-import { RenderSurfaceService } from 'src/editor/render/surface'
-import { RenderTreeService } from 'src/editor/render/tree'
-import { StageViewportService } from 'src/editor/stage/viewport'
+import { RenderInvalidator } from 'src/editor/render/invalidator'
+import { RenderSurface } from 'src/editor/render/surface'
+import { RenderTree } from 'src/editor/render/tree'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { Raf } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
 import { rgba } from 'src/utils/color'
@@ -27,7 +27,7 @@ export type SurfaceRenderType =
   | 'partialRender'
 
 @reflection
-export class RendererService extends Service {
+export class Renderer extends Service {
   onRenderTopCanvas = Signal.create<CanvasRenderingContext2D>()
 
   private bufferCanvas = new OffscreenCanvas(0, 0)
@@ -50,12 +50,12 @@ export class RendererService extends Service {
   private accumulatedErrorY = 0
 
   constructor(
-    private readonly setting: SettingService,
-    private readonly renderTree: RenderTreeService,
-    private readonly renderSurface: RenderSurfaceService,
-    private readonly stageViewport: StageViewportService,
-    private readonly elemDrawer: ElemDrawerService,
-    private readonly renderInvalidator: RenderInvalidatorService,
+    private readonly setting: Setting,
+    private readonly renderTree: RenderTree,
+    private readonly renderSurface: RenderSurface,
+    private readonly stageViewport: StageViewport,
+    private readonly elemDrawer: ElemDrawer,
+    private readonly renderInvalidator: RenderInvalidator,
   ) {
     super()
     autoBind(this)

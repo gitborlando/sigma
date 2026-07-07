@@ -1,17 +1,17 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
 import { reflection } from 'first-di'
-import { SettingService } from 'src/editor/core/setting'
+import { Setting } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
 import { max } from 'src/editor/geometry/base'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
-import { RenderInvalidatorService } from 'src/editor/render/invalidator'
+import { RenderInvalidator } from 'src/editor/render/invalidator'
 import {
   createTextBreaker,
   ISplitText,
   TextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
-import { StageViewportService } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 import { Image } from 'src/global/service/image'
 import { rgba } from 'src/utils/color'
@@ -19,7 +19,7 @@ import { themeColor } from 'src/view/styles/color'
 import { Elem } from './elem'
 
 @reflection
-export class ElemDrawerService extends Service {
+export class ElemDrawer extends Service {
   private node!: S.Node
   private elem!: Elem
   private ctx!: CanvasRenderingContext2D
@@ -27,9 +27,9 @@ export class ElemDrawerService extends Service {
   private dirtyRects: AABB[] = []
 
   constructor(
-    private readonly setting: SettingService,
-    private readonly stageViewport: StageViewportService,
-    private readonly renderInvalidator: RenderInvalidatorService,
+    private readonly setting: Setting,
+    private readonly stageViewport: StageViewport,
+    private readonly renderInvalidator: RenderInvalidator,
   ) {
     super()
     autoBind(this)

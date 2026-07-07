@@ -4,12 +4,12 @@ import equal from 'fast-deep-equal'
 import { reflection } from 'first-di'
 import { Patch, produceWithPatches } from 'immer'
 import { makeObservable } from 'mobx'
-import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
-import { UndoService } from '../core/undo'
-import { HandleSelectService } from '../handle/select'
-import { YStateService } from '../y-adapter/y-state'
+import { Undo } from '../core/undo'
+import { HandleSelect } from '../handle/select'
+import { YState } from '../y-adapter/y-state'
 
 type DynamicYStateMutation = {
   insert: (path: YPlainPath, value: unknown) => boolean
@@ -18,15 +18,15 @@ type DynamicYStateMutation = {
 }
 
 @reflection
-export class OperateFillService extends Service {
+export class OperateFill extends Service {
   @observable.ref fills = <S.Fill[]>[]
   isMultiFills = false
 
   constructor(
-    private readonly handleSelect: HandleSelectService,
-    private readonly yState: YStateService,
-    private readonly schemaCreator: SchemaCreatorService,
-    private readonly undo: UndoService,
+    private readonly handleSelect: HandleSelect,
+    private readonly yState: YState,
+    private readonly schemaCreator: SchemaCreator,
+    private readonly undo: Undo,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -115,7 +115,7 @@ export class OperateFillService extends Service {
   }
 }
 
-function applyFillPatches(yState: YStateService, id: ID, patches: Patch[]) {
+function applyFillPatches(yState: YState, id: ID, patches: Patch[]) {
   const mutation = yState as unknown as DynamicYStateMutation
 
   patches.forEach((patch) => {

@@ -5,7 +5,7 @@ import { Service } from 'src/global/service'
 import { Elem } from './elem'
 
 @reflection
-export class RenderInvalidatorService extends Service {
+export class RenderInvalidator extends Service {
   private dirtyRects = new Set<AABB>()
   private hasWidgetDirty = false
   readonly dirty$ = Signal.create()

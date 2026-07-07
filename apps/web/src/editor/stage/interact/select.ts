@@ -7,22 +7,22 @@ import { reflection } from 'first-di'
 import hotkeys from 'hotkeys-js'
 import { SelectController } from 'src/editor/controller/select'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import { HandleSelectService, type Selection } from 'src/editor/handle/select'
+import { HandleSelect, type Selection } from 'src/editor/handle/select'
 import { ElemMouseEvent } from 'src/editor/render/elem'
-import { RenderSurfaceService } from 'src/editor/render/surface'
-import { RenderTreeService } from 'src/editor/render/tree'
+import { RenderSurface } from 'src/editor/render/surface'
+import { RenderTree } from 'src/editor/render/tree'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { createStageDragger } from 'src/editor/stage/dragger'
-import { StageEventService } from 'src/editor/stage/event'
-import { StageTransformerService } from 'src/editor/stage/tools/transformer'
-import { StageViewportService } from 'src/editor/stage/viewport'
-import { YStateService } from 'src/editor/y-adapter/y-state'
+import { StageEvent } from 'src/editor/stage/event'
+import { StageTransformer } from 'src/editor/stage/tools/transformer'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
-import { UndoService } from '../../core/undo'
+import { Undo } from '../../core/undo'
 
 @reflection
-export class StageSelectService extends Service {
+export class StageSelect extends Service {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
   @observable hoverId?: string
 
@@ -30,15 +30,15 @@ export class StageSelectService extends Service {
   private isPointerDown = false
 
   constructor(
-    private readonly renderTree: RenderTreeService,
-    private readonly renderSurface: RenderSurfaceService,
-    private readonly stageEvent: StageEventService,
-    private readonly stageTransformer: StageTransformerService,
-    private readonly handleSelect: HandleSelectService,
+    private readonly renderTree: RenderTree,
+    private readonly renderSurface: RenderSurface,
+    private readonly stageEvent: StageEvent,
+    private readonly stageTransformer: StageTransformer,
+    private readonly handleSelect: HandleSelect,
     private readonly selectController: SelectController,
-    private readonly undo: UndoService,
-    private readonly yState: YStateService,
-    private readonly stageViewport: StageViewportService,
+    private readonly undo: Undo,
+    private readonly yState: YState,
+    private readonly stageViewport: StageViewport,
   ) {
     super()
     autoBind(makeObservable(this))

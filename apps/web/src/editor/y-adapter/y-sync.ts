@@ -7,7 +7,7 @@ import * as Y from 'yjs'
 const DEFAULT_PROVIDER_URL = 'wss://api.gitborlando.com'
 
 @reflection
-export class YSyncService extends Service {
+export class YSync extends Service {
   provider?: HocuspocusProvider
   awareness?: Awareness
 

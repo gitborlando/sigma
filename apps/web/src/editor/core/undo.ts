@@ -1,4 +1,4 @@
-import { MobxUndoService, MobxUndoState } from '@gitborlando/mobx-undo'
+import { MobxUndo, MobxUndoState } from '@gitborlando/mobx-undo'
 import { matchCase } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
@@ -22,11 +22,11 @@ type StateUndoConfig = {
 }
 
 @reflection
-export class UndoService extends Service {
+export class Undo extends Service {
   @observable.shallow stack: UndoInfo[] = []
   @observable next = 0
 
-  mobxUndo = autoBind(new MobxUndoService())
+  mobxUndo = autoBind(new MobxUndo())
   yUndo?: Y.UndoManager
 
   private getStatePatches?: () => YStatePatch[]

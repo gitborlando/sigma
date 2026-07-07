@@ -4,35 +4,35 @@ import { SchemaController } from 'src/editor/controller/schema'
 import { SelectController } from 'src/editor/controller/select'
 import { StageController } from 'src/editor/controller/stage'
 import { ViewportController } from 'src/editor/controller/viewport'
-import { CommandService } from 'src/editor/core/command'
-import { SettingService } from 'src/editor/core/setting'
-import { UndoService } from 'src/editor/core/undo'
-import { HandleNodeService } from 'src/editor/handle/node'
-import { HandlePageService } from 'src/editor/handle/page'
-import { HandleSelectService } from 'src/editor/handle/select'
-import { OperateFillService } from 'src/editor/operate/fill'
-import { DesignGeometryService } from 'src/editor/operate/geometry'
-import { ElemDrawerService } from 'src/editor/render/drawer'
-import { RenderInvalidatorService } from 'src/editor/render/invalidator'
-import { RendererService } from 'src/editor/render/renderer'
-import { RenderSurfaceService } from 'src/editor/render/surface'
-import { RenderTreeService } from 'src/editor/render/tree'
-import { SchemaCreatorService } from 'src/editor/schema/creator'
-import { StageCursorService } from 'src/editor/stage/cursor'
-import { StageEventService } from 'src/editor/stage/event'
-import { StageCreateService } from 'src/editor/stage/interact/create'
-import { StageInteractService } from 'src/editor/stage/interact/interact'
-import { StageMoveService } from 'src/editor/stage/interact/move'
-import { StageSelectService } from 'src/editor/stage/interact/select'
-import { StageTransformerService } from 'src/editor/stage/tools/transformer'
-import { StageViewportService } from 'src/editor/stage/viewport'
-import { DesignAlignService } from 'src/editor/workbench/design-panel/align'
-import { FillPickerService } from 'src/editor/workbench/design-panel/fill-picker'
-import { LayerPanelService } from 'src/editor/workbench/layer-panel'
-import { LayerPanelNodeTreeService } from 'src/editor/workbench/layer-panel/node-tree'
-import { YAwareService } from 'src/editor/y-adapter/y-aware'
-import { YStateService } from 'src/editor/y-adapter/y-state'
-import { YSyncService } from 'src/editor/y-adapter/y-sync'
+import { EditorCommand } from 'src/editor/core/command'
+import { Setting } from 'src/editor/core/setting'
+import { Undo } from 'src/editor/core/undo'
+import { HandleNode } from 'src/editor/handle/node'
+import { HandlePage } from 'src/editor/handle/page'
+import { HandleSelect } from 'src/editor/handle/select'
+import { OperateFill } from 'src/editor/operate/fill'
+import { DesignGeometry } from 'src/editor/operate/geometry'
+import { ElemDrawer } from 'src/editor/render/drawer'
+import { RenderInvalidator } from 'src/editor/render/invalidator'
+import { Renderer } from 'src/editor/render/renderer'
+import { RenderSurface } from 'src/editor/render/surface'
+import { RenderTree } from 'src/editor/render/tree'
+import { SchemaCreator } from 'src/editor/schema/creator'
+import { StageCursor } from 'src/editor/stage/cursor'
+import { StageEvent } from 'src/editor/stage/event'
+import { StageCreate } from 'src/editor/stage/interact/create'
+import { StageInteract } from 'src/editor/stage/interact/interact'
+import { StageMove } from 'src/editor/stage/interact/move'
+import { StageSelect } from 'src/editor/stage/interact/select'
+import { StageTransformer } from 'src/editor/stage/tools/transformer'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { DesignAlign } from 'src/editor/workbench/design-panel/align'
+import { FillPicker } from 'src/editor/workbench/design-panel/fill-picker'
+import { LayerPanel } from 'src/editor/workbench/layer-panel'
+import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
+import { YAware } from 'src/editor/y-adapter/y-aware'
+import { YState } from 'src/editor/y-adapter/y-state'
+import { YSync } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
 const editorServices = {
@@ -44,51 +44,51 @@ const editorServices = {
   schemaController: SchemaController,
 
   /** core */
-  setting: SettingService,
-  command: CommandService,
-  undo: UndoService,
+  setting: Setting,
+  command: EditorCommand,
+  undo: Undo,
 
   /** handle */
-  handleNode: HandleNodeService,
-  handlePage: HandlePageService,
-  handleSelect: HandleSelectService,
+  handleNode: HandleNode,
+  handlePage: HandlePage,
+  handleSelect: HandleSelect,
 
   /** render */
-  renderInvalidator: RenderInvalidatorService,
-  elemDrawer: ElemDrawerService,
-  renderTree: RenderTreeService,
-  renderSurface: RenderSurfaceService,
-  renderer: RendererService,
+  renderInvalidator: RenderInvalidator,
+  elemDrawer: ElemDrawer,
+  renderTree: RenderTree,
+  renderSurface: RenderSurface,
+  renderer: Renderer,
 
   /** schema */
-  schemaCreator: SchemaCreatorService,
+  schemaCreator: SchemaCreator,
 
   /** stage */
-  stageCreate: StageCreateService,
-  stageInteract: StageInteractService,
-  stageMove: StageMoveService,
-  stageSelect: StageSelectService,
-  stageEvent: StageEventService,
+  stageCreate: StageCreate,
+  stageInteract: StageInteract,
+  stageMove: StageMove,
+  stageSelect: StageSelect,
+  stageEvent: StageEvent,
 
   /** tools */
-  stageCursor: StageCursorService,
-  stageViewport: StageViewportService,
-  stageTransformer: StageTransformerService,
+  stageCursor: StageCursor,
+  stageViewport: StageViewport,
+  stageTransformer: StageTransformer,
 
   /** workbench.design */
-  fillPicker: FillPickerService,
-  designAlign: DesignAlignService,
-  operateFill: OperateFillService,
-  designGeometry: DesignGeometryService,
+  fillPicker: FillPicker,
+  designAlign: DesignAlign,
+  operateFill: OperateFill,
+  designGeometry: DesignGeometry,
 
   /** workbench.layer */
-  layerPanel: LayerPanelService,
-  layerPanelNodeTree: LayerPanelNodeTreeService,
+  layerPanel: LayerPanel,
+  layerPanelNodeTree: LayerPanelNodeTree,
 
   /** yjs */
-  yAware: YAwareService,
-  ySync: YSyncService,
-  yState: YStateService,
+  yAware: YAware,
+  ySync: YSync,
+  yState: YState,
 }
 
 export type EditorServiceId = keyof typeof editorServices

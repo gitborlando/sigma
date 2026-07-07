@@ -2,7 +2,7 @@ import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { reflection } from 'first-di'
 import { floor } from 'src/editor/geometry/base'
-import { RenderSurfaceService } from 'src/editor/render/surface'
+import { RenderSurface } from 'src/editor/render/surface'
 import { Service } from 'src/global/service'
 
 export type StageCursorType =
@@ -16,12 +16,12 @@ export type StageCursorType =
   | 'grab'
 
 @reflection
-export class StageCursorService extends Service {
+export class StageCursor extends Service {
   private type: StageCursorType = 'select'
   private rotation = 0
   private locked = false
 
-  constructor(private readonly renderSurface: RenderSurfaceService) {
+  constructor(private readonly renderSurface: RenderSurface) {
     super()
     autoBind(this)
     this.effect(listen('mouseup', () => (this.locked = false)))

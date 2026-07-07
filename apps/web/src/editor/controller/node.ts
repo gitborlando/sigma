@@ -1,22 +1,22 @@
 import { iife, objKeys } from '@gitborlando/utils'
 import { reflection } from 'first-di'
-import { UndoService } from 'src/editor/core/undo'
-import { HandleNodeService } from 'src/editor/handle/node'
-import { HandleSelectService, type Selection } from 'src/editor/handle/select'
-import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { Undo } from 'src/editor/core/undo'
+import { HandleNode } from 'src/editor/handle/node'
+import { HandleSelect, type Selection } from 'src/editor/handle/select'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { YStateService } from 'src/editor/y-adapter/y-state'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
 @reflection
 export class NodeController extends Service {
   constructor(
-    private readonly handleNode: HandleNodeService,
-    private readonly handleSelect: HandleSelectService,
-    private readonly yState: YStateService,
-    private readonly undo: UndoService,
-    private readonly schemaCreator: SchemaCreatorService,
+    private readonly handleNode: HandleNode,
+    private readonly handleSelect: HandleSelect,
+    private readonly yState: YState,
+    private readonly undo: Undo,
+    private readonly schemaCreator: SchemaCreator,
   ) {
     super()
     autoBind(this)

@@ -3,7 +3,7 @@ import { makeObservable } from 'mobx'
 import { Service } from 'src/global/service'
 
 @reflection
-export class LayerPanelService extends Service {
+export class LayerPanel extends Service {
   @observable pagePanelHeight = 200
   @observable pagePanelExpanded = true
 

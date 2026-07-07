@@ -1,7 +1,7 @@
 import { getSet } from '@gitborlando/utils'
 import { useClean } from '@gitborlando/utils/react'
 import Color from 'color'
-import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { IRGBA } from 'src/utils/color'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Segments } from 'src/view/component/segments'
@@ -11,7 +11,7 @@ import { PickerLinearGradientComp } from 'src/view/editor/right-panel/operate/pi
 import { useEditorServices } from 'src/view/hooks/editor'
 
 const createFillCache = (
-  schemaCreator: SchemaCreatorService,
+  schemaCreator: SchemaCreator,
   type: S.Fill['type'],
 ): S.Fill => {
   if (type === 'color') return schemaCreator.fillColor()

@@ -3,14 +3,14 @@ import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
-import { HandleSelectService } from 'src/editor/handle/select'
+import { HandleSelect } from 'src/editor/handle/select'
 import { Service } from 'src/global/service'
 import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
 import { Awareness } from 'y-protocols/awareness.js'
 
 @reflection
-export class YAwareService extends Service {
+export class YAware extends Service {
   clientId?: number
   awareness?: Awareness
 
@@ -24,7 +24,7 @@ export class YAwareService extends Service {
     return others[this.observingClientId]
   }
 
-  constructor(private readonly handleSelect: HandleSelectService) {
+  constructor(private readonly handleSelect: HandleSelect) {
     super()
     makeObservable(this, {
       client: observable,

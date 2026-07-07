@@ -1,17 +1,17 @@
 import { reflection } from 'first-di'
-import { HandleSelectService } from 'src/editor/handle/select'
-import { SchemaCreatorService } from 'src/editor/schema/creator'
+import { HandleSelect } from 'src/editor/handle/select'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { Service } from 'src/global/service'
-import { UndoService } from '../core/undo'
-import { YStateService } from '../y-adapter/y-state'
+import { Undo } from '../core/undo'
+import { YState } from '../y-adapter/y-state'
 
 @reflection
-export class HandlePageService extends Service {
+export class HandlePage extends Service {
   constructor(
-    private readonly schemaCreator: SchemaCreatorService,
-    private readonly yState: YStateService,
-    private readonly undo: UndoService,
-    private readonly handleSelect: HandleSelectService,
+    private readonly schemaCreator: SchemaCreator,
+    private readonly yState: YState,
+    private readonly undo: Undo,
+    private readonly handleSelect: HandleSelect,
   ) {
     super()
     autoBind(this)
