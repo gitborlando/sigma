@@ -28,7 +28,7 @@ export class StageViewportService extends Service {
   @observable offset = XY.$(0, 0)
   @observable isZooming = false
 
-  sceneAABB = new AABB(0, 0, 0, 0)
+  @observable sceneAABB = new AABB(0, 0, 0, 0)
   prevSceneAABB = new AABB(0, 0, 0, 0)
   pageSceneMatrix = new Map<ID, IMatrix>()
 

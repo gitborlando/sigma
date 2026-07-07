@@ -3,6 +3,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import type { NoopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { reflection } from 'first-di'
+import { untracked } from 'mobx'
 import { Matrix } from 'src/editor/geometry'
 import { Elem } from 'src/editor/render/elem'
 import { RendererService } from 'src/editor/render/renderer'
@@ -59,7 +60,7 @@ export class StageEventService extends Service {
   }
 
   isElemVisible(elem: Elem) {
-    return elem.getVisible(this.stageViewport.sceneAABB)
+    return elem.getVisible(untracked(() => this.stageViewport.sceneAABB))
   }
 
   private prepareHitTest(xy: IXY) {

@@ -4,6 +4,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { createTraverser } from '@gitborlando/toolkit/traverser'
 import type { NoopFunc } from '@gitborlando/utils'
 import { reflection } from 'first-di'
+import { untracked } from 'mobx'
 import { SettingService } from 'src/editor/core/setting'
 import { max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
@@ -87,7 +88,7 @@ export class RendererService extends Service {
   }
 
   isElemVisible(elem: Elem) {
-    return elem.getVisible(this.stageViewport.sceneAABB)
+    return elem.getVisible(untracked(() => this.stageViewport.sceneAABB))
   }
 
   private onDirty() {
