@@ -1,4 +1,5 @@
 import { IRect } from '@gitborlando/geo'
+import type { Matrix } from 'src/editor/geometry'
 
 export type TRBL = 'top' | 'right' | 'bottom' | 'left'
 
@@ -23,6 +24,20 @@ export function snapGridRoundRect(rect: IRect, snapToGrid: boolean): IRect {
 
 export const snapHalfPixel = (n: number) => {
   return Math.round(n - 0.5) + 0.5
+}
+
+export const snapSceneXYToHalfPixel = (
+  xy: IXY,
+  sceneMatrix: Matrix,
+  axis: 'x' | 'y' | 'both' = 'both',
+) => {
+  const screenXY = sceneMatrix.applyXY(xy)
+  return sceneMatrix.invertXY(
+    XY.$(
+      axis === 'x' || axis === 'both' ? snapHalfPixel(screenXY.x) : screenXY.x,
+      axis === 'y' || axis === 'both' ? snapHalfPixel(screenXY.y) : screenXY.y,
+    ),
+  )
 }
 
 export function arrayLoopGet<T>(arr: T[], index: number) {

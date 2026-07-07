@@ -1,4 +1,4 @@
-import { expandOneStep } from 'src/editor/utils/misc'
+import { expandOneStep, snapSceneXYToHalfPixel } from 'src/editor/utils/misc'
 import { rgba } from 'src/utils/color'
 import { useEditorServices } from 'src/view/hooks/editor'
 
@@ -56,12 +56,15 @@ const Line: FC<{
 }> = observer(({ type, x, y, length }) => {
   const { schemaCreator, stageViewport } = useEditorServices()
   const zoom = stageViewport.zoom
+  const axis = type === 'horizontal' ? 'y' : 'x'
   const end = type === 'horizontal' ? XY.$(x + length, y) : XY.$(x, y + length)
+  const start = snapSceneXYToHalfPixel(XY.$(x, y), stageViewport.sceneMatrix, axis)
+  const snappedEnd = snapSceneXYToHalfPixel(end, stageViewport.sceneMatrix, axis)
   const line = schemaCreator.line({
     fills: [],
     points: [
-      schemaCreator.point({ x, y, isStart: true }),
-      schemaCreator.point({ x: end.x, y: end.y, isEnd: true }),
+      schemaCreator.point({ x: start.x, y: start.y, isStart: true }),
+      schemaCreator.point({ x: snappedEnd.x, y: snappedEnd.y, isEnd: true }),
     ],
     strokes: [schemaCreator.solidStroke(rgba(204, 204, 204, 0.33), 1 / zoom)],
   })
