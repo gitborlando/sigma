@@ -7,7 +7,7 @@ import { FPSComp } from 'src/view/editor/stage/fps'
 import { EditorStageGridComp } from 'src/view/editor/stage/grid'
 import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
-import { RulerComp } from 'src/view/editor/stage/ruler'
+import { StageRulerComp } from 'src/view/editor/stage/ruler'
 import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
 import { EditorContext, useEditor, useEditorServices } from 'src/view/hooks/editor'
 
@@ -24,6 +24,7 @@ export const StageComp: FC<{}> = observer(({}) => {
         <EditorStageTransformComp />
         <EditorStageMarqueeComp />
         <EditorStageCursorsComp />
+        <StageRulerComp />
       </EditorContext.Provider>,
       renderTree.widgetRoot,
     )
@@ -55,7 +56,6 @@ export const StageComp: FC<{}> = observer(({}) => {
   return (
     <G onContextMenu={handleContextMenu}>
       <SurfaceComp />
-      <RulerComp />
       <FPSComp />
       <CooperateObservingBorderComp />
     </G>
