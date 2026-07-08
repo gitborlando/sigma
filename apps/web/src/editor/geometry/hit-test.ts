@@ -24,9 +24,9 @@ export class HitTest {
 
   static hitPolyline(xys: IXY[], spread: number) {
     const polygons: IXY[][] = []
-    loopFor(xys, (cur, next) => {
-      polygons.push(this.twoPointsSpreadRect(cur, next, spread))
-    })
+    for (let i = 0; i < xys.length - 1; i++) {
+      polygons.push(this.twoPointsSpreadRect(xys[i], xys[i + 1], spread))
+    }
     return (xy: IXY) => {
       for (let i = 0; i < polygons.length; i++) {
         if (this.inPolygon(polygons[i], xy)) return true

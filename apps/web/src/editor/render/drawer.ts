@@ -3,7 +3,6 @@ import { getSet, iife, loopFor } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { Setting } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
-import { max } from 'src/editor/geometry/base'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
 import { RenderInvalidator } from 'src/editor/render/invalidator'
 import {
@@ -174,7 +173,7 @@ export class ElemDrawer extends Service {
 
   private drawPath(points: S.Point[]) {
     loopFor(points, (cur, next, last, i) => {
-      if (i === points.length - 1 && cur.isEnd) {
+      if (cur.isEnd) {
         return this.path2d.closePath()
       }
       if (cur.isStart) {
@@ -430,12 +429,10 @@ export class ElemDrawer extends Service {
       case 'line':
         const { points, strokes } = this.node
         this.elem.eventHandle.cacheHitTest(() => {
-          const xys = iife(() => {
-            if (this.node.type === 'line') return points
-            return this.getPathCollideXys()
-          })
-          const strokeWidth = max(...strokes.map((s) => s.width))
-          return HitTest.hitPolyline(xys, strokeWidth * 2)
+          if (this.node.type === 'line') {
+            return this.createPolylineHitTest([points], strokes)
+          }
+          return this.createPathHitTest(strokes)
         }, [points, strokes])
         break
 
@@ -450,28 +447,75 @@ export class ElemDrawer extends Service {
     }
   }
 
-  private getPathCollideXys() {
-    const points = (this.node as S.Path).points
-    const collideXys = <IXY[]>[XY.of(points[0])]
+  private createPolylineHitTest(polylines: IXY[][], strokes: S.Stroke[]) {
+    const strokeWidth = Math.max(0, ...strokes.map((s) => s.width))
+    if (strokeWidth === 0) return () => false
 
-    loopFor(points, (cur, next) => {
-      if (next.isStart) return
-      if (cur.out && next.in) {
-        const [cp2, cp1] = [cur.out, next.in]
-        const xys = pointsOnBezierCurves([cur, cp2, cp1, next], 0.3, 0.3)
-        collideXys.push(...xys.slice(1))
-      } else if (cur.out) {
-        const xys = pointsOnBezierCurves([cur, cur.out, next, next], 0.3, 0.3)
-        collideXys.push(...xys.slice(1))
-      } else if (next.in) {
-        const xys = pointsOnBezierCurves([cur, cur, next.in, next], 0.3, 0.3)
-        collideXys.push(...xys.slice(1))
-      } else {
-        collideXys.push(XY.of(next))
+    const hitTests = polylines
+      .filter((xys) => xys.length > 1)
+      .map((xys) => HitTest.hitPolyline(xys, strokeWidth * 2))
+
+    return (xy: IXY) => hitTests.some((hitTest) => hitTest(xy))
+  }
+
+  private createPathHitTest(strokes: S.Stroke[]) {
+    const { polylines, polygons } = this.getPathCollideInfo()
+    const strokeHitTest = this.createPolylineHitTest(polylines, strokes)
+    const polygonHitTests = polygons
+      .filter((xys) => xys.length > 2)
+      .map((xys) => HitTest.hitPolygon(xys))
+
+    return (xy: IXY) => {
+      if (strokeHitTest(xy)) return true
+      return polygonHitTests.some((hitTest) => hitTest(xy))
+    }
+  }
+
+  private getPathCollideInfo() {
+    const points = (this.node as S.Path).points
+    const polylines = <IXY[][]>[]
+    const polygons = <IXY[][]>[]
+    let contour = <IXY[]>[]
+
+    const pushContour = (closed = false) => {
+      if (contour.length < 2) {
+        contour = []
+        return
       }
+      if (closed) {
+        polygons.push(contour)
+        polylines.push([...contour, contour[0]])
+      } else {
+        polylines.push(contour)
+      }
+      contour = []
+    }
+
+    points.forEach((cur, i) => {
+      if (i === 0 || cur.isStart || contour.length === 0) contour = [XY.of(cur)]
+      if (cur.isEnd) return pushContour(true)
+
+      const next = points[i + 1]
+      if (!next || next.isStart) return pushContour()
+
+      contour.push(...this.getPathSegmentCollideXys(cur, next).slice(1))
     })
 
-    return collideXys
+    pushContour()
+    return { polylines, polygons }
+  }
+
+  private getPathSegmentCollideXys(cur: S.Point, next: S.Point) {
+    if (cur.out && next.in) {
+      return pointsOnBezierCurves([cur, cur.out, next.in, next], 0.3, 0.3)
+    }
+    if (cur.out) {
+      return pointsOnBezierCurves([cur, cur.out, next, next], 0.3, 0.3)
+    }
+    if (next.in) {
+      return pointsOnBezierCurves([cur, cur, next.in, next], 0.3, 0.3)
+    }
+    return [XY.of(cur), XY.of(next)]
   }
 
   private getTextCollideXys() {
