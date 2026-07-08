@@ -1,5 +1,5 @@
 import { XY } from '@gitborlando/geo'
-import { clone } from '@gitborlando/utils'
+import { clone, miniId } from '@gitborlando/utils'
 import { omit } from 'es-toolkit'
 import { MRect } from 'src/editor/geometry'
 import { SchemaHelper } from 'src/editor/schema/helper'
@@ -123,6 +123,94 @@ export const migrationList = [
       if (node.type === 'irregular') {
         Object.assign(node, { type: 'path' })
       }
+    },
+  },
+  {
+    version: 4,
+    desc: `将 polygon / star 节点迁移为 path 节点`,
+    transform: (ctx: SchemaTraverseContext) => {
+      type LegacyShapeNode = S.NodeBase & {
+        type: 'polygon' | 'star'
+        points?: S.Point[]
+        sides?: number
+        pointCount?: number
+        radius?: number
+        innerRate?: number
+      }
+
+      const createPoint = (option?: Partial<S.Point>): S.Point => ({
+        id: miniId(5),
+        type: 'point',
+        symmetric: 'angle',
+        x: 0,
+        y: 0,
+        radius: 0,
+        ...option,
+      })
+
+      const createRegularPolygon = (
+        width: number,
+        height: number,
+        sideCount: number,
+      ) => {
+        sideCount = Math.max(sideCount | 0, 3)
+
+        return Array.from({ length: sideCount }, (_, i) => {
+          const radian = ((i * 360) / sideCount - 90) * (Math.PI / 180)
+          return createPoint({
+            x: width / 2 + Math.cos(radian) * (width / 2),
+            y: height / 2 + Math.sin(radian) * (height / 2),
+          })
+        })
+      }
+
+      const createStarPolygon = (
+        width: number,
+        height: number,
+        pointCount: number,
+        innerRate: number,
+      ) => {
+        pointCount = Math.max(pointCount | 0, 3)
+
+        return Array.from({ length: pointCount * 2 }, (_, i) => {
+          const rate = i % 2 === 0 ? 1 : innerRate
+          const radian = ((i * 180) / pointCount - 90) * (Math.PI / 180)
+          return createPoint({
+            x: width / 2 + Math.cos(radian) * (width / 2) * rate,
+            y: height / 2 + Math.sin(radian) * (height / 2) * rate,
+          })
+        })
+      }
+
+      const node = T<LegacyShapeNode>(ctx.item)
+      if (node.type !== 'polygon' && node.type !== 'star') return
+
+      const legacyType = node.type
+      const points =
+        Array.isArray(node.points) && node.points.length > 0
+          ? node.points
+          : legacyType === 'polygon'
+            ? createRegularPolygon(node.width, node.height, node.sides ?? 3)
+            : createStarPolygon(
+                node.width,
+                node.height,
+                node.pointCount ?? 5,
+                node.innerRate ?? 0.382,
+              )
+
+      points[0].isStart ||= true
+      points[points.length - 1].isEnd ||= true
+
+      Object.assign(node, { type: 'path', points })
+      delete node.radius
+
+      if (legacyType === 'polygon') {
+        delete node.sides
+        return
+      }
+
+      delete node.pointCount
+      delete node.innerRate
     },
   },
 ] satisfies Migration[]

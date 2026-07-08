@@ -95,8 +95,6 @@ export class ElemDrawer extends Service {
       //   this.drawLine(node.points)
       //   break
 
-      case 'polygon':
-      case 'star':
       case 'path':
       case 'line':
         this.drawPath(node.points)
@@ -414,12 +412,6 @@ export class ElemDrawer extends Service {
         const radius = 'radius' in this.node ? this.node.radius : 0
         this.elem.hitTest = HitTest.hitRoundRect(width, height, radius)
         break
-
-      case 'polygon':
-      case 'star': {
-        this.elem.hitTest = HitTest.hitPolygon(this.node.points)
-        break
-      }
 
       case 'ellipse':
         const { startAngle, endAngle, innerRate } = this.node
