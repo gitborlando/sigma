@@ -17,8 +17,8 @@ import editorDesignGeomRotate from './editor/design/geom/rotate.svg'
 import editorDesignGeomWidth from './editor/design/geom/width.svg'
 import editorDesignGeomX from './editor/design/geom/x.svg'
 import editorDesignGeomY from './editor/design/geom/y.svg'
-import editorHeaderStageOperateMove from './editor/header/stage-operate/move.svg'
-import editorHeaderStageOperateSelect from './editor/header/stage-operate/select.svg'
+import editorHeaderMove from './editor/header/move.svg'
+import editorHeaderSelect from './editor/header/select.svg'
 import editorNodeEllipse from './editor/node/ellipse.svg'
 import editorNodeFrame from './editor/node/frame.svg'
 import editorNodeImage from './editor/node/image.svg'
@@ -62,10 +62,8 @@ export const Assets = {
       },
     },
     header: {
-      stageOperate: {
-        move: editorHeaderStageOperateMove,
-        select: editorHeaderStageOperateSelect,
-      },
+      move: editorHeaderMove,
+      select: editorHeaderSelect,
     },
     node: {
       ellipse: editorNodeEllipse,

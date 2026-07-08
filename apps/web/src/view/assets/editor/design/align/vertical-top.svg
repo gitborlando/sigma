@@ -1,34 +1,5 @@
-<svg
-    xmlns='http://www.w3.org/2000/svg'
-    xmlns:xlink='http://www.w3.org/1999/xlink'
-    width='16'
-    height='16'
-    viewBox='0 0 16 16'
-    fill='none'>
-    <g opacity='1' transform='translate(0 0)  rotate(0 8 8)'>
-      <path
-        id='\u77E9\u5F62 1'
-        fill-rule='evenodd'
-        fill='currentColor'
-        transform='translate(1 2)  rotate(0 7 0.5)'
-        opacity='1'
-        d='M0,1L14,1L14,0L0,0L0,1Z '
-      />
-      <path
-        id='solid'
-        fill-rule='evenodd'
-        fill='currentColor'
-        transform='translate(4.5 4)  rotate(0 1 5.000000000000001)'
-        opacity='1'
-        d='M0,10L2,10L2,0L0,0L0,10Z '
-      />
-      <path
-        id='solid'
-        fill-rule='evenodd'
-        fill='currentColor'
-        transform='translate(9.5 4)  rotate(0 1 3.5000000000000004)'
-        opacity='1'
-        d='M0,7L2,7L2,0L0,0L0,7Z '
-      />
-    </g>
-  </svg>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 5.71428H20" stroke="#2A2A2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M8.57141 9.14286V18.2857" stroke="#2A2A2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M15.4286 9.14286V14.8571" stroke="#2A2A2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,51 +1,6 @@
-<svg
-    xmlns='http://www.w3.org/2000/svg'
-    xmlns:xlink='http://www.w3.org/1999/xlink'
-    width='20'
-    height='20'
-    viewBox='0 0 20 20'
-    fill='none'>
-    <defs>
-      <rect id='path_0' x='0' y='0' width='20' height='20' />
-    </defs>
-    <g opacity='1' transform='translate(0 0)  rotate(0 10 10)'>
-      <g>
-        <g opacity='1' transform='translate(2.5 2.5)  rotate(0 7.5 7.499999985239221)'>
-          <g opacity='1' transform='translate(0 0)  rotate(0 7.5 7.499999985239221)'>
-            <path
-              id='\u76F4\u7EBF 1 (\u8F6E\u5ED3)'
-              fill-rule='evenodd'
-              fill='currentColor'
-              transform='translate(3.1499999999999773 0)  rotate(0 0.6 7.5)'
-              opacity='1'
-              d='M0,0L0,15L1.2,15L1.2,0L0,0Z '
-            />
-            <path
-              id='\u76F4\u7EBF 1 (\u8F6E\u5ED3)'
-              fill-rule='evenodd'
-              fill='currentColor'
-              transform='translate(10.649999999999977 0)  rotate(0 0.6 7.5)'
-              opacity='1'
-              d='M0,0L0,15L1.2,15L1.2,0L0,0Z '
-            />
-            <path
-              id='\u76F4\u7EBF 1 (\u8F6E\u5ED3)'
-              fill-rule='evenodd'
-              fill='currentColor'
-              transform='translate(0 3.150000000000091)  rotate(0 7.5 0.6)'
-              opacity='1'
-              d='M0,1.2L15,1.2L15,0L0,0L0,1.2Z '
-            />
-            <path
-              id='\u76F4\u7EBF 1 (\u8F6E\u5ED3)'
-              fill-rule='evenodd'
-              fill='currentColor'
-              transform='translate(0 10.650000000000091)  rotate(0 7.5 0.6)'
-              opacity='1'
-              d='M0,1.2L15,1.2L15,0L0,0L0,1.2Z '
-            />
-          </g>
-        </g>
-      </g>
-    </g>
-  </svg>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 5.57144L21 5.57144" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M3 18.4286L21 18.4286" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.57153 3V21" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M18.4285 3V21" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

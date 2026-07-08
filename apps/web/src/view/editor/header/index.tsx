@@ -54,7 +54,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
 const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) => {
   const { stageInteract } = useEditorServices()
   const isActive = stageInteract.interaction === type
-  const iconUrl = Assets.editor.header.stageOperate[type]
+  const iconUrl = Assets.editor.header[type]
 
   return (
     <Btn

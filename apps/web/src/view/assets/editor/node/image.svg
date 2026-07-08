@@ -1,31 +1,5 @@
-<svg
-    xmlns='http://www.w3.org/2000/svg'
-    xmlns:xlink='http://www.w3.org/1999/xlink'
-    width='20'
-    height='20'
-    viewBox='0 0 20 20'
-    fill='none'>
-    <defs>
-      <rect id='path_0' x='0' y='0' width='20' height='20' />
-    </defs>
-    <g opacity='1' transform='translate(0 0)  rotate(0 10 10)'>
-      <g>
-        <path
-          id='\u270F\uFE0F (\u8F6E\u5ED3)'
-          fill-rule='evenodd'
-          fill='rgba(32, 32, 32, 1)'
-          transform='translate(2.900011150000296 3.150011158680627)  rotate(0 7.1000000000000005 6.8500000000000005)'
-          opacity='1'
-          d='M14.2 0L14.2 13.7L0 13.7L0 0L14.2 0ZM1.2 12.5L1.2 1.2L13 1.2L13 12.5L1.2 12.5Z'
-        />
-        <path
-          id='\u270F\uFE0F (\u8F6E\u5ED3)'
-          fill-rule='evenodd'
-          fill='rgba(32, 32, 32, 1)'
-          transform='translate(3.0461935641234277 8.701238661553589)  rotate(0 6.6759485000000005 3.6889415)'
-          opacity='1'
-          d='M0.68,3.79L3.85,1.6L6.77,5.01L9.48,4.01L12.45,7.38L13.35,6.58L9.84,2.6L7.14,3.59L4.05,0L0,2.81L0.68,3.79Z '
-        />
-      </g>
-    </g>
-  </svg>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.2857 4H5.71429C4.76751 4 4 4.89543 4 6V18C4 19.1046 4.76751 20 5.71429 20H18.2857C19.2325 20 20 19.1046 20 18V6C20 4.89543 19.2325 4 18.2857 4Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M7.42859 15.4286L10.8572 12L14.2857 15.4286L16.5714 13.1429L20 16.5714" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M8.57145 10.2857C9.20263 10.2857 9.7143 9.77404 9.7143 9.14286C9.7143 8.51167 9.20263 8 8.57145 8C7.94026 8 7.42859 8.51167 7.42859 9.14286C7.42859 9.77404 7.94026 10.2857 8.57145 10.2857Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
