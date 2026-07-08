@@ -90,10 +90,6 @@ export class ElemDrawer extends Service {
         this.drawEllipse()
         break
 
-      // case 'line':
-      //   this.drawLine(node.points)
-      //   break
-
       case 'path':
       case 'line':
         this.drawPath(node.points)
@@ -162,12 +158,6 @@ export class ElemDrawer extends Service {
         )
       }
     }
-    this.path2d.closePath()
-  }
-
-  private drawLine = (points: S.Point[]) => {
-    this.path2d.moveTo(points[0].x, points[0].y)
-    this.path2d.lineTo(points[1].x, points[1].y)
     this.path2d.closePath()
   }
 
