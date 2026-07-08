@@ -1,7 +1,8 @@
 import { XY } from '@gitborlando/geo'
-import { clone, miniId } from '@gitborlando/utils'
+import { clone } from '@gitborlando/utils'
 import { omit } from 'es-toolkit'
 import { MRect } from 'src/editor/geometry'
+import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import {
   createSchemaTraverse,
@@ -136,50 +137,6 @@ export const migrationList = [
         pointCount?: number
         radius?: number
         innerRate?: number
-      }
-
-      const createPoint = (option?: Partial<S.Point>): S.Point => ({
-        id: miniId(5),
-        type: 'point',
-        symmetric: 'angle',
-        x: 0,
-        y: 0,
-        radius: 0,
-        ...option,
-      })
-
-      const createRegularPolygon = (
-        width: number,
-        height: number,
-        sideCount: number,
-      ) => {
-        sideCount = Math.max(sideCount | 0, 3)
-
-        return Array.from({ length: sideCount }, (_, i) => {
-          const radian = ((i * 360) / sideCount - 90) * (Math.PI / 180)
-          return createPoint({
-            x: width / 2 + Math.cos(radian) * (width / 2),
-            y: height / 2 + Math.sin(radian) * (height / 2),
-          })
-        })
-      }
-
-      const createStarPolygon = (
-        width: number,
-        height: number,
-        pointCount: number,
-        innerRate: number,
-      ) => {
-        pointCount = Math.max(pointCount | 0, 3)
-
-        return Array.from({ length: pointCount * 2 }, (_, i) => {
-          const rate = i % 2 === 0 ? 1 : innerRate
-          const radian = ((i * 180) / pointCount - 90) * (Math.PI / 180)
-          return createPoint({
-            x: width / 2 + Math.cos(radian) * (width / 2) * rate,
-            y: height / 2 + Math.sin(radian) * (height / 2) * rate,
-          })
-        })
       }
 
       const node = T<LegacyShapeNode>(ctx.item)
