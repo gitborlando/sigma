@@ -59,6 +59,7 @@ export const migrationList = [
         'polygon',
         'star',
         'path',
+        'irregular',
       ])
       if (!nodeTypes.has(node.type)) return
 
@@ -91,7 +92,7 @@ export const migrationList = [
   },
   {
     version: 2,
-    desc: '去除hFlip, vFlip属性或flip: "x"|"y"|"xy", 改为flip: 0|1|2|3',
+    desc: `去除hFlip, vFlip属性或flip: 'x'|'y'|'xy', 改为flip: 0|1|2|3`,
     transform: (ctx: SchemaTraverseContext) => {
       const { item: node, schema } = ctx
       if (!SchemaHelper.isNode(node)) return
@@ -108,6 +109,20 @@ export const migrationList = [
 
       const newNode = omit(old, ['hFlip', 'vFlip'])
       schema[node.id] = newNode as S.SchemaItem
+    },
+  },
+  {
+    version: 3,
+    desc: `更改 Path 类图形的 type: 'irregular' -> 'path'`,
+    transform: (ctx: SchemaTraverseContext) => {
+      type LegacyPathNode = {
+        type: 'irregular'
+      }
+      const node = T<LegacyPathNode>(ctx.item)
+
+      if (node.type === 'irregular') {
+        Object.assign(node, { type: 'path' })
+      }
     },
   },
 ] satisfies Migration[]
