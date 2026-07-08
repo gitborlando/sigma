@@ -18,37 +18,37 @@ export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
   return (
     <G x-if={nodes.length > 0} className={cls()} horizontal='auto auto' gap={8}>
       <GeometryItemComp
-        label={<Icon url={Assets.editor.RP.operate.geo.x} />}
+        label={<Icon url={Assets.editor.design.geom.x} />}
         operateKey='x'
         value={currentGeometries.x}
         slideRate={1 / zoom}
       />
       <GeometryItemComp
-        label={<Icon url={Assets.editor.RP.operate.geo.y} />}
+        label={<Icon url={Assets.editor.design.geom.y} />}
         operateKey='y'
         value={currentGeometries.y}
         slideRate={1 / zoom}
       />
       <GeometryItemComp
-        label={<Icon url={Assets.editor.RP.operate.geo.w} />}
+        label={<Icon url={Assets.editor.design.geom.width} />}
         operateKey='width'
         value={currentGeometries.width}
         slideRate={1 / zoom}
       />
       <GeometryItemComp
-        label={<Icon url={Assets.editor.RP.operate.geo.h} />}
+        label={<Icon url={Assets.editor.design.geom.height} />}
         operateKey='height'
         value={currentGeometries.height}
         slideRate={1 / zoom}
       />
       <GeometryItemComp
-        label={<Icon url={Assets.editor.RP.operate.geo.rotate} />}
+        label={<Icon url={Assets.editor.design.geom.rotate} />}
         operateKey='rotation'
         value={currentGeometries.rotation}
       />
       <GeometryItemComp
         x-if={currentKeys.has('radius')}
-        label={<Icon url={Assets.editor.RP.operate.geo.radius} />}
+        label={<Icon url={Assets.editor.design.geom.cornerRadius} />}
         operateKey='radius'
         slideRate={1 / zoom}
         value={currentGeometries.radius}

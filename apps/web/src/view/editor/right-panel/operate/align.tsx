@@ -13,7 +13,7 @@ export const AlignComp: FC<{}> = observer(({}) => {
           key={type}
           disabled={!canAlign}
           onClick={() => setAlign(type)}
-          icon={<Icon url={Assets.editor.RP.design.align[type]} />}
+          icon={<Icon url={Assets.editor.design.align[type]} />}
         />
       ))}
     </G>
