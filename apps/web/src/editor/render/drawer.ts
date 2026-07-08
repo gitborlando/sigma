@@ -97,7 +97,7 @@ export class ElemDrawer extends Service {
 
       case 'polygon':
       case 'star':
-      case 'irregular':
+      case 'path':
       case 'line':
         this.drawPath(node.points)
         break
@@ -434,7 +434,7 @@ export class ElemDrawer extends Service {
         )
         break
 
-      case 'irregular':
+      case 'path':
       case 'line':
         const { points, strokes } = this.node
         this.elem.eventHandle.cacheHitTest(() => {

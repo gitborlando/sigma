@@ -159,10 +159,10 @@ export class SchemaCreator extends Service {
     }
   }
 
-  irregular(option?: Partial<S.Path>): S.Path {
+  path(option?: Partial<S.Path>): S.Path {
     const nodeBase = this.createNodeBase()
     return {
-      type: 'irregular',
+      type: 'path',
       points: [],
       ...nodeBase,
       ...option,

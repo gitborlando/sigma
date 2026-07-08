@@ -112,7 +112,7 @@ namespace S2 {
 
   type Path = NodeBase &
     VectorBase & {
-      type: 'irregular'
+      type: 'path'
     }
 
   type Rectangle = NodeBase &
