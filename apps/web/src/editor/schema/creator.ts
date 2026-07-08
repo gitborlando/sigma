@@ -2,11 +2,7 @@ import { XY } from '@gitborlando/geo'
 import { clone, getSet, miniId } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
-import {
-  createLine,
-  createRegularPolygon,
-  createStarPolygon,
-} from 'src/editor/geometry/point'
+import { createLine } from 'src/editor/geometry/point'
 import { getLatestVersion } from 'src/editor/schema/migration'
 import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
@@ -109,35 +105,6 @@ export class SchemaCreator extends Service {
       innerRate: 0,
       startAngle: 0,
       endAngle: 360,
-      ...nodeBase,
-      ...option,
-    }
-  }
-
-  polygon(option?: Partial<S.Polygon>): S.Polygon {
-    const nodeBase = this.createNodeBase()
-    const { width, height } = option || nodeBase
-    const points = createRegularPolygon(width!, height!, option?.sides || 3)
-    return {
-      type: 'polygon',
-      sides: option?.sides || 3,
-      radius: 0,
-      points,
-      ...nodeBase,
-      ...option,
-    }
-  }
-
-  star(option?: Partial<S.Star>): S.Star {
-    const nodeBase = this.createNodeBase()
-    const { width, height } = option || nodeBase
-    const points = createStarPolygon(width!, height!, 5, 0.382)
-    return {
-      type: 'star',
-      pointCount: 5,
-      radius: 0,
-      innerRate: 0.382,
-      points,
       ...nodeBase,
       ...option,
     }

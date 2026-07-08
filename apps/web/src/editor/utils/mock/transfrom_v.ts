@@ -24,21 +24,11 @@ export function mock_transform_v(schemaCreator: SchemaCreator) {
   // editor.schemaCreator.addToSchema(schema, line)
   // editor.schemaCreator.addChild(frame, line)
 
-  const rect = schemaCreator.polygon({
+  const rect = schemaCreator.rect({
     ...MRect.identity(100, 100).shift(XY.$(100, 100)).plain(),
   })
   schemaCreator.addToSchema(schema, rect)
   schemaCreator.addChild(page, rect)
-
-  // const polygon = editor.schemaCreator.polygon({
-  //   x: 300,
-  //   y: 300,
-  //   width: 100,
-  //   height: 100,
-  //   sides: 8,
-  // })
-  // editor.schemaCreator.addToSchema(schema, polygon)
-  // editor.schemaCreator.addChild(frame, polygon)
 
   return schema
 }

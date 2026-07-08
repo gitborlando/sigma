@@ -1,7 +1,6 @@
 import { AnyObject, iife, objKeys } from '@gitborlando/utils'
 import { reflection } from 'first-di'
-import { divide, floor, max, min } from 'src/editor/geometry/base'
-import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
+import { divide, max } from 'src/editor/geometry/base'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandleSelect } from 'src/editor/handle/select'
 import { YState } from 'src/editor/y-adapter/y-state'
@@ -16,8 +15,6 @@ function createDesignGeoInfos() {
     height: 0,
     rotation: 0,
     radius: 0,
-    sides: 3,
-    pointCount: 5,
     startAngle: 0,
     endAngle: 360,
     innerRate: 0,
@@ -64,11 +61,6 @@ export class DesignGeometry extends Service {
     selectedNodes.forEach((node) => {
       if (node.type === 'frame') this.currentKeys.add('radius')
       if (node.type === 'rect') this.currentKeys.add('radius')
-      if (node.type === 'polygon') this.currentKeys.add('sides')
-      if (node.type === 'star') {
-        this.currentKeys.add('innerRate')
-        this.currentKeys.add('pointCount')
-      }
       if (node.type === 'ellipse') {
         this.currentKeys.add('startAngle')
         this.currentKeys.add('endAngle')
@@ -159,26 +151,6 @@ export class DesignGeometry extends Service {
       if (key === 'radius') {
         const radius = max(0, T<any>(node).radius + this.delta(key, node))
         this.yState.set<any>([node.id, 'radius'], radius)
-      }
-      if (key === 'sides') {
-        let { width, height, sides } = node as S.Polygon
-        sides = max(3, sides + floor(this.delta(key, node)))
-        this.yState.set<S.Polygon>([node.id, 'sides'], sides)
-        this.yState.set<S.Polygon>(
-          [node.id, 'points'],
-          createRegularPolygon(width, height, sides),
-        )
-      }
-      if (key === 'pointCount' || key === 'innerRate') {
-        let { width, height, pointCount, innerRate } = node as S.Star
-        pointCount = max(3, floor(pointCount))
-        innerRate = min(1, max(0, innerRate))
-        this.yState.set<S.Star>([node.id, 'pointCount'], pointCount)
-        this.yState.set<S.Star>([node.id, 'innerRate'], innerRate)
-        this.yState.set<S.Star>(
-          [node.id, 'points'],
-          createStarPolygon(width, height, pointCount, innerRate),
-        )
       }
     })
   }

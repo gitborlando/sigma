@@ -54,20 +54,6 @@ export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
         value={currentGeometries.radius}
       />
       <GeometryItemComp
-        x-if={currentKeys.has('sides')}
-        label='边数'
-        operateKey='sides'
-        slideRate={0.5 / zoom}
-        value={currentGeometries.sides}
-      />
-      <GeometryItemComp
-        x-if={currentKeys.has('pointCount')}
-        label='角数'
-        operateKey='pointCount'
-        slideRate={0.01}
-        value={currentGeometries.pointCount}
-      />
-      <GeometryItemComp
         x-if={currentKeys.has('startAngle')}
         label='起始角'
         operateKey='startAngle'

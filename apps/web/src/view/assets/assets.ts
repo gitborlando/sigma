@@ -7,9 +7,7 @@ import editorNodeEllipse from './editor/node/ellipse.svg'
 import editorNodeFrame from './editor/node/frame.svg'
 import editorNodeImage from './editor/node/image.svg'
 import editorNodeLine from './editor/node/line.svg'
-import editorNodePolygon from './editor/node/polygon.svg'
 import editorNodeRect from './editor/node/rect.svg'
-import editorNodeStar from './editor/node/star.svg'
 import editorNodeText from './editor/node/text.svg'
 import editorRPDesignAlignAlignCenter from './editor/RP/design/align/align-center.svg'
 import editorRPDesignAlignAlignLeft from './editor/RP/design/align/align-left.svg'
@@ -48,9 +46,7 @@ export const Assets = {
       frame: editorNodeFrame,
       image: editorNodeImage,
       line: editorNodeLine,
-      polygon: editorNodePolygon,
       rect: editorNodeRect,
-      star: editorNodeStar,
       text: editorNodeText,
     },
     RP: {

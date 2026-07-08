@@ -7,13 +7,7 @@ import { makeObservable } from 'mobx'
 import { SelectController } from 'src/editor/controller/select'
 import { Setting } from 'src/editor/core/setting'
 import { Undo } from 'src/editor/core/undo'
-import {
-  createLine,
-  createRegularPolygon,
-  createStarPolygon,
-  Matrix,
-  MRect,
-} from 'src/editor/geometry'
+import { createLine, Matrix, MRect } from 'src/editor/geometry'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandleSelect } from 'src/editor/handle/select'
 import { RenderTree } from 'src/editor/render/tree'
@@ -27,15 +21,7 @@ import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
-const createTypes = [
-  'frame',
-  'rect',
-  'ellipse',
-  'line',
-  'polygon',
-  'star',
-  'text',
-] as const
+const createTypes = ['frame', 'rect', 'ellipse', 'line', 'text'] as const
 export type IStageCreateType = (typeof createTypes)[number]
 
 const defaultCreateSize = 100
@@ -189,17 +175,6 @@ export class StageCreate extends Service {
   private createNodePoints(node: S.Node, mrect: MRect) {
     if (SchemaHelper.is(node, 'line')) {
       return createLine(XY.$(0, 0), mrect.width)
-    }
-    if (SchemaHelper.is(node, 'polygon')) {
-      return createRegularPolygon(mrect.width, mrect.height, node.sides)
-    }
-    if (SchemaHelper.is(node, 'star')) {
-      return createStarPolygon(
-        mrect.width,
-        mrect.height,
-        node.pointCount,
-        node.innerRate,
-      )
     }
   }
 
