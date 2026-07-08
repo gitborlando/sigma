@@ -15,6 +15,14 @@ type Migration = {
   transform: (ctx: SchemaTraverseContext) => void
 }
 
+type LegacyObbNode = {
+  x: number
+  y: number
+  width: number
+  height: number
+  rotation: number
+}
+
 export function migrationSchema(schema: any) {
   const version = schema?.meta?.version
 
@@ -54,7 +62,7 @@ export const migrationList = [
       ])
       if (!nodeTypes.has(node.type)) return
 
-      const { x, y, rotation, width, height } = T<S1.Node>(node)
+      const { x, y, rotation, width, height } = T<LegacyObbNode>(node)
 
       const mrect = MRect.identity(width, height)
       const parentXY = SchemaHelper.isNode(parent) ? parent : XY.$(0, 0)
@@ -71,7 +79,7 @@ export const migrationList = [
       const { item: node, parent } = ctx
       if (node.type !== 'rect') return
 
-      const { x, y, rotation, width, height } = T<S1.Node>(node)
+      const { x, y, rotation, width, height } = T<LegacyObbNode>(node)
 
       const parentXY = SchemaHelper.isNode(parent) ? parent : XY.$(0, 0)
       const mrect = MRect.identity(width, height)

@@ -1,70 +1,227 @@
 namespace S {
-  type IXY = S2.IXY
-  type Matrix = S2.Matrix
+  type IXY = { x: number; y: number }
+  type Matrix = import('src/editor/geometry/matrix').IMatrix
+  type MRect = import('src/editor/geometry/mrect').IMRect
 
-  type Schema = S2.Schema
+  type Schema = {
+    meta: Meta
+    [id: string & {}]: SchemaItem
+  }
 
-  type SchemaItem = S2.SchemaItem
+  type SchemaItem = Node | Page
 
-  type Meta = S2.Meta
+  type Meta = {
+    type: 'meta'
+    id: 'meta'
+    fileId: string
+    name: string
+    pageIds: string[]
+    userId: string
+    version: number
+  }
 
-  type Client = S2.Client
+  type Client = {
+    userId: string
+    userName: string
+    userAvatar: string
+    selectIdMap: Record<string, boolean>
+    selectPageId: string
+    cursor: IXY
+    color: string
+    sceneMatrix: Matrix
+  }
 
-  type Clients = S2.Clients
+  type Clients = {
+    [clientId: number]: Client
+  }
 
-  type NodeParentBase = S2.NodeParentBase
+  type NodeParentBase = {
+    childIds: string[]
+  }
 
-  type Page = S2.Page
+  type Page = NodeParentBase & {
+    type: 'page'
+    id: `page_${string}`
+    name: string
+  }
 
-  type NodeParent = S2.NodeParent
+  type NodeParent = Frame | Group | Page
 
-  type Node = S2.Node
+  type Node =
+    | Frame
+    | Group
+    | Rectangle
+    | Ellipse
+    | Text
+    | Line
+    | Polygon
+    | Star
+    | Path
 
-  type NodeMeta = S2.NodeMeta
+  type NodeMeta = {
+    id: string
+    name: string
+    lock: boolean
+    visible: boolean
+    parentId: string
+    __isNode: true
+  }
 
-  type NodeBase = S2.NodeBase
+  type NodeEffect = {
+    opacity: number
+    flip: 0 | 1 | 2 | 3
+    fills: Fill[]
+    strokes: Stroke[]
+    blurs: any[]
+    shadows: Shadow[]
+    outline?: Outline
+  }
 
-  type MRect = S2.MRect
+  type ObbInfo = {
+    x: number
+    y: number
+    width: number
+    height: number
+    rotation: number
+  }
 
-  type Frame = S2.Frame
+  type NodeBase = NodeMeta & NodeEffect & MRect & ObbInfo
 
-  type Group = S2.Group
+  type Frame = NodeBase &
+    NodeParentBase & {
+      type: 'frame'
+      radius: number
+    }
 
-  type Point = S2.Point
+  type Group = NodeBase &
+    NodeParentBase & {
+      type: 'group'
+    }
 
-  type Vector = S2.Vector
+  type Point = {
+    id: string
+    type: 'point'
+    symmetric: 'angle' | 'complete' | 'none'
+    x: number
+    y: number
+    radius: number
+    in?: IXY
+    out?: IXY
+    isStart?: boolean
+    isEnd?: boolean
+  }
 
-  type VectorBase = S2.VectorBase
+  type Vector = Rectangle | Ellipse | Polygon | Star | Line | Path
 
-  type Path = S2.Path
+  type VectorBase = {
+    points: Point[]
+  }
 
-  type Rectangle = S2.Rectangle
+  type Path = NodeBase &
+    VectorBase & {
+      type: 'path'
+    }
 
-  type Ellipse = S2.Ellipse
+  type Rectangle = NodeBase &
+    VectorBase & {
+      type: 'rect'
+      radius: number
+    }
 
-  type Polygon = S2.Polygon
+  type Ellipse = NodeBase &
+    VectorBase & {
+      type: 'ellipse'
+      innerRate: number
+      startAngle: number
+      endAngle: number
+    }
 
-  type Star = S2.Star
+  type Polygon = NodeBase &
+    VectorBase & {
+      type: 'polygon'
+      sides: number
+      radius: number
+    }
 
-  type Line = S2.Line
+  type Star = NodeBase &
+    VectorBase & {
+      type: 'star'
+      pointCount: number
+      radius: number
+      innerRate: number
+    }
 
-  type Text = S2.Text
+  type Line = NodeBase &
+    VectorBase & {
+      type: 'line'
+    }
+
+  type Text = NodeBase & {
+    type: 'text'
+    content: string
+    style: {
+      align: 'left' | 'center' | 'right'
+      fontFamily: string | string[]
+      fontSize: number
+      fontStyle: 'normal' | 'italic' | 'oblique'
+      fontWeight: 'normal' | 'bold' | 'bolder' | 'lighter' | number
+      letterSpacing: number
+      lineHeight: number
+      decoration?: TextDecoration
+    }
+  }
 
   type Fill = FillColor | FillLinearGradient | FillImage
 
-  type FillMeta = S2.FillMeta
+  type FillMeta = {
+    visible: boolean
+    alpha: number
+  }
 
-  type FillColor = S2.FillColor
+  type FillColor = FillMeta & {
+    type: 'color'
+    color: string
+  }
 
-  type FillLinearGradient = S2.FillLinearGradient
+  type FillLinearGradient = FillMeta & {
+    type: 'linearGradient'
+    start: IXY
+    end: IXY
+    stops: { offset: number; color: string }[]
+  }
 
-  type FillImage = S2.FillImage
+  type FillImage = FillMeta & {
+    type: 'image'
+    url: string
+    matrix: number[]
+  }
 
-  type Stroke = S2.Stroke
+  type Stroke = {
+    visible: boolean
+    width: number
+    fill: Fill
+    align: 'inner' | 'center' | 'outer'
+    cap: CanvasRenderingContext2D['lineCap']
+    join: CanvasRenderingContext2D['lineJoin']
+  }
 
-  type Shadow = S2.Shadow
+  type Shadow = {
+    visible: boolean
+    offsetX: number
+    offsetY: number
+    blur: number
+    spread: number
+    fill: Fill
+  }
 
-  type Outline = S2.Outline
+  type Outline = {
+    width: number
+    color: string
+  }
 
-  type TextDecoration = S2.TextDecoration
+  type TextDecoration = {
+    style: 'none' | 'underline'
+    width: number
+    color: string
+  }
 }
