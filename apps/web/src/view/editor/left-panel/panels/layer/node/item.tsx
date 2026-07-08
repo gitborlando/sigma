@@ -9,6 +9,7 @@ import { ContextMenu } from 'src/global/context-menu'
 import { Lucide } from 'src/view/component/lucide'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
+import { LayerPanelNodePathIcon } from './path-icon'
 
 export const EditorLeftPanelLayerNodeItemComp: FC<{
   nodeInfo: LayerPanelNodeInfo
@@ -87,10 +88,13 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
         }}
       />
       {!isParent && <G style={{ width: 12, height: 12 }} />}
-      <Icon
-        url={
-          Assets.editor.node[node.type as keyof typeof Assets.editor.node]
-        }></Icon>
+      {node.type === 'path' ? (
+        <LayerPanelNodePathIcon node={node} />
+      ) : (
+        <Icon
+          url={Assets.editor.node[node.type as keyof typeof Assets.editor.node]}
+        />
+      )}
       <G className={cls('name')}>{node.name || '未命名'}</G>
     </G>
   )
