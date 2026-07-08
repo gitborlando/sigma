@@ -47,16 +47,7 @@ namespace S {
 
   type NodeParent = Frame | Group | Page
 
-  type Node =
-    | Frame
-    | Group
-    | Rectangle
-    | Ellipse
-    | Text
-    | Line
-    | Polygon
-    | Star
-    | Path
+  type Node = Frame | Group | Rectangle | Ellipse | Text | Line | Path
 
   type NodeMeta = {
     id: string
@@ -111,7 +102,7 @@ namespace S {
     isEnd?: boolean
   }
 
-  type Vector = Rectangle | Ellipse | Polygon | Star | Line | Path
+  type Vector = Rectangle | Ellipse | Line | Path
 
   type VectorBase = {
     points: Point[]
@@ -134,21 +125,6 @@ namespace S {
       innerRate: number
       startAngle: number
       endAngle: number
-    }
-
-  type Polygon = NodeBase &
-    VectorBase & {
-      type: 'polygon'
-      sides: number
-      radius: number
-    }
-
-  type Star = NodeBase &
-    VectorBase & {
-      type: 'star'
-      pointCount: number
-      radius: number
-      innerRate: number
     }
 
   type Line = NodeBase &

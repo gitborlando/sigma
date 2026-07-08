@@ -34,8 +34,6 @@
   "rect": "rectangle",
   "rectangle": "rectangle",
   "ellipse": "ellipse",
-  "polygon": "polygon",
-  "star": "star",
   "line": "line",
   "text": "text",
   "path": "path",
