@@ -9,7 +9,7 @@ import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
 import { useEditorServices } from 'src/view/hooks/editor'
 
-export const HeaderComp: FC<{}> = observer(({}) => {
+export const EditorHeaderComp: FC<{}> = observer(({}) => {
   const { stageViewport, stageCreate } = useEditorServices()
   const navigate = useNavigate()
 

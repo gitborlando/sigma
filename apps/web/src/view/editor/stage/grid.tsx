@@ -2,7 +2,7 @@ import { expandOneStep, snapSceneXYToHalfPixel } from 'src/editor/utils/misc'
 import { rgba } from 'src/utils/color'
 import { useEditorServices } from 'src/view/hooks/editor'
 
-export const EditorStageGridComp: FC<{}> = observer(({}) => {
+export const StageGridComp: FC<{}> = observer(({}) => {
   const { stageViewport } = useEditorServices()
   if (stageViewport.zoom < 10.96) return null
 

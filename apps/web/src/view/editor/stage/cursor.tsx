@@ -2,7 +2,7 @@ import { values } from 'mobx'
 import { COLOR } from 'src/utils/color'
 import { useEditorServices } from 'src/view/hooks/editor'
 
-export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
+export const StageCursorsComp: FC<{}> = observer(({}) => {
   const { yAware } = useEditorServices()
   const others = yAware.others
   const cursors = values(others).map((other) => ({

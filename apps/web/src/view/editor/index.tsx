@@ -6,7 +6,7 @@ import { RightPanelComp } from 'src/view/editor/right-panel'
 import { StageComp } from 'src/view/editor/stage/stage'
 import { EditorContext } from 'src/view/hooks/editor'
 import { clear, suspend } from 'suspend-react'
-import { HeaderComp } from './header'
+import { EditorHeaderComp } from './header'
 
 export const EditorComp = withSuspense(
   ({}) => {
@@ -34,7 +34,7 @@ export const EditorComp = withSuspense(
     return (
       <EditorContext.Provider value={editor}>
         <G vertical='auto 1fr'>
-          <HeaderComp />
+          <EditorHeaderComp />
           <G horizontal='auto 1fr auto'>
             <LeftPanelComp />
             <StageComp />

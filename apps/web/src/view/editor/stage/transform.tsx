@@ -10,7 +10,7 @@ import { themeColor } from 'src/view/styles/color'
 
 let isSelectOnlyLine = false
 
-export const EditorStageTransformComp: FC<{}> = observer(({}) => {
+export const StageTransformComp: FC<{}> = observer(({}) => {
   const {
     schemaCreator,
     stageInteract,

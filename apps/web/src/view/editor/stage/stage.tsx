@@ -2,13 +2,13 @@ import { CSSProperties } from 'react'
 import { renderElem } from 'src/editor/render/react/reconciler'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { ContextMenu } from 'src/global/context-menu'
-import { EditorStageCursorsComp } from 'src/view/editor/stage/cursor'
+import { StageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
-import { EditorStageGridComp } from 'src/view/editor/stage/grid'
-import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'
-import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
+import { StageGridComp } from 'src/view/editor/stage/grid'
+import { StageMarqueeComp } from 'src/view/editor/stage/marquee'
+import { StageOutlineComp } from 'src/view/editor/stage/outline'
 import { StageRulerComp } from 'src/view/editor/stage/ruler'
-import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
+import { StageTransformComp } from 'src/view/editor/stage/transform'
 import { EditorContext, useEditor, useEditorServices } from 'src/view/hooks/editor'
 
 export const StageComp: FC<{}> = observer(({}) => {
@@ -19,11 +19,11 @@ export const StageComp: FC<{}> = observer(({}) => {
   useEffect(() => {
     return renderElem(
       <EditorContext.Provider value={editor}>
-        <EditorStageGridComp />
-        <EditorStageOutlineComp />
-        <EditorStageTransformComp />
-        <EditorStageMarqueeComp />
-        <EditorStageCursorsComp />
+        <StageGridComp />
+        <StageOutlineComp />
+        <StageTransformComp />
+        <StageMarqueeComp />
+        <StageCursorsComp />
         <StageRulerComp />
       </EditorContext.Provider>,
       renderTree.widgetRoot,

@@ -11,15 +11,15 @@ type OutlineInfo = {
   color?: string
 }
 
-export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
+export const StageOutlineComp: FC<{}> = observer(({}) => {
   const { stageTransformer, stageViewport, stageMove } = useEditorServices()
   if (stageTransformer.isMoving) return null
   if (stageViewport.isZooming) return null
   if (stageMove.isMoving) return null
-  return <EditorStageOutlineCompInner />
+  return <StageOutlineCompInner />
 })
 
-export const EditorStageOutlineCompInner: FC<{}> = observer(({}) => {
+export const StageOutlineCompInner: FC<{}> = observer(({}) => {
   const { stageSelect, handleSelect, yAware } = useEditorServices()
   const { hoverId } = stageSelect
   const others = yAware.others

@@ -3,7 +3,7 @@ import { rgbToRgba } from 'src/utils/color'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { themeColor } from 'src/view/styles/color'
 
-export const EditorStageMarqueeComp: FC<{}> = observer(({}) => {
+export const StageMarqueeComp: FC<{}> = observer(({}) => {
   const { stageSelect, schemaCreator, stageViewport } = useEditorServices()
   const zoom = stageViewport.zoom
   const { marquee } = stageSelect
