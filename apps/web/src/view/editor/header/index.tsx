@@ -1,5 +1,5 @@
-import { Icon } from '@gitborlando/widget'
 import { ChevronLeft, Redo, Undo as UndoIcon } from 'lucide-react'
+import { ReactSVG } from 'react-svg'
 import { IStageCreateType } from 'src/editor/stage/interact/create'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
@@ -54,13 +54,12 @@ export const HeaderComp: FC<{}> = observer(({}) => {
 const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) => {
   const { stageInteract } = useEditorServices()
   const isActive = stageInteract.interaction === type
-  const iconUrl = Assets.editor.header[type]
 
   return (
     <Btn
       size={32}
       active={isActive}
-      icon={<Icon url={iconUrl} className={cls('centerGroup-icon')} />}
+      icon={<IconComp url={Assets.editor.header[type]} active={isActive} />}
       onClick={() => (stageInteract.interaction = type)}
     />
   )
@@ -70,12 +69,11 @@ const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
   const { stageCreate, stageInteract } = useEditorServices()
   const isActive =
     stageInteract.interaction === 'create' && stageCreate.createType === type
-  const url = Assets.editor.node[type]
 
   return (
     <Btn
       size={32}
-      icon={<Icon url={url} className={cls('centerGroup-icon')} />}
+      icon={<IconComp url={Assets.editor.node[type]} active={isActive} />}
       active={isActive}
       onClick={action(() => {
         stageInteract.interaction = 'create'
@@ -105,6 +103,30 @@ const UndoGroup: FC<{}> = observer(() => {
   )
 })
 
+const IconComp: FC<{
+  url: string
+  active: boolean
+}> = observer(({ url, active }) => {
+  return (
+    <ReactSVG
+      src={url}
+      className={cls('centerGroup-icon')}
+      beforeInjection={(s) => {
+        s.setAttribute('width', '20')
+        s.setAttribute('height', '20')
+        s.querySelectorAll('[stroke-width]').forEach((el) => {
+          el.setAttribute('stroke-width', '1.5')
+        })
+        if (active) {
+          s.querySelectorAll('[stroke]').forEach((el) => {
+            el.setAttribute('stroke', 'white')
+          })
+        }
+      }}
+    />
+  )
+})
+
 const cls = classes(css`
   height: 48px;
   padding-inline: 8px;
@@ -123,8 +145,8 @@ const cls = classes(css`
       margin-right: 8px;
     }
     &-icon {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
     }
   }
 `)
