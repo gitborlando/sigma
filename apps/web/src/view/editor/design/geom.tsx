@@ -1,6 +1,6 @@
 import { twoDecimal } from '@gitborlando/geo'
 import { Icon } from '@gitborlando/widget'
-import { type DesignGeomKey } from 'src/editor/workbench/design-panel/geom-field-definitions'
+import { type DesignGeomKey } from 'src/editor/workbench/design/geom-field-definitions'
 import { MULTI_VALUE } from 'src/global/constant'
 import { InputNum } from 'src/view/component/input-num'
 import { useEditorServices } from 'src/view/hooks/editor'
@@ -49,7 +49,7 @@ const geomFieldViews: Record<DesignGeomKey, GeomFieldView> = {
   },
 }
 
-export const RightPanelDesignGeom: FC<{}> = observer(({}) => {
+export const DesignGeomComp: FC<{}> = observer(({}) => {
   const { designGeom, stageViewport } = useEditorServices()
   const { currentFields, currentGeom, setupGeom } = designGeom
   const { zoom } = stageViewport

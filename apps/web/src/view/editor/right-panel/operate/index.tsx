@@ -3,8 +3,8 @@ import { DesignAlignComp } from 'src/view/editor/design/align'
 import { EditorRPOperateFillComp } from 'src/view/editor/right-panel/operate/fill'
 import { FillPickerComp } from 'src/view/editor/right-panel/operate/picker'
 import { useEditorServices } from 'src/view/hooks/editor'
-import { RightPanelDesignGeom } from '../design/geom'
 import { useSelectIds } from 'src/view/hooks/schema/use-y-client'
+import { DesignGeomComp } from '../../design/geom'
 
 export const OperatePanelComp: FC<{}> = observer(({}) => {
   const { fillPicker } = useEditorServices()
@@ -13,8 +13,8 @@ export const OperatePanelComp: FC<{}> = observer(({}) => {
   if (!selectIdList.length) return null
   return (
     <Scrollbars>
-      <RightPanelDesignGeom />
       <DesignAlignComp />
+      <DesignGeomComp />
       <EditorRPOperateFillComp />
       <FillPickerComp x-if={fillPicker.isShowPicker} />
     </Scrollbars>
