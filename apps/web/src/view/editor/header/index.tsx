@@ -70,12 +70,12 @@ const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
   const { stageCreate, stageInteract } = useEditorServices()
   const isActive =
     stageInteract.interaction === 'create' && stageCreate.createType === type
-  const iconUrl = Assets.editor.node[type as keyof typeof Assets.editor.node]
+  const url = Assets.editor.node[type]
 
   return (
     <Btn
       size={32}
-      icon={<Icon url={iconUrl} className={cls('centerGroup-icon')} />}
+      icon={<Icon url={url} className={cls('centerGroup-icon')} />}
       active={isActive}
       onClick={action(() => {
         stageInteract.interaction = 'create'
@@ -123,8 +123,8 @@ const cls = classes(css`
       margin-right: 8px;
     }
     &-icon {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
     }
   }
 `)
