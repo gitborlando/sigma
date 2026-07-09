@@ -4,12 +4,12 @@ import { Lucide } from 'src/view/component/lucide'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
 
-export const PageHeaderComp: FC<{}> = observer(({}) => {
-  const { handlePage, layerPanel } = useEditorServices()
-  const { pagePanelExpanded } = layerPanel
+export const LayerPageListHeaderComp: FC<{}> = observer(({}) => {
+  const { handlePage, layerPageList } = useEditorServices()
+  const { isCollapsed } = layerPageList
   const selectPage = useSelectPage()
   const addPage = () => {
-    layerPanel.pagePanelExpanded = pagePanelExpanded || true
+    layerPageList.isCollapsed = false
     handlePage.addPage()
   }
 
@@ -20,11 +20,11 @@ export const PageHeaderComp: FC<{}> = observer(({}) => {
       </G>
       <Btn onClick={addPage} icon={<Lucide icon={Plus} />} />
       <Btn
-        onClick={() => (layerPanel.pagePanelExpanded = !pagePanelExpanded)}
+        onClick={() => (layerPageList.isCollapsed = !isCollapsed)}
         icon={
           <Lucide
             icon={ChevronDown}
-            style={{ rotate: pagePanelExpanded ? '0deg' : '180deg' }}
+            style={{ rotate: isCollapsed ? '180deg' : '0deg' }}
           />
         }
       />

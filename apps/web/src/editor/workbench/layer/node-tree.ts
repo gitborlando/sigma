@@ -6,14 +6,14 @@ import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
-export type LayerPanelNodeInfo = {
+export type LayerNodeTreeInfo = {
   id: string
   indent: number
   ancestorIds: string[]
 }
 
 @reflection
-export class LayerPanelNodeTree extends Service {
+export class LayerNodeTree extends Service {
   private expandedNodeMap = observable.map<string, boolean>()
   @observable private nodeInfoVersion = 0
 
@@ -59,7 +59,7 @@ export class LayerPanelNodeTree extends Service {
   }
 
   private getNodeInfoList() {
-    const nodeInfoList: LayerPanelNodeInfo[] = []
+    const nodeInfoList: LayerNodeTreeInfo[] = []
     const traverse = createSchemaTraverse({
       schema: this.yState.schema,
       enter: ({ item, ancestors }) => {

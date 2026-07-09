@@ -4,20 +4,20 @@ import { stopPropagation } from '@gitborlando/utils/browser'
 import { Icon } from '@gitborlando/widget'
 import { ChevronRight } from 'lucide-react'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { LayerPanelNodeInfo } from 'src/editor/workbench/layer-panel/node-tree'
+import { LayerNodeTreeInfo } from 'src/editor/workbench/layer/node-tree'
 import { ContextMenu } from 'src/global/context-menu'
 import { Lucide } from 'src/view/component/lucide'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
-import { LayerPanelNodePathIcon } from './path-icon'
+import { LayerNodeTreePathIcon } from './path-icon'
 
-export const EditorLeftPanelLayerNodeItemComp: FC<{
-  nodeInfo: LayerPanelNodeInfo
+export const LayerNodeTreeItemComp: FC<{
+  nodeInfo: LayerNodeTreeInfo
 }> = observer(({ nodeInfo }) => {
-  const { command, layerPanelNodeTree, stageSelect, selectController, yState } =
+  const { command, layerNodeTree, stageSelect, selectController, yState } =
     useEditorServices()
   const { id, indent, ancestorIds } = nodeInfo
-  const { toggleNodeExpanded, getNodeExpanded } = layerPanelNodeTree
+  const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
 
   const node = yState.find<S.Node>(id)
   const isParent = SchemaHelper.isNodeParent(node)
@@ -89,7 +89,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
       />
       {!isParent && <G style={{ width: 12, height: 12 }} />}
       {node.type === 'path' ? (
-        <LayerPanelNodePathIcon node={node} />
+        <LayerNodeTreePathIcon node={node} />
       ) : (
         <Icon
           url={Assets.editor.node[node.type as keyof typeof Assets.editor.node]}

@@ -8,7 +8,7 @@ type IPageItemComp = {
   id: string
 }
 
-export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
+export const LayerPageListItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
   const { command, handleSelect, undo } = useEditorServices()
   const openMenu = (e: React.MouseEvent) => {
     ContextMenu.context = { id }

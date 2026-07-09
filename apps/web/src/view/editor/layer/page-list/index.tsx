@@ -2,38 +2,40 @@ import Scrollbars from 'react-custom-scrollbars-2'
 import { Drag } from 'src/global/event/drag'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
-import { PageHeaderComp } from './header'
-import { PageItemComp } from './item'
+import { LayerPageListHeaderComp } from './header'
+import { LayerPageListItemComp } from './item'
 
-export const PageComp: FC<{}> = observer(({}) => {
-  const { layerPanel, yState } = useEditorServices()
-  const { pagePanelHeight, pagePanelExpanded } = layerPanel
+export const LayerPageListComp: FC<{}> = observer(({}) => {
+  const { layerPageList, yState } = useEditorServices()
+  const { panelHeight, isCollapsed } = layerPageList
   const meta = useSchema((schema) => schema.meta)
 
   return (
     <G vertical className={cls()}>
-      <PageHeaderComp />
+      <LayerPageListHeaderComp />
       <G
         vertical
         className={cls('content')}
-        x-if={pagePanelExpanded}
-        style={{ height: pagePanelHeight - 37 }}>
-        <Scrollbars style={{ height: pagePanelHeight - 37 }}>
+        x-if={!isCollapsed}
+        style={{ height: panelHeight - 37 }}>
+        <Scrollbars style={{ height: panelHeight - 37 }}>
           {meta.pageIds.map((id) => {
             const page = yState.find<S.Page>(id)
-            return <PageItemComp key={page.id} name={page.name} id={page.id} />
+            return (
+              <LayerPageListItemComp key={page.id} name={page.name} id={page.id} />
+            )
           })}
         </Scrollbars>
       </G>
       <G
         className={cls('resize')}
-        x-if={pagePanelExpanded}
+        x-if={!isCollapsed}
         onMouseDown={() => {
-          let lastHeight = pagePanelHeight
+          let lastHeight = panelHeight
           Drag.onMove(({ shift }) => {
             let newHeight = lastHeight + shift.y
             if (newHeight <= 69 || newHeight >= 800) return
-            layerPanel.pagePanelHeight = newHeight
+            layerPageList.panelHeight = newHeight
           }).start()
         }}></G>
     </G>

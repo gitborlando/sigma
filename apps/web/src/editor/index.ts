@@ -26,10 +26,10 @@ import { StageMove } from 'src/editor/stage/interact/move'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { DesignAlign } from 'src/editor/workbench/design-panel/align'
-import { FillPicker } from 'src/editor/workbench/design-panel/fill-picker'
-import { LayerPanel } from 'src/editor/workbench/layer-panel'
-import { LayerPanelNodeTree } from 'src/editor/workbench/layer-panel/node-tree'
+import { DesignAlign } from 'src/editor/workbench/design/align'
+import { FillPicker } from 'src/editor/workbench/design/fill-picker'
+import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
+import { LayerPageList } from 'src/editor/workbench/layer/page-list'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { YSync } from 'src/editor/y-adapter/y-sync'
@@ -82,8 +82,8 @@ const editorServices = {
   designGeometry: DesignGeometry,
 
   /** workbench.layer */
-  layerPanel: LayerPanel,
-  layerPanelNodeTree: LayerPanelNodeTree,
+  layerPageList: LayerPageList,
+  layerNodeTree: LayerNodeTree,
 
   /** yjs */
   yAware: YAware,

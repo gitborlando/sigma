@@ -10,9 +10,9 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react'
-import { EditorLeftPanelLayerNodeHeaderComp } from 'src/view/editor/left-panel/panels/layer/node/header'
-import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
-import { EditorLeftPanelLayerNodeListComp } from 'src/view/editor/left-panel/panels/layer/node/list'
+import { LayerNodeTreeHeaderComp } from 'src/view/editor/layer/node-tree/header'
+import { LayerNodeTreeItemComp } from 'src/view/editor/layer/node-tree/item'
+import { LayerNodeTreeListComp } from 'src/view/editor/layer/node-tree/list'
 import { useEditorServices } from 'src/view/hooks/editor'
 
 const dropAnimationConfig: DropAnimation = {
@@ -25,9 +25,9 @@ const dropAnimationConfig: DropAnimation = {
   }),
 }
 
-export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
-  const { layerPanel, layerPanelNodeTree } = useEditorServices()
-  const { nodeInfoList } = layerPanelNodeTree
+export const LayerNodeTreeComp: FC<{}> = observer(({}) => {
+  const { layerPageList, layerNodeTree } = useEditorServices()
+  const { nodeInfoList } = layerNodeTree
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const sensors = useSensors(
@@ -77,15 +77,15 @@ export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
         <G
           vertical='auto 1fr'
           className={cls()}
-          style={{ height: innerHeight - 48 - layerPanel.pagePanelHeight }}>
-          <EditorLeftPanelLayerNodeHeaderComp />
-          <EditorLeftPanelLayerNodeListComp />
+          style={{ height: innerHeight - 48 - layerPageList.panelHeight }}>
+          <LayerNodeTreeHeaderComp />
+          <LayerNodeTreeListComp />
         </G>
       </SortableContext>
       <DragOverlay dropAnimation={dropAnimationConfig}>
         {activeNodeInfo && (
           <G style={{ opacity: 0.8 }}>
-            <EditorLeftPanelLayerNodeItemComp nodeInfo={activeNodeInfo} />
+            <LayerNodeTreeItemComp nodeInfo={activeNodeInfo} />
           </G>
         )}
       </DragOverlay>

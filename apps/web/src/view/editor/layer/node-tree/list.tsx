@@ -1,11 +1,11 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
+import { LayerNodeTreeItemComp } from 'src/view/editor/layer/node-tree/item'
 import { useEditorServices } from 'src/view/hooks/editor'
 
-export const EditorLeftPanelLayerNodeListComp: FC<{}> = observer(({}) => {
-  const { layerPanelNodeTree } = useEditorServices()
-  const { nodeInfoList } = layerPanelNodeTree
+export const LayerNodeTreeListComp: FC<{}> = observer(({}) => {
+  const { layerNodeTree } = useEditorServices()
+  const { nodeInfoList } = layerNodeTree
   const scrollBarsRef = useRef<Scrollbars>(null)
 
   const virtualizer = useVirtualizer({
@@ -28,7 +28,7 @@ export const EditorLeftPanelLayerNodeListComp: FC<{}> = observer(({}) => {
               key={virtualItem.key}
               data-index={virtualItem.index}
               style={{ transform: `translateY(${virtualItem.start}px)` }}>
-              <EditorLeftPanelLayerNodeItemComp nodeInfo={nodeInfo} />
+              <LayerNodeTreeItemComp nodeInfo={nodeInfo} />
             </G>
           )
         })}

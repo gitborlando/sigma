@@ -3,16 +3,16 @@ import { makeObservable } from 'mobx'
 import { Service } from 'src/global/service'
 
 @reflection
-export class LayerPanel extends Service {
-  @observable pagePanelHeight = 200
-  @observable pagePanelExpanded = true
+export class LayerPageList extends Service {
+  @observable panelHeight = 200
+  @observable isCollapsed = false
 
   constructor() {
     super()
     autoBind(makeObservable(this))
     this.effect(
       autorun(() => {
-        this.pagePanelHeight = this.pagePanelExpanded ? 200 : 32
+        this.panelHeight = this.isCollapsed ? 32 : 200
       }),
     )
   }

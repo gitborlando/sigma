@@ -1,12 +1,11 @@
 import { ChevronsUp } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
-
 import { Lucide } from 'src/view/component/lucide'
 import { useEditorServices } from 'src/view/hooks/editor'
 
-export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
-  const { layerPanelNodeTree } = useEditorServices()
-  const { hasNodeExpanded, toggleAllNodeExpanded } = layerPanelNodeTree
+export const LayerNodeTreeHeaderComp: FC<{}> = observer(({}) => {
+  const { layerNodeTree } = useEditorServices()
+  const { hasNodeExpanded, toggleAllNodeExpanded } = layerNodeTree
   const handleToggleExpand = () => {
     toggleAllNodeExpanded(!hasNodeExpanded)
   }

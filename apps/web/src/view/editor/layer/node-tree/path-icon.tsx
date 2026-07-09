@@ -1,7 +1,7 @@
 const iconSize = 14
 const fallbackPath = 'M5 10H15'
 
-export const LayerPanelNodePathIcon: FC<{
+export const LayerNodeTreePathIcon: FC<{
   node: S.Path
 }> = ({ node }) => {
   const { d, viewBox } = getPathIconInfo(node.points)
