@@ -1,5 +1,4 @@
 import { AABB } from '@gitborlando/geo'
-import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import { IMatrix } from 'src/editor/geometry/matrix'
 import { StageViewport } from 'src/editor/stage/viewport'

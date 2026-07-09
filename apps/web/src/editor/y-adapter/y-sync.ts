@@ -1,5 +1,4 @@
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import { reflection } from 'first-di'
 import { Service } from 'src/global/service'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'

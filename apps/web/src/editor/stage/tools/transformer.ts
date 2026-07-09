@@ -1,6 +1,5 @@
 import { Dragger } from '@gitborlando/toolkit/browser'
 import { iife } from '@gitborlando/utils'
-import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { Setting } from 'src/editor/core/setting'
 import { Undo } from 'src/editor/core/undo'

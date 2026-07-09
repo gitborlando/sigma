@@ -1,5 +1,4 @@
 import hotkeys from 'hotkeys-js'
-import { reflection } from 'first-di'
 import { Undo } from 'src/editor/core/undo'
 import { HandleSelect, type Selection } from 'src/editor/handle/select'
 import { Service } from 'src/global/service'

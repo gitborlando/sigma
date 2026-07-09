@@ -1,6 +1,5 @@
 import { HandleSelect } from 'src/editor/handle/select'
 import { Renderer } from 'src/editor/render/renderer'
-import { reflection } from 'first-di'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { StageEvent } from 'src/editor/stage/event'

@@ -1,5 +1,4 @@
 import { jsonParse } from '@gitborlando/utils'
-import { reflection } from 'first-di'
 import JSZip from 'jszip'
 import { Undo } from 'src/editor/core/undo'
 import { HandleSelect } from 'src/editor/handle/select'

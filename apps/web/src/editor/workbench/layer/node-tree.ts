@@ -1,4 +1,3 @@
-import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'

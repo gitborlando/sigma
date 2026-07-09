@@ -1,7 +1,6 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
-import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import { HandleSelect } from 'src/editor/handle/select'
 import { Service } from 'src/global/service'

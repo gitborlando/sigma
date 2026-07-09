@@ -1,5 +1,4 @@
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import { RenderSurface } from 'src/editor/render/surface'
 import { StageCursor } from 'src/editor/stage/cursor'

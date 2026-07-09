@@ -1,5 +1,4 @@
 import { AABB } from '@gitborlando/geo'
-import { reflection } from 'first-di'
 import { NodeController } from 'src/editor/controller/node'
 import { MRect } from 'src/editor/geometry'
 import { HandleNode } from 'src/editor/handle/node'

@@ -1,4 +1,3 @@
-import { reflection } from 'first-di'
 import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { Service } from 'src/global/service'

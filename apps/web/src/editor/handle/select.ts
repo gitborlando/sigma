@@ -1,6 +1,5 @@
 import { MobxUndoSlice } from '@gitborlando/mobx-undo'
 import { Signal } from '@gitborlando/signal'
-import { reflection } from 'first-di'
 import equal from 'fast-deep-equal'
 import { makeObservable } from 'mobx'
 import { Undo } from 'src/editor/core/undo'

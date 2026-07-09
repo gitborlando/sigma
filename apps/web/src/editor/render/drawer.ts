@@ -1,6 +1,5 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
-import { reflection } from 'first-di'
 import { Setting } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'

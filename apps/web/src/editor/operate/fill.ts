@@ -1,7 +1,6 @@
 import { clone } from '@gitborlando/utils'
 import type { YPlainPath } from '@gitborlando/y-plain'
 import equal from 'fast-deep-equal'
-import { reflection } from 'first-di'
 import { Patch, produceWithPatches } from 'immer'
 import { makeObservable } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'

@@ -1,6 +1,5 @@
 import { Disposer } from '@gitborlando/toolkit'
 import { listen } from '@gitborlando/utils/browser'
-import { reflection } from 'first-di'
 import hotkeys from 'hotkeys-js'
 import { makeObservable } from 'mobx'
 import { NodeController } from 'src/editor/controller/node'

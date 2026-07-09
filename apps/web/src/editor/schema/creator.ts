@@ -1,6 +1,5 @@
 import { XY } from '@gitborlando/geo'
 import { clone, getSet, miniId } from '@gitborlando/utils'
-import { reflection } from 'first-di'
 import { Matrix } from 'src/editor/geometry'
 import { createLine } from 'src/editor/geometry/point'
 import { getLatestVersion } from 'src/editor/schema/migration'

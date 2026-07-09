@@ -1,5 +1,4 @@
 import { clampIndex, firstOne, getSet } from '@gitborlando/utils'
-import { reflection } from 'first-di'
 import { makeObservable } from 'mobx'
 import { MRect } from 'src/editor/geometry'
 import { HandleSelect } from 'src/editor/handle/select'

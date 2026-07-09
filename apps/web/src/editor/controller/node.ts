@@ -1,5 +1,4 @@
 import { iife, objKeys } from '@gitborlando/utils'
-import { reflection } from 'first-di'
 import { Undo } from 'src/editor/core/undo'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandleSelect, type Selection } from 'src/editor/handle/select'

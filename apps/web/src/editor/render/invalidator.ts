@@ -1,6 +1,5 @@
 import { AABB } from '@gitborlando/geo'
 import { Signal } from '@gitborlando/signal'
-import { reflection } from 'first-di'
 import { Service } from 'src/global/service'
 import { Elem } from './elem'
 

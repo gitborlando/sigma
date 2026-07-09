@@ -1,6 +1,5 @@
 import { AABB } from '@gitborlando/geo'
 import { Matrix } from 'src/editor/geometry'
-import { reflection } from 'first-di'
 import { HandleSelect } from 'src/editor/handle/select'
 import { RenderTree } from 'src/editor/render/tree'
 import { StageViewport } from 'src/editor/stage/viewport'

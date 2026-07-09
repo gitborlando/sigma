@@ -1,5 +1,4 @@
 import { AnyObject, iife, objKeys } from '@gitborlando/utils'
-import { reflection } from 'first-di'
 import { divide, max } from 'src/editor/geometry/base'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandleSelect } from 'src/editor/handle/select'

@@ -1,6 +1,5 @@
 import { MobxUndo, MobxUndoState } from '@gitborlando/mobx-undo'
 import { matchCase } from '@gitborlando/utils'
-import { reflection } from 'first-di'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
