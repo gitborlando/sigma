@@ -1,5 +1,6 @@
 import RcInputNumber, { InputNumberProps } from '@rc-component/input-number'
 import { Dragger } from '@gitborlando/toolkit/browser'
+import { isNumber, isUndefined } from 'es-toolkit'
 
 export interface InputNumProps extends Omit<
   InputNumberProps<number>,
@@ -8,8 +9,8 @@ export interface InputNumProps extends Omit<
   needFocusStyle?: boolean
   needAutoSelect?: boolean
   needControls?: boolean
-  onChange?: (value: number) => void
-  onEnd?: (value: number) => void
+  onChange?: (value: number | null) => void
+  onEnd?: (value: number | null) => void
   suffix?: ReactNode
   prefix?: ReactNode
 }
@@ -23,7 +24,7 @@ export const InputNum = forwardRef<
       className,
       needFocusStyle = true,
       needAutoSelect = true,
-      needControls = true,
+      needControls = false,
       suffix,
       prefix,
       onChange,
@@ -33,6 +34,7 @@ export const InputNum = forwardRef<
       onFocus,
       onBlur,
       onPressEnter,
+      onStep,
       formatter,
       parser,
       slideRate = 1,
@@ -46,30 +48,26 @@ export const InputNum = forwardRef<
     const inputRef = useRef<HTMLInputElement>()
     const lastValue = useRef(value)
     const currentValue = useRef(value)
+    const isFocusing = useRef(false)
+    const isSliding = useRef(false)
+    const slideStartValue = useRef<number | null>()
 
     useLayoutEffect(() => {
-      lastValue.current = value
       currentValue.current = value
+      if (!isFocusing.current && !isSliding.current) {
+        lastValue.current = value
+      }
     }, [value])
 
     const handleChange = (val: number | null) => {
-      if (val !== null) {
-        currentValue.current = val
-        onChange?.(val)
-      }
+      currentValue.current = val
+      onChange?.(val)
     }
 
-    const getFinalValue = () => {
-      if (currentValue.current) {
-        if (!parser) return currentValue.current
-        return parser(currentValue.current.toString())
-      }
-    }
-
-    const handleEnd = () => {
-      const finalValue = getFinalValue()
-      if (!finalValue) return
-      if (finalValue === lastValue.current) return
+    const handleEnd = (last = lastValue.current) => {
+      const finalValue = currentValue.current
+      if (isUndefined(finalValue)) return
+      if (Object.is(finalValue, last)) return
 
       lastValue.current = finalValue
       onEnd?.(finalValue)
@@ -101,9 +99,22 @@ export const InputNum = forwardRef<
           onSlide ? (
             <SliderWrapperComp
               slideRate={slideRate}
-              beforeSlide={beforeSlide}
-              onSlide={onSlide}
-              afterSlide={afterSlide}>
+              beforeSlide={() => {
+                isSliding.current = true
+                slideStartValue.current = currentValue.current
+                beforeSlide?.()
+              }}
+              onSlide={(value) => {
+                if (isNumber(currentValue.current)) {
+                  currentValue.current += value
+                }
+                onSlide?.(value)
+              }}
+              afterSlide={(changed) => {
+                isSliding.current = false
+                afterSlide?.(changed)
+                handleEnd(slideStartValue.current)
+              }}>
               {prefix}
             </SliderWrapperComp>
           ) : (
@@ -114,7 +125,10 @@ export const InputNum = forwardRef<
         onChange={handleChange}
         onBlur={(e) => {
           onBlur?.(e)
-          handleEnd()
+          queueMicrotask(() => {
+            handleEnd()
+            isFocusing.current = false
+          })
         }}
         onPressEnter={(e) => {
           onPressEnter?.(e)
@@ -122,10 +136,15 @@ export const InputNum = forwardRef<
           inputRef.current?.blur()
         }}
         onFocus={(e) => {
+          isFocusing.current = true
           onFocus?.(e)
           if (needAutoSelect) {
             inputRef.current?.select()
           }
+        }}
+        onStep={(stepValue, info) => {
+          onStep?.(stepValue, info)
+          handleEnd()
         }}
         formatter={formatter}
         parser={parser}
@@ -147,19 +166,22 @@ const SliderWrapperComp: FC<
     children: ReactNode
   }
 > = observer(({ children, slideRate = 1, beforeSlide, onSlide, afterSlide }) => {
-  const [drag] = useState(() => new Dragger({}))
-  drag
-    .needInfinity()
-    .onStart(() => beforeSlide?.())
-    .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
-    .onDestroy(({ moved }) => afterSlide?.(moved))
-
   const cls = css`
     ${styles.fitContent}
     cursor: e-resize;
   `
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    new Dragger({})
+      .needInfinity()
+      .onStart(() => beforeSlide?.())
+      .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
+      .onDestroy(({ moved }) => afterSlide?.(moved))
+      .start(e)
+  }
+
   return (
-    <G onMouseDown={() => drag.start()} className={cls}>
+    <G onMouseDown={handleMouseDown} className={cls}>
       {children}
     </G>
   )

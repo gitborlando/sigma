@@ -11,7 +11,6 @@ import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { HandleSelect } from 'src/editor/handle/select'
 import { OperateFill } from 'src/editor/operate/fill'
-import { DesignGeometry } from 'src/editor/operate/geometry'
 import { ElemDrawer } from 'src/editor/render/drawer'
 import { RenderInvalidator } from 'src/editor/render/invalidator'
 import { Renderer } from 'src/editor/render/renderer'
@@ -30,6 +29,7 @@ import { DesignAlign } from 'src/editor/workbench/design/align'
 import { FillPicker } from 'src/editor/workbench/design/fill-picker'
 import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { LayerPageList } from 'src/editor/workbench/layer/page-list'
+import { DesignGeom } from 'src/editor/workbench/design-panel/geom'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { YSync } from 'src/editor/y-adapter/y-sync'
@@ -79,7 +79,7 @@ const editorServices = {
   fillPicker: FillPicker,
   designAlign: DesignAlign,
   operateFill: OperateFill,
-  designGeometry: DesignGeometry,
+  designGeom: DesignGeom,
 
   /** workbench.layer */
   layerPageList: LayerPageList,
