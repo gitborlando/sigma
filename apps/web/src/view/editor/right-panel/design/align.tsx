@@ -2,7 +2,7 @@ import { Icon } from '@gitborlando/widget'
 import { Btn } from 'src/view/component/btn'
 import { useEditorServices } from 'src/view/hooks/editor'
 
-export const AlignComp: FC<{}> = observer(({}) => {
+export const DesignAlignComp: FC<{}> = observer(({}) => {
   const { designAlign } = useEditorServices()
   const { alignTypes, canAlign, setAlign } = designAlign
 
@@ -11,6 +11,7 @@ export const AlignComp: FC<{}> = observer(({}) => {
       {alignTypes.map((type) => (
         <Btn
           key={type}
+          size={30}
           disabled={!canAlign}
           onClick={() => setAlign(type)}
           icon={<Icon url={Assets.editor.design.align[type]} />}
