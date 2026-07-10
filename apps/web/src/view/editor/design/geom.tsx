@@ -1,7 +1,8 @@
 import { twoDecimal } from '@gitborlando/geo'
 import { Icon } from '@gitborlando/widget'
-import { type DesignGeomKey } from 'src/editor/workbench/design/geom-field-definitions'
-import { MULTI_VALUE } from 'src/global/constant'
+import { isNil } from 'es-toolkit'
+import { type DesignGeomKey } from 'src/editor/workbench/design/geom/field-definitions'
+import { MIXED_VALUE } from 'src/global/constant'
 import { InputNum } from 'src/view/component/input-num'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
@@ -65,18 +66,21 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
   return (
     <G x-if={nodes.length > 0} className={cls()} horizontal='auto auto' gap={8}>
       {currentFields.map((field) => {
-        if (field.interaction !== 'number') return null
-
         const view = geomFieldViews[field.key]
-        return (
-          <GeomItem
-            key={field.key}
-            label={view.label}
-            geomKey={field.key}
-            value={currentGeom[field.key]}
-            slideRate={view.slideRate?.(zoom)}
-          />
-        )
+        switch (field.interaction) {
+          case 'number':
+            return (
+              <GeomItem
+                key={field.key}
+                label={view.label}
+                geomKey={field.key}
+                value={currentGeom[field.key] as number | typeof MIXED_VALUE}
+                slideRate={view.slideRate?.(zoom)}
+              />
+            )
+          default:
+            return null
+        }
       })}
     </G>
   )
@@ -85,46 +89,41 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
 const GeomItem: FC<{
   label: ReactNode
   geomKey: DesignGeomKey
-  value: number
+  value: number | typeof MIXED_VALUE
   slideRate?: number
 }> = observer(({ label, geomKey, value, slideRate = 1 }) => {
   const { designGeom, undo } = useEditorServices()
-  const { endSetGeom, setGeom, slideGeom, startSetGeom } = designGeom
-  const isMultiValue = T<any>(value) === MULTI_VALUE
+  const { setGeom, setupSlideGeom } = designGeom
   const nodes = useSelectNodes()
-  const slideDeltaRef = useRef(0)
+  const slideSessionRef = useRef<ReturnType<typeof setupSlideGeom>>()
 
-  const handleEnd = (value: number | null) => {
-    setGeom(nodes, { [geomKey]: value ?? 0 })
+  const handleEnd = (value: number | typeof MIXED_VALUE | Nil) => {
+    if (!isNil(value) && value !== MIXED_VALUE) setGeom(nodes, { [geomKey]: value })
     undo.track('state', `${t('modify geometry property')}: ${geomKey}`)
   }
 
   const handleBeforeSlide = () => {
-    slideDeltaRef.current = 0
-    startSetGeom(nodes)
+    slideSessionRef.current = setupSlideGeom(nodes, geomKey)
   }
 
   const handleSlide = (delta: number) => {
-    slideDeltaRef.current += delta
-    slideGeom(nodes, { [geomKey]: slideDeltaRef.current })
+    slideSessionRef.current?.(delta)
   }
 
-  const handleAfterSlide = (changed: boolean) => {
-    endSetGeom()
-    if (changed && isMultiValue)
-      undo.track('state', `${t('modify geometry property')}: ${geomKey}`)
+  const handleAfterSlide = () => {
+    slideSessionRef.current = undefined
   }
 
   return (
     <InputNum
       prefix={label}
-      value={isMultiValue ? undefined : twoDecimal(value)}
+      value={value === MIXED_VALUE ? value : twoDecimal(value)}
+      specialValue={{ value: MIXED_VALUE, label: t('mixed') }}
       slideRate={slideRate}
       beforeSlide={handleBeforeSlide}
       onSlide={handleSlide}
       afterSlide={handleAfterSlide}
       onEnd={handleEnd}
-      {...(isMultiValue ? { placeholder: t('mixed') } : {})}
     />
   )
 })

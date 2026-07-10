@@ -1,13 +1,24 @@
 import { max } from 'src/editor/geometry/base'
 import { HandleNode } from 'src/editor/handle/node'
 import { YState } from 'src/editor/y-adapter/y-state'
+import { MIXED_VALUE } from 'src/global/constant'
 
 export const designOBBKeys = ['x', 'y', 'width', 'height', 'rotation'] as const
+export const designGeomKeys = [
+  ...designOBBKeys,
+  'radius',
+  'startAngle',
+  'endAngle',
+  'innerRate',
+] as const
 
 export type DesignOBBKey = (typeof designOBBKeys)[number]
-export type DesignGeomInfo = ReturnType<typeof createDesignGeomInfo>
-export type DesignGeomKey = keyof DesignGeomInfo
-export type DesignGeomFieldValue = number | boolean | string
+export type DesignGeomKey = (typeof designGeomKeys)[number]
+export type DesignGeomFieldValue = number | boolean | (string & {})
+export type DesignGeomInfo = Record<
+  DesignGeomKey,
+  DesignGeomFieldValue | typeof MIXED_VALUE
+>
 
 export type DesignGeomFieldContext = {
   handleNode: HandleNode
@@ -21,15 +32,15 @@ type DesignGeomFieldBase<Value extends DesignGeomFieldValue> = {
   apply: (node: S.Node, value: Value, context: DesignGeomFieldContext) => void
 }
 
-export type DesignNumberFieldDefinition = DesignGeomFieldBase<number> & {
+export type DesignNumberField = DesignGeomFieldBase<number> & {
   interaction: 'number'
 }
 
-export type DesignToggleFieldDefinition = DesignGeomFieldBase<boolean> & {
+export type DesignToggleField = DesignGeomFieldBase<boolean> & {
   interaction: 'toggle'
 }
 
-export type DesignSelectFieldDefinition<Value extends string = string> =
+export type DesignSelectField<Value extends string = string> =
   DesignGeomFieldBase<Value> & {
     interaction: 'select'
     getOptions: (
@@ -38,31 +49,31 @@ export type DesignSelectFieldDefinition<Value extends string = string> =
     ) => readonly Value[]
   }
 
-export type DesignGeomFieldDefinition =
-  | DesignNumberFieldDefinition
-  | DesignToggleFieldDefinition
-  | DesignSelectFieldDefinition
+export type DesignGeomField =
+  | DesignNumberField
+  | DesignToggleField
+  | DesignSelectField
 
-export const createDesignGeomInfo = () => ({
-  x: 0,
-  y: 0,
-  width: 0,
-  height: 0,
-  rotation: 0,
-  radius: 0,
-  startAngle: 0,
-  endAngle: 360,
-  innerRate: 0,
-})
+export const createDesignGeomInfo = () =>
+  ({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    rotation: 0,
+    radius: 0,
+    startAngle: 0,
+    endAngle: 360,
+    innerRate: 0,
+    flip: 0,
+  }) as unknown as DesignGeomInfo
 
 const designOBBKeySet = new Set<DesignGeomKey>(designOBBKeys)
 
 export const isDesignOBBKey = (key: DesignGeomKey): key is DesignOBBKey =>
   designOBBKeySet.has(key)
 
-const createMRectFieldDefinition = (
-  key: DesignOBBKey,
-): DesignNumberFieldDefinition => ({
+const createMRectField = (key: DesignOBBKey): DesignNumberField => ({
   key,
   interaction: 'number',
   supports: () => true,
@@ -82,11 +93,11 @@ const createMRectFieldDefinition = (
   },
 })
 
-const createNodePropFieldDefinition = (
+const createNumberField = (
   key: Exclude<DesignGeomKey, DesignOBBKey>,
   supports: (node: S.Node) => boolean,
   normalize = (value: number) => value,
-): DesignNumberFieldDefinition => ({
+): DesignNumberField => ({
   key,
   interaction: 'number',
   supports,
@@ -97,13 +108,16 @@ const createNodePropFieldDefinition = (
 })
 
 const supportRadius = (node: S.Node) => node.type === 'frame' || node.type === 'rect'
-
 const supportEllipse = (node: S.Node) => node.type === 'ellipse'
 
-export const designGeomFieldDefinitions: DesignGeomFieldDefinition[] = [
-  ...designOBBKeys.map(createMRectFieldDefinition),
-  createNodePropFieldDefinition('radius', supportRadius, (value) => max(0, value)),
-  createNodePropFieldDefinition('startAngle', supportEllipse),
-  createNodePropFieldDefinition('endAngle', supportEllipse),
-  createNodePropFieldDefinition('innerRate', supportEllipse),
+export const designGeomFields: DesignGeomField[] = [
+  ...designOBBKeys.map(createMRectField),
+  createNumberField('radius', supportRadius, (value) => max(0, value)),
+  createNumberField('startAngle', supportEllipse),
+  createNumberField('endAngle', supportEllipse),
+  createNumberField('innerRate', supportEllipse),
 ]
+
+export const designGeomFieldMap = new Map(
+  designGeomFields.map((field) => [field.key, field]),
+)

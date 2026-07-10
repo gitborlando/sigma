@@ -1,3 +1,5 @@
+type Nil = undefined | null
+
 type ID = string
 
 type IDPayload = {

@@ -1,23 +1,36 @@
-import RcInputNumber, { InputNumberProps } from '@rc-component/input-number'
 import { Dragger } from '@gitborlando/toolkit/browser'
-import { isNumber, isUndefined } from 'es-toolkit'
+import RcInputNumber, { InputNumberProps } from '@rc-component/input-number'
 
-export interface InputNumProps extends Omit<
+type InputNumSpecialValue = string | symbol
+
+export interface InputNumProps<
+  SpecialValue extends InputNumSpecialValue = never,
+> extends Omit<
   InputNumberProps<number>,
-  'prefix' | 'suffix' | 'onChange'
+  'prefix' | 'suffix' | 'value' | 'onChange'
 > {
   needFocusStyle?: boolean
   needAutoSelect?: boolean
   needControls?: boolean
-  onChange?: (value: number | null) => void
-  onEnd?: (value: number | null) => void
+  value?: number | SpecialValue | Nil
+  onChange?: (value: number | SpecialValue | Nil) => void
+  onEnd?: (value: number | SpecialValue | Nil) => void
   suffix?: ReactNode
   prefix?: ReactNode
+  specialValue?: {
+    value: SpecialValue
+    label: string
+  }
 }
+
+type InputNumComp = <SpecialValue extends InputNumSpecialValue = never>(
+  props: InputNumProps<SpecialValue> &
+    InputNumSliderProps & { ref?: React.ForwardedRef<HTMLInputElement> },
+) => ReactNode
 
 export const InputNum = forwardRef<
   HTMLInputElement,
-  InputNumProps & InputNumSliderProps
+  InputNumProps<InputNumSpecialValue> & InputNumSliderProps
 >(
   (
     {
@@ -31,6 +44,8 @@ export const InputNum = forwardRef<
       onEnd,
       disabled,
       value,
+      specialValue,
+      placeholder,
       onFocus,
       onBlur,
       onPressEnter,
@@ -45,32 +60,34 @@ export const InputNum = forwardRef<
     },
     ref,
   ) => {
+    const isSpecialValue = specialValue !== undefined && value === specialValue.value
+    const inputValue = isSpecialValue ? undefined : (value as number | Nil)
     const inputRef = useRef<HTMLInputElement>()
-    const lastValue = useRef(value)
-    const currentValue = useRef(value)
-    const isFocusing = useRef(false)
-    const isSliding = useRef(false)
-    const slideStartValue = useRef<number | null>()
+    const state = useRef({
+      lastValue: value,
+      curValue: value,
+      isFocusing: false,
+      isSliding: false,
+    }).current
 
     useLayoutEffect(() => {
-      currentValue.current = value
-      if (!isFocusing.current && !isSliding.current) {
-        lastValue.current = value
+      state.curValue = value
+
+      if (!state.isFocusing && !state.isSliding) {
+        state.lastValue = value
       }
     }, [value])
 
-    const handleChange = (val: number | null) => {
-      currentValue.current = val
-      onChange?.(val)
+    const handleChange = (value: number | Nil) => {
+      state.curValue = value
+      onChange?.(value)
     }
 
-    const handleEnd = (last = lastValue.current) => {
-      const finalValue = currentValue.current
-      if (isUndefined(finalValue)) return
-      if (Object.is(finalValue, last)) return
+    const handleEnd = (changed = !Object.is(state.curValue, state.lastValue)) => {
+      if (!changed) return
 
-      lastValue.current = finalValue
-      onEnd?.(finalValue)
+      state.lastValue = state.curValue
+      onEnd?.(state.curValue)
     }
 
     return (
@@ -92,7 +109,8 @@ export const InputNum = forwardRef<
           prefix: cls('prefix'),
           suffix: cls('addon'),
         }}
-        value={value}
+        value={inputValue}
+        placeholder={isSpecialValue ? specialValue.label : placeholder}
         disabled={disabled}
         controls={needControls}
         prefix={
@@ -100,20 +118,14 @@ export const InputNum = forwardRef<
             <SliderWrapperComp
               slideRate={slideRate}
               beforeSlide={() => {
-                isSliding.current = true
-                slideStartValue.current = currentValue.current
+                state.isSliding = true
                 beforeSlide?.()
               }}
-              onSlide={(value) => {
-                if (isNumber(currentValue.current)) {
-                  currentValue.current += value
-                }
-                onSlide?.(value)
-              }}
+              onSlide={onSlide}
               afterSlide={(changed) => {
-                isSliding.current = false
+                state.isSliding = false
                 afterSlide?.(changed)
-                handleEnd(slideStartValue.current)
+                handleEnd(changed)
               }}>
               {prefix}
             </SliderWrapperComp>
@@ -127,7 +139,7 @@ export const InputNum = forwardRef<
           onBlur?.(e)
           queueMicrotask(() => {
             handleEnd()
-            isFocusing.current = false
+            state.isFocusing = false
           })
         }}
         onPressEnter={(e) => {
@@ -136,7 +148,7 @@ export const InputNum = forwardRef<
           inputRef.current?.blur()
         }}
         onFocus={(e) => {
-          isFocusing.current = true
+          state.isFocusing = true
           onFocus?.(e)
           if (needAutoSelect) {
             inputRef.current?.select()
@@ -152,7 +164,7 @@ export const InputNum = forwardRef<
       />
     )
   },
-)
+) as InputNumComp
 
 interface InputNumSliderProps {
   slideRate?: number
