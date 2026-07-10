@@ -7,7 +7,7 @@ export class Disposer {
     disposers.forEach((d) => this.disposers.add(d))
   }
 
-  dispose() {
+  dispose = () => {
     Disposer.flushDisposers(this.disposers)
   }
 
