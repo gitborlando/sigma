@@ -68,14 +68,14 @@ export class Setting extends Service {
   }
 
   private loadSetting() {
-    const savedSetting = jsonParse(localStorage.getItem('editor.setting'))
+    const savedSetting = jsonParse(localStorage.getItem('editor.setting') || '{}')
     this.settings = mergeOverrideArray(initSetting(), savedSetting)
   }
 
   private autoSaveSetting() {
     return reaction(
       () => jsonFy(this.settings),
-      (json) => localStorage.setItem('editor.setting', json || ''),
+      (json) => localStorage.setItem('editor.setting', json || '{}'),
     )
   }
 }
