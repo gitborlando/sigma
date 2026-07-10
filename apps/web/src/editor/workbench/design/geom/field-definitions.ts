@@ -6,6 +6,7 @@ import { MIXED_VALUE } from 'src/global/constant'
 export const designOBBKeys = ['x', 'y', 'width', 'height', 'rotation'] as const
 export const designGeomKeys = [
   ...designOBBKeys,
+  'aspectRatio',
   'radius',
   'startAngle',
   'endAngle',
@@ -66,6 +67,7 @@ export const createDesignGeomInfo = () =>
     endAngle: 360,
     innerRate: 0,
     flip: 0,
+    aspectRatio: false,
   }) as unknown as DesignGeomInfo
 
 const designOBBKeySet = new Set<DesignGeomKey>(designOBBKeys)
@@ -90,8 +92,24 @@ const createMRectField = (key: DesignOBBKey): DesignNumberField => ({
     }
 
     yState.set<S.Node>([node.id, key], mrect[key])
+    if (mrect.aspectRatio > 0) {
+      const linkedKey = key === 'width' ? 'height' : 'width'
+      yState.set<S.Node>([node.id, linkedKey], mrect[linkedKey])
+    }
   },
 })
+
+const aspectRatioField: DesignToggleField = {
+  key: 'aspectRatio',
+  interaction: 'toggle',
+  supports: () => true,
+  read: (node, { handleNode }) => handleNode.getMRect(node).aspectRatio > 0,
+  apply: (node, value, { handleNode, yState }) => {
+    const mrect = handleNode.getMRect(node)
+    mrect.lockAspectRatio(value)
+    yState.set<S.Node>([node.id, 'aspectRatio'], mrect.aspectRatio)
+  },
+}
 
 const createNumberField = (
   key: Exclude<DesignGeomKey, DesignOBBKey>,
@@ -112,6 +130,7 @@ const supportEllipse = (node: S.Node) => node.type === 'ellipse'
 
 export const designGeomFields: DesignGeomField[] = [
   ...designOBBKeys.map(createMRectField),
+  aspectRatioField,
   createNumberField('radius', supportRadius, (value) => max(0, value)),
   createNumberField('startAngle', supportEllipse),
   createNumberField('endAngle', supportEllipse),

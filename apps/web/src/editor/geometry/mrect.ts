@@ -5,6 +5,7 @@ export interface IMRect {
   width: number
   height: number
   matrix: IMatrix
+  aspectRatio: number
 }
 
 /**
@@ -14,6 +15,7 @@ export class MRect {
   private _width: number
   private _height: number
   private _matrix: IMatrix
+  private _aspectRatio: number
 
   private _xy?: IXY
   private _rotation?: number
@@ -21,10 +23,16 @@ export class MRect {
   private _vertices?: IXY[]
   private _aabb?: AABB
 
-  constructor(width: number, height: number, matrix: IMatrix) {
+  constructor(
+    width: number,
+    height: number,
+    matrix: IMatrix,
+    aspectRatio: number = -1,
+  ) {
     this._width = width
     this._height = height
     this._matrix = matrix
+    this._aspectRatio = aspectRatio
   }
 
   get width() {
@@ -34,6 +42,7 @@ export class MRect {
   set width(width: number) {
     if (this._width === width) return
     this._width = width
+    if (this._aspectRatio > 0) this._height = width / this._aspectRatio
     this.expired()
   }
 
@@ -44,7 +53,16 @@ export class MRect {
   set height(height: number) {
     if (this._height === height) return
     this._height = height
+    if (this._aspectRatio > 0) this._width = height * this._aspectRatio
     this.expired()
+  }
+
+  get aspectRatio() {
+    return this._aspectRatio
+  }
+
+  set aspectRatio(aspectRatio: number) {
+    this._aspectRatio = aspectRatio
   }
 
   get matrix() {
@@ -178,20 +196,28 @@ export class MRect {
     return this
   }
 
+  lockAspectRatio(lock = true) {
+    if (!lock || this.width <= 0 || this.height <= 0) {
+      return (this.aspectRatio = -1)
+    }
+    this.aspectRatio = this.width / this.height
+  }
+
   clone(mrect?: IMRect) {
     if (!mrect) return MRect.of(this)
 
     this._width = mrect.width
     this._height = mrect.height
+    this._aspectRatio = mrect.aspectRatio
     this.matrix = Matrix.plain(mrect.matrix)
     this.expired()
     return this
   }
 
   plain() {
-    const { width, height } = this
+    const { width, height, aspectRatio } = this
     const matrix = Matrix.plain(this.matrix)
-    return { width, height, matrix }
+    return { width, height, matrix, aspectRatio }
   }
 
   calcVertices(matrix: IMatrix) {
@@ -207,7 +233,9 @@ export class MRect {
   }
 
   static of(mrect: IMRect) {
-    return new MRect(mrect.width, mrect.height, Matrix.plain(mrect.matrix))
+    const { width, height, aspectRatio } = mrect
+    const matrix = Matrix.plain(mrect.matrix)
+    return new MRect(width, height, matrix, aspectRatio)
   }
 
   static fromRect(rect: IRect, matrix: IMatrix) {

@@ -23,7 +23,7 @@ export class HandleNode extends Service {
   }
 
   getMRect(node: S.Node) {
-    const compare = [node.width, node.height, node.matrix]
+    const compare = [node.width, node.height, node.matrix, node.aspectRatio]
     return getSet(this.mrectCache, node.id, () => MRect.of(node), compare)
   }
 

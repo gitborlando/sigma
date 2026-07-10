@@ -1,6 +1,6 @@
 import { XY } from '@gitborlando/geo'
 import { clone, getSet, miniId } from '@gitborlando/utils'
-import { Matrix } from 'src/editor/geometry'
+import { MRect } from 'src/editor/geometry'
 import { createLine } from 'src/editor/geometry/point'
 import { getLatestVersion } from 'src/editor/schema/migration'
 import { Service } from 'src/global/service'
@@ -262,10 +262,9 @@ export class SchemaCreator extends Service {
   private createNodeBase(): S.NodeBase {
     return {
       ...this.createSchemaMeta(),
+      ...MRect.identity(100, 100).plain(),
       x: 0,
       y: 0,
-      width: 100,
-      height: 100,
       opacity: 1,
       rotation: 0,
       flip: 0,
@@ -273,7 +272,6 @@ export class SchemaCreator extends Service {
       strokes: [],
       blurs: [],
       shadows: [],
-      matrix: Matrix.identity(),
     }
   }
 
