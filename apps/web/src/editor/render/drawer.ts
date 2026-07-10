@@ -4,11 +4,7 @@ import { Setting } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
 import { RenderInvalidator } from 'src/editor/render/invalidator'
-import {
-  createTextBreaker,
-  ISplitText,
-  TextBreaker,
-} from 'src/editor/render/text-break/text-breaker'
+import { ISplitText, TextBreaker } from 'src/editor/render/text-break/text-breaker'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 import { Image } from 'src/global/service/image'
@@ -34,17 +30,9 @@ export class ElemDrawer extends Service {
   }
 
   private textBreaker?: TextBreaker
-  private initTextBreakerTask?: Promise<void>
 
-  initTextBreaker() {
-    if (this.textBreaker) return Promise.resolve()
-    if (this.initTextBreakerTask) return this.initTextBreakerTask
-
-    this.initTextBreakerTask = createTextBreaker().then((textBreaker) => {
-      this.textBreaker = textBreaker
-    })
-
-    return this.initTextBreakerTask
+  setTextBreaker(textBreaker: TextBreaker) {
+    this.textBreaker = textBreaker
   }
 
   draw = (elem: Elem, ctx: CanvasRenderingContext2D, path2d: Path2D) => {

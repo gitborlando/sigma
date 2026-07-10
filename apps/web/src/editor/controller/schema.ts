@@ -14,7 +14,7 @@ import { FileService } from 'src/global/service/file'
 
 @reflection
 export class SchemaController extends Service {
-  private loadingFileId = ''
+  private sessionFileId = ''
 
   constructor(
     private readonly schemaCreator: SchemaCreator,
@@ -28,11 +28,12 @@ export class SchemaController extends Service {
     autoBind(this)
   }
 
-  async initSchemaSession(fileId: string) {
-    this.loadingFileId = fileId
+  async loadSchema(fileId: string) {
+    return migrationSchema(await this.fetchSchema(fileId))
+  }
 
-    const schema = migrationSchema(await this.loadSchema(fileId))
-    if (this.loadingFileId !== fileId) return
+  setupSchema(fileId: string, schema: S.Schema) {
+    if (fileId === this.sessionFileId) return
 
     this.yState.init(schema)
     this.ySync.init(fileId, this.yState.doc)
@@ -46,9 +47,11 @@ export class SchemaController extends Service {
     })
     SchemaHelper.init({ find: this.yState.find })
     this.handleSelect.selectPage(schema.meta.pageIds[0])
+
+    this.sessionFileId = fileId
   }
 
-  private async loadSchema(fileId: string) {
+  private async fetchSchema(fileId: string) {
     if (fileId === 'mock') {
       const schema = mock_transform_v(this.schemaCreator)
       if (schema) return schema

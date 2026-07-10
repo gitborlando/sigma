@@ -121,7 +121,9 @@ export class Editor extends Service {
   constructor() {
     super()
     this.effect(() => this.container.dispose())
-    this.effect(() => (Editor.editor = undefined!))
+    this.effect(() => {
+      if (Editor.editor === this) Editor.editor = undefined!
+    })
   }
 
   resolve = <K extends EditorServiceId>(key: K) => {
