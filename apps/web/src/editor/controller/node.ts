@@ -110,11 +110,8 @@ export class NodeController extends Service {
       selected.forEach((node) => this.handleNode.removeChild(oldParent, node))
       selected.forEach((node) => this.handleNode.insertChildAt(frameNode, node))
     })
-    this.undo.untrack(
-      action(() => {
-        this.handleSelect.replaceSelection({ [frameNode.id]: true })
-      }),
-    )
+    this.handleSelect.replaceSelection({ [frameNode.id]: true })
+
     this.undo.track('all', t('create frame'))
   }
 }

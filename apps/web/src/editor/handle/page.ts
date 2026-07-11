@@ -21,26 +21,19 @@ export class HandlePage extends Service {
       this.yState.set<S.Page>([page.id], page)
       this.yState.insert<S.Meta>(['meta', 'pageIds'], page.id)
     })
-
-    this.undo.untrack(() => this.handleSelect.selectPage(page.id))
+    this.handleSelect.selectPage(page.id)
     this.undo.track('all', t('add and select page'))
   }
 
   removePage = (page: S.Page) => {
-    if (this.yState.state.meta.pageIds.length === 1) return
+    const pageIds = this.yState.state.meta.pageIds
+    if (pageIds.length === 1) return
 
     this.yState.transact(() => {
       this.yState.delete<S.Page>([page.id])
-      this.yState.delete<S.Meta>([
-        'meta',
-        'pageIds',
-        this.yState.state.meta.pageIds.indexOf(page.id),
-      ])
+      this.yState.delete<S.Meta>(['meta', 'pageIds', pageIds.indexOf(page.id)])
     })
-
-    this.undo.untrack(() =>
-      this.handleSelect.selectPage(this.yState.state.meta.pageIds[0]),
-    )
+    this.handleSelect.selectPage(pageIds[0])
     this.undo.track('all', t('delete page'))
   }
 
@@ -58,10 +51,6 @@ export class HandlePage extends Service {
     }
     curPage.childIds.forEach(findNodes)
 
-    console.log({
-      meta: this.yState.state.meta,
-      page: curPage,
-      ...nodes,
-    })
+    console.log({ meta: this.yState.state.meta, page: curPage, ...nodes })
   }
 }
