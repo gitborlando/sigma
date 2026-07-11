@@ -1,5 +1,4 @@
 import { twoDecimal } from '@gitborlando/geo'
-import { Icon } from '@gitborlando/widget'
 import { isNil } from 'es-toolkit'
 import {
   type DesignGeomFieldValue,
@@ -8,6 +7,7 @@ import {
 import { MIXED_VALUE } from 'src/global/constant'
 import { Btn } from 'src/view/component/btn'
 import { InputNum, type InputNumProps } from 'src/view/component/input-num'
+import { Icon } from 'src/view/component/svg-icon'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 
@@ -38,13 +38,13 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
       horizontal='auto auto'
       gap={8}>
       <GeomItem
-        label={<Icon url={Assets.editor.design.geom.x} />}
+        label={<Icon src={Assets.editor.design.geom.x} />}
         geomKey='x'
         value={currentGeom.x as number | typeof MIXED_VALUE}
         slideRate={1 / zoom}
       />
       <GeomItem
-        label={<Icon url={Assets.editor.design.geom.y} />}
+        label={<Icon src={Assets.editor.design.geom.y} />}
         geomKey='y'
         value={currentGeom.y as number | typeof MIXED_VALUE}
         slideRate={1 / zoom}
@@ -54,7 +54,7 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
         horizontal='minmax(0, 1fr) minmax(0, 1fr)'
         gap={8}>
         <GeomItem
-          label={<Icon url={Assets.editor.design.geom.width} />}
+          label={<Icon src={Assets.editor.design.geom.width} />}
           geomKey='width'
           value={currentGeom.width as number | typeof MIXED_VALUE}
           slideRate={1 / zoom}
@@ -67,17 +67,17 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
           onClick={() => {
             setGeomValue('aspectRatio', currentGeom.aspectRatio !== true)
           }}
-          icon={<Icon url={Assets.editor.design.geom.lockAspectRatio} />}
+          icon={<Icon src={Assets.editor.design.geom.lockAspectRatio} />}
         />
         <GeomItem
-          label={<Icon url={Assets.editor.design.geom.height} />}
+          label={<Icon src={Assets.editor.design.geom.height} />}
           geomKey='height'
           value={currentGeom.height as number | typeof MIXED_VALUE}
           slideRate={1 / zoom}
         />
       </G>
       <GeomItem
-        label={<Icon url={Assets.editor.design.geom.rotate} />}
+        label={<Icon src={Assets.editor.design.geom.rotate} />}
         geomKey='rotation'
         value={currentGeom.rotation as number | typeof MIXED_VALUE}
         formatter={angleFormatter}
@@ -86,7 +86,7 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
       <FlipComp />
       <GeomItem
         x-if={currentKeys.has('radius')}
-        label={<Icon url={Assets.editor.design.geom.cornerRadius} />}
+        label={<Icon src={Assets.editor.design.geom.cornerRadius} />}
         geomKey='radius'
         value={currentGeom.radius as number | typeof MIXED_VALUE}
         slideRate={1 / zoom}
@@ -121,7 +121,7 @@ const FlipComp: FC<{}> = observer(({}) => {
         className={flipCls('button')}
         title='flipX'
         onClick={() => handleFlip(1)}
-        icon={<Icon url={Assets.editor.design.geom.flipHorizontal} />}
+        icon={<Icon src={Assets.editor.design.geom.flipHorizontal} />}
       />
       <Btn
         type='button'
@@ -129,7 +129,7 @@ const FlipComp: FC<{}> = observer(({}) => {
         className={flipCls('button')}
         title='flipY'
         onClick={() => handleFlip(2)}
-        icon={<Icon url={Assets.editor.design.geom.flipVertical} />}
+        icon={<Icon src={Assets.editor.design.geom.flipVertical} />}
       />
       <Btn
         type='button'
@@ -137,7 +137,7 @@ const FlipComp: FC<{}> = observer(({}) => {
         className={flipCls('button')}
         title='rotate90'
         onClick={handleRotate90}
-        icon={<Icon url={Assets.editor.design.geom.rotate90} />}
+        icon={<Icon src={Assets.editor.design.geom.rotate90} />}
       />
     </G>
   )
@@ -161,7 +161,7 @@ const ArcGeomComp: FC<{}> = observer(({}) => {
     <G className={arcGeomCls()} horizontal='1.2fr 1fr 1fr'>
       <GeomItem
         className={arcGeomCls('input')}
-        label={<Icon url={Assets.editor.design.geom.innerRadiusRatio} />}
+        label={<Icon src={Assets.editor.design.geom.innerRadiusRatio} />}
         value={startAngle}
         geomKey='startAngle'
         formatter={angleFormatter}

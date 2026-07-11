@@ -233,7 +233,6 @@ const cls = classes(css`
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      color: rgba(0, 0, 0, 0.65);
     }
 
     &-input {
@@ -246,7 +245,7 @@ const cls = classes(css`
       font-size: 12px;
       color: inherit;
       &::placeholder {
-        color: rgba(0, 0, 0, 0.35);
+        color: rgba(0, 0, 0, 0.65);
       }
     }
 

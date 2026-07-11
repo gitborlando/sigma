@@ -1,8 +1,8 @@
 import { ChevronLeft, Redo, Undo as UndoIcon } from 'lucide-react'
-import { ReactSVG } from 'react-svg'
 import { IStageCreateType } from 'src/editor/stage/interact/create'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
+import { Icon } from 'src/view/component/svg-icon'
 import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot'
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
@@ -59,7 +59,9 @@ const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) =>
     <Btn
       size={32}
       active={isActive}
-      icon={<IconComp url={Assets.editor.header[type]} active={isActive} />}
+      icon={
+        <Icon className={cls('centerGroup-icon')} src={Assets.editor.header[type]} />
+      }
       onClick={() => (stageInteract.interaction = type)}
     />
   )
@@ -73,7 +75,9 @@ const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
   return (
     <Btn
       size={32}
-      icon={<IconComp url={Assets.editor.node[type]} active={isActive} />}
+      icon={
+        <Icon className={cls('centerGroup-icon')} src={Assets.editor.node[type]} />
+      }
       active={isActive}
       onClick={action(() => {
         stageInteract.interaction = 'create'
@@ -100,30 +104,6 @@ const UndoGroup: FC<{}> = observer(() => {
         onClick={undo.redo}
       />
     </G>
-  )
-})
-
-const IconComp: FC<{
-  url: string
-  active: boolean
-}> = observer(({ url, active }) => {
-  return (
-    <ReactSVG
-      src={url}
-      className={cls('centerGroup-icon')}
-      beforeInjection={(s) => {
-        s.setAttribute('width', '20')
-        s.setAttribute('height', '20')
-        s.querySelectorAll('[stroke-width]').forEach((el) => {
-          el.setAttribute('stroke-width', '1.5')
-        })
-        if (active) {
-          s.querySelectorAll('[stroke]').forEach((el) => {
-            el.setAttribute('stroke', 'white')
-          })
-        }
-      }}
-    />
   )
 })
 
