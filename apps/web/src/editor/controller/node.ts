@@ -78,12 +78,8 @@ export class NodeController extends Service {
   }
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
-    const selected = this.handleSelect.selectIdList.map((id) =>
-      this.yState.find<S.Node>(id),
-    )
-
     this.yState.transact(() => {
-      selected.forEach((node) => {
+      this.selectNodes.forEach((node) => {
         const parent = this.yState.find<S.NodeParent>(node.parentId)
         let index = parent.childIds.indexOf(node.id)
         index = iife(() => {
@@ -100,9 +96,7 @@ export class NodeController extends Service {
   }
 
   wrapInFrame() {
-    const selected = this.handleSelect.selectIdList.map((id) =>
-      this.yState.find<S.Node>(id),
-    )
+    const selected = this.selectNodes
     if (selected.length === 0) return
 
     const frameOBB = this.handleNode.getNodesMergedOBB(selected)

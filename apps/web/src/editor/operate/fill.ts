@@ -3,11 +3,11 @@ import type { YPlainPath } from '@gitborlando/y-plain'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
 import { makeObservable } from 'mobx'
+import { NodeController } from 'src/editor/controller/node'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
 import { Undo } from '../core/undo'
-import { HandleSelect } from '../handle/select'
 import { YState } from '../y-adapter/y-state'
 
 type DynamicYStateMutation = {
@@ -22,10 +22,10 @@ export class OperateFill extends Service {
   isMultiFills = false
 
   constructor(
-    private readonly handleSelect: HandleSelect,
     private readonly yState: YState,
     private readonly schemaCreator: SchemaCreator,
     private readonly undo: Undo,
+    private readonly nodeController: NodeController,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -42,9 +42,7 @@ export class OperateFill extends Service {
   setupFills() {
     this.fills = []
     this.isMultiFills = false
-    const nodes = this.handleSelect.selectIdList.map((id) =>
-      this.yState.find<S.Node>(id),
-    )
+    const nodes = this.nodeController.selectNodes
     if (nodes.length === 1) return (this.fills = clone(nodes[0].fills))
     if (nodes.length > 1) {
       if (this.isSameFills(nodes)) return (this.fills = clone(nodes[0].fills))
@@ -53,9 +51,7 @@ export class OperateFill extends Service {
   }
 
   updateFills() {
-    const nodes = this.handleSelect.selectIdList.map((id) =>
-      this.yState.find<S.Node>(id),
-    )
+    const nodes = this.nodeController.selectNodes
     this.fills = clone(nodes[0].fills)
   }
 
@@ -83,9 +79,7 @@ export class OperateFill extends Service {
   }
 
   applyChangeToYState(patches: Patch[]) {
-    const nodes = this.handleSelect.selectIdList.map((id) =>
-      this.yState.find<S.Node>(id),
-    )
+    const nodes = this.nodeController.selectNodes
     this.yState.transact(() => {
       nodes.forEach((node) => {
         if (this.isMultiFills) {

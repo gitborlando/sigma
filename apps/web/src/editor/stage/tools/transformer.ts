@@ -1,10 +1,10 @@
 import { Dragger } from '@gitborlando/toolkit/browser'
 import { iife } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
+import { NodeController } from 'src/editor/controller/node'
 import { Setting } from 'src/editor/core/setting'
 import { Undo } from 'src/editor/core/undo'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
-import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -21,7 +21,7 @@ export class StageTransformer extends Service {
   @observable isMoving = false
 
   @computed get isSingleSelect() {
-    return this.handleSelect.selectIdList.length === 1
+    return this.nodeController.selectNodes.length === 1
   }
 
   private action: TransformerAction = 'move'
@@ -30,15 +30,15 @@ export class StageTransformer extends Service {
   private dragger!: Dragger
 
   constructor(
-    private readonly handleSelect: HandleSelect,
     private readonly yState: YState,
     private readonly undo: Undo,
     private readonly stageViewport: StageViewport,
     private readonly setting: Setting,
+    private readonly nodeController: NodeController,
   ) {
     super()
     autoBind(makeObservable(this))
-    this.dragger = createStageDragger(stageViewport)
+    this.dragger = createStageDragger(this.stageViewport)
   }
 
   setup(selectNodes: S.Node[]) {
@@ -86,13 +86,7 @@ export class StageTransformer extends Service {
       .start(e)
   }
 
-  onResize(
-    directions: TRBL[],
-    options?: {
-      e?: MouseEvent
-      shiftKey?: boolean
-    },
-  ) {
+  onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {
     const { startMRect, startMatrix } = this.onStartTransform()
     const endMatrix = Matrix.of(startMatrix)
 
@@ -169,11 +163,9 @@ export class StageTransformer extends Service {
   private mrectCache = new Map<ID, IMRect>()
 
   private onStartTransform() {
-    this.handleSelect.selectIdList
-      .map((id) => this.yState.find<S.Node>(id))
-      .forEach((node) => {
-        this.mrectCache.set(node.id, MRect.of(node))
-      })
+    this.nodeController.selectNodes.forEach((node) => {
+      this.mrectCache.set(node.id, MRect.of(node))
+    })
     const startMRect = this.mrect.clone()
     const startMatrix = this.isSingleSelect
       ? Matrix.identity()
@@ -188,9 +180,7 @@ export class StageTransformer extends Service {
 
   private transform() {
     this.yState.transact(() => {
-      this.handleSelect.selectIdList
-        .map((id) => this.yState.find<S.Node>(id))
-        .forEach(this.applyToNode)
+      this.nodeController.selectNodes.forEach(this.applyToNode)
     })
   }
 
@@ -201,7 +191,7 @@ export class StageTransformer extends Service {
     const startMRect = MRect.of(mrect)
     const forwardMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
 
-    if (this.handleSelect.selectIdList.length === 1 && this.action === 'resize') {
+    if (this.nodeController.selectNodes.length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
     } else {
       const localDiff = Matrix.of(forwardMatrix)
