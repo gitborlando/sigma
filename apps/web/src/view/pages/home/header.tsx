@@ -1,8 +1,8 @@
-import { Icon } from '@gitborlando/widget'
 import { Github, LucideLanguages } from 'lucide-react'
 import { UserService } from 'src/global/service/user'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
+import { Icon } from 'src/view/component/svg-icon'
 import { Text } from 'src/view/component/text'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
 
@@ -14,7 +14,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
   return (
     <G className={cls()} horizontal='auto auto 1fr' center gap={16}>
       <G horizontal center gap={8} className={cls('title')}>
-        <Icon url={Assets.favIcon.sigmaLogoText2} className={cls('title-icon')} />
+        <Icon src={Assets.favIcon.sigmaLogoText2} className={cls('title-icon')} />
       </G>
       <G horizontal center gap={8}>
         <a href='https://github.com/gitborlando/editor' target='_blank'>

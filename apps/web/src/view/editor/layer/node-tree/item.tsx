@@ -1,12 +1,12 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { stopPropagation } from '@gitborlando/utils/browser'
-import { Icon } from '@gitborlando/widget'
 import { ChevronRight } from 'lucide-react'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { LayerNodeTreeInfo } from 'src/editor/workbench/layer/node-tree'
 import { ContextMenu } from 'src/global/context-menu'
 import { Lucide } from 'src/view/component/lucide'
+import { Icon } from 'src/view/component/svg-icon'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
 import { LayerNodeTreePathIcon } from './path-icon'
@@ -92,7 +92,7 @@ export const LayerNodeTreeItemComp: FC<{
         <LayerNodeTreePathIcon node={node} />
       ) : (
         <Icon
-          url={Assets.editor.node[node.type as keyof typeof Assets.editor.node]}
+          src={Assets.editor.node[node.type as keyof typeof Assets.editor.node]}
         />
       )}
       <G className={cls('name')}>{node.name || '未命名'}</G>
