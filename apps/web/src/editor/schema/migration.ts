@@ -1,6 +1,6 @@
 import { XY } from '@gitborlando/geo'
 import { clone } from '@gitborlando/utils'
-import { omit } from 'es-toolkit'
+import { clamp, omit } from 'es-toolkit'
 import { MRect } from 'src/editor/geometry'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/geometry/point'
 import { SchemaHelper } from 'src/editor/schema/helper'
@@ -168,6 +168,24 @@ export const migrationList = [
 
       delete node.pointCount
       delete node.innerRate
+    },
+  },
+  {
+    version: 5,
+    desc: `将 ellipse 的 endAngle 改为 sweepAngle`,
+    transform: (ctx: SchemaTraverseContext) => {
+      type LegacyEllipseNode = S.NodeBase & {
+        type: 'ellipse'
+        startAngle: number
+        endAngle?: number
+        sweepAngle?: number
+      }
+
+      const node = T<LegacyEllipseNode>(ctx.item)
+      if (node.type !== 'ellipse') return
+
+      node.sweepAngle ??= clamp(node.endAngle! - node.startAngle, -360, 360)
+      delete node.endAngle
     },
   },
 ] satisfies Migration[]

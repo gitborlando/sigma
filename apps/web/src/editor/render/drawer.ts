@@ -1,5 +1,6 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
+import { clamp } from 'es-toolkit'
 import { Setting } from 'src/editor/core/setting'
 import { HitTest } from 'src/editor/geometry'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
@@ -105,46 +106,59 @@ export class ElemDrawer extends Service {
   }
 
   private drawEllipse = () => {
-    const { width, height, startAngle, endAngle, innerRate } = this.node as S.Ellipse
+    const {
+      width,
+      height,
+      startAngle,
+      sweepAngle: rawSweepAngle,
+      innerRate: rawInnerRate,
+    } = this.node as S.Ellipse
+    const innerRate = clamp(rawInnerRate, 0, 1)
+    const sweepAngle = clamp(rawSweepAngle, -360, 360)
+    const endAngle = startAngle + sweepAngle
+    const anticlockwise = sweepAngle < 0
+    const isFullEllipse = Math.abs(sweepAngle) === 360
     const [cx, cy] = [width / 2, height / 2]
     const startRadian = Angle.radianFy(startAngle)
     const endRadian = Angle.radianFy(endAngle)
+    const appendEllipse = (
+      radiusRate: number,
+      start: number,
+      end: number,
+      reverse = anticlockwise,
+    ) =>
+      this.path2d.ellipse(
+        cx,
+        cy,
+        cx * radiusRate,
+        cy * radiusRate,
+        0,
+        start,
+        end,
+        reverse,
+      )
+
+    appendEllipse(1, startRadian, endRadian)
 
     if (innerRate === 0) {
-      if (startAngle === 0 && endAngle === 360) {
-        this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
-      } else {
-        this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
-        this.path2d.lineTo(cx, cy)
-      }
-    } else {
-      if (startAngle === 0 && endAngle === 360) {
-        this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
-        this.path2d.moveTo(cx * (1 + innerRate), cy)
-        this.path2d.ellipse(
-          cx,
-          cy,
-          cx * innerRate,
-          cy * innerRate,
-          0,
-          startRadian,
-          endRadian,
-          true,
-        )
-      } else {
-        this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
-        this.path2d.ellipse(
-          cx,
-          cy,
-          cx * innerRate,
-          cy * innerRate,
-          0,
-          endRadian,
-          startRadian,
-          true,
-        )
-      }
+      if (!isFullEllipse) this.path2d.lineTo(cx, cy)
+      this.path2d.closePath()
+      return
     }
+
+    if (isFullEllipse)
+      this.path2d.moveTo(
+        cx + Math.cos(startRadian) * cx * innerRate,
+        cy + Math.sin(startRadian) * cy * innerRate,
+      )
+
+    appendEllipse(
+      innerRate,
+      isFullEllipse ? startRadian : endRadian,
+      isFullEllipse ? endRadian : startRadian,
+      !anticlockwise,
+    )
+
     this.path2d.closePath()
   }
 
@@ -390,14 +404,14 @@ export class ElemDrawer extends Service {
         break
 
       case 'ellipse':
-        const { startAngle, endAngle, innerRate } = this.node
+        const { startAngle, sweepAngle, innerRate } = this.node
         this.elem.hitTest = HitTest.hitEllipse(
           width / 2,
           height / 2,
           width / 2,
           height / 2,
           startAngle,
-          endAngle,
+          sweepAngle,
           innerRate,
         )
         break

@@ -103,7 +103,7 @@ export class SchemaCreator extends Service {
       points: [],
       innerRate: 0,
       startAngle: 0,
-      endAngle: 360,
+      sweepAngle: 360,
       ...nodeBase,
       ...option,
     }

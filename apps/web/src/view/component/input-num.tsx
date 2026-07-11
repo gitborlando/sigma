@@ -13,14 +13,14 @@ export interface InputNumProps<
   needAutoSelect?: boolean
   needControls?: boolean
   value?: number | SpecialValue | Nil
-  onChange?: (value: number | SpecialValue | Nil) => void
-  onEnd?: (value: number | SpecialValue | Nil) => void
   suffix?: ReactNode
   prefix?: ReactNode
   specialValue?: {
     value: SpecialValue
     label: string
   }
+  onChange?: (value: number | SpecialValue | Nil) => void
+  onEnd?: (value: number | SpecialValue | Nil) => void
 }
 
 type InputNumComp = <SpecialValue extends InputNumSpecialValue = never>(
@@ -158,7 +158,7 @@ export const InputNum = forwardRef<
           onStep?.(stepValue, info)
           handleEnd()
         }}
-        formatter={formatter}
+        formatter={isSpecialValue ? () => '' : formatter}
         parser={parser}
         {...rest}
       />
@@ -208,7 +208,9 @@ const cls = classes(css`
       width: 100%;
       height: 30px;
       padding: 0 8px;
-      transition: all 0.15s ease;
+      transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
       ${styles.borderRadius}
     }
 

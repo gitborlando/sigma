@@ -94,7 +94,7 @@ export class StageEvent extends Service {
       if (!this.isElemVisible(elem)) return
 
       if (xy) {
-        if (elem.node?.matrix) xy = Matrix.of(elem.node.matrix).invertXY(xy)
+        if (elem.node?.matrix) xy = Matrix.of(elem.renderMatrix).invertXY(xy)
 
         func({ elem, capture: true, stopped, stopPropagation, hitList, xy })
 

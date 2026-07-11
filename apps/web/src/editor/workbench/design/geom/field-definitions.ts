@@ -1,3 +1,4 @@
+import { clamp } from 'es-toolkit'
 import { max } from 'src/editor/geometry/base'
 import { HandleNode } from 'src/editor/handle/node'
 import { YState } from 'src/editor/y-adapter/y-state'
@@ -6,10 +7,11 @@ import { MIXED_VALUE } from 'src/global/constant'
 export const designOBBKeys = ['x', 'y', 'width', 'height', 'rotation'] as const
 export const designGeomKeys = [
   ...designOBBKeys,
+  'flip',
   'aspectRatio',
   'radius',
   'startAngle',
-  'endAngle',
+  'sweepAngle',
   'innerRate',
 ] as const
 
@@ -64,7 +66,7 @@ export const createDesignGeomInfo = () =>
     rotation: 0,
     radius: 0,
     startAngle: 0,
-    endAngle: 360,
+    sweepAngle: 360,
     innerRate: 0,
     flip: 0,
     aspectRatio: false,
@@ -129,12 +131,13 @@ const supportRadius = (node: S.Node) => node.type === 'frame' || node.type === '
 const supportEllipse = (node: S.Node) => node.type === 'ellipse'
 
 export const designGeomFields: DesignGeomField[] = [
-  ...designOBBKeys.map(createMRectField),
   aspectRatioField,
-  createNumberField('radius', supportRadius, (value) => max(0, value)),
-  createNumberField('startAngle', supportEllipse),
-  createNumberField('endAngle', supportEllipse),
-  createNumberField('innerRate', supportEllipse),
+  ...designOBBKeys.map(createMRectField),
+  createNumberField('flip', () => true),
+  createNumberField('radius', supportRadius, (v) => max(0, v)),
+  createNumberField('startAngle', supportEllipse, (v) => Angle.normal(v)),
+  createNumberField('sweepAngle', supportEllipse, (v) => Angle.normal(v)),
+  createNumberField('innerRate', supportEllipse, (v) => clamp(v, 0, 1)),
 ]
 
 export const designGeomFieldMap = new Map(

@@ -13,6 +13,7 @@ import editorDesignGeomFlipVertical from './editor/design/geom/flip-vertical.svg
 import editorDesignGeomHeight from './editor/design/geom/height.svg'
 import editorDesignGeomInnerRadiusRatio from './editor/design/geom/inner-radius-ratio.svg'
 import editorDesignGeomLockAspectRatio from './editor/design/geom/lock-aspect-ratio.svg'
+import editorDesignGeomRotate90 from './editor/design/geom/rotate-90.svg'
 import editorDesignGeomRotate from './editor/design/geom/rotate.svg'
 import editorDesignGeomWidth from './editor/design/geom/width.svg'
 import editorDesignGeomX from './editor/design/geom/x.svg'
@@ -55,6 +56,7 @@ export const Assets = {
         height: editorDesignGeomHeight,
         innerRadiusRatio: editorDesignGeomInnerRadiusRatio,
         lockAspectRatio: editorDesignGeomLockAspectRatio,
+        rotate90: editorDesignGeomRotate90,
         rotate: editorDesignGeomRotate,
         width: editorDesignGeomWidth,
         x: editorDesignGeomX,

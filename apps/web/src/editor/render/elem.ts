@@ -49,6 +49,30 @@ export class Elem {
     return this.memoMRect([this.node.width, this.node.height, this.node.matrix])
   }
 
+  private memoRenderMatrix = memorized(() => {
+    const { matrix, width, height, flip } = this.node
+    const flipX = flip & 1 ? -1 : 1
+    const flipY = flip & 2 ? -1 : 1
+    return Matrix.of(matrix)
+      .append({
+        a: flipX,
+        b: 0,
+        c: 0,
+        d: flipY,
+        tx: flipX === -1 ? width : 0,
+        ty: flipY === -1 ? height : 0,
+      })
+      .plain()
+  })
+  get renderMatrix(): IMatrix {
+    return this.memoRenderMatrix([
+      this.node.width,
+      this.node.height,
+      this.node.matrix,
+      this.node.flip,
+    ])
+  }
+
   private memoAABB = memorized(() =>
     Matrix.of(this.globalMatrix).applyAABB({
       minX: 0,
@@ -63,12 +87,12 @@ export class Elem {
 
   private _globalMatrix = Matrix.identity()
   private memoGlobalMatrix = memorized(() => {
-    return Matrix.of(this.parent.globalMatrix).append(this.node.matrix)
+    return Matrix.of(this.parent.globalMatrix).append(this.renderMatrix)
   })
   get globalMatrix(): IMatrix {
     if (!this.parent) return this._globalMatrix
     if (!this.node) return this.parent.globalMatrix
-    return this.memoGlobalMatrix([this.node.matrix, this.parent.globalMatrix])
+    return this.memoGlobalMatrix([this.renderMatrix, this.parent.globalMatrix])
   }
 
   getVisible(sceneAABB: AABB) {

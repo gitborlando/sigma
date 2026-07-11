@@ -1,29 +1,42 @@
 import { twoDecimal } from '@gitborlando/geo'
 import { Icon } from '@gitborlando/widget'
 import { isNil } from 'es-toolkit'
-import { type DesignGeomKey } from 'src/editor/workbench/design/geom/field-definitions'
+import {
+  type DesignGeomFieldValue,
+  type DesignGeomKey,
+} from 'src/editor/workbench/design/geom/field-definitions'
 import { MIXED_VALUE } from 'src/global/constant'
 import { Btn } from 'src/view/component/btn'
-import { InputNum } from 'src/view/component/input-num'
+import { InputNum, type InputNumProps } from 'src/view/component/input-num'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 
+const useSetGeomValue = () => {
+  const { designGeom, undo } = useEditorServices()
+  const nodes = useSelectNodes()
+
+  return (geomKey: DesignGeomKey, value: DesignGeomFieldValue) => {
+    designGeom.setGeom(nodes, { [geomKey]: value })
+    undo.track('state', `${t('modify geometry property')}: ${geomKey}`)
+  }
+}
+
 export const DesignGeomComp: FC<{}> = observer(({}) => {
-  const { designGeom, stageViewport, undo } = useEditorServices()
-  const { currentFields, currentGeom, setGeom, setupGeom } = designGeom
+  const { designGeom, stageViewport } = useEditorServices()
+  const { currentFields, currentGeom, setupGeom } = designGeom
   const currentKeys = new Set(currentFields.map(({ key }) => key))
   const { zoom } = stageViewport
   const nodes = useSelectNodes()
-
-  const handleLockAspectRatio = () => {
-    setGeom(nodes, { aspectRatio: currentGeom.aspectRatio !== true })
-    undo.track('state', `${t('modify geometry property')}: aspectRatio`)
-  }
+  const setGeomValue = useSetGeomValue()
 
   useLayoutEffect(() => setupGeom(nodes), [nodes, setupGeom])
 
   return (
-    <G x-if={nodes.length > 0} className={cls()} horizontal='auto auto' gap={8}>
+    <G
+      x-if={nodes.length > 0}
+      className={designGeomCls()}
+      horizontal='auto auto'
+      gap={8}>
       <GeomItem
         label={<Icon url={Assets.editor.design.geom.x} />}
         geomKey='x'
@@ -36,7 +49,10 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
         value={currentGeom.y as number | typeof MIXED_VALUE}
         slideRate={1 / zoom}
       />
-      <G className={cls('size')} horizontal='minmax(0, 1fr) minmax(0, 1fr)' gap={8}>
+      <G
+        className={designGeomCls('size')}
+        horizontal='minmax(0, 1fr) minmax(0, 1fr)'
+        gap={8}>
         <GeomItem
           label={<Icon url={Assets.editor.design.geom.width} />}
           geomKey='width'
@@ -45,10 +61,12 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
         />
         <Btn
           type='button'
-          className={cls('lock-aspect-ratio')}
+          className={designGeomCls('lock-aspect-ratio')}
           title={t('lock aspect ratio')}
           active={currentGeom.aspectRatio === true}
-          onClick={handleLockAspectRatio}
+          onClick={() => {
+            setGeomValue('aspectRatio', currentGeom.aspectRatio !== true)
+          }}
           icon={<Icon url={Assets.editor.design.geom.lockAspectRatio} />}
         />
         <GeomItem
@@ -62,7 +80,10 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
         label={<Icon url={Assets.editor.design.geom.rotate} />}
         geomKey='rotation'
         value={currentGeom.rotation as number | typeof MIXED_VALUE}
+        formatter={angleFormatter}
+        parser={angleParser}
       />
+      <FlipComp />
       <GeomItem
         x-if={currentKeys.has('radius')}
         label={<Icon url={Assets.editor.design.geom.cornerRadius} />}
@@ -70,30 +91,156 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
         value={currentGeom.radius as number | typeof MIXED_VALUE}
         slideRate={1 / zoom}
       />
-      <GeomItem
-        x-if={currentKeys.has('startAngle')}
-        label='起始角'
-        geomKey='startAngle'
-        value={currentGeom.startAngle as number | typeof MIXED_VALUE}
+      <ArcGeomComp x-if={currentKeys.has('startAngle')} />
+    </G>
+  )
+})
+
+const FlipComp: FC<{}> = observer(({}) => {
+  const { designGeom, undo } = useEditorServices()
+  const { currentGeom, setupSlideGeom } = designGeom
+  const nodes = useSelectNodes()
+  const setGeomValue = useSetGeomValue()
+
+  const handleFlip = (mask: 1 | 2) => {
+    const flip =
+      currentGeom.flip === MIXED_VALUE ? mask : (currentGeom.flip as number) ^ mask
+    setGeomValue('flip', flip)
+  }
+
+  const handleRotate90 = () => {
+    setupSlideGeom(nodes, 'rotation')?.(90)
+    undo.track('state', `${t('modify geometry property')}: rotation`)
+  }
+
+  return (
+    <G className={flipCls()} horizontal='repeat(3, minmax(0, 1fr))'>
+      <Btn
+        type='button'
+        size={30}
+        className={flipCls('button')}
+        title='flipX'
+        onClick={() => handleFlip(1)}
+        icon={<Icon url={Assets.editor.design.geom.flipHorizontal} />}
       />
-      <GeomItem
-        x-if={currentKeys.has('endAngle')}
-        label='结束角'
-        geomKey='endAngle'
-        value={currentGeom.endAngle as number | typeof MIXED_VALUE}
+      <Btn
+        type='button'
+        size={30}
+        className={flipCls('button')}
+        title='flipY'
+        onClick={() => handleFlip(2)}
+        icon={<Icon url={Assets.editor.design.geom.flipVertical} />}
       />
-      <GeomItem
-        x-if={currentKeys.has('innerRate')}
-        label='内径比'
-        geomKey='innerRate'
-        value={currentGeom.innerRate as number | typeof MIXED_VALUE}
-        slideRate={0.01}
+      <Btn
+        type='button'
+        size={30}
+        className={flipCls('button')}
+        title='rotate90'
+        onClick={handleRotate90}
+        icon={<Icon url={Assets.editor.design.geom.rotate90} />}
       />
     </G>
   )
 })
 
-const cls = classes(css`
+type ArcGeomValue = number | typeof MIXED_VALUE
+
+const angleFormatter: InputNumProps['formatter'] = (value, { userTyping, input }) =>
+  userTyping ? input : `${twoDecimal(Number(value ?? 0))}°`
+const angleParser: InputNumProps['parser'] = (value) =>
+  Number(value?.replace('°', ''))
+
+const ArcGeomComp: FC<{}> = observer(({}) => {
+  const { designGeom } = useEditorServices()
+  const { currentGeom } = designGeom
+  const startAngle = currentGeom.startAngle as ArcGeomValue
+  const sweepAngle = currentGeom.sweepAngle as ArcGeomValue
+  const innerRate = currentGeom.innerRate as ArcGeomValue
+
+  return (
+    <G className={arcGeomCls()} horizontal='1.2fr 1fr 1fr'>
+      <GeomItem
+        className={arcGeomCls('input')}
+        label={<Icon url={Assets.editor.design.geom.innerRadiusRatio} />}
+        value={startAngle}
+        geomKey='startAngle'
+        formatter={angleFormatter}
+        parser={angleParser}
+      />
+      <GeomItem
+        className={arcGeomCls('input')}
+        label={<span className={arcGeomCls('slide-handle')} />}
+        value={sweepAngle}
+        geomKey='sweepAngle'
+        formatter={angleFormatter}
+        parser={angleParser}
+      />
+      <GeomItem
+        className={arcGeomCls('input')}
+        label={<span className={arcGeomCls('slide-handle')} />}
+        value={innerRate}
+        geomKey='innerRate'
+        slideRate={0.01}
+        formatter={(value, { userTyping, input }) =>
+          userTyping ? input : `${twoDecimal(Number(value ?? 0) * 100)}%`
+        }
+        parser={(value) => Number(value?.replace('%', '')) / 100}
+      />
+    </G>
+  )
+})
+
+const GeomItem: FC<{
+  className?: string
+  label: ReactNode
+  geomKey: DesignGeomKey
+  value: number | typeof MIXED_VALUE
+  slideRate?: number
+  formatter?: InputNumProps['formatter']
+  parser?: InputNumProps['parser']
+}> = observer(
+  ({
+    className,
+    label,
+    geomKey,
+    value,
+    slideRate = 1,
+    parser,
+    formatter = ((value, { userTyping, input }) =>
+      userTyping || isNil(value)
+        ? input
+        : `${twoDecimal(Number(value))}`) as InputNumProps['formatter'],
+  }) => {
+    const { designGeom } = useEditorServices()
+    const { setupSlideGeom } = designGeom
+    const nodes = useSelectNodes()
+    const setGeomValue = useSetGeomValue()
+    const slideSessionRef = useRef<ReturnType<typeof setupSlideGeom>>()
+
+    const handleEnd = (value: number | typeof MIXED_VALUE | Nil) => {
+      if (!isNil(value) && value !== MIXED_VALUE) setGeomValue(geomKey, value)
+    }
+
+    return (
+      <InputNum
+        className={className}
+        prefix={label}
+        value={value}
+        formatter={formatter}
+        parser={parser}
+        specialValue={{ value: MIXED_VALUE, label: t('mixed') }}
+        slideRate={slideRate}
+        beforeSlide={() =>
+          (slideSessionRef.current = setupSlideGeom(nodes, geomKey))
+        }
+        onSlide={(delta) => slideSessionRef.current?.(delta)}
+        onEnd={handleEnd}
+      />
+    )
+  },
+)
+
+const designGeomCls = classes(css`
   padding: 12px;
   height: fit-content;
   ${styles.borderBottom}
@@ -117,42 +264,46 @@ const cls = classes(css`
   }
 `)
 
-const GeomItem: FC<{
-  label: ReactNode
-  geomKey: DesignGeomKey
-  value: number | typeof MIXED_VALUE
-  slideRate?: number
-}> = observer(({ label, geomKey, value, slideRate = 1 }) => {
-  const { designGeom, undo } = useEditorServices()
-  const { setGeom, setupSlideGeom } = designGeom
-  const nodes = useSelectNodes()
-  const slideSessionRef = useRef<ReturnType<typeof setupSlideGeom>>()
+const flipCls = classes(css`
+  overflow: hidden;
+  ${styles.borderRadius}
 
-  const handleEnd = (value: number | typeof MIXED_VALUE | Nil) => {
-    if (!isNil(value) && value !== MIXED_VALUE) setGeom(nodes, { [geomKey]: value })
-    undo.track('state', `${t('modify geometry property')}: ${geomKey}`)
+  &-button {
+    width: 100%;
+    border-radius: 0;
+    background: var(--gray-bg);
+    & + & {
+      border-left: 1px solid var(--gray-border);
+    }
+  }
+`)
+
+const arcGeomCls = classes(css`
+  grid-column: 1 / -1;
+  overflow: hidden;
+  background: var(--gray-bg);
+  ${styles.borderRadius}
+  &:focus-within {
+    background: white;
+    outline: 1px solid var(--color);
+    outline-offset: -1px;
   }
 
-  const handleBeforeSlide = () => {
-    slideSessionRef.current = setupSlideGeom(nodes, geomKey)
+  &-input {
+    border-radius: 0;
+    background: transparent;
+    &:focus-within {
+      position: relative;
+      z-index: 1;
+      outline: none;
+      background: transparent;
+    }
+    & + & {
+      border-left: 1px solid var(--gray-border);
+    }
   }
-  const handleSlide = (delta: number) => {
-    slideSessionRef.current?.(delta)
+  &-slide-handle {
+    width: 4px;
+    height: 16px;
   }
-  const handleAfterSlide = () => {
-    slideSessionRef.current = undefined
-  }
-
-  return (
-    <InputNum
-      prefix={label}
-      value={value === MIXED_VALUE ? value : twoDecimal(value)}
-      specialValue={{ value: MIXED_VALUE, label: t('mixed') }}
-      slideRate={slideRate}
-      beforeSlide={handleBeforeSlide}
-      onSlide={handleSlide}
-      afterSlide={handleAfterSlide}
-      onEnd={handleEnd}
-    />
-  )
-})
+`)

@@ -124,7 +124,7 @@ namespace S {
       type: 'ellipse'
       innerRate: number
       startAngle: number
-      endAngle: number
+      sweepAngle: number
     }
 
   type Line = NodeBase &

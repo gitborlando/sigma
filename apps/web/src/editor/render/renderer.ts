@@ -210,7 +210,7 @@ export class Renderer extends Service {
       let resetTransform = () => {}
 
       if (elem.node) {
-        resetTransform = this.renderSurface.setTransform(elem.node.matrix)
+        resetTransform = this.renderSurface.setTransform(elem.renderMatrix)
         this.renderSurface.ctxSaveRestore(() =>
           this.elemDrawer.draw(elem, ctx, path2d),
         )

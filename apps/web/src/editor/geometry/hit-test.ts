@@ -1,5 +1,6 @@
 import { Angle, type IXY, XY } from '@gitborlando/geo'
 import { loopFor } from '@gitborlando/utils'
+import { clamp } from 'es-toolkit'
 
 export class HitTest {
   static hitRoundRect(w: number, h: number, r: number) {
@@ -41,9 +42,11 @@ export class HitTest {
     a: number,
     b: number,
     startAngle: number,
-    endAngle: number,
+    sweepAngle: number,
     innerRate: number,
   ) {
+    sweepAngle = clamp(sweepAngle, -360, 360)
+    innerRate = clamp(innerRate, 0, 1)
     return (xy: IXY) => {
       const dx = xy.x - cx
       const dy = xy.y - cy
@@ -59,15 +62,15 @@ export class HitTest {
         if (hitInner) return false
       }
 
-      startAngle = Angle.normal(startAngle)
-      endAngle = Angle.normal(endAngle)
-
-      if (startAngle === 0 && endAngle === 0) return true
+      if (Math.abs(sweepAngle) === 360) return true
+      if (sweepAngle === 0) return false
 
       const angle = Angle.sweep(XY.vector(xy, XY.$(cx, cy)))
+      const normalizedStart = Angle.normal(startAngle)
 
-      if (startAngle <= endAngle) return angle >= startAngle && angle <= endAngle
-      return angle >= startAngle || angle <= endAngle
+      return sweepAngle > 0
+        ? Angle.normal(angle - normalizedStart) <= sweepAngle
+        : Angle.normal(normalizedStart - angle) <= -sweepAngle
     }
   }
 
