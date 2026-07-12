@@ -11,12 +11,14 @@ export function mock_transform_v(schemaCreator: SchemaCreator) {
   meta.pageIds.push(page.id)
 
   const rect = schemaCreator.rect({
+    id: 'rect',
     ...MRect.identity(100, 100).shift(XY.$(100, 100)).plain(),
   })
   schemaCreator.addToSchema(schema, rect)
   schemaCreator.addChild(page, rect)
 
   const triangle = schemaCreator.path({
+    id: 'triangle',
     ...MRect.identity(100, 100).shift(XY.$(300, 100)).plain(),
     points: createRegularPolygon(100, 100, 3),
   })
@@ -24,6 +26,7 @@ export function mock_transform_v(schemaCreator: SchemaCreator) {
   schemaCreator.addChild(page, triangle)
 
   const pentagon = schemaCreator.path({
+    id: 'pentagon',
     ...MRect.identity(100, 100).shift(XY.$(500, 100)).plain(),
     points: createRegularPolygon(100, 100, 5),
   })

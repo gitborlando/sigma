@@ -5,11 +5,7 @@ import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
-export type LayerNodeTreeInfo = {
-  id: string
-  indent: number
-  ancestorIds: string[]
-}
+export type LayerNodeTreeInfo = { id: string; indent: number; ancestorIds: string[] }
 
 @reflection
 export class LayerNodeTree extends Service {
@@ -48,7 +44,6 @@ export class LayerNodeTree extends Service {
 
   toggleAllNodeExpanded(expanded: boolean) {
     const traverse = createSchemaTraverse({
-      schema: this.yState.schema,
       enter: ({ item }) => {
         if (!SchemaHelper.isNodeParent(item)) return
         this.expandedNodeMap.set(item.id, expanded)
@@ -60,7 +55,6 @@ export class LayerNodeTree extends Service {
   private getNodeInfoList() {
     const nodeInfoList: LayerNodeTreeInfo[] = []
     const traverse = createSchemaTraverse({
-      schema: this.yState.schema,
       enter: ({ item, ancestors }) => {
         const ancestorIds = ancestors.map((node) => node.id)
         nodeInfoList.push({

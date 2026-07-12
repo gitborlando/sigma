@@ -5,6 +5,7 @@ import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
+import { configureSchemaTraverse } from 'src/editor/schema/traverse'
 import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YState } from 'src/editor/y-adapter/y-state'
@@ -41,11 +42,15 @@ export class SchemaController extends Service {
       clientId: this.yState.doc.clientID,
       awareness: this.ySync.awareness,
     })
+
     this.undo.init({
       stateMap: this.yState.doc.getMap('schema'),
       getPatches: this.yState.getPatches,
     })
+
     SchemaHelper.init({ find: this.yState.find })
+    configureSchemaTraverse(() => this.yState.schema)
+
     this.handleSelect.selectPage(schema.meta.pageIds[0])
 
     this.sessionFileId = fileId

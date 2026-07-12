@@ -1,8 +1,8 @@
-import type { AnyObject } from '@gitborlando/utils'
+import { type AnyObject } from '@gitborlando/utils'
 import { T } from 'src/utils/common'
 
 export type SchemaTraverseOptions<ExtendCtx extends AnyObject = {}> = {
-  schema: S.Schema
+  getSchema?: () => S.Schema
   enter?: (ctx: SchemaTraverseContext<ExtendCtx>) => boolean | void
   leave?: (ctx: SchemaTraverseContext<ExtendCtx>) => void
 }
@@ -20,10 +20,16 @@ export type SchemaTraverseContext<ExtendCtx extends AnyObject = {}> = {
   forwardCtx?: SchemaTraverseContext<ExtendCtx>
 } & ExtendCtx
 
+let defaultGetSchema: (() => S.Schema) | undefined
+
+export function configureSchemaTraverse(schemaMapGetter: () => S.Schema) {
+  defaultGetSchema = schemaMapGetter
+}
+
 export function createSchemaTraverse<ExtendCtx extends AnyObject = {}>(
   options: SchemaTraverseOptions<ExtendCtx>,
 ) {
-  const { schema, enter, leave } = options
+  const { enter, leave } = options
 
   const traverse = (
     parent: S.NodeParent | undefined,
@@ -37,6 +43,14 @@ export function createSchemaTraverse<ExtendCtx extends AnyObject = {}>(
     ids.forEach((id, index) => {
       if (stopped) return
 
+      const getSchema = options.getSchema ?? defaultGetSchema
+      if (!getSchema) {
+        throw new Error(
+          'createSchemaTraverse: getSchema should be configured or injected',
+        )
+      }
+
+      const schema = getSchema()
       const item = schema[id]
       if (!item) return
 

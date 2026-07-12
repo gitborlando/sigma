@@ -110,7 +110,6 @@ export class StageSelect extends Service {
     }
 
     const traverser = createSchemaTraverse<{ matrix: IMatrix }>({
-      schema: this.yState.schema,
       enter: (ctx) => {
         const { item, depth, childIds, forwardCtx } = ctx
         const elem = this.renderTree.findElem(item.id)

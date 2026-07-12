@@ -28,7 +28,6 @@ export class NodeController extends Service {
   deleteSelectedNodes() {
     this.yState.transact(() => {
       const traverse = createSchemaTraverse({
-        schema: this.yState.schema,
         leave: ({ item, parent }) => {
           if (!parent || !SchemaHelper.isNode(item)) return
           this.handleNode.deleteChild(parent, item)
@@ -53,7 +52,6 @@ export class NodeController extends Service {
 
     this.yState.transact(() => {
       const traverse = createSchemaTraverse<{ newNode?: S.Node | S.NodeParent }>({
-        schema: this.yState.schema,
         enter: (ctx) => {
           const { item, parent, forwardCtx, depth } = ctx
           if (!parent || !SchemaHelper.isNode(item)) return false

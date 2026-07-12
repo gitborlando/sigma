@@ -31,7 +31,7 @@ export function migrationSchema(schema: any) {
   const migrations = migrationList.slice(version)
 
   const traverse = createSchemaTraverse({
-    schema: newSchema,
+    getSchema: () => newSchema,
     enter: (ctx) => migrations.forEach((m) => m.transform(ctx)),
   })
   traverse(newSchema.meta.pageIds)
@@ -116,9 +116,7 @@ export const migrationList = [
     version: 3,
     desc: `更改 Path 类图形的 type: 'irregular' -> 'path'`,
     transform: (ctx: SchemaTraverseContext) => {
-      type LegacyPathNode = {
-        type: 'irregular'
-      }
+      type LegacyPathNode = { type: 'irregular' }
       const node = T<LegacyPathNode>(ctx.item)
 
       if (node.type === 'irregular') {
