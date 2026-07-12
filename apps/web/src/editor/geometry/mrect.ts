@@ -190,8 +190,8 @@ export class MRect {
     const scaleY = newHeight / this.height
     const scaleMatrix = Matrix.identity().scale(scaleX, scaleY)
     const newMatrix = Matrix.of(this.matrix).divide(scaleMatrix).plain()
-    this.width = newWidth
-    this.height = newHeight
+    this._width = newWidth
+    this._height = newHeight
     this.matrix = newMatrix
     return this
   }
@@ -210,7 +210,6 @@ export class MRect {
     this._height = mrect.height
     this._aspectRatio = mrect.aspectRatio
     this.matrix = Matrix.plain(mrect.matrix)
-    this.expired()
     return this
   }
 

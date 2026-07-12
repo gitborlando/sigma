@@ -76,6 +76,6 @@ export const expandOneStep = (
   return direction === 'left' ? (n - 1) * step : (n + 1) * step
 }
 
-export function isNumberEqual(a: number, b: number, precision = 0.00001) {
+export function isNumberEqual(a: number, b: number, precision = 1e-6) {
   return Math.abs(a - b) < precision
 }

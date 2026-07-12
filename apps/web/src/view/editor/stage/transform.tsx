@@ -30,11 +30,7 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
     stageTransformer.setup(selectNodes)
   }, [selectNodes, stageTransformer])
 
-  const node = schemaCreator.rect({
-    id: 'transform',
-    fills: [],
-    ...mrect.plain(),
-  })
+  const node = schemaCreator.rect({ id: 'transform', fills: [], ...mrect.plain() })
 
   const mousedown = (e: ElemMouseEvent) => {
     if (stageInteract.interaction !== 'select') return
@@ -119,6 +115,7 @@ const VertexComp: FC<{
   const vertexMRect = MRect.of({
     width: size,
     height: size,
+    aspectRatio: -1,
     matrix: Matrix.identity().shift(XY.of(xy).plusNum(-size / 2)),
   })
   vertexMRect.rotate(mrect.rotation)
@@ -197,13 +194,5 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
     stageTransformer.onRotate()
   }
 
-  return (
-    <elem
-      node={rotatePoint}
-      events={{
-        hover: mouseenter,
-        mousedown,
-      }}
-    />
-  )
+  return <elem node={rotatePoint} events={{ hover: mouseenter, mousedown }} />
 })

@@ -14,6 +14,41 @@ import { Service } from 'src/global/service'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
+interface AxisPositionOptions {
+  startSelectionMin: number
+  startSelectionSize: number
+  startNodeMin: number
+  startNodeSize: number
+  endSelectionMin: number
+  endSelectionSize: number
+  endNodeSize: number
+  flipped: boolean
+  fallbackAnchor: number
+}
+
+const calculateAxisPosition = ({
+  startSelectionMin,
+  startSelectionSize,
+  startNodeMin,
+  startNodeSize,
+  endSelectionMin,
+  endSelectionSize,
+  endNodeSize,
+  flipped,
+  fallbackAnchor,
+}: AxisPositionOptions) => {
+  const startFreeSpace = startSelectionSize - startNodeSize
+  let anchor =
+    Math.abs(startFreeSpace) < 1e-6
+      ? fallbackAnchor
+      : (startNodeMin - startSelectionMin) / startFreeSpace
+
+  anchor = Math.max(0, Math.min(1, anchor))
+  if (flipped) anchor = 1 - anchor
+
+  return endSelectionMin + anchor * (endSelectionSize - endNodeSize)
+}
+
 @reflection
 export class StageTransformer extends Service {
   @observable.ref mrect = MRect.identity()
@@ -24,8 +59,15 @@ export class StageTransformer extends Service {
     return this.nodeController.selectNodes.length === 1
   }
 
-  private action: TransformerAction = 'move'
   isSelectOnlyLine = false
+
+  private action: TransformerAction = 'move'
+  private isResizing = false
+  private keepRatioScale = 1 // 锁定比例节点的统一缩放倍率
+  private scaleX = 1 // 选择框横向缩放倍率，用于保留翻转方向
+  private scaleY = 1 // 选择框纵向缩放倍率，用于保留翻转方向
+  private resizeStartMRect = MRect.identity()
+  private resizeDirections: TRBL[] = []
 
   private dragger!: Dragger
 
@@ -42,9 +84,12 @@ export class StageTransformer extends Service {
   }
 
   setup(selectNodes: S.Node[]) {
+    if (this.isResizing) return this.mrect
+
     if (selectNodes.length === 1) {
-      const matrix = SchemaHelper.getSceneMatrix(selectNodes[0])
-      return (this.mrect = MRect.fromRect(selectNodes[0], matrix))
+      const node = selectNodes[0]
+      const matrix = SchemaHelper.getSceneMatrix(node)
+      return (this.mrect = MRect.of({ ...node, matrix }))
     }
 
     const aabbList = selectNodes.map((node) => {
@@ -87,7 +132,10 @@ export class StageTransformer extends Service {
   }
 
   onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {
+    this.isResizing = true
     const { startMRect, startMatrix } = this.onStartTransform()
+    this.resizeStartMRect = startMRect
+    this.resizeDirections = [...directions]
     const endMatrix = Matrix.of(startMatrix)
 
     this.dragger
@@ -96,13 +144,14 @@ export class StageTransformer extends Service {
         shift = Matrix.of(startMRect.matrix).applyShift(shift, true)
 
         const { tx, ty, scaleX, scaleY } = iife(() => {
-          let width = startMRect.width
-          let height = startMRect.height
+          const startWidth = startMRect.width
+          const startHeight = startMRect.height
+          let width = startWidth
+          let height = startHeight
           let tx = startMatrix.tx
           let ty = startMatrix.ty
-          const maxShift = Math.max(shift.x, shift.y)
-          const shiftX = options?.shiftKey ? maxShift : shift.x
-          const shiftY = options?.shiftKey ? maxShift : shift.y
+          const shiftX = shift.x
+          const shiftY = shift.y
           if (directions.includes('left')) {
             width -= shiftX
             tx += shiftX
@@ -113,13 +162,45 @@ export class StageTransformer extends Service {
           }
           if (directions.includes('right')) width += shiftX
           if (directions.includes('bottom')) height += shiftY
-          const scaleX = width / startMRect.width
-          const scaleY = height / startMRect.height
+
+          const resizeX = directions.includes('left') || directions.includes('right')
+          const resizeY = directions.includes('top') || directions.includes('bottom')
+          const rawScaleX = width / startWidth
+          const rawScaleY = height / startHeight
+          let keepRatioScale = resizeX ? rawScaleX : rawScaleY
+          if (resizeX && resizeY) {
+            keepRatioScale =
+              (width * startWidth + height * startHeight) /
+              (startWidth ** 2 + startHeight ** 2)
+          }
+
+          const keepRatio =
+            options?.shiftKey || (this.isSingleSelect && startMRect.aspectRatio > 0)
+          if (keepRatio && startWidth > 0 && startHeight > 0) {
+            width = startWidth * keepRatioScale
+            height = startHeight * keepRatioScale
+            tx = directions.includes('left')
+              ? startMatrix.tx + startWidth - width
+              : startMatrix.tx + (resizeX ? 0 : (startWidth - width) / 2)
+            ty = directions.includes('top')
+              ? startMatrix.ty + startHeight - height
+              : startMatrix.ty + (resizeY ? 0 : (startHeight - height) / 2)
+          }
+
+          const scaleX = width / startWidth
+          const scaleY = height / startHeight
+          this.keepRatioScale = Math.sqrt(Math.abs(scaleX * scaleY))
+          this.scaleX = scaleX
+          this.scaleY = scaleY
           return { tx, ty, scaleX, scaleY }
         })
 
         endMatrix.set({ a: scaleX, d: scaleY, tx, ty })
         this.diffMatrix = Matrix.of(endMatrix).divide(startMatrix)
+        this.mrect = MRect.of(startMRect).transform(
+          this.diffMatrix,
+          this.isSingleSelect,
+        )
 
         this.transform()
       })
@@ -174,8 +255,14 @@ export class StageTransformer extends Service {
   }
 
   private onEndTransform() {
+    this.isResizing = false
     this.mrectCache.clear()
     this.diffMatrix = Matrix.identity()
+    this.keepRatioScale = 1
+    this.scaleX = 1
+    this.scaleY = 1
+    this.resizeStartMRect = MRect.identity()
+    this.resizeDirections = []
   }
 
   private transform() {
@@ -198,7 +285,69 @@ export class StageTransformer extends Service {
         .invert()
         .append(this.diffMatrix)
         .append(forwardMatrix)
-      startMRect.transform(localDiff)
+      if (this.action === 'resize' && startMRect.aspectRatio > 0) {
+        const startSceneMRect = MRect.of(mrect)
+        startSceneMRect.matrix = Matrix.of(mrect.matrix)
+          .prepend(forwardMatrix)
+          .plain()
+        const startAABB = startSceneMRect.aabb
+        const selectionAABB = this.mrect.aabb
+        const nodeScale = Math.min(
+          this.keepRatioScale,
+          (selectionAABB.maxX - selectionAABB.minX) /
+            (startAABB.maxX - startAABB.minX),
+          (selectionAABB.maxY - selectionAABB.minY) /
+            (startAABB.maxY - startAABB.minY),
+        )
+        const scaleXSign = Math.sign(this.scaleX)
+        const scaleYSign = Math.sign(this.scaleY)
+        // 等比缩放节点并保留选择框的翻转方向
+        const keepRatioMatrixDiff = Matrix.identity().scale(
+          scaleXSign * nodeScale,
+          scaleYSign * nodeScale,
+        )
+        startMRect.transform(keepRatioMatrixDiff, true)
+        const selectionStartAABB = this.resizeStartMRect.aabb
+        const resizedSceneMRect = MRect.of(startMRect)
+        resizedSceneMRect.matrix = Matrix.of(startMRect.matrix)
+          .prepend(forwardMatrix)
+          .plain()
+        const resizedAABB = resizedSceneMRect.aabb
+        const newX = calculateAxisPosition({
+          startSelectionMin: selectionStartAABB.minX,
+          startSelectionSize: selectionStartAABB.maxX - selectionStartAABB.minX,
+          startNodeMin: startAABB.minX,
+          startNodeSize: startAABB.maxX - startAABB.minX,
+          endSelectionMin: selectionAABB.minX,
+          endSelectionSize: selectionAABB.maxX - selectionAABB.minX,
+          endNodeSize: resizedAABB.maxX - resizedAABB.minX,
+          flipped: this.scaleX < 0,
+          fallbackAnchor: this.resizeDirections.includes('left')
+            ? 1
+            : this.resizeDirections.includes('right')
+              ? 0
+              : 0.5,
+        })
+        const newY = calculateAxisPosition({
+          startSelectionMin: selectionStartAABB.minY,
+          startSelectionSize: selectionStartAABB.maxY - selectionStartAABB.minY,
+          startNodeMin: startAABB.minY,
+          startNodeSize: startAABB.maxY - startAABB.minY,
+          endSelectionMin: selectionAABB.minY,
+          endSelectionSize: selectionAABB.maxY - selectionAABB.minY,
+          endNodeSize: resizedAABB.maxY - resizedAABB.minY,
+          flipped: this.scaleY < 0,
+          fallbackAnchor: this.resizeDirections.includes('top')
+            ? 1
+            : this.resizeDirections.includes('bottom')
+              ? 0
+              : 0.5,
+        })
+        const sceneShift = XY.$(newX - resizedAABB.minX, newY - resizedAABB.minY)
+        startMRect.shift(Matrix.of(forwardMatrix).applyShift(sceneShift, true))
+      } else {
+        startMRect.transform(localDiff)
+      }
     }
 
     this.yState.set<S.Node>([node.id, 'width'], startMRect.width)
