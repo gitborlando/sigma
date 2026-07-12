@@ -1,8 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
-    "noEmit": true
-  },
+  "compilerOptions": { "lib": ["ESNext", "DOM"], "noEmit": true },
   "include": ["src", "playground.ts"]
 }

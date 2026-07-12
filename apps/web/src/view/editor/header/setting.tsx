@@ -116,10 +116,10 @@ const BooleanSettingComp: FC<{
   )
 }
 
-const SwitchComp: FC<{
-  value: boolean
-  onChange: (value: boolean) => void
-}> = ({ value, onChange }) => {
+const SwitchComp: FC<{ value: boolean; onChange: (value: boolean) => void }> = ({
+  value,
+  onChange,
+}) => {
   return (
     <G className={switchCls()} onClick={() => onChange(!value)}>
       <G className={cx(switchCls('inner'), value && switchCls('inner-checked'))}></G>

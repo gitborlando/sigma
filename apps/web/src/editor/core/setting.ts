@@ -12,9 +12,7 @@ const initSetting = () => ({
   showDirtyRect: false,
   fullRender: false,
   snapToGrid: false,
-  dev: {
-    logUndoRedoInfo: false,
-  },
+  dev: { logUndoRedoInfo: false },
 })
 
 export interface Setting extends ReturnType<typeof initSetting> {}

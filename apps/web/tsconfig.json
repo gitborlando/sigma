@@ -8,10 +8,7 @@
     "emitDecoratorMetadata": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "paths": {
-      "src/*": ["./src/*"],
-      "types/*": ["../../types/*"]
-    }
+    "paths": { "src/*": ["./src/*"], "types/*": ["../../types/*"] }
   },
   "include": [
     "src",

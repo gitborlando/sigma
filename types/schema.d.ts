@@ -3,10 +3,7 @@ namespace S {
   type Matrix = import('src/editor/geometry/matrix').IMatrix
   type MRect = import('src/editor/geometry/mrect').IMRect
 
-  type Schema = {
-    meta: Meta
-    [id: string & {}]: SchemaItem
-  }
+  type Schema = { meta: Meta; [id: string & {}]: SchemaItem }
 
   type SchemaItem = Node | Page
 
@@ -31,19 +28,11 @@ namespace S {
     sceneMatrix: Matrix
   }
 
-  type Clients = {
-    [clientId: number]: Client
-  }
+  type Clients = { [clientId: number]: Client }
 
-  type NodeParentBase = {
-    childIds: string[]
-  }
+  type NodeParentBase = { childIds: string[] }
 
-  type Page = NodeParentBase & {
-    type: 'page'
-    id: `page_${string}`
-    name: string
-  }
+  type Page = NodeParentBase & { type: 'page'; id: `page_${string}`; name: string }
 
   type NodeParent = Frame | Group | Page
 
@@ -78,16 +67,9 @@ namespace S {
 
   type NodeBase = NodeMeta & NodeEffect & MRect & ObbInfo
 
-  type Frame = NodeBase &
-    NodeParentBase & {
-      type: 'frame'
-      radius: number
-    }
+  type Frame = NodeBase & NodeParentBase & { type: 'frame'; radius: number }
 
-  type Group = NodeBase &
-    NodeParentBase & {
-      type: 'group'
-    }
+  type Group = NodeBase & NodeParentBase & { type: 'group' }
 
   type Point = {
     id: string
@@ -104,20 +86,11 @@ namespace S {
 
   type Vector = Rectangle | Ellipse | Line | Path
 
-  type VectorBase = {
-    points: Point[]
-  }
+  type VectorBase = { points: Point[] }
 
-  type Path = NodeBase &
-    VectorBase & {
-      type: 'path'
-    }
+  type Path = NodeBase & VectorBase & { type: 'path' }
 
-  type Rectangle = NodeBase &
-    VectorBase & {
-      type: 'rect'
-      radius: number
-    }
+  type Rectangle = NodeBase & VectorBase & { type: 'rect'; radius: number }
 
   type Ellipse = NodeBase &
     VectorBase & {
@@ -127,10 +100,7 @@ namespace S {
       sweepAngle: number
     }
 
-  type Line = NodeBase &
-    VectorBase & {
-      type: 'line'
-    }
+  type Line = NodeBase & VectorBase & { type: 'line' }
 
   type Text = NodeBase & {
     type: 'text'
@@ -149,15 +119,9 @@ namespace S {
 
   type Fill = FillColor | FillLinearGradient | FillImage
 
-  type FillMeta = {
-    visible: boolean
-    alpha: number
-  }
+  type FillMeta = { visible: boolean; alpha: number }
 
-  type FillColor = FillMeta & {
-    type: 'color'
-    color: string
-  }
+  type FillColor = FillMeta & { type: 'color'; color: string }
 
   type FillLinearGradient = FillMeta & {
     type: 'linearGradient'
@@ -166,11 +130,7 @@ namespace S {
     stops: { offset: number; color: string }[]
   }
 
-  type FillImage = FillMeta & {
-    type: 'image'
-    url: string
-    matrix: number[]
-  }
+  type FillImage = FillMeta & { type: 'image'; url: string; matrix: number[] }
 
   type Stroke = {
     visible: boolean
@@ -190,14 +150,7 @@ namespace S {
     fill: Fill
   }
 
-  type Outline = {
-    width: number
-    color: string
-  }
+  type Outline = { width: number; color: string }
 
-  type TextDecoration = {
-    style: 'none' | 'underline'
-    width: number
-    color: string
-  }
+  type TextDecoration = { style: 'none' | 'underline'; width: number; color: string }
 }

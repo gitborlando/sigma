@@ -22,12 +22,7 @@ export class SchemaCreator extends Service {
     const page = this.page()
     const meta = this.meta()
     meta.pageIds = [page.id]
-    return Object.assign(
-      { meta },
-      {
-        [page.id]: page,
-      },
-    )
+    return Object.assign({ meta }, { [page.id]: page })
   }
 
   meta(): S.Meta {
@@ -77,23 +72,12 @@ export class SchemaCreator extends Service {
 
   group(option?: Partial<S.Group>): S.Group {
     const nodeBase = this.createNodeBase()
-    return {
-      type: 'group',
-      childIds: [],
-      ...nodeBase,
-      ...option,
-    }
+    return { type: 'group', childIds: [], ...nodeBase, ...option }
   }
 
   rect(option?: Partial<S.Rectangle>): S.Rectangle {
     const nodeBase = this.createNodeBase()
-    return {
-      type: 'rect',
-      points: [],
-      radius: 0,
-      ...nodeBase,
-      ...option,
-    }
+    return { type: 'rect', points: [], radius: 0, ...nodeBase, ...option }
   }
 
   ellipse(option?: Partial<S.Ellipse>): S.Ellipse {
@@ -127,12 +111,7 @@ export class SchemaCreator extends Service {
 
   path(option?: Partial<S.Path>): S.Path {
     const nodeBase = this.createNodeBase()
-    return {
-      type: 'path',
-      points: [],
-      ...nodeBase,
-      ...option,
-    }
+    return { type: 'path', points: [], ...nodeBase, ...option }
   }
 
   image(option?: Partial<S.Rectangle>): S.Rectangle {
@@ -160,9 +139,7 @@ export class SchemaCreator extends Service {
           },
           fills: [this.fillColor(COLOR.black, 1)],
         },
-        {
-          ...option,
-        },
+        { ...option },
       ),
     )
   }
@@ -213,10 +190,7 @@ export class SchemaCreator extends Service {
   }
 
   solidStroke(color = COLOR.black, width = 1) {
-    return this.stroke({
-      fill: this.fillColor(color),
-      width,
-    })
+    return this.stroke({ fill: this.fillColor(color), width })
   }
 
   shadow(option?: Partial<S.Shadow>): S.Shadow {
@@ -232,20 +206,11 @@ export class SchemaCreator extends Service {
   }
 
   outline(option?: Partial<S.Outline>): S.Outline {
-    return {
-      color: themeColor(),
-      width: 2,
-      ...option,
-    }
+    return { color: themeColor(), width: 2, ...option }
   }
 
   textDecoration(option?: Partial<S.TextDecoration>): S.TextDecoration {
-    return {
-      style: 'underline',
-      color: themeColor(),
-      width: 1,
-      ...option,
-    }
+    return { style: 'underline', color: themeColor(), width: 1, ...option }
   }
 
   private createSchemaMeta(): S.NodeMeta {

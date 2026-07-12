@@ -207,22 +207,9 @@ type YPlainNestedPath<
     : never
 
 export type YPlainPatch =
-  | {
-      type: 'add'
-      keys: YPlainPath
-      value: any
-    }
-  | {
-      type: 'remove'
-      keys: YPlainPath
-      oldValue: any
-    }
-  | {
-      type: 'replace'
-      keys: YPlainPath
-      value: any
-      oldValue: any
-    }
+  | { type: 'add'; keys: YPlainPath; value: any }
+  | { type: 'remove'; keys: YPlainPath; oldValue: any }
+  | { type: 'replace'; keys: YPlainPath; value: any; oldValue: any }
 
 export type YPlainChange<T extends AnyObject = AnyObject> = {
   state: T
@@ -235,10 +222,7 @@ export type YPlainListener<T extends AnyObject = AnyObject> = (
   change: YPlainChange<T>,
 ) => void
 
-type YPlainTransact = {
-  <R>(fn: () => R): R
-  <R>(origin: unknown, fn: () => R): R
-}
+type YPlainTransact = { <R>(fn: () => R): R; <R>(origin: unknown, fn: () => R): R }
 
 export class YPlain<T extends AnyObject = AnyObject> {
   private plainState: T
@@ -605,10 +589,7 @@ export class YPlain<T extends AnyObject = AnyObject> {
     const key = path[path.length - 1]
     if (!isYPlainPathKey(key)) return undefined
 
-    return {
-      parent: this.getYValue(path.slice(0, -1)),
-      key,
-    }
+    return { parent: this.getYValue(path.slice(0, -1)), key }
   }
 
   private runMutation(callback: () => boolean) {
@@ -760,10 +741,7 @@ function projectYArrayEvent<T extends AnyObject>(
 
     if (change.delete) {
       flushRemove()
-      pendingRemove = {
-        index,
-        values: nextArray.splice(index, change.delete),
-      }
+      pendingRemove = { index, values: nextArray.splice(index, change.delete) }
     }
 
     if (change.insert) {
@@ -794,10 +772,7 @@ function projectYArrayEvent<T extends AnyObject>(
     return { state, patches: [] }
   }
 
-  return {
-    state: setPlainValue(state, event.path, nextArray),
-    patches,
-  }
+  return { state: setPlainValue(state, event.path, nextArray), patches }
 }
 
 function projectYArraySnapshotEvent<T extends AnyObject>(

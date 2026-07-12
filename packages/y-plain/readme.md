@@ -25,20 +25,13 @@ import { YPlain } from '@gitborlando/y-plain'
 
 type State = {
   title: string
-  nodes: {
-    id: string
-    name: string
-    flags: string[]
-  }[]
+  nodes: { id: string; name: string; flags: string[] }[]
 }
 
 const doc = new Y.Doc()
 const yMap = doc.getMap('state')
 
-const plain = new YPlain<State>(yMap, {
-  title: 'Untitled',
-  nodes: [],
-})
+const plain = new YPlain<State>(yMap, { title: 'Untitled', nodes: [] })
 
 const disposeObserve = plain.observe()
 const disposeSubscribe = plain.subscribe(({ state, patches, origin }) => {
@@ -132,21 +125,13 @@ plain.replace(['nodes', 0], undefined)
 如果路径最后一段是数字，就插入到指定下标：
 
 ```ts
-plain.insert(['nodes', 0], {
-  id: 'node-1',
-  name: 'Header',
-  flags: [],
-})
+plain.insert(['nodes', 0], { id: 'node-1', name: 'Header', flags: [] })
 ```
 
 如果路径指向数组本身，就追加到末尾：
 
 ```ts
-plain.insert(['nodes'], {
-  id: 'node-2',
-  name: 'Footer',
-  flags: [],
-})
+plain.insert(['nodes'], { id: 'node-2', name: 'Footer', flags: [] })
 ```
 
 数组下标必须是非负整数。大于数组长度时会按末尾处理。
@@ -180,11 +165,7 @@ plain.setState({
 ```ts
 plain.transact('user-action', () => {
   plain.set(['title'], 'New title')
-  plain.insert(['nodes'], {
-    id: 'node-1',
-    name: 'Header',
-    flags: [],
-  })
+  plain.insert(['nodes'], { id: 'node-1', name: 'Header', flags: [] })
 })
 ```
 

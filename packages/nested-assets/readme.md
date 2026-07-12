@@ -17,11 +17,7 @@ import vitePluginNestedAssets from '@gitborlando/vite-plugin-nested-assets'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  plugins: [
-    vitePluginNestedAssets({
-      base: 'src/view/assets',
-    }),
-  ],
+  plugins: [vitePluginNestedAssets({ base: 'src/view/assets' })],
 })
 ```
 
@@ -37,14 +33,8 @@ The plugin generates:
 
 ```ts
 export const Assets = {
-  editor: {
-    node: {
-      rect: editorNodeRect,
-    },
-  },
-  favIcon: {
-    sigmaLogo: favIconSigmaLogo,
-  },
+  editor: { node: { rect: editorNodeRect } },
+  favIcon: { sigmaLogo: favIconSigmaLogo },
 } as const
 ```
 

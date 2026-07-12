@@ -8,9 +8,7 @@ export type Command = {
   when?: () => boolean
 }
 
-export type MenuItem = Command & {
-  children?: MenuItem[][]
-}
+export type MenuItem = Command & { children?: MenuItem[][] }
 
 class ContextMenuClass {
   @observable menus: MenuItem[][] = []

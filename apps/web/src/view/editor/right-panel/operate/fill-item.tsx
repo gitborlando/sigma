@@ -10,10 +10,10 @@ import { Lucide } from 'src/view/component/lucide'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { suspend } from 'suspend-react'
 
-export const EditorRPOperateFillItemComp: FC<{
-  fill: S.Fill
-  index: number
-}> = ({ fill, index }) => {
+export const EditorRPOperateFillItemComp: FC<{ fill: S.Fill; index: number }> = ({
+  fill,
+  index,
+}) => {
   const { fillPicker } = useEditorServices()
   const isColorType = fill.type === 'color'
   const isLinearType = fill.type === 'linearGradient'
@@ -59,49 +59,48 @@ const ImgComp = withSuspense<{ url: string }>(({ url }) => {
   return <img src={image.objectUrl} style={{ ...imageBound }}></img>
 })
 
-const HexInputComp: FC<{
-  fill: S.Fill
-  index: number
-}> = observer(({ fill, index }) => {
-  const { operateFill } = useEditorServices()
-  const isSolidFill = fill.type === 'color'
+const HexInputComp: FC<{ fill: S.Fill; index: number }> = observer(
+  ({ fill, index }) => {
+    const { operateFill } = useEditorServices()
+    const isSolidFill = fill.type === 'color'
 
-  const validateColor = (value: string) => {
-    try {
-      Color(`#${value}`)
-      return true
-    } catch (error) {}
-    return false
-  }
-
-  const setColor = (color: string) => {
-    if (!isSolidFill) {
-      return
+    const validateColor = (value: string) => {
+      try {
+        Color(`#${value}`)
+        return true
+      } catch (error) {}
+      return false
     }
-    operateFill.setFill(index, (fill) => {
-      T<S.FillColor>(fill).color = Color(`#${color}`).toString()
+
+    const setColor = (color: string) => {
+      if (!isSolidFill) {
+        return
+      }
+      operateFill.setFill(index, (fill) => {
+        T<S.FillColor>(fill).color = Color(`#${color}`).toString()
+      })
+    }
+
+    const value = matchCase(fill.type, {
+      color: Color(T<S.FillColor>(fill).color).hex().slice(1),
+      linearGradient: t('linear gradient'),
+      image: t('image fill'),
     })
-  }
 
-  const value = matchCase(fill.type, {
-    color: Color(T<S.FillColor>(fill).color).hex().slice(1),
-    linearGradient: t('linear gradient'),
-    image: t('image fill'),
-  })
-
-  return null
-  // return (
-  //   <Input
-  //     className={cls('hex')}
-  //     noHoverFocusStyle
-  //     readOnly={!isSolidFill}
-  //     value={value}
-  //     onEnd={(value) => setColor(value)}
-  //     onFocus={(e) => isSolidFill && e.target.select()}
-  //     validate={validateColor}
-  //   />
-  // )
-})
+    return null
+    // return (
+    //   <Input
+    //     className={cls('hex')}
+    //     noHoverFocusStyle
+    //     readOnly={!isSolidFill}
+    //     value={value}
+    //     onEnd={(value) => setColor(value)}
+    //     onFocus={(e) => isSolidFill && e.target.select()}
+    //     validate={validateColor}
+    //   />
+    // )
+  },
+)
 
 const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {

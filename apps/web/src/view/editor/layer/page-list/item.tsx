@@ -3,10 +3,7 @@ import { ContextMenu } from 'src/global/context-menu'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
 
-type IPageItemComp = {
-  name: string
-  id: string
-}
+type IPageItemComp = { name: string; id: string }
 
 export const LayerPageListItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
   const { command, handleSelect, undo } = useEditorServices()

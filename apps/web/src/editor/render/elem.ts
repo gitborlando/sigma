@@ -19,9 +19,7 @@ export type ElemProps = {
   children?: ReactNode[]
 }
 
-export type ElemContext = {
-  renderInvalidator: RenderInvalidator
-}
+export type ElemContext = { renderInvalidator: RenderInvalidator }
 
 export class Elem {
   constructor(
@@ -184,10 +182,7 @@ export class Elem {
 
 export type ElemEventType = 'mousedown' | 'mousemove' | 'hover'
 
-type ElemEventBase = {
-  hostEvent: Event
-  stopPropagation: () => void
-}
+type ElemEventBase = { hostEvent: Event; stopPropagation: () => void }
 
 export type ElemEvent = ElemMouseEvent
 
@@ -266,11 +261,7 @@ class ElemEventHandler {
     if (this.eventCount === 0) return
 
     const capture = isCapture ? 0 : 1
-    const mouseEvent = {
-      xy,
-      stopPropagation,
-      hostEvent: e as MouseEvent,
-    }
+    const mouseEvent = { xy, stopPropagation, hostEvent: e as MouseEvent }
 
     switch (e.type) {
       case 'mousedown':

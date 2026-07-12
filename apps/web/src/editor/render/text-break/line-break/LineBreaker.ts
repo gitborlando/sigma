@@ -53,10 +53,7 @@ function mapFirst(c: number) {
   }
 }
 
-type Break = {
-  position: number
-  required?: boolean
-}
+type Break = { position: number; required?: boolean }
 
 export class LineBreaker {
   trie: UnicodeTrie

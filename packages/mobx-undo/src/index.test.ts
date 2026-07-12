@@ -2,11 +2,7 @@ import { makeObservable, observable } from 'mobx'
 import { describe, expect, it } from 'vitest'
 import { MobxUndo, type MobxUndoSlice } from './index'
 
-type DraftState = {
-  count: number
-  title: string
-  flags: Record<string, boolean>
-}
+type DraftState = { count: number; title: string; flags: Record<string, boolean> }
 
 class DraftStore {
   count = 0

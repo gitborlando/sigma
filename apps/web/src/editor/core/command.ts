@@ -49,11 +49,7 @@ export class EditorCommand extends Service {
 
   get undoRedoGroup(): Command[] {
     return [
-      {
-        name: t('undo'),
-        shortcut: 'ctrl+z',
-        callback: () => this.undo.undo(),
-      },
+      { name: t('undo'), shortcut: 'ctrl+z', callback: () => this.undo.undo() },
       {
         name: t('redo'),
         shortcut: 'ctrl+shift+z',
@@ -92,10 +88,7 @@ export class EditorCommand extends Service {
           // UILeftPanelLayer.enterReName.dispatch(id)
         },
       },
-      {
-        name: t('create frame'),
-        callback: () => this.nodeController.wrapInFrame(),
-      },
+      { name: t('create frame'), callback: () => this.nodeController.wrapInFrame() },
       {
         name: t('delete'),
         shortcut: 'del',
@@ -169,14 +162,8 @@ export class EditorCommand extends Service {
 
   get fileGroup(): Command[] {
     return [
-      {
-        name: t('delete file'),
-        callback: () => {},
-      },
-      {
-        name: t('export file'),
-        callback: () => {},
-      },
+      { name: t('delete file'), callback: () => {} },
+      { name: t('export file'), callback: () => {} },
     ]
   }
 

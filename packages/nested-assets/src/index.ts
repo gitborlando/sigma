@@ -106,23 +106,14 @@ const withDefaultInclude = (base: string) =>
 
 const resolveExportPattern = (include: GlobPattern) => {
   if (typeof include !== 'string') {
-    return {
-      include,
-      base: getIncludeBase(include),
-    }
+    return { include, base: getIncludeBase(include) }
   }
 
   if (isDynamicPattern(include, { caseSensitiveMatch: true })) {
-    return {
-      include,
-      base: getPatternBase(include),
-    }
+    return { include, base: getPatternBase(include) }
   }
 
-  return {
-    include: withDefaultInclude(include.replace(/\\/g, '/')),
-    base: include,
-  }
+  return { include: withDefaultInclude(include.replace(/\\/g, '/')), base: include }
 }
 
 const toImportPath = (fromDir: string, file: string) => {
@@ -152,11 +143,7 @@ const getAssetFiles = (
 
   const output = normalizePath(options.output)
 
-  return globSync(include, {
-    absolute: true,
-    cwd: options.base,
-    onlyFiles: true,
-  })
+  return globSync(include, { absolute: true, cwd: options.base, onlyFiles: true })
     .map(normalizePath)
     .filter((file) => file !== output)
     .toSorted((a, b) =>
@@ -354,10 +341,7 @@ const generateAssets = (inputOptions: ResolvedNestedAssetsOptions) => {
   fs.mkdirSync(path.dirname(options.output), { recursive: true })
   fs.writeFileSync(options.output, code, 'utf8')
 
-  return {
-    fileCount: files.length,
-    output: options.output,
-  }
+  return { fileCount: files.length, output: options.output }
 }
 
 const resolveAliases = (options: VitePluginNestedAssetsOptions) => {
@@ -365,11 +349,7 @@ const resolveAliases = (options: VitePluginNestedAssetsOptions) => {
     assertValidExportName(key)
     const pattern = resolveExportPattern(include)
 
-    return {
-      key,
-      include: pattern.include,
-      base: pattern.base,
-    }
+    return { key, include: pattern.include, base: pattern.base }
   })
 }
 

@@ -1,16 +1,8 @@
 import { XY, type IRect, type IXY } from '@gitborlando/geo'
 
-type MouseEventLike = {
-  clientX: number
-  clientY: number
-}
+type MouseEventLike = { clientX: number; clientY: number }
 
-export type DragData = {
-  current: IXY
-  start: IXY
-  shift: IXY
-  marquee: IRect
-}
+export type DragData = { current: IXY; start: IXY; shift: IXY; marquee: IRect }
 
 export type DragOptions = {
   useRafThrottle?: boolean

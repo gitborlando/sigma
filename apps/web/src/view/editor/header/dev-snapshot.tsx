@@ -15,9 +15,7 @@ type SnapshotState = {
   savedAt: number
 }
 
-type DevSnapshot = SnapshotState & {
-  base?: SnapshotState
-}
+type DevSnapshot = SnapshotState & { base?: SnapshotState }
 
 type YState = EditorServices['yState']
 type Undo = EditorServices['undo']

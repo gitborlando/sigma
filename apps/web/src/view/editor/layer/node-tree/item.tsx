@@ -11,94 +11,94 @@ import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
 import { LayerNodeTreePathIcon } from './path-icon'
 
-export const LayerNodeTreeItemComp: FC<{
-  nodeInfo: LayerNodeTreeInfo
-}> = observer(({ nodeInfo }) => {
-  const { command, layerNodeTree, stageSelect, selectController, yState } =
-    useEditorServices()
-  const { id, indent, ancestorIds } = nodeInfo
-  const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
+export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observer(
+  ({ nodeInfo }) => {
+    const { command, layerNodeTree, stageSelect, selectController, yState } =
+      useEditorServices()
+    const { id, indent, ancestorIds } = nodeInfo
+    const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
 
-  const node = yState.find<S.Node>(id)
-  const isParent = SchemaHelper.isNodeParent(node)
-  const expanded = getNodeExpanded(id)
+    const node = yState.find<S.Node>(id)
+    const isParent = SchemaHelper.isNodeParent(node)
+    const expanded = getNodeExpanded(id)
 
-  const selectIdMap = useSelectIdMap()
-  const selected = selectIdMap[id]
-  const subSelected = ancestorIds.some((ancestor) => selectIdMap[ancestor])
+    const selectIdMap = useSelectIdMap()
+    const selected = selectIdMap[id]
+    const subSelected = ancestorIds.some((ancestor) => selectIdMap[ancestor])
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id, disabled: false })
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+      useSortable({ id, disabled: false })
 
-  const handleToggleExpand = stopPropagation(() => {
-    toggleNodeExpanded(id, !expanded)
-  })
-  const handleSelect = () => {
-    selectController.onPanelSelect(id)
-  }
-  const handleDoubleClick = () => {
-    selectController.onPanelSelect(id)
-    toggleNodeExpanded(id, true)
-  }
-  const handleContextMenu = (e: React.MouseEvent) => {
-    ContextMenu.context = { id }
-    ContextMenu.menus = [command.nodeGroup, command.copyPasteGroup]
-    ContextMenu.openMenu(e)
-  }
-  const handleMouseEnter = () => {
-    stageSelect.hoverId = id
-  }
-  const handleMouseLeave = () => {
-    stageSelect.hoverId = undefined
-  }
+    const handleToggleExpand = stopPropagation(() => {
+      toggleNodeExpanded(id, !expanded)
+    })
+    const handleSelect = () => {
+      selectController.onPanelSelect(id)
+    }
+    const handleDoubleClick = () => {
+      selectController.onPanelSelect(id)
+      toggleNodeExpanded(id, true)
+    }
+    const handleContextMenu = (e: React.MouseEvent) => {
+      ContextMenu.context = { id }
+      ContextMenu.menus = [command.nodeGroup, command.copyPasteGroup]
+      ContextMenu.openMenu(e)
+    }
+    const handleMouseEnter = () => {
+      stageSelect.hoverId = id
+    }
+    const handleMouseLeave = () => {
+      stageSelect.hoverId = undefined
+    }
 
-  return (
-    <G
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-        paddingLeft: 8 + indent * 16,
-      }}
-      gap={4}
-      {...attributes}
-      {...listeners}
-      horizontal='auto auto 1fr auto'
-      center
-      data-hover={stageSelect.hoverId === id}
-      data-selected={selected}
-      data-sub-selected={subSelected}
-      data-dragging={isDragging}
-      className={cls()}
-      onMouseDown={handleSelect}
-      onDoubleClick={handleDoubleClick}
-      onContextMenu={handleContextMenu}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}>
-      <Lucide
-        size={14}
-        icon={ChevronRight}
-        x-if={isParent}
-        onClick={handleToggleExpand}
-        onMouseDown={(e) => e.stopPropagation()}
+    return (
+      <G
+        ref={setNodeRef}
         style={{
-          transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s',
+          transform: CSS.Transform.toString(transform),
+          transition,
+          opacity: isDragging ? 0.5 : 1,
+          paddingLeft: 8 + indent * 16,
         }}
-      />
-      {!isParent && <G style={{ width: 12, height: 12 }} />}
-      {node.type === 'path' ? (
-        <LayerNodeTreePathIcon node={node} />
-      ) : (
-        <Icon
-          src={Assets.editor.node[node.type as keyof typeof Assets.editor.node]}
+        gap={4}
+        {...attributes}
+        {...listeners}
+        horizontal='auto auto 1fr auto'
+        center
+        data-hover={stageSelect.hoverId === id}
+        data-selected={selected}
+        data-sub-selected={subSelected}
+        data-dragging={isDragging}
+        className={cls()}
+        onMouseDown={handleSelect}
+        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleContextMenu}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}>
+        <Lucide
+          size={14}
+          icon={ChevronRight}
+          x-if={isParent}
+          onClick={handleToggleExpand}
+          onMouseDown={(e) => e.stopPropagation()}
+          style={{
+            transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s',
+          }}
         />
-      )}
-      <G className={cls('name')}>{node.name || '未命名'}</G>
-    </G>
-  )
-})
+        {!isParent && <G style={{ width: 12, height: 12 }} />}
+        {node.type === 'path' ? (
+          <LayerNodeTreePathIcon node={node} />
+        ) : (
+          <Icon
+            src={Assets.editor.node[node.type as keyof typeof Assets.editor.node]}
+          />
+        )}
+        <G className={cls('name')}>{node.name || '未命名'}</G>
+      </G>
+    )
+  },
+)
 
 const cls = classes(css`
   width: 100%;

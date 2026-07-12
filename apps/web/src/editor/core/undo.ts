@@ -15,10 +15,7 @@ export type UndoInfo = {
   statePatches?: YStatePatch[]
 }
 
-type StateUndoConfig = {
-  stateMap: Y.Map<S.Schema>
-  getPatches: () => YStatePatch[]
-}
+type StateUndoConfig = { stateMap: Y.Map<S.Schema>; getPatches: () => YStatePatch[] }
 
 @reflection
 export class Undo extends Service {

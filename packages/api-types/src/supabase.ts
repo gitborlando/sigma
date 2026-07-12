@@ -9,45 +9,20 @@ export type Json =
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: '13.0.5'
-  }
+  __InternalSupabase: { PostgrestVersion: '13.0.5' }
   public: {
     Tables: {
       files: {
-        Row: {
-          createdAt: string
-          id: string
-          name: string
-          url: string
-        }
-        Insert: {
-          createdAt?: string
-          id?: string
-          name: string
-          url: string
-        }
-        Update: {
-          createdAt?: string
-          id?: string
-          name?: string
-          url?: string
-        }
+        Row: { createdAt: string; id: string; name: string; url: string }
+        Insert: { createdAt?: string; id?: string; name: string; url: string }
+        Update: { createdAt?: string; id?: string; name?: string; url?: string }
         Relationships: []
       }
     }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    Views: { [_ in never]: never }
+    Functions: { [_ in never]: never }
+    Enums: { [_ in never]: never }
+    CompositeTypes: { [_ in never]: never }
   }
 }
 
@@ -143,9 +118,7 @@ export type Enums<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
     ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
@@ -168,8 +141,4 @@ export type CompositeTypes<
     ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
     : never
 
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const
+export const Constants = { public: { Enums: {} } } as const

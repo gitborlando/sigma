@@ -5,11 +5,7 @@ import { useEditorServices } from 'src/view/hooks/editor'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
-type OutlineInfo = {
-  hovered: boolean
-  selected?: boolean
-  color?: string
-}
+type OutlineInfo = { hovered: boolean; selected?: boolean; color?: string }
 
 export const StageOutlineComp: FC<{}> = observer(({}) => {
   const { stageTransformer, stageViewport, stageMove } = useEditorServices()

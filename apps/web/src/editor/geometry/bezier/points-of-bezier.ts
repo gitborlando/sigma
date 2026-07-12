@@ -1,7 +1,4 @@
-export type Point = {
-  x: number
-  y: number
-}
+export type Point = { x: number; y: number }
 
 // distance between 2 points
 function distance(p1: Point, p2: Point): number {

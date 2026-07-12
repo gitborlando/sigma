@@ -29,13 +29,14 @@
   },
   "prettier": {
     "printWidth": 85,
-    "jsxBracketSameLine": true,
+    "endOfLine": "lf",
     "useTabs": false,
     "tabWidth": 2,
     "semi": false,
+    "objectWrap": "collapse",
     "singleQuote": true,
-    "jsxSingleQuote": true,
-    "objectWrap": "collapse"
+    "jsxBracketSameLine": true,
+    "jsxSingleQuote": true
   },
   "pnpm": {
     "overrides": {

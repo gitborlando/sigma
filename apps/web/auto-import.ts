@@ -30,10 +30,6 @@ export const autoImportConfig = autoImportPlugin({
       imports: ['FC', 'ReactNode', 'ComponentPropsWithRef'],
       type: true,
     },
-    {
-      from: '@gitborlando/geo',
-      imports: ['IXY'],
-      type: true,
-    },
+    { from: '@gitborlando/geo', imports: ['IXY'], type: true },
   ],
 })

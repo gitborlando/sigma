@@ -167,10 +167,7 @@ function useSlider(
       .start(e)
   }
 
-  return {
-    value: x,
-    handleMove,
-  }
+  return { value: x, handleMove }
 }
 
 const HueComp: FC<{}> = observer(({}) => {

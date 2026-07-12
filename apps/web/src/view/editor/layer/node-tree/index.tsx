@@ -17,11 +17,7 @@ import { useEditorServices } from 'src/view/hooks/editor'
 
 const dropAnimationConfig: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
-    styles: {
-      active: {
-        opacity: '0.5',
-      },
-    },
+    styles: { active: { opacity: '0.5' } },
   }),
 }
 
@@ -31,11 +27,7 @@ export const LayerNodeTreeComp: FC<{}> = observer(({}) => {
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 32,
-      },
-    }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 32 } }),
   )
 
   const activeNodeInfo = nodeInfoList.find((info) => info.id === activeId)

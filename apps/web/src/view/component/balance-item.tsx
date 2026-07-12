@@ -4,10 +4,7 @@ import { Text } from 'src/view/component/text'
 
 export const BalanceItem = forwardRef<
   HTMLDivElement,
-  ComponentPropsWithRef<'div'> & {
-    left: ReactNode
-    right: ReactNode
-  }
+  ComponentPropsWithRef<'div'> & { left: ReactNode; right: ReactNode }
 >(({ className, children, left, right, ...rest }, ref) => {
   const cls = classes(css`
     width: 100%;

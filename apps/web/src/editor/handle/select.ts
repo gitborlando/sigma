@@ -5,10 +5,7 @@ import { makeObservable } from 'mobx'
 import { Undo } from 'src/editor/core/undo'
 import { Service } from 'src/global/service'
 
-export type HandleSelectState = {
-  selectIdMap: Selection
-  selectPageId: ID | ''
-}
+export type HandleSelectState = { selectIdMap: Selection; selectPageId: ID | '' }
 
 export type Selection = Record<string, boolean>
 

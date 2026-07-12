@@ -24,37 +24,37 @@ export const StageRulerComp: FC<{}> = observer(({}) => {
   )
 })
 
-export const Ruler: FC<{
-  type: 'horizontal' | 'vertical'
-}> = observer(({ type }) => {
-  const { stageViewport, handleNode } = useEditorServices()
-  const { bound, zoom, offset: offsetXY } = stageViewport
-  const datumXY = handleNode.datumXY
+export const Ruler: FC<{ type: 'horizontal' | 'vertical' }> = observer(
+  ({ type }) => {
+    const { stageViewport, handleNode } = useEditorServices()
+    const { bound, zoom, offset: offsetXY } = stageViewport
+    const datumXY = handleNode.datumXY
 
-  const getTicks = () => {
-    const ticks: { offset: number; value: number }[] = []
-    const length = (type === 'horizontal' ? bound.width : bound.height) / zoom
-    const offset =
-      (type === 'horizontal' ? offsetXY.x + datumXY.x : offsetXY.y + datumXY.y) /
-      zoom
-    const step = stageViewport.getStepByZoom(zoom)
-    const start = getNearestIntMultiple(-offset, step)
-    const end = getNearestIntMultiple(length - offset, step)
-    for (let i = start; i <= end; i += step) {
-      const y = (i + offset) * zoom
-      ticks.push({ offset: y, value: i })
+    const getTicks = () => {
+      const ticks: { offset: number; value: number }[] = []
+      const length = (type === 'horizontal' ? bound.width : bound.height) / zoom
+      const offset =
+        (type === 'horizontal' ? offsetXY.x + datumXY.x : offsetXY.y + datumXY.y) /
+        zoom
+      const step = stageViewport.getStepByZoom(zoom)
+      const start = getNearestIntMultiple(-offset, step)
+      const end = getNearestIntMultiple(length - offset, step)
+      for (let i = start; i <= end; i += step) {
+        const y = (i + offset) * zoom
+        ticks.push({ offset: y, value: i })
+      }
+      return ticks
     }
-    return ticks
-  }
 
-  return (
-    <>
-      {getTicks().map(({ offset, value }) => (
-        <Tick key={`${type}-${value}`} type={type} offset={offset} value={value} />
-      ))}
-    </>
-  )
-})
+    return (
+      <>
+        {getTicks().map(({ offset, value }) => (
+          <Tick key={`${type}-${value}`} type={type} offset={offset} value={value} />
+        ))}
+      </>
+    )
+  },
+)
 
 export const Tick: FC<{
   type: 'horizontal' | 'vertical'

@@ -3,11 +3,7 @@ import { SegmentGroup } from '@ark-ui/react'
 type SegmentSize = 'sm' | 'md' | 'lg'
 type SegmentVariant = 'solid' | 'outline'
 
-export type SegmentOption = {
-  label: string
-  value: string
-  disabled?: boolean
-}
+export type SegmentOption = { label: string; value: string; disabled?: boolean }
 
 export const Segments = forwardRef<
   HTMLDivElement,

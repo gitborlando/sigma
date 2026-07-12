@@ -15,10 +15,7 @@ export interface InputNumProps<
   value?: number | SpecialValue | Nil
   suffix?: ReactNode
   prefix?: ReactNode
-  specialValue?: {
-    value: SpecialValue
-    label: string
-  }
+  specialValue?: { value: SpecialValue; label: string }
   onChange?: (value: number | SpecialValue | Nil) => void
   onEnd?: (value: number | SpecialValue | Nil) => void
 }
@@ -173,31 +170,28 @@ interface InputNumSliderProps {
   afterSlide?: (changed: boolean) => void
 }
 
-const SliderWrapperComp: FC<
-  InputNumSliderProps & {
-    children: ReactNode
-  }
-> = observer(({ children, slideRate = 1, beforeSlide, onSlide, afterSlide }) => {
-  const cls = css`
-    ${styles.fitContent}
-    cursor: e-resize;
-  `
+const SliderWrapperComp: FC<InputNumSliderProps & { children: ReactNode }> =
+  observer(({ children, slideRate = 1, beforeSlide, onSlide, afterSlide }) => {
+    const cls = css`
+      ${styles.fitContent}
+      cursor: e-resize;
+    `
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    new Dragger({})
-      .needInfinity()
-      .onStart(() => beforeSlide?.())
-      .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
-      .onDestroy(({ moved }) => afterSlide?.(moved))
-      .start(e)
-  }
+    const handleMouseDown = (e: React.MouseEvent) => {
+      new Dragger({})
+        .needInfinity()
+        .onStart(() => beforeSlide?.())
+        .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
+        .onDestroy(({ moved }) => afterSlide?.(moved))
+        .start(e)
+    }
 
-  return (
-    <G onMouseDown={handleMouseDown} className={cls}>
-      {children}
-    </G>
-  )
-})
+    return (
+      <G onMouseDown={handleMouseDown} className={cls}>
+        {children}
+      </G>
+    )
+  })
 
 const cls = classes(css`
   @layer local-components {

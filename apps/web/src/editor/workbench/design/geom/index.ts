@@ -99,10 +99,7 @@ export class DesignGeom extends Service {
   }
 
   private createFieldContext(): DesignGeomFieldContext {
-    return {
-      handleNode: this.handleNode,
-      yState: this.yState,
-    }
+    return { handleNode: this.handleNode, yState: this.yState }
   }
 
   private applyChangeToNode(

@@ -23,10 +23,7 @@ export type DesignGeomInfo = Record<
   DesignGeomFieldValue | typeof MIXED_VALUE
 >
 
-export type DesignGeomFieldContext = {
-  handleNode: HandleNode
-  yState: YState
-}
+export type DesignGeomFieldContext = { handleNode: HandleNode; yState: YState }
 
 type DesignGeomFieldBase<Value extends DesignGeomFieldValue> = {
   key: DesignGeomKey

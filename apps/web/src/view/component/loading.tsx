@@ -1,8 +1,6 @@
 import { CSSProperties } from 'react'
 
-export const Loading: FC<{
-  size?: number
-}> = memo(({ size = 37 }) => {
+export const Loading: FC<{ size?: number }> = memo(({ size = 37 }) => {
   return (
     <G className={cls()} center>
       <svg

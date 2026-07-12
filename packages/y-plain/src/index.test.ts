@@ -4,35 +4,17 @@ import { joinYPlainPath, YPlain } from './index'
 
 type EditorState = {
   title: string
-  nodes: {
-    id: string
-    name: string
-    flags?: string[]
-  }[]
+  nodes: { id: string; name: string; flags?: string[] }[]
 }
 
-type Rectangle = {
-  id: string
-  width: number
-  fills: {
-    color: string
-  }[]
-}
+type Rectangle = { id: string; width: number; fills: { color: string }[] }
 
-type FlatState = {
-  meta: {
-    pageIds: string[]
-  }
-  [id: string]: any
-}
+type FlatState = { meta: { pageIds: string[] }; [id: string]: any }
 
 const createPlain = () => {
   const doc = new Y.Doc()
   const yMap = doc.getMap('state')
-  const plain = new YPlain<EditorState>(yMap, {
-    title: 'Untitled',
-    nodes: [],
-  })
+  const plain = new YPlain<EditorState>(yMap, { title: 'Untitled', nodes: [] })
 
   return { doc, plain, yMap }
 }
@@ -65,11 +47,7 @@ describe('YPlain', () => {
   it('writes id-keyed record paths with an explicit item type', () => {
     const doc = new Y.Doc()
     const yMap = doc.getMap('state')
-    const rect: Rectangle = {
-      id: 'rect-1',
-      width: 100,
-      fills: [{ color: 'red' }],
-    }
+    const rect: Rectangle = { id: 'rect-1', width: 100, fills: [{ color: 'red' }] }
     const plain = new YPlain<FlatState>(yMap, {
       meta: { pageIds: [] },
       [rect.id]: rect,
@@ -88,16 +66,8 @@ describe('YPlain', () => {
 
     expect(plain.state).toEqual({
       meta: { pageIds: [] },
-      'rect-1': {
-        id: 'rect-1',
-        width: 120,
-        fills: [{ color: 'green' }],
-      },
-      'rect-2': {
-        id: 'rect-2',
-        width: 100,
-        fills: [{ color: 'red' }],
-      },
+      'rect-1': { id: 'rect-1', width: 120, fills: [{ color: 'green' }] },
+      'rect-2': { id: 'rect-2', width: 100, fills: [{ color: 'red' }] },
     })
 
     disposeObserve()
@@ -119,19 +89,11 @@ describe('YPlain', () => {
   it('compares plain fields named like object methods', () => {
     const yMap = new Y.Map()
     const plain = new YPlain<any>(yMap, {
-      meta: {
-        toString: 'plain',
-        valueOf: 'data',
-      },
+      meta: { toString: 'plain', valueOf: 'data' },
     })
 
     expect(() =>
-      plain.setState({
-        meta: {
-          toString: 'plain',
-          valueOf: 'data',
-        },
-      }),
+      plain.setState({ meta: { toString: 'plain', valueOf: 'data' } }),
     ).not.toThrow()
   })
 
@@ -164,10 +126,7 @@ describe('YPlain', () => {
             oldValue: 'Untitled',
           },
         ],
-        state: {
-          title: 'Remote',
-          nodes: [],
-        },
+        state: { title: 'Remote', nodes: [] },
       }),
     )
     expect(plain.state.title).toBe('Remote')
@@ -187,11 +146,7 @@ describe('YPlain', () => {
     }, 'remote')
 
     const patch = listener.mock.calls[0][0].patches[0]
-    expect(patch).toEqual({
-      type: 'add',
-      keys: ['description'],
-      value: 'Remote',
-    })
+    expect(patch).toEqual({ type: 'add', keys: ['description'], value: 'Remote' })
     expect('oldValue' in patch).toBe(false)
 
     disposeSubscribe()
@@ -215,10 +170,7 @@ describe('YPlain', () => {
     expect(listener).toHaveBeenCalledWith(
       expect.objectContaining({
         origin: 'batch',
-        state: {
-          title: 'Batch',
-          nodes: [{ id: 'node-1', name: 'Header' }],
-        },
+        state: { title: 'Batch', nodes: [{ id: 'node-1', name: 'Header' }] },
       }),
     )
 
@@ -237,9 +189,7 @@ describe('YPlain', () => {
     })
 
     expect(listener).toHaveBeenCalledWith(
-      expect.objectContaining({
-        origin: 'batch',
-      }),
+      expect.objectContaining({ origin: 'batch' }),
     )
 
     disposeSubscribe()
@@ -263,9 +213,7 @@ describe('YPlain', () => {
     ).toThrow(error)
 
     expect(second).toHaveBeenCalledWith(
-      expect.objectContaining({
-        origin: 'broken',
-      }),
+      expect.objectContaining({ origin: 'broken' }),
     )
 
     disposeFirst()
@@ -274,9 +222,7 @@ describe('YPlain', () => {
     })
 
     expect(second).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        origin: 'recovered',
-      }),
+      expect.objectContaining({ origin: 'recovered' }),
     )
 
     disposeSecond()

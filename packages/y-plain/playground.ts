@@ -5,36 +5,16 @@ type Shape = {
   id: string
   type: 'rect' | 'text'
   name: string
-  position: {
-    x: number
-    y: number
-  }
-  style: {
-    fill: string
-    opacity: number
-  }
+  position: { x: number; y: number }
+  style: { fill: string; opacity: number }
   children: string[]
 }
 
 type DemoState = {
-  document: {
-    title: string
-    pageIds: string[]
-    activePageId: string
-  }
-  pages: Record<
-    string,
-    {
-      id: string
-      name: string
-      shapeIds: string[]
-    }
-  >
+  document: { title: string; pageIds: string[]; activePageId: string }
+  pages: Record<string, { id: string; name: string; shapeIds: string[] }>
   shapes: Record<string, Shape>
-  selection: {
-    shapeIds: string[]
-    locked: boolean
-  }
+  selection: { shapeIds: string[]; locked: boolean }
 }
 
 const initialState: DemoState = {
@@ -44,11 +24,7 @@ const initialState: DemoState = {
     activePageId: 'page-cover',
   },
   pages: {
-    'page-cover': {
-      id: 'page-cover',
-      name: 'Cover',
-      shapeIds: ['shape-title'],
-    },
+    'page-cover': { id: 'page-cover', name: 'Cover', shapeIds: ['shape-title'] },
   },
   shapes: {
     'shape-title': {
@@ -60,10 +36,7 @@ const initialState: DemoState = {
       children: [],
     },
   },
-  selection: {
-    shapeIds: [],
-    locked: false,
-  },
+  selection: { shapeIds: [], locked: false },
 }
 
 const logSection = (title: string) => {

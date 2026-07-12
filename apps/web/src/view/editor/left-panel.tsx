@@ -31,9 +31,7 @@ export const SwitchBarComp: FC<{}> = observer(({}) => {
   return (
     <G center vertical className={cls('switchBar')} gap={8}>
       {EditorLeftPanelIds.map((id) => {
-        const icon = matchCase(id, {
-          layer: <Lucide icon={Layers} size={17} />,
-        })
+        const icon = matchCase(id, { layer: <Lucide icon={Layers} size={17} /> })
         return (
           <Btn
             key={id}

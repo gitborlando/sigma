@@ -33,12 +33,7 @@ let panelCount = 0
 let maxZIndex = 0
 
 const dragPanelInfoSchema = z.object({
-  xy: z
-    .object({
-      x: z.number(),
-      y: z.number(),
-    })
-    .optional(),
+  xy: z.object({ x: z.number(), y: z.number() }).optional(),
   autoPopup: z.boolean().optional(),
 })
 

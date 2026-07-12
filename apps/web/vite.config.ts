@@ -10,14 +10,9 @@ import { autoImportConfig } from './auto-import'
 export default defineConfig(() => {
   return {
     plugins: [
-      vitePluginNestedAssets({
-        base: 'src/view/assets',
-      }),
+      vitePluginNestedAssets({ base: 'src/view/assets' }),
       autoImportConfig,
-      wywInJs({
-        include: 'src/**/*.tsx',
-        classNameSlug: () => miniId(5),
-      }),
+      wywInJs({ include: 'src/**/*.tsx', classNameSlug: () => miniId(5) }),
       react({
         babel: {
           plugins: [
@@ -35,13 +30,7 @@ export default defineConfig(() => {
         types: path.resolve(__dirname, '../../types'),
       },
     },
-    build: {
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
-    },
-    server: {
-      open: true,
-    },
+    build: { commonjsOptions: { transformMixedEsModules: true } },
+    server: { open: true },
   }
 })

@@ -2,9 +2,7 @@ type Nil = undefined | null
 
 type ID = string
 
-type IDPayload = {
-  id: ID
-}
+type IDPayload = { id: ID }
 
 type NestPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
