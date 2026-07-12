@@ -127,6 +127,10 @@ export class StageEvent extends Service {
     const onMouseEvent = (e: MouseEvent) => {
       if (this.isPointerEventNone || this.renderer.isSliceRendering) return
 
+      if (e.type === 'mousedown' && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur()
+      }
+
       const point = XY.client(e)
       this.prepareHitTest(point)
 
