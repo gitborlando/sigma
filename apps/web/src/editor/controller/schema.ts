@@ -43,15 +43,15 @@ export class SchemaController extends Service {
       awareness: this.ySync.awareness,
     })
 
-    this.undo.init({
-      stateMap: this.yState.doc.getMap('schema'),
-      getPatches: this.yState.getPatches,
-    })
-
     SchemaHelper.init({ find: this.yState.find })
     configureSchemaTraverse(() => this.yState.schema)
 
     this.handleSelect.selectPage(schema.meta.pageIds[0])
+
+    this.undo.init({
+      stateMap: this.yState.doc.getMap('schema'),
+      getPatches: this.yState.getPatches,
+    })
 
     this.sessionFileId = fileId
   }
