@@ -37,11 +37,12 @@ export class SchemaController extends Service {
     if (fileId === this.sessionFileId) return
 
     this.yState.init(schema)
-    this.ySync.init(fileId, this.yState.doc)
-    this.yAware.init({
-      clientId: this.yState.doc.clientID,
-      awareness: this.ySync.awareness,
-    })
+    // 开发中暂时不启用y-sync
+    // this.ySync.init(fileId, this.yState.doc)
+    // this.yAware.init({
+    //   clientId: this.yState.doc.clientID,
+    //   awareness: this.ySync.awareness,
+    // })
 
     SchemaHelper.init({ find: this.yState.find })
     configureSchemaTraverse(() => this.yState.schema)
