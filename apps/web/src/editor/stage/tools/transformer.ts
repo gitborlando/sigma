@@ -5,6 +5,7 @@ import { NodeController } from 'src/editor/controller/node'
 import { Setting } from 'src/editor/core/setting'
 import { Undo } from 'src/editor/core/undo'
 import { IMRect, Matrix, MRect } from 'src/editor/geometry'
+import { HandleNode } from 'src/editor/handle/node'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -77,6 +78,7 @@ export class StageTransformer extends Service {
     private readonly stageViewport: StageViewport,
     private readonly setting: Setting,
     private readonly nodeController: NodeController,
+    private readonly handleNode: HandleNode,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -350,8 +352,7 @@ export class StageTransformer extends Service {
       }
     }
 
-    this.yState.set<S.Node>([node.id, 'width'], startMRect.width)
-    this.yState.set<S.Node>([node.id, 'height'], startMRect.height)
+    this.handleNode.setNodeSize(node, startMRect.width, startMRect.height)
     this.yState.set<S.Node>([node.id, 'matrix'], startMRect.matrix)
   }
 }

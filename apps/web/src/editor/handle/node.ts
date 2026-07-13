@@ -60,6 +60,26 @@ export class HandleNode extends Service {
     this.yState.insert<S.NodeParent>([parent.id, 'childIds', index], node.id)
   }
 
+  setNodeSize(node: S.Node, width: number, height: number) {
+    if (node.width === width && node.height === height) return
+
+    if (node.type === 'path' || node.type === 'line') {
+      const scaleX = node.width === 0 ? 1 : width / node.width
+      const scaleY = node.height === 0 ? 1 : height / node.height
+      const scaleXY = ({ x, y }: IXY) => ({ x: x * scaleX, y: y * scaleY })
+      const points = node.points.map((point) => ({
+        ...point,
+        ...scaleXY(point),
+        ...(point.in && { in: scaleXY(point.in) }),
+        ...(point.out && { out: scaleXY(point.out) }),
+      }))
+      this.yState.set<S.Node>([node.id, 'points'], points)
+    }
+
+    this.yState.set<S.Node>([node.id, 'width'], width)
+    this.yState.set<S.Node>([node.id, 'height'], height)
+  }
+
   getNodesMergedOBB(nodes: S.Node[]) {
     const aabbList = nodes.map((node) => OBB.fromRect(node, node.rotation).aabb)
     return OBB.fromAABB(AABB.merge(aabbList))

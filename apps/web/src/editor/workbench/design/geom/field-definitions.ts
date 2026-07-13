@@ -90,11 +90,7 @@ const createMRectField = (key: DesignOBBKey): DesignNumberField => ({
       return
     }
 
-    yState.set<S.Node>([node.id, key], mrect[key])
-    if (mrect.aspectRatio > 0) {
-      const linkedKey = key === 'width' ? 'height' : 'width'
-      yState.set<S.Node>([node.id, linkedKey], mrect[linkedKey])
-    }
+    handleNode.setNodeSize(node, mrect.width, mrect.height)
   },
 })
 
