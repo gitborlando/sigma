@@ -248,10 +248,7 @@ function restoreUndo(yState: YState, undo: Undo, snapshot: SnapshotState) {
 }
 
 function resetUndo(yState: YState, undo: Undo) {
-  undo.init({
-    stateMap: yState.doc.getMap<S.Schema>('schema'),
-    getPatches: yState.getPatches,
-  })
+  undo.setup()
   return true
 }
 

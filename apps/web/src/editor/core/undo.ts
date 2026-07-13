@@ -1,7 +1,7 @@
 import { MobxUndo, MobxUndoState } from '@gitborlando/mobx-undo'
 import { matchCase } from '@gitborlando/utils'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
-import type { YStatePatch } from 'src/editor/y-adapter/y-state'
+import { YState, YStatePatch } from 'src/editor/y-adapter/y-state'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { Service } from 'src/global/service'
 import * as Y from 'yjs'
@@ -15,8 +15,6 @@ export type UndoInfo = {
   statePatches?: YStatePatch[]
 }
 
-type StateUndoConfig = { stateMap: Y.Map<S.Schema>; getPatches: () => YStatePatch[] }
-
 @reflection
 export class Undo extends Service {
   @observable.shallow stack: UndoInfo[] = []
@@ -25,10 +23,9 @@ export class Undo extends Service {
   mobxUndo = autoBind(new MobxUndo())
   yUndo?: Y.UndoManager
 
-  private getStatePatches?: () => YStatePatch[]
   private shouldTrack = true
 
-  constructor() {
+  constructor(private readonly yState: YState) {
     super()
     autoBind(makeObservable(this))
     this.effect(() => this.mobxUndo.dispose())
@@ -43,13 +40,9 @@ export class Undo extends Service {
     return this.next < this.stack.length
   }
 
-  init({ stateMap, getPatches }: StateUndoConfig) {
-    this.mobxUndo.rebase()
+  setup() {
     this.yUndo?.destroy()
-    this.stack = []
-    this.next = 0
-    this.getStatePatches = getPatches
-    this.yUndo = new Y.UndoManager(stateMap, {
+    this.yUndo = new Y.UndoManager(this.yState.doc.getMap('schema'), {
       trackedOrigins: new Set([null, Y_STATE_LOCAL_ORIGIN]),
     })
   }
@@ -75,7 +68,7 @@ export class Undo extends Service {
 
     if (type === 'state' || type === 'all') {
       this.yUndo?.stopCapturing()
-      info.statePatches = this.getStatePatches?.()
+      info.statePatches = this.yState.getPatches()
     }
     if (type === 'client' || type === 'all') {
       this.mobxUndo.archive()

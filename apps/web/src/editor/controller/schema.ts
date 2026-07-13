@@ -5,7 +5,7 @@ import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
-import { configureSchemaTraverse } from 'src/editor/schema/traverse'
+import { setupSchemaTraverse } from 'src/editor/schema/traverse'
 import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YState } from 'src/editor/y-adapter/y-state'
@@ -36,23 +36,20 @@ export class SchemaController extends Service {
   setupSchema(fileId: string, schema: S.Schema) {
     if (fileId === this.sessionFileId) return
 
-    this.yState.init(schema)
+    this.yState.setup(schema)
     // 开发中暂时不启用y-sync
     // this.ySync.init(fileId, this.yState.doc)
     // this.yAware.init({
     //   clientId: this.yState.doc.clientID,
     //   awareness: this.ySync.awareness,
     // })
+    this.undo.setup()
 
-    SchemaHelper.init({ find: this.yState.find })
-    configureSchemaTraverse(() => this.yState.schema)
+    SchemaHelper.setup({ find: this.yState.find })
+    setupSchemaTraverse(() => this.yState.schema)
 
     this.handleSelect.selectPage(schema.meta.pageIds[0])
-
-    this.undo.init({
-      stateMap: this.yState.doc.getMap('schema'),
-      getPatches: this.yState.getPatches,
-    })
+    this.undo.mobxUndo.rebase()
 
     this.sessionFileId = fileId
   }

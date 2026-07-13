@@ -14,7 +14,7 @@ const missingFinder: SchemaFinder = () => {
 export class SchemaHelper {
   private static find: SchemaFinder = missingFinder
 
-  static init(option: { find: SchemaFinder }) {
+  static setup(option: { find: SchemaFinder }) {
     this.find = option.find
   }
 

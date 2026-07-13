@@ -16,8 +16,8 @@ export class YState extends Service {
 
   flushPatch$ = Signal.create<YStatePatch>()
 
+  private patches: YStatePatch[] = []
   private listeners = new Set<YStateListener>()
-  private accumulatePatches: YStatePatch[] = []
 
   constructor() {
     super()
@@ -61,22 +61,8 @@ export class YState extends Service {
     return () => void this.listeners.delete(listener)
   }
 
-  getPatches() {
-    const keyPatchMap = new Map<string, YStatePatch>()
-    this.accumulatePatches.forEach((patch) => {
-      const keyPath = patch.keys.join('.')
-      const existingPatch = keyPatchMap.get(keyPath)
-      if (existingPatch && 'value' in patch) {
-        Object.assign(existingPatch, { value: clone(patch.value) })
-        return
-      }
-      keyPatchMap.set(keyPath, clone(patch))
-    })
-    this.accumulatePatches = []
-    return clone([...keyPatchMap.values()])
-  }
-
-  init(schema: S.Schema) {
+  setup(schema: S.Schema) {
+    this.patches = []
     this.doc = new Y.Doc()
     this.effect(() => this.doc.destroy())
     this.plain = autoBind(new YPlain(this.doc.getMap<unknown>('schema'), schema))
@@ -84,10 +70,16 @@ export class YState extends Service {
     this.effect(this.plain.subscribe(this.handlePlainChange))
   }
 
+  getPatches() {
+    const patches = [...this.patches]
+    this.patches = []
+    return patches
+  }
+
   private handlePlainChange = ({ patches }: YPlainChange<S.Schema>) => {
     if (!patches.length) return
 
-    this.accumulatePatches.push(...clone(patches))
+    this.patches.push(...clone(patches))
     this.listeners.forEach((listener) => listener(patches))
 
     patches.forEach((patch) => this.flushPatch$.dispatch(patch))
