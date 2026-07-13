@@ -8,8 +8,6 @@ import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
-let isSelectOnlyLine = false
-
 export const StageTransformComp: FC<{}> = observer(({}) => {
   const {
     schemaCreator,
@@ -22,9 +20,6 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
   const selectNodes = useSelectNodes()
   const { mrect, isMoving } = stageTransformer
   const shouldHidden = isMoving || stageViewport.isZooming || stageMove.isMoving
-
-  isSelectOnlyLine = selectNodes.length === 1 && selectNodes[0].type === 'line'
-  stageTransformer.isSelectOnlyLine = isSelectOnlyLine
 
   useLayoutEffect(() => {
     stageTransformer.setup(selectNodes)
@@ -42,6 +37,19 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
     }
   }
 
+  if (stageTransformer.isSelectOneLine) {
+    return (
+      <elem
+        x-if={selectNodes.length > 0}
+        hidden={shouldHidden}
+        node={node}
+        events={{ mousedown }}>
+        <LineComp type='top' index={0} />
+        <VertexComp type='topLeft' index={0} directions={['left']} />
+        <VertexComp type='topRight' index={1} directions={['right']} />
+      </elem>
+    )
+  }
   return (
     <elem
       x-if={selectNodes.length > 0}
@@ -82,7 +90,7 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
   const mouseover = (e: ElemMouseEvent) => {
     if (!e.hovered) return stageCursor.setCursor('select')
 
-    if (isSelectOnlyLine) {
+    if (stageTransformer.isSelectOneLine) {
       return stageCursor.setCursor('select')
     }
 
@@ -93,7 +101,11 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
   const mousedown = (e: ElemMouseEvent) => {
     e.stopPropagation()
     stageCursor.lock()
-    stageTransformer.onResize([type], { shiftKey: hotkeys.shift })
+    if (stageTransformer.isSelectOneLine) {
+      stageTransformer.move(e.hostEvent)
+      return
+    }
+    stageTransformer.onResize([type], { e: e.hostEvent, shiftKey: hotkeys.shift })
   }
 
   return <elem node={line} events={{ hover: mouseover, mousedown }} />
@@ -131,7 +143,7 @@ const VertexComp: FC<{
   const mouseenter = (e: ElemMouseEvent) => {
     if (!e.hovered) return stageCursor.setCursor('select')
 
-    if (isSelectOnlyLine) {
+    if (stageTransformer.isSelectOneLine) {
       return stageCursor.setCursor('resize', mrect.rotation)
     }
 
@@ -142,7 +154,10 @@ const VertexComp: FC<{
   const mousedown = (e: ElemMouseEvent) => {
     e.stopPropagation()
     stageCursor.lock()
-    stageTransformer.onResize(directions, { shiftKey: hotkeys.shift })
+    stageTransformer.onResize(directions, {
+      e: e.hostEvent,
+      shiftKey: hotkeys.shift,
+    })
   }
 
   return (

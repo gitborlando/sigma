@@ -186,8 +186,8 @@ export class MRect {
     const [p0, p1, p2] = this.vertices
     const newWidth = XY.distance(p0, p1)
     const newHeight = XY.distance(p1, p2)
-    const scaleX = newWidth / this.width
-    const scaleY = newHeight / this.height
+    const scaleX = this.width === 0 ? 1 : newWidth / this.width
+    const scaleY = this.height === 0 ? 1 : newHeight / this.height
     const scaleMatrix = Matrix.identity().scale(scaleX, scaleY)
     const newMatrix = Matrix.of(this.matrix).divide(scaleMatrix).plain()
     this._width = newWidth

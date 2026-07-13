@@ -15,6 +15,11 @@ import { Service } from 'src/global/service'
 
 type TransformerAction = 'move' | 'resize' | 'rotate'
 
+interface ResizeResult {
+  mrect: MRect
+  points?: S.Point[]
+}
+
 interface AxisPositionOptions {
   startSelectionMin: number
   startSelectionSize: number
@@ -59,8 +64,10 @@ export class StageTransformer extends Service {
   @computed get isSingleSelect() {
     return this.nodeController.selectNodes.length === 1
   }
-
-  isSelectOnlyLine = false
+  @computed get isSelectOneLine() {
+    if (this.nodeController.selectNodes.length !== 1) return false
+    return SchemaHelper.is(this.nodeController.selectNodes[0], 'line')
+  }
 
   private action: TransformerAction = 'move'
   private isResizing = false
@@ -136,6 +143,13 @@ export class StageTransformer extends Service {
   onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {
     this.isResizing = true
     const { startMRect, startMatrix } = this.onStartTransform()
+    const node = this.nodeController.selectNodes[0]
+
+    if (this.isSelectOneLine) {
+      this.resizeLine(node as S.Line, startMRect, directions, options?.e)
+      return
+    }
+
     this.resizeStartMRect = startMRect
     this.resizeDirections = [...directions]
     const endMatrix = Matrix.of(startMatrix)
@@ -213,6 +227,50 @@ export class StageTransformer extends Service {
         }
       })
       .start(options?.e)
+  }
+
+  private resizeLine(
+    node: S.Line,
+    startMRect: MRect,
+    directions: TRBL[],
+    e?: MouseEvent,
+  ) {
+    const [start, end] = startMRect.vertices
+    const isMoveStartHandler = directions.includes('left')
+    const fixedPoint = isMoveStartHandler ? end : start
+    const movingPoint = isMoveStartHandler ? start : end
+    const forwardMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
+    const [startPoint, endPoint] = node.points
+
+    this.dragger
+      .onMove(({ shift }) => {
+        this.action = 'resize'
+
+        const movedPoint = XY.of(movingPoint).plus(shift).$()
+        const lineStart = isMoveStartHandler ? movedPoint : fixedPoint
+        const lineEnd = isMoveStartHandler ? fixedPoint : movedPoint
+        const width = XY.distance(lineStart, lineEnd)
+        const rotation = Angle.sweep(XY.vector(lineEnd, lineStart))
+        const sceneMatrix = Matrix.identity().rotate(rotation).shift(lineStart)
+        const matrix = Matrix.of(forwardMatrix).invert().append(sceneMatrix).plain()
+        const result: ResizeResult = {
+          mrect: new MRect(width, 0, matrix),
+          points: [
+            { ...startPoint, x: 0, y: 0 },
+            { ...endPoint, x: width, y: 0 },
+          ],
+        }
+
+        this.mrect = new MRect(width, 0, sceneMatrix.plain())
+        this.yState.transact(() =>
+          this.applyNodeMRect(node, result.mrect, result.points),
+        )
+      })
+      .onDestroy(({ moved }) => {
+        this.onEndTransform()
+        if (moved) this.undo.track('state', t('resize nodes'))
+      })
+      .start(e)
   }
 
   onRotate() {
@@ -352,7 +410,17 @@ export class StageTransformer extends Service {
       }
     }
 
-    this.handleNode.setNodeSize(node, startMRect.width, startMRect.height)
-    this.yState.set<S.Node>([node.id, 'matrix'], startMRect.matrix)
+    this.applyNodeMRect(node, startMRect)
+  }
+
+  private applyNodeMRect(node: S.Node, mrect: MRect, points?: S.Point[]) {
+    if (points) {
+      this.yState.set<S.Line>([node.id, 'points'], points)
+      this.yState.set<S.Node>([node.id, 'width'], mrect.width)
+      this.yState.set<S.Node>([node.id, 'height'], mrect.height)
+    } else {
+      this.handleNode.setNodeSize(node, mrect.width, mrect.height)
+    }
+    this.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
   }
 }
