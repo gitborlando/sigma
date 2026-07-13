@@ -25,6 +25,14 @@ export class NodeController extends Service {
     return this.handleSelect.selectIdList.map((id) => this.yState.find<S.Node>(id))
   }
 
+  selectAllNodes() {
+    const selectIds = SchemaHelper.getPageChildIds(
+      this.handleSelect.selectPageId,
+    ).map((id) => [id, true])
+    const selection = Object.fromEntries(selectIds)
+    this.handleSelect.replaceSelection(selection)
+  }
+
   deleteSelectedNodes() {
     this.yState.transact(() => {
       const traverse = createSchemaTraverse({

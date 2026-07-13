@@ -89,6 +89,7 @@ export class EditorCommand extends Service {
         },
       },
       { name: t('create frame'), callback: () => this.nodeController.wrapInFrame() },
+
       {
         name: t('delete'),
         shortcut: 'del',
@@ -118,6 +119,16 @@ export class EditorCommand extends Service {
     }
 
     return commands
+  }
+
+  get selectionGroup(): Command[] {
+    return [
+      {
+        name: t('select all nodes'),
+        shortcut: 'ctrl+a',
+        callback: () => this.nodeController.selectAllNodes(),
+      },
+    ]
   }
 
   get nodeReHierarchyGroup(): Command[] {
@@ -174,6 +185,7 @@ export class EditorCommand extends Service {
       this.undoRedoGroup,
       this.pageGroup,
       this.nodeGroup,
+      this.selectionGroup,
       this.nodeReHierarchyGroup,
       this.createShapeGroup,
       this.fileGroup,
