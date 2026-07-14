@@ -25,6 +25,7 @@ export class DesignAlign extends Service {
   @observable canAlign = false
 
   private toAlignNodes = <S.Node[]>[]
+  private aligned = false
 
   constructor(
     private readonly yState: YState,
@@ -35,28 +36,33 @@ export class DesignAlign extends Service {
   ) {
     super()
     autoBind(makeObservable(this))
-    this.effect(autorun(this.setupAlign))
+    this.effect(autorun(this.setup))
   }
 
   setAlign(align: IAlignType) {
+    this.setup()
     this.yState.transact(() => {
       this[align]?.(this.getAlignBound())
     })
+    if (this.aligned) {
+      this.undo.track('state', t('set alignment'))
+      this.aligned = false
+    }
   }
 
-  private setupAlign() {
-    const selectNodes = this.nodeController.selectNodes
+  private setup() {
+    const selectedNodes = this.nodeController.selectNodes
 
-    if (selectNodes.length === 0) {
+    if (selectedNodes.length === 0) {
       this.canAlign = false
-    } else if (selectNodes.length > 1) {
-      this.toAlignNodes = [...selectNodes]
+    } else if (selectedNodes.length > 1) {
+      this.toAlignNodes = [...selectedNodes]
       this.canAlign = true
     } else if (
-      selectNodes.length === 1 &&
-      SchemaHelper.isById(selectNodes[0].id, 'nodeParent')
+      selectedNodes.length === 1 &&
+      SchemaHelper.isById(selectedNodes[0].id, 'nodeParent')
     ) {
-      this.toAlignNodes = SchemaHelper.getChildren(<S.NodeParent>selectNodes[0])
+      this.toAlignNodes = SchemaHelper.getChildren(<S.NodeParent>selectedNodes[0])
       this.canAlign = true
     } else this.canAlign = false
   }
@@ -72,9 +78,9 @@ export class DesignAlign extends Service {
   private alignCenter(alignBound: AABB) {
     this.toAlignNodes.forEach((node) => {
       const nodeBound = this.getNodeAABB(node)
-      const shift =
-        (alignBound.maxX - alignBound.minX) / 2 -
-        (nodeBound.maxX - nodeBound.minX) / 2
+      const alignMiddle = (alignBound.maxX - alignBound.minX) / 2 + alignBound.minX
+      const nodeMiddle = (nodeBound.maxX - nodeBound.minX) / 2 + nodeBound.minX
+      const shift = alignMiddle - nodeMiddle
       this.setAlignState(node, XY.$(shift, 0))
     })
   }
@@ -98,9 +104,9 @@ export class DesignAlign extends Service {
   private verticalCenter(alignBound: AABB) {
     this.toAlignNodes.forEach((node) => {
       const nodeBound = this.getNodeAABB(node)
-      const shift =
-        (alignBound.maxY - alignBound.minY) / 2 -
-        (nodeBound.maxY - nodeBound.minY) / 2
+      const alignMiddle = (alignBound.maxY - alignBound.minY) / 2 + alignBound.minY
+      const nodeMiddle = (nodeBound.maxY - nodeBound.minY) / 2 + nodeBound.minY
+      const shift = alignMiddle - nodeMiddle
       this.setAlignState(node, XY.$(0, shift))
     })
   }
@@ -115,10 +121,11 @@ export class DesignAlign extends Service {
 
   private setAlignState(node: S.Node, shift: IXY) {
     if (shift.x === 0 && shift.y === 0) return
+
     const mrect = this.handleNode.getMRect(node)
     const newMRect = MRect.of(mrect).shift(shift)
     this.yState.set<S.Node>([node.id, 'matrix'], newMRect.matrix)
-    this.undo.track('state', t('set alignment'))
+    this.aligned = true
   }
 
   private getAlignBound() {
