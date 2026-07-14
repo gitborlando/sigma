@@ -3,6 +3,7 @@ import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import type { EditorServices } from 'src/editor'
 import type { UndoInfo } from 'src/editor/core/undo'
+import { type IMatrix, Matrix } from 'src/editor/geometry'
 import type { HandleSelectState } from 'src/editor/handle/select'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
@@ -13,17 +14,19 @@ type SnapshotState = {
   undoStack: UndoInfo[]
   undoNext: number
   savedAt: number
+  sceneMatrix: IMatrix
 }
 
 type DevSnapshot = SnapshotState & { base?: SnapshotState }
 
 type YState = EditorServices['yState']
 type Undo = EditorServices['undo']
+type StageViewport = EditorServices['stageViewport']
 
 const STORAGE_KEY_PREFIX = 'sigma:dev-snapshot'
 
 export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
-  const { yState, undo } = useEditorServices()
+  const { yState, undo, stageViewport } = useEditorServices()
   const { fileId } = useParams<{ fileId: string }>()
   const [searchParams] = useSearchParams()
   const applyRecord = searchParams.get('applyRecord') === 'true'
@@ -45,7 +48,10 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
     (base = baseSnapshotRef.current) => {
       if (!storageKey) return
 
-      const snapshot: DevSnapshot = { ...createSnapshotState(yState, undo), base }
+      const snapshot: DevSnapshot = {
+        ...createSnapshotState(yState, undo, stageViewport),
+        base,
+      }
 
       try {
         localStorage.setItem(storageKey, JSON.stringify(snapshot))
@@ -54,7 +60,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
         console.warn('Save dev snapshot failed', error)
       }
     },
-    [storageKey, undo, yState],
+    [stageViewport, storageKey, undo, yState],
   )
 
   const restoreSnapshot = useCallback(() => {
@@ -62,12 +68,12 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
     if (!snapshot) return false
 
     if (snapshot.base) {
-      restoreReplayableSnapshot(yState, undo, snapshot)
+      restoreReplayableSnapshot(yState, undo, stageViewport, snapshot)
     } else {
-      restoreFinalSnapshot(yState, undo, snapshot)
+      restoreFinalSnapshot(yState, undo, stageViewport, snapshot)
     }
     return true
-  }, [storageKey, undo, yState])
+  }, [stageViewport, storageKey, undo, yState])
 
   useEffect(() => {
     if (!applyRecord || !storageKey) return
@@ -87,12 +93,12 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
   }, [storageKey])
 
   const startRecording = useCallback(() => {
-    const base = createSnapshotState(yState, undo)
+    const base = createSnapshotState(yState, undo, stageViewport)
     baseSnapshotRef.current = base
     saveSnapshot(base)
     setAppliedRecord(false)
     setRecording(true)
-  }, [saveSnapshot, undo, yState])
+  }, [saveSnapshot, stageViewport, undo, yState])
 
   const stopRecording = useCallback(() => {
     saveSnapshot()
@@ -112,14 +118,19 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
       () => [undo.next, undo.stack.length],
       scheduleSave,
     )
+    const disposeSceneMatrixReaction = reaction(
+      () => stageViewport.sceneMatrix,
+      scheduleSave,
+    )
 
     return () => {
       window.clearTimeout(timer)
       saveSnapshot()
       unSub()
       disposeHistoryReaction()
+      disposeSceneMatrixReaction()
     }
-  }, [recording, saveSnapshot, undo, yState])
+  }, [recording, saveSnapshot, stageViewport, undo, yState])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -201,32 +212,50 @@ function readSnapshot(storageKey: string) {
   }
 }
 
-function createSnapshotState(yState: YState, undo: Undo): SnapshotState {
+function createSnapshotState(
+  yState: YState,
+  undo: Undo,
+  stageViewport: StageViewport,
+): SnapshotState {
   return {
     schema: toPlain(yState.schema),
     undoStack: toPlain(undo.stack),
     undoNext: undo.next,
     savedAt: Date.now(),
+    sceneMatrix: Matrix.plain(stageViewport.sceneMatrix),
   }
 }
 
-function restoreFinalSnapshot(yState: YState, undo: Undo, snapshot: SnapshotState) {
+function restoreFinalSnapshot(
+  yState: YState,
+  undo: Undo,
+  stageViewport: StageViewport,
+  snapshot: SnapshotState,
+) {
   replaceSchema(yState, snapshot.schema)
   restoreUndo(yState, undo, snapshot)
+  restoreSceneMatrix(stageViewport, snapshot)
 }
 
 function restoreReplayableSnapshot(
   yState: YState,
   undo: Undo,
+  stageViewport: StageViewport,
   snapshot: DevSnapshot,
 ) {
   const base = snapshot.base
-  if (!base) return restoreFinalSnapshot(yState, undo, snapshot)
+  if (!base) return restoreFinalSnapshot(yState, undo, stageViewport, snapshot)
 
   replaceSchema(yState, base.schema)
   if (!resetUndo(yState, undo)) return
 
   replayHistoryFromBase(yState, undo, snapshot, base)
+  restoreSceneMatrix(stageViewport, snapshot)
+}
+
+function restoreSceneMatrix(stageViewport: StageViewport, snapshot: SnapshotState) {
+  if (!snapshot.sceneMatrix) return
+  stageViewport.sceneMatrix = Matrix.of(snapshot.sceneMatrix)
 }
 
 function replaceSchema(yState: YState, schema: S.Schema) {
