@@ -13,7 +13,7 @@ import { snapGridRound, TRBL } from 'src/editor/utils/misc'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
-type TransformerAction = 'move' | 'resize' | 'rotate'
+type TransformerAction = 'move' | 'resize' | 'rotate' | 'flip'
 
 interface ResizeResult {
   mrect: MRect
@@ -138,6 +138,20 @@ export class StageTransformer extends Service {
         }
       })
       .start(e)
+  }
+
+  flip(axis: 'x' | 'y') {
+    if (this.nodeController.selectNodes.length < 2) return
+
+    const { startMRect } = this.onStartTransform()
+    const { center } = startMRect
+    this.action = 'flip'
+    this.diffMatrix = Matrix.identity().set(
+      axis === 'x' ? { a: -1, tx: center.x * 2 } : { d: -1, ty: center.y * 2 },
+    )
+
+    this.transform()
+    this.onEndTransform()
   }
 
   onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {
@@ -336,19 +350,21 @@ export class StageTransformer extends Service {
     if (!this.diffMatrix || !mrect) return
 
     const startMRect = MRect.of(mrect)
-    const forwardMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
+    const ancestorsMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
 
     if (this.nodeController.selectNodes.length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
     } else {
-      const localDiff = Matrix.of(forwardMatrix)
+      const localDiff = Matrix.of(ancestorsMatrix)
         .invert()
         .append(this.diffMatrix)
-        .append(forwardMatrix)
-      if (this.action === 'resize' && startMRect.aspectRatio > 0) {
+        .append(ancestorsMatrix)
+      if (this.action === 'flip') {
+        startMRect.matrix = Matrix.of(startMRect.matrix).prepend(localDiff).plain()
+      } else if (this.action === 'resize' && startMRect.aspectRatio > 0) {
         const startSceneMRect = MRect.of(mrect)
         startSceneMRect.matrix = Matrix.of(mrect.matrix)
-          .prepend(forwardMatrix)
+          .prepend(ancestorsMatrix)
           .plain()
         const startAABB = startSceneMRect.aabb
         const selectionAABB = this.mrect.aabb
@@ -370,7 +386,7 @@ export class StageTransformer extends Service {
         const selectionStartAABB = this.resizeStartMRect.aabb
         const resizedSceneMRect = MRect.of(startMRect)
         resizedSceneMRect.matrix = Matrix.of(startMRect.matrix)
-          .prepend(forwardMatrix)
+          .prepend(ancestorsMatrix)
           .plain()
         const resizedAABB = resizedSceneMRect.aabb
         const newX = calculateAxisPosition({
@@ -404,7 +420,7 @@ export class StageTransformer extends Service {
               : 0.5,
         })
         const sceneShift = XY.$(newX - resizedAABB.minX, newY - resizedAABB.minY)
-        startMRect.shift(Matrix.of(forwardMatrix).applyShift(sceneShift, true))
+        startMRect.shift(Matrix.of(ancestorsMatrix).applyShift(sceneShift, true))
       } else {
         startMRect.transform(localDiff)
       }

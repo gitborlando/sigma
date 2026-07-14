@@ -97,12 +97,18 @@ export const DesignGeomComp: FC<{}> = observer(({}) => {
 })
 
 const FlipComp: FC<{}> = observer(({}) => {
-  const { designGeom, undo } = useEditorServices()
+  const { designGeom, stageTransformer, undo } = useEditorServices()
   const { currentGeom, setupSlideGeom } = designGeom
   const nodes = useSelectNodes()
   const setGeomValue = useSetGeomValue()
 
   const handleFlip = (mask: 1 | 2) => {
+    if (nodes.length > 1) {
+      stageTransformer.flip(mask === 1 ? 'x' : 'y')
+      undo.track('state', `${t('modify geometry property')}: flip`)
+      return
+    }
+
     const flip =
       currentGeom.flip === MIXED_VALUE ? mask : (currentGeom.flip as number) ^ mask
     setGeomValue('flip', flip)
