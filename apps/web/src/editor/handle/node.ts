@@ -1,23 +1,14 @@
-import { clampIndex, firstOne, getSet } from '@gitborlando/utils'
+import { clampIndex, getSet } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
 import { MRect } from 'src/editor/geometry'
-import { HandleSelect } from 'src/editor/handle/select'
-import { SchemaHelper } from 'src/editor/schema/helper'
 import { Service } from 'src/global/service'
 import { YState } from '../y-adapter/y-state'
 
 @reflection
 export class HandleNode extends Service {
-  @computed get datumXY() {
-    return this.getDatumXY()
-  }
-
   private mrectCache = new Map<ID, MRect>()
 
-  constructor(
-    private readonly yState: YState,
-    private readonly handleSelect: HandleSelect,
-  ) {
+  constructor(private readonly yState: YState) {
     super()
     autoBind(makeObservable(this))
   }
@@ -78,37 +69,5 @@ export class HandleNode extends Service {
 
     this.yState.set<S.Node>([node.id, 'width'], width)
     this.yState.set<S.Node>([node.id, 'height'], height)
-  }
-
-  getNodesMergedOBB(nodes: S.Node[]) {
-    const aabbList = nodes.map((node) => OBB.fromRect(node, node.rotation).aabb)
-    return OBB.fromAABB(AABB.merge(aabbList))
-  }
-
-  getNodeCenterXY(node: S.Node) {
-    return OBB.fromRect(node, node.rotation).center
-  }
-
-  private getDatumXY() {
-    const selectIds = this.handleSelect.selectIdList
-    let datumId = ''
-
-    if (selectIds.length === 1) {
-      datumId = this.yState.find<S.Node>(firstOne(selectIds)!).parentId
-    }
-    if (selectIds.length > 1) {
-      const parentIds = new Set<string>()
-      selectIds.forEach((id) => parentIds.add(this.yState.find<S.Node>(id).parentId))
-      if (parentIds.size === 1) datumId = firstOne(parentIds)!
-      if (parentIds.size > 1) datumId = ''
-    }
-
-    const datum = this.yState.find<S.Node>(datumId)
-    if (datum && !SchemaHelper.isPageById(datum.id)) {
-      const aabb = OBB.fromRect(datum, datum.rotation).aabb
-      return XY.$(aabb.minX, aabb.minY)
-    } else {
-      return XY.$(0, 0)
-    }
   }
 }

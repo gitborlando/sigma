@@ -1,4 +1,5 @@
 import { values } from 'mobx'
+import { MRect } from 'src/editor/geometry/mrect'
 import { COLOR } from 'src/utils/color'
 import { useEditorServices } from 'src/view/hooks/editor'
 
@@ -30,10 +31,9 @@ const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
     fills: [schemaCreator.fillColor(color, 1)],
   })
   const text = schemaCreator.text({
-    x: xy.x + 6,
-    y: xy.y + 16,
-    width: 60,
-    height: 12,
+    ...MRect.identity(60, 12)
+      .shift({ x: xy.x + 6, y: xy.y + 16 })
+      .plain(),
     content: name,
     style: {
       fontSize: 12,

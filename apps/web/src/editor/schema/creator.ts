@@ -95,7 +95,7 @@ export class SchemaCreator extends Service {
 
   line(option?: Partial<S.Line>): S.Line {
     const nodeBase = this.createNodeBase()
-    const start = XY.$(nodeBase.x, nodeBase.y)
+    const start = XY.$(nodeBase.matrix.tx, nodeBase.matrix.ty)
     const length = option?.width || nodeBase.width
     const points = createLine(start, length)
     return {
@@ -228,10 +228,7 @@ export class SchemaCreator extends Service {
     return {
       ...this.createSchemaMeta(),
       ...MRect.identity(100, 100).plain(),
-      x: 0,
-      y: 0,
       opacity: 1,
-      rotation: 0,
       flip: 0,
       fills: [this.fillColor()],
       strokes: [],

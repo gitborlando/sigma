@@ -26,9 +26,9 @@ export const StageRulerComp: FC<{}> = observer(({}) => {
 
 export const Ruler: FC<{ type: 'horizontal' | 'vertical' }> = observer(
   ({ type }) => {
-    const { stageViewport, handleNode } = useEditorServices()
+    const { stageViewport, nodeController } = useEditorServices()
     const { bound, zoom, offset: offsetXY } = stageViewport
-    const datumXY = handleNode.datumXY
+    const datumXY = nodeController.datumXY
 
     const getTicks = () => {
       const ticks: { offset: number; value: number }[] = []

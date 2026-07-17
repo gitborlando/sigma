@@ -57,15 +57,7 @@ namespace S {
     outline?: Outline
   }
 
-  type ObbInfo = {
-    x: number
-    y: number
-    width: number
-    height: number
-    rotation: number
-  }
-
-  type NodeBase = NodeMeta & NodeEffect & MRect & ObbInfo
+  type NodeBase = NodeMeta & NodeEffect & MRect
 
   type Frame = NodeBase & NodeParentBase & { type: 'frame'; radius: number }
 

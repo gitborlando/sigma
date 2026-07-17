@@ -1,7 +1,9 @@
-import { iife, objKeys } from '@gitborlando/utils'
+import { firstOne, iife, objKeys } from '@gitborlando/utils'
 import { Undo } from 'src/editor/core/undo'
+import { MRect } from 'src/editor/geometry/mrect'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandleSelect, type Selection } from 'src/editor/handle/select'
+import { RenderTree } from 'src/editor/render/tree'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
@@ -16,9 +18,14 @@ export class NodeController extends Service {
     private readonly yState: YState,
     private readonly undo: Undo,
     private readonly schemaCreator: SchemaCreator,
+    private readonly renderTree: RenderTree,
   ) {
     super()
     autoBind(this)
+  }
+
+  @computed get datumXY() {
+    return this.getDatumXY()
   }
 
   @computed get selectNodes() {
@@ -105,8 +112,12 @@ export class NodeController extends Service {
     const selected = this.selectNodes
     if (selected.length === 0) return
 
-    const frameOBB = this.handleNode.getNodesMergedOBB(selected)
-    const frameNode = this.schemaCreator.frame({ ...frameOBB })
+    const aabbList = selected.map((node) => this.renderTree.findElem(node.id).aabb)
+    const rect = AABB.rect(AABB.merge(aabbList))
+
+    const frameNode = this.schemaCreator.frame({
+      ...MRect.identity(rect.width, rect.height),
+    })
     const oldParent = this.yState.find<S.NodeParent>(selected[0].parentId)
     const index = oldParent.childIds.indexOf(selected[0].id)
 
@@ -119,5 +130,28 @@ export class NodeController extends Service {
     this.handleSelect.replaceSelection({ [frameNode.id]: true })
 
     this.undo.track('all', t('create frame'))
+  }
+
+  private getDatumXY() {
+    const selectIds = this.handleSelect.selectIdList
+    let datumId = ''
+
+    if (selectIds.length === 1) {
+      datumId = this.yState.find<S.Node>(firstOne(selectIds)!).parentId
+    }
+    if (selectIds.length > 1) {
+      const parentIds = new Set<string>()
+      selectIds.forEach((id) => parentIds.add(this.yState.find<S.Node>(id).parentId))
+      if (parentIds.size === 1) datumId = firstOne(parentIds)!
+      if (parentIds.size > 1) datumId = ''
+    }
+
+    const datum = this.yState.find<S.Node>(datumId)
+    if (datum && !SchemaHelper.isPageById(datum.id)) {
+      const aabb = this.renderTree.findElem(datum.id).aabb
+      return XY.$(aabb.minX, aabb.minY)
+    } else {
+      return XY.$(0, 0)
+    }
   }
 }

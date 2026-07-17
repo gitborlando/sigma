@@ -67,7 +67,10 @@ export const migrationList = [
       const { x, y, rotation, width, height } = T<LegacyObbNode>(node)
 
       const mrect = MRect.identity(width, height)
-      const parentXY = SchemaHelper.isNode(parent) ? parent : XY.$(0, 0)
+      const parentXY = SchemaHelper.isNode(parent)
+        ? (parent as unknown as LegacyObbNode)
+        : XY.$(0, 0)
+
       mrect.shift(XY.from(x, y).minus(parentXY))
       mrect.rotate(rotation)
 
@@ -83,8 +86,11 @@ export const migrationList = [
 
       const { x, y, rotation, width, height } = T<LegacyObbNode>(node)
 
-      const parentXY = SchemaHelper.isNode(parent) ? parent : XY.$(0, 0)
       const mrect = MRect.identity(width, height)
+      const parentXY = SchemaHelper.isNode(parent)
+        ? (parent as unknown as LegacyObbNode)
+        : XY.$(0, 0)
+
       mrect.shift(XY.from(x, y).minus(parentXY))
       mrect.rotate(rotation)
 
@@ -184,6 +190,21 @@ export const migrationList = [
 
       node.sweepAngle ??= clamp(node.endAngle! - node.startAngle, -360, 360)
       delete node.endAngle
+    },
+  },
+  {
+    version: 6,
+    desc: `移除旧的 x, y, rotation 三个属性`,
+    transform: (ctx: SchemaTraverseContext) => {
+      type LegacyXYRNode = S.Node & { x?: number; y?: number; rotation?: number }
+
+      const node = T<LegacyXYRNode>(ctx.item)
+      if (!SchemaHelper.isNode(node)) return
+
+      const legacyNode = node as LegacyXYRNode
+      delete legacyNode.x
+      delete legacyNode.y
+      delete legacyNode.rotation
     },
   },
 ] satisfies Migration[]
