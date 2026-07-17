@@ -95,7 +95,7 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
     }
 
     const extraRotation = type === 'top' || type === 'bottom' ? 90 : 0
-    stageCursor.setCursor('resize', mrect.rotation + extraRotation)
+    stageCursor.setCursor('resize', stageTransformer.mrect.rotation + extraRotation)
   }
 
   const mousedown = (e: ElemMouseEvent) => {
@@ -148,7 +148,7 @@ const VertexComp: FC<{
     }
 
     const extraRotation = type === 'topLeft' || type === 'bottomRight' ? 45 : -45
-    stageCursor.setCursor('resize', mrect.rotation + extraRotation)
+    stageCursor.setCursor('resize', stageTransformer.mrect.rotation + extraRotation)
   }
 
   const mousedown = (e: ElemMouseEvent) => {
