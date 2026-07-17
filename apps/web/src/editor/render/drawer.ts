@@ -2,10 +2,10 @@ import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor } from '@gitborlando/utils'
 import { clamp } from 'es-toolkit'
 import { Setting } from 'src/editor/core/setting'
-import { HitTest } from 'src/editor/geometry'
+import { HitTest, Matrix } from 'src/editor/geometry'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
-import { RenderInvalidator } from 'src/editor/render/invalidator'
 import { ISplitText, TextBreaker } from 'src/editor/render/text-break/text-breaker'
+import { RenderTree } from 'src/editor/render/tree'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 import { Image } from 'src/global/service/image'
@@ -13,18 +13,19 @@ import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
 import { Elem } from './elem'
 
+const dpr = devicePixelRatio
+
 @reflection
 export class ElemDrawer extends Service {
   private node!: S.Node
   private elem!: Elem
   private ctx!: CanvasRenderingContext2D
   private path2d!: Path2D
-  private dirtyRects: AABB[] = []
 
   constructor(
     private readonly setting: Setting,
     private readonly stageViewport: StageViewport,
-    private readonly renderInvalidator: RenderInvalidator,
+    private readonly renderTree: RenderTree,
   ) {
     super()
     autoBind(this)
@@ -41,7 +42,6 @@ export class ElemDrawer extends Service {
     this.elem = elem
     this.ctx = ctx
     this.path2d = path2d
-    this.dirtyRects = [elem.aabb]
 
     this.drawShapePath()
 
@@ -62,6 +62,51 @@ export class ElemDrawer extends Service {
     // this.drawOutline()
     this.drawTextDecoration()
     this.updateHitTest()
+
+    elem.cachePaintRect(this.measurePaintRect(elem))
+  }
+
+  measurePaintRect = (elem: Elem) => {
+    this.node = elem.node
+    this.elem = elem
+    const shapeBounds = this.getShapeBounds()
+    const paintBounds = [shapeBounds]
+
+    this.node.fills.forEach((_, i) => {
+      const shadowBounds = this.getShadowBounds(this.node.shadows[i], shapeBounds)
+      if (shadowBounds) paintBounds.push(shadowBounds)
+    })
+
+    this.node.strokes.forEach((stroke, i) => {
+      const strokeBounds = this.getStrokeBounds(shapeBounds, stroke)
+      const shadowBounds = this.getShadowBounds(this.node.shadows[i], strokeBounds)
+      if (shadowBounds) paintBounds.push(shadowBounds)
+      if (stroke.visible) paintBounds.push(strokeBounds)
+    })
+
+    const antialiasPadding = 1 / (dpr * this.stageViewport.zoom)
+    return AABB.extend(AABB.merge(paintBounds), antialiasPadding)
+  }
+
+  private getShapeBounds = () => {
+    const shapeBounds = [this.elem.aabb]
+    if (this.node.type !== 'text') return AABB.merge(shapeBounds)
+
+    this.breakText()
+    const { width, height, style } = this.node
+    const { lineHeight } = style
+    const dirtyHeight = lineHeight * this.splitTexts.length
+    const minX = Math.min(0, ...this.splitTexts.map(({ start }) => start))
+    const maxX = Math.max(
+      width,
+      ...this.splitTexts.map(({ start, width }) => start + width),
+    )
+    shapeBounds.push(
+      Matrix.of(this.elem.globalMatrix).applyAABB(
+        new AABB(minX, -lineHeight / 2, maxX, Math.max(height, dirtyHeight)),
+      ),
+    )
+    return AABB.merge(shapeBounds)
   }
 
   private drawShapePath = () => {
@@ -85,14 +130,10 @@ export class ElemDrawer extends Service {
 
       case 'text':
         this.breakText()
-
-        const { lineHeight } = node.style
-        this.dirtyRects.push(AABB.extend(this.elem.aabb, 0, lineHeight / 2, 0, 0))
-
-        const dirtyHeight = lineHeight * this.splitTexts.length
-        this.dirtyRects.push(
-          AABB.extend(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight),
-        )
+        const { fontWeight, fontSize, fontFamily, letterSpacing } = node.style
+        this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`
+        this.ctx.textBaseline = 'top'
+        this.ctx.letterSpacing = `${letterSpacing}px`
         break
     }
   }
@@ -194,11 +235,7 @@ export class ElemDrawer extends Service {
 
   private breakText() {
     const { content, style, width } = this.node as S.Text
-    const { fontWeight, fontSize, fontFamily, letterSpacing } = style
-
-    this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`
-    this.ctx.textBaseline = 'top'
-    this.ctx.letterSpacing = `${letterSpacing}px`
+    const { letterSpacing } = style
 
     this.splitTexts = getSet(
       this.splitTextsCache,
@@ -275,9 +312,7 @@ export class ElemDrawer extends Service {
       case 'image':
         const image = Image.getImage(fill.url)
         if (!image) {
-          Image.getImageAsync(fill.url).then(() => {
-            this.renderInvalidator.collectDirty(this.elem)
-          })
+          Image.getImageAsync(fill.url).then(() => this.elem.dirty())
         } else {
           const { width, height } = this.node
           const rate = iife(() => {
@@ -322,37 +357,46 @@ export class ElemDrawer extends Service {
       default:
         break
     }
+  }
 
-    switch (stroke.align) {
-      case 'center':
-        this.dirtyRects.push(AABB.extend(this.elem.aabb, stroke.width / 2))
-        break
-      case 'outer':
-        this.dirtyRects.push(AABB.extend(this.elem.aabb, stroke.width))
-    }
+  private getStrokeBounds(shapeBounds: AABB, stroke: S.Stroke) {
+    if (!stroke.visible) return shapeBounds
+
+    const { a, b, c, d } = this.elem.globalMatrix
+    const scale = Math.max(Math.hypot(a, b), Math.hypot(c, d))
+    const expand = stroke.width * scale * (stroke.align === 'outer' ? 1 : 0.5)
+    return AABB.extend(shapeBounds, expand)
   }
 
   private drawShadow = (shadow?: S.Shadow) => {
     if (!shadow?.visible) return
 
-    let { fill, blur, offsetX, offsetY, spread } = shadow
-    offsetX = offsetX * this.stageViewport.zoom
-    offsetY = offsetY * this.stageViewport.zoom
-    blur = blur * this.stageViewport.zoom
+    const { fill } = shadow
+    const offsetX = shadow.offsetX * this.stageViewport.zoom
+    const offsetY = shadow.offsetY * this.stageViewport.zoom
+    const blur = shadow.blur * this.stageViewport.zoom
 
     this.ctx.shadowColor = (fill as S.FillColor).color
     this.ctx.shadowBlur = blur
     this.ctx.shadowOffsetX = offsetX
     this.ctx.shadowOffsetY = offsetY
+  }
 
-    this.dirtyRects.push(
-      AABB.extend(
-        this.elem.aabb,
-        -offsetX + blur,
-        -offsetY + blur,
-        offsetX + blur,
-        offsetY + blur,
-      ),
+  private getShadowBounds = (shadow: S.Shadow | undefined, baseBounds: AABB) => {
+    if (!shadow?.visible) return
+
+    const offsetX = shadow.offsetX * this.stageViewport.zoom
+    const offsetY = shadow.offsetY * this.stageViewport.zoom
+    const blur = shadow.blur * this.stageViewport.zoom
+    const canvasToScene = 1 / (dpr * this.stageViewport.zoom)
+    const sceneOffsetX = offsetX * canvasToScene
+    const sceneOffsetY = offsetY * canvasToScene
+    const sceneBlur = blur * canvasToScene
+    return new AABB(
+      baseBounds.minX + sceneOffsetX - sceneBlur,
+      baseBounds.minY + sceneOffsetY - sceneBlur,
+      baseBounds.maxX + sceneOffsetX + sceneBlur,
+      baseBounds.maxY + sceneOffsetY + sceneBlur,
     )
   }
 

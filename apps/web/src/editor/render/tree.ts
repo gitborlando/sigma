@@ -1,15 +1,20 @@
+import { Signal } from '@gitborlando/signal'
 import { clone } from '@gitborlando/utils'
 import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 import { Elem } from './elem'
-import { RenderInvalidator } from './invalidator'
+
+export type RenderDirtyType = 'widget' | 'scene'
 
 @reflection
 export class RenderTree extends Service {
   elements = new Map<string, Elem>()
+  dirtyElems = new Set<Elem>()
+  hasDirty$ = Signal.create<RenderDirtyType>()
 
   sceneRoot!: Elem
   widgetRoot!: Elem
@@ -25,7 +30,6 @@ export class RenderTree extends Service {
   constructor(
     private readonly handleSelect: HandleSelect,
     private readonly yState: YState,
-    private readonly renderInvalidator: RenderInvalidator,
   ) {
     super()
     autoBind(this)
@@ -34,6 +38,27 @@ export class RenderTree extends Service {
 
   findElem(id: string) {
     return this.elements.get(id)!
+  }
+
+  pageFirstRender() {
+    ;[...this.sceneRoot.children].forEach((child) => this.unmountNode(child.id))
+
+    createSchemaTraverse({
+      enter: ({ item }) => {
+        if (!SchemaHelper.isNode(item)) return false
+        this.render('add', [item.id])
+      },
+    })(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId))
+  }
+
+  onPatchRender() {
+    this.effect(
+      this.yState.flushPatch$.hook((op) => {
+        const { type, keys } = op
+        if (keys[1] === 'childIds') this.reHierarchy(op)
+        else this.render(type, keys as string[])
+      }),
+    )
   }
 
   private setupElems() {
@@ -48,27 +73,6 @@ export class RenderTree extends Service {
       this.elements.clear()
       this.rootElems.forEach((elem) => elem.destroy())
       this.rootElems.length = 0
-    })
-  }
-
-  firstRenderPage() {
-    ;[...this.sceneRoot.children].forEach((child) => this.unmountNode(child.id))
-
-    const traverse = (id: ID) => {
-      const node = this.yState.find<S.Node>(id)
-      this.render('add', [node.id])
-      if ('childIds' in node) node.childIds.forEach(traverse)
-    }
-
-    const page = this.yState.find<S.Page>(this.handleSelect.selectPageId)
-    page.childIds.forEach(traverse)
-  }
-
-  hookPatchRender() {
-    return this.yState.flushPatch$.hook((op) => {
-      const { type, keys } = op
-      if (keys[1] === 'childIds') this.reHierarchy(op)
-      else this.render(type, keys as string[])
     })
   }
 
@@ -109,6 +113,7 @@ export class RenderTree extends Service {
 
     elem.node = clone(node)
     elem.optimize = true
+    elem.dirty()
 
     if (node.type === 'frame') elem.clip = true
   }
@@ -141,6 +146,7 @@ export class RenderTree extends Service {
       }
 
       childElem.parent = parent
+      childElem.dirty()
       nextChildren.push(childElem)
     })
 
@@ -148,7 +154,16 @@ export class RenderTree extends Service {
     parent.dirty()
   }
 
+  private collectDirty(elem: Elem) {
+    if (elem.type === 'sceneElem' && elem.id !== 'sceneRoot') {
+      this.dirtyElems.add(elem)
+      this.hasDirty$.dispatch('scene')
+    } else if (elem.type === 'widgetElem') {
+      this.hasDirty$.dispatch('widget')
+    }
+  }
+
   private createElem(id = '', type: 'sceneElem' | 'widgetElem') {
-    return new Elem({ renderInvalidator: this.renderInvalidator }, id, type)
+    return new Elem({ collectDirty: this.collectDirty }, id, type)
   }
 }

@@ -12,7 +12,6 @@ import { HandlePage } from 'src/editor/handle/page'
 import { HandleSelect } from 'src/editor/handle/select'
 import { OperateFill } from 'src/editor/operate/fill'
 import { ElemDrawer } from 'src/editor/render/drawer'
-import { RenderInvalidator } from 'src/editor/render/invalidator'
 import { Renderer } from 'src/editor/render/renderer'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
@@ -54,7 +53,6 @@ const editorServices = {
   handleSelect: HandleSelect,
 
   /** render */
-  renderInvalidator: RenderInvalidator,
   elemDrawer: ElemDrawer,
   renderTree: RenderTree,
   renderSurface: RenderSurface,

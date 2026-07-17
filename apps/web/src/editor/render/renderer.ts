@@ -9,9 +9,8 @@ import { max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
 import { ElemDrawer } from 'src/editor/render/drawer'
 import { Elem } from 'src/editor/render/elem'
-import { RenderInvalidator } from 'src/editor/render/invalidator'
 import { RenderSurface } from 'src/editor/render/surface'
-import { RenderTree } from 'src/editor/render/tree'
+import { RenderTree, type RenderDirtyType } from 'src/editor/render/tree'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Raf } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
@@ -27,7 +26,7 @@ export type SurfaceRenderType =
 
 @reflection
 export class Renderer extends Service {
-  onRenderTopCanvas = Signal.create<CanvasRenderingContext2D>()
+  renderTopCanvas$ = Signal.create<CanvasRenderingContext2D>()
 
   private bufferCanvas = new OffscreenCanvas(0, 0)
   private bufferCtx = this.bufferCanvas.getContext('2d')!
@@ -37,14 +36,18 @@ export class Renderer extends Service {
   private raf = new Raf()
 
   private hasRequestedRenderTopCanvas = false
+
   private fullRenderElemsMinHeap: TinyQueue<{
     elem: Elem
     selfIndex: number
     layerIndex: number
   }> = new TinyQueue()
-  private dirtyRects = new Set<AABB>()
+
+  private elemLatestPaintRectMap?: Map<Elem, AABB>
   private DEV_dirtyArea?: AABB
+
   private renderPriorityXY = XY.$(0, 0)
+
   private accumulatedErrorX = 0
   private accumulatedErrorY = 0
 
@@ -54,7 +57,6 @@ export class Renderer extends Service {
     private readonly renderSurface: RenderSurface,
     private readonly stageViewport: StageViewport,
     private readonly elemDrawer: ElemDrawer,
-    private readonly renderInvalidator: RenderInvalidator,
   ) {
     super()
     autoBind(this)
@@ -65,20 +67,10 @@ export class Renderer extends Service {
   }
 
   onCanvasInited() {
-    this.effect(
-      this.renderInvalidator.dirty$.hook(this.onDirty),
-      this.onViewportChange(),
-      this.DEV_showDirtyRect(),
-    )
+    this.effect(this.renderTree.hasDirty$.hook(this.onDirty))
+    this.effect(this.onViewportChange())
+    this.effect(this.DEV_showDirtyRect())
     this.stageViewport.onWheelZoom(this.renderSurface)
-    this.requestRenderTopCanvas()
-  }
-
-  requestFirstFullRender() {
-    this.requestRender('firstFullRender')
-  }
-
-  requestTopCanvasRender() {
     this.requestRenderTopCanvas()
   }
 
@@ -86,18 +78,19 @@ export class Renderer extends Service {
     this.renderPriorityXY = XY.of(xy)
   }
 
-  isElemVisible(elem: Elem) {
-    return elem.getVisible(untracked(() => this.stageViewport.sceneAABB))
+  isElemVisible(elem: Elem, latestPaintRect?: AABB) {
+    return elem.getVisible(
+      untracked(() => this.stageViewport.sceneAABB),
+      latestPaintRect,
+    )
   }
 
-  private onDirty() {
-    const dirtyRects = this.renderInvalidator.takeDirtyRects()
-    const hasWidgetDirty = this.renderInvalidator.takeWidgetDirty()
-
-    dirtyRects.forEach((dirtyRect) => this.dirtyRects.add(dirtyRect))
-
-    if (dirtyRects.size) this.requestRender('partialRender')
-    if (hasWidgetDirty) this.requestRenderTopCanvas()
+  private onDirty(type: RenderDirtyType) {
+    if (type === 'scene') {
+      this.requestRender('partialRender')
+    } else {
+      this.requestRenderTopCanvas()
+    }
   }
 
   private onViewportChange() {
@@ -124,7 +117,6 @@ export class Renderer extends Service {
           this.requestRender('firstFullRender')
           this.requestRenderTopCanvas()
         },
-        { fireImmediately: true },
       ),
     )
   }
@@ -133,7 +125,7 @@ export class Renderer extends Service {
     if (this.renderType === type) return
     this.renderType = type
 
-    if (type !== 'partialRender') this.dirtyRects.clear()
+    if (type !== 'partialRender') this.renderTree.dirtyElems.clear()
     if (type === 'partialRender' && this.renderTasks.length) return
 
     if (type === 'firstFullRender') this.calcFullRenderElemsMinHeap()
@@ -165,8 +157,8 @@ export class Renderer extends Service {
       this.renderSurface.clearSurface()
       this.renderSurface.ctxSaveRestore((ctx) => {
         this.renderSurface.transformTopCanvas()
-        this.onRenderTopCanvas.dispatch(ctx)
-        this.renderTree.widgetRoot.children.forEach(this.drawElem)
+        this.renderTopCanvas$.dispatch(ctx)
+        this.renderTree.widgetRoot.children.forEach((elem) => this.drawElem(elem))
       })
       resetCtx()
     })
@@ -194,7 +186,7 @@ export class Renderer extends Service {
   }
 
   private drawElem(elem: Elem) {
-    if (!this.isElemVisible(elem)) return
+    if (!this.isElemVisible(elem, this.elemLatestPaintRectMap?.get(elem))) return
 
     if (this.setting.ignoreUnVisible && elem.optimize) {
       const visualSize = this.renderSurface.getVisualSize(elem.aabb)
@@ -211,14 +203,14 @@ export class Renderer extends Service {
 
       if (elem.node) {
         resetTransform = this.renderSurface.setTransform(elem.renderMatrix)
-        this.renderSurface.ctxSaveRestore(() =>
-          this.elemDrawer.draw(elem, ctx, path2d),
-        )
+        this.renderSurface.ctxSaveRestore(() => {
+          this.elemDrawer.draw(elem, ctx, path2d)
+        })
       }
 
       if (elem.children.length) {
         if (elem.clip) ctx.clip(path2d)
-        elem.children.forEach(this.drawElem)
+        elem.children.forEach((child) => this.drawElem(child))
       }
 
       resetTransform()
@@ -231,7 +223,7 @@ export class Renderer extends Service {
     this.renderSurface.transformCanvas()
 
     if (!this.setting.needSliceRender) {
-      this.renderTree.sceneRoot.children.forEach(this.drawElem)
+      this.renderTree.sceneRoot.children.forEach((elem) => this.drawElem(elem))
       while (this.fullRenderElemsMinHeap.length) this.fullRenderElemsMinHeap.pop()
       return
     }
@@ -247,11 +239,11 @@ export class Renderer extends Service {
     if (this.fullRenderElemsMinHeap.length) this.requestRender('nextFullRender')
   }
 
-  private patchRender(reRenderElems: Set<Elem>) {
+  private patchRender(rerenderElems: Set<Elem>) {
     this.renderSurface.transformCanvas()
 
     this.renderTree.sceneRoot.children.forEach((elem) => {
-      if (reRenderElems.has(elem)) this.drawElem(elem)
+      if (rerenderElems.has(elem)) this.drawElem(elem)
     })
   }
 
@@ -260,12 +252,12 @@ export class Renderer extends Service {
 
     const { width, height } = this.bufferCanvas
     const delta = XY.of(cur).minus(prev)
-    const reRenderElems = new Set<Elem>()
+    const rerenderElems = new Set<Elem>()
 
     const traverse = (elem: Elem) => {
       if (!this.isElemVisible(elem)) return
       if (AABB.include(this.stageViewport.prevSceneAABB, elem.aabb) === 1) return
-      reRenderElems.add(elem)
+      rerenderElems.add(elem)
     }
 
     const idealX = delta.x * dpr + this.accumulatedErrorX
@@ -294,32 +286,52 @@ export class Renderer extends Service {
     ctx.drawImage(this.bufferCanvas, 0, 0, width, height, 0, 0, width, height)
 
     this.renderTree.sceneRoot.children.forEach(traverse)
-    this.renderSurface.ctxSaveRestore(() => this.patchRender(reRenderElems))
+    this.renderSurface.ctxSaveRestore(() => this.patchRender(rerenderElems))
   }
 
   private partialRender() {
-    if (this.dirtyRects.size === 0) return
+    if (this.renderTree.dirtyElems.size === 0) return
 
-    const reRenderElems = new Set<Elem>()
-    let dirtyArea = AABB.merge(this.dirtyRects)
-    let needReTest = true
+    this.elemLatestPaintRectMap = new Map<Elem, AABB>()
+    const dirtyRects: AABB[] = []
+
+    createTraverser<Elem, { visible?: boolean }>({
+      enter: (elem) => {
+        if (elem.lastPaintRect) dirtyRects.push(elem.lastPaintRect)
+        if (elem.hidden) return false
+
+        const latestPaintRect = this.elemDrawer.measurePaintRect(elem)
+        this.elemLatestPaintRectMap?.set(elem, latestPaintRect)
+        dirtyRects.push(latestPaintRect)
+      },
+    }).traverse([...this.renderTree.dirtyElems])
+
+    this.renderTree.dirtyElems.clear()
+    if (dirtyRects.length === 0) return
+
+    const rerenderElems = new Set<Elem>()
+    const antialiasPadding = 1 / (dpr * this.stageViewport.zoom)
+    let dirtyArea = AABB.extend(AABB.merge(dirtyRects), antialiasPadding)
+    let needRetest = true
 
     const traverser = createTraverser<Elem>({
       enter: (elem) => {
-        if (!this.isElemVisible(elem)) return false
-        if (!AABB.collide(dirtyArea, elem.aabb)) return false
+        const latestPaintRect =
+          this.elemLatestPaintRectMap?.get(elem) ?? elem.estimatedPaintRect
+        if (!this.isElemVisible(elem, latestPaintRect)) return false
+        if (!AABB.collide(dirtyArea, latestPaintRect)) return false
 
-        if (AABB.include(dirtyArea, elem.aabb) !== 1) {
-          dirtyArea = AABB.merge([dirtyArea, elem.aabb])
-          needReTest = true
+        if (AABB.include(dirtyArea, latestPaintRect) !== 1) {
+          dirtyArea = AABB.merge([dirtyArea, latestPaintRect])
+          needRetest = true
         }
-        reRenderElems.add(elem)
+        rerenderElems.add(elem)
       },
     })
 
-    while (needReTest) {
-      needReTest = false
-      reRenderElems.clear()
+    while (needRetest) {
+      needRetest = false
+      rerenderElems.clear()
       traverser.traverse(this.renderTree.sceneElems)
     }
 
@@ -327,15 +339,15 @@ export class Renderer extends Service {
       this.renderSurface.transformCanvas()
       const { minX, minY, maxX, maxY } = dirtyArea
       this.renderSurface.getMainCtx().clearRect(minX, minY, maxX - minX, maxY - minY)
-      this.dirtyRects.clear()
       this.DEV_dirtyArea = dirtyArea
     })
 
-    this.renderSurface.ctxSaveRestore(() => this.patchRender(reRenderElems))
+    this.renderSurface.ctxSaveRestore(() => this.patchRender(rerenderElems))
+    this.elemLatestPaintRectMap = undefined
   }
 
   private DEV_showDirtyRect() {
-    return this.onRenderTopCanvas.hook((ctx) => {
+    return this.renderTopCanvas$.hook((ctx) => {
       if (!this.setting.showDirtyRect) return
       if (!this.DEV_dirtyArea) return
 

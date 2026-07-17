@@ -25,16 +25,14 @@ export class StageController extends Service {
     this.renderer.onCanvasInited()
     this.stageEvent.onCanvasInited()
     this.stageInteract.onInteract()
-    this.effect(autorun(this.renderOnInited))
-    this.effect(this.renderTree.hookPatchRender())
+    this.renderTree.onPatchRender()
+    this.effect(autorun(this.renderPage))
   }
 
-  private renderOnInited() {
+  private renderPage() {
     if (this.handleSelect.selectPageId) {
       this.renderSurface.clearSurface()
-      this.renderTree.firstRenderPage()
-      this.renderer.requestFirstFullRender()
-      this.renderer.requestTopCanvasRender()
+      this.renderTree.pageFirstRender()
     }
   }
 }

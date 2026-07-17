@@ -1,7 +1,6 @@
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, type NoopFunc } from '@gitborlando/utils'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import type { RenderInvalidator } from 'src/editor/render/invalidator'
 import { memorized } from 'src/utils/export'
 
 declare module 'react' {
@@ -19,7 +18,7 @@ export type ElemProps = {
   children?: ReactNode[]
 }
 
-export type ElemContext = { renderInvalidator: RenderInvalidator }
+export type ElemContext = { collectDirty: (elem: Elem) => void }
 
 export class Elem {
   constructor(
@@ -30,16 +29,7 @@ export class Elem {
   clip = false
   hidden = false
   optimize = false
-
-  private _node!: S.Node
-  get node() {
-    return this._node
-  }
-  set node(node: S.Node) {
-    this.dirty()
-    this._node = node
-    this.dirty()
-  }
+  node!: S.Node
 
   private _mrect = MRect.identity()
   private memoMRect = memorized(() => this._mrect.clone(this.node))
@@ -93,20 +83,26 @@ export class Elem {
     return this.memoGlobalMatrix([this.renderMatrix, this.parent.globalMatrix])
   }
 
-  getVisible(sceneAABB: AABB) {
+  lastPaintRect?: AABB
+
+  get estimatedPaintRect() {
+    if (!this.lastPaintRect) return this.aabb
+    return AABB.merge([this.lastPaintRect, this.aabb])
+  }
+
+  cachePaintRect(bounds: AABB) {
+    this.lastPaintRect = AABB.clone(bounds)
+  }
+
+  getVisible(sceneAABB: AABB, latestPaintRect?: AABB) {
     if (this.hidden) return false
     if (this.id === 'sceneRoot') return true
     if (this.type === 'widgetElem') return true
-    return AABB.collide(this.aabb, sceneAABB)
+    return AABB.collide(latestPaintRect ?? this.estimatedPaintRect, sceneAABB)
   }
 
   dirty() {
-    this.context.renderInvalidator.collectDirty(this)
-  }
-
-  getDirtyRect() {
-    if (!this.node) return null
-    return this.aabb
+    this.context.collectDirty(this)
   }
 
   parent!: Elem
@@ -142,9 +138,10 @@ export class Elem {
     const index = this.children.indexOf(elem)
     if (index === -1) return
 
-    this.children.splice(index, 1)
-    elem.parent = undefined!
     elem.dirty()
+    elem.parent = undefined!
+
+    this.children.splice(index, 1)
     this.dirty()
   }
 

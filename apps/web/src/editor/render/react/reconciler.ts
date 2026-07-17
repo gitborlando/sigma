@@ -15,6 +15,9 @@ function applyProps(elem: Elem, props: ElemProps, oldProps?: ElemProps) {
       for (const eventType of objKeys(events)) {
         elem.addEvent(eventType, events[eventType]!)
       }
+    } else if (key === 'node') {
+      elem.node = props.node
+      elem.dirty()
     } else if (key !== 'children') {
       elem[key] = props[key] as any
     }

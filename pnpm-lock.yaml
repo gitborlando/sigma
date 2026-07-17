@@ -41,8 +41,8 @@ importers:
         specifier: ^3.2.2
         version: 3.2.2(react@18.3.1)
       '@gitborlando/geo':
-        specifier: ^5.2.0
-        version: 5.2.0
+        specifier: ^5.3.0
+        version: 5.3.0
       '@gitborlando/mobx-undo':
         specifier: workspace:*
         version: link:../../packages/mobx-undo
@@ -1670,6 +1670,12 @@ packages:
         integrity: sha512-vecmLOHEvnHyM/S7nfdYfzRcT70N6mn2Ire0lbrJF+ArVdED6ohQoPfy+Zh9D3b7wCycvXNyQlotKtXEEhx/QA==,
       }
 
+  '@gitborlando/geo@5.3.0':
+    resolution:
+      {
+        integrity: sha512-AHq+ueapFM58V/MSc1Q1sVYS3jK9QL53Psi/M8+oGAUSI2stvYTPO9Zex8fW8+Jknm3u4WwpRMgKHf1U4bXE1A==,
+      }
+
   '@gitborlando/signal@1.0.2':
     resolution:
       {
@@ -1986,6 +1992,7 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@oxc-parser/binding-linux-arm64-musl@0.82.3':
     resolution:
@@ -1995,6 +2002,7 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@oxc-parser/binding-linux-riscv64-gnu@0.82.3':
     resolution:
@@ -2004,6 +2012,7 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@oxc-parser/binding-linux-s390x-gnu@0.82.3':
     resolution:
@@ -2013,6 +2022,7 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@oxc-parser/binding-linux-x64-gnu@0.82.3':
     resolution:
@@ -2022,6 +2032,7 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@oxc-parser/binding-linux-x64-musl@0.82.3':
     resolution:
@@ -2031,6 +2042,7 @@ packages:
     engines: { node: '>=20.0.0' }
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@oxc-parser/binding-wasm32-wasi@0.82.3':
     resolution:
@@ -2200,6 +2212,7 @@ packages:
       }
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.62.2':
     resolution:
@@ -2208,6 +2221,7 @@ packages:
       }
     cpu: [arm]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.62.2':
     resolution:
@@ -2216,6 +2230,7 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.62.2':
     resolution:
@@ -2224,6 +2239,7 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-loong64-gnu@4.62.2':
     resolution:
@@ -2232,6 +2248,7 @@ packages:
       }
     cpu: [loong64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-loong64-musl@4.62.2':
     resolution:
@@ -2240,6 +2257,7 @@ packages:
       }
     cpu: [loong64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-ppc64-gnu@4.62.2':
     resolution:
@@ -2248,6 +2266,7 @@ packages:
       }
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-ppc64-musl@4.62.2':
     resolution:
@@ -2256,6 +2275,7 @@ packages:
       }
     cpu: [ppc64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-riscv64-gnu@4.62.2':
     resolution:
@@ -2264,6 +2284,7 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-musl@4.62.2':
     resolution:
@@ -2272,6 +2293,7 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-s390x-gnu@4.62.2':
     resolution:
@@ -2280,6 +2302,7 @@ packages:
       }
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.62.2':
     resolution:
@@ -2288,6 +2311,7 @@ packages:
       }
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.62.2':
     resolution:
@@ -2296,6 +2320,7 @@ packages:
       }
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-openbsd-x64@4.62.2':
     resolution:
@@ -2363,70 +2388,6 @@ packages:
         integrity: sha512-tNaQmBgodDZwgB40mRwVbxFy8IDYwjdpcZ0BYrWiwlULCSQoJj4QoG4zgJT7QRPXcqipefNOzvO/qAu4dF98ag==,
       }
     engines: { node: '>=20.0.0' }
-
-  '@supabase/cli-darwin-arm64@2.107.0':
-    resolution:
-      {
-        integrity: sha512-930MojHei14+PrGNF0QzlPJAjOYilCofgO9aTtKiQ6x36ZUI7dc4ujl5VzccC/19ex/f4ird0lH1d2U92MwDqQ==,
-      }
-    cpu: [arm64]
-    os: [darwin]
-
-  '@supabase/cli-darwin-x64@2.107.0':
-    resolution:
-      {
-        integrity: sha512-qcnichkHiCCNybtCqoeqYO6q8WuTxilaah18QilZskEM+zCSdV5rOXXfeF1BPexRxsvGYbghZ+fEQfWp7+lOUQ==,
-      }
-    cpu: [x64]
-    os: [darwin]
-
-  '@supabase/cli-linux-arm64-musl@2.107.0':
-    resolution:
-      {
-        integrity: sha512-5se1bYRIzivL+ehImnwFjBpzKZ+AwLS6/cBg6lvJOJdWatuaK9Edu6wOZAmPjVMy4vZRJ27tdL+3F7N+Vk64AA==,
-      }
-    cpu: [arm64]
-    os: [linux]
-
-  '@supabase/cli-linux-arm64@2.107.0':
-    resolution:
-      {
-        integrity: sha512-an0dsOhPcLQXZ0sFEBm6NU1HFUjXCStHxetfJvgt4u7SiH/EyDMLfDvV7W9ef56bgG+3hoWHtih2Kplj3cecQA==,
-      }
-    cpu: [arm64]
-    os: [linux]
-
-  '@supabase/cli-linux-x64-musl@2.107.0':
-    resolution:
-      {
-        integrity: sha512-gXDzvDsmmJw9HbeVRFD6xboGwbu/cpBp84ZESEcXKyB8Onvs3igWKwoXMofx+ppFM1EaZb/flTwJ77b19EMD1A==,
-      }
-    cpu: [x64]
-    os: [linux]
-
-  '@supabase/cli-linux-x64@2.107.0':
-    resolution:
-      {
-        integrity: sha512-8ttnpfBFEXk0JFmH6gw8ZCVcMa/UNH1sD6iG9PQLbK2eXdZ6kDIzGs5g+CEvxZ3j6HxEIYn9h9rfxoqGoBUgwA==,
-      }
-    cpu: [x64]
-    os: [linux]
-
-  '@supabase/cli-windows-arm64@2.107.0':
-    resolution:
-      {
-        integrity: sha512-V/4q5dbDgBQXhDAJaHamTm9u/kY2UJ4nNibVKOYMaLh9q7H74b8unteJ+rYHSwWZy0EIT8DTDryGP6xatKQicw==,
-      }
-    cpu: [arm64]
-    os: [win32]
-
-  '@supabase/cli-windows-x64@2.107.0':
-    resolution:
-      {
-        integrity: sha512-ciDDFUGHt6bFjtVD00cojFhB5oscZAyjPo2vg94RGUeKHXx1zo/UzfMvUlCA32y5b5KONZ4TKStCHhlFK7Clrw==,
-      }
-    cpu: [x64]
-    os: [win32]
 
   '@supabase/functions-js@2.108.2':
     resolution:
@@ -2722,6 +2683,7 @@ packages:
     resolution:
       {
         integrity: sha512-oqq2ZfEJ7BQuufcC3QBQndZLPNyamYNHLao8lKRBeeSkZKypBqxPSgkzrcFZtbYcIaBvpiyUnQP9MT7DEYHWbw==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-aix-ppc64/-/typescript-aix-ppc64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [ppc64]
@@ -2749,6 +2711,7 @@ packages:
     resolution:
       {
         integrity: sha512-DE+ppd8Ix2c6OMuRkKY4PJ4hngMGJ9M95OQUP17p9xL/1IKXof7npIeuusMN/bgL5o5JzMfSGh+N+5scTYRg0Q==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-freebsd-arm64/-/typescript-freebsd-arm64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [arm64]
@@ -2758,6 +2721,7 @@ packages:
     resolution:
       {
         integrity: sha512-ST1ozHMw0u+CLOnWkcTyWDMV4Qn9osZ6fd1V1lnKDM1t0hZIp81mdGpdHxyHJjd7jdGrb6Gb/QXcZ1uqZ0t5zw==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-freebsd-x64/-/typescript-freebsd-x64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [x64]
@@ -2767,6 +2731,7 @@ packages:
     resolution:
       {
         integrity: sha512-N46pRihK3t5zD5MUtTQcdmQUqr1WI4U2nxno1gLwOtRSsB4krFkRjPHcQNG7h2DtRkX64rQiReX6WKwg2wprMA==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-linux-arm64/-/typescript-linux-arm64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [arm64]
@@ -2776,6 +2741,7 @@ packages:
     resolution:
       {
         integrity: sha512-gHmHwT5Naq5CKM8g9bbaGeEpnwQEvWCLn3fwP4K2m61VQdDKkPk0Dhab/OoZ4LV2SrMddmclYXTzpyg23YGt5g==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-linux-arm/-/typescript-linux-arm-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [arm]
@@ -2785,6 +2751,7 @@ packages:
     resolution:
       {
         integrity: sha512-G17Sao312rgiPBTh2F4nOpLpa3CcnBSaNhqNghZk2LNhnsp1RaMO5HMq2me21gqu9xLpc6CIgHtOzU6JBgNlfg==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-linux-loong64/-/typescript-linux-loong64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [loong64]
@@ -2794,6 +2761,7 @@ packages:
     resolution:
       {
         integrity: sha512-0FQspOb5UsQ4tQKvWgUO3pS9OIWkP7/8dPRWq+CRazJUeQZ4LBjtYK52jg5iIOrvItrVl2CwvRtrU3/9OihwJg==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-linux-mips64el/-/typescript-linux-mips64el-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [mips64el]
@@ -2803,6 +2771,7 @@ packages:
     resolution:
       {
         integrity: sha512-SUmwfVBEv6A2Ld0eWfcvW0FqrgemfQL8jFGOmV1qYxsDqumjE5DekHXqbstgmbE4SHr4rrjHjvmuGCY+kTH/vw==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-linux-ppc64/-/typescript-linux-ppc64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [ppc64]
@@ -2812,6 +2781,7 @@ packages:
     resolution:
       {
         integrity: sha512-rxeqnNnGiYzv/LlPHi/3+4p0ooR1cNJLjRIHXKovtiVmxXGJq6gtw8VSpbHuWPekyFMXgIAoLCZN0SQ51rAALQ==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-linux-riscv64/-/typescript-linux-riscv64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [riscv64]
@@ -2821,6 +2791,7 @@ packages:
     resolution:
       {
         integrity: sha512-RYWCHCiPypxajdRHM2CNK/eM22e4Ex5TTjV2pXf7PTtBowGr0xX8i8kIMknyZS0LX2QfleYHouaoMVsFDSle3g==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-linux-s390x/-/typescript-linux-s390x-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [s390x]
@@ -2830,6 +2801,7 @@ packages:
     resolution:
       {
         integrity: sha512-PfLJSu0JzroDkqw2m4nqflPEcn8yev0m/vHFQlY9EzHorzjR6QG0wL8AJHvnD1e6h1s76AZngJ5u+z1K/D/HKw==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-linux-x64/-/typescript-linux-x64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [x64]
@@ -2839,6 +2811,7 @@ packages:
     resolution:
       {
         integrity: sha512-FfbPxH3dTfp8yVIaNM7bdWTixXuyxpzoemluqcqMROSIz+ImpCG3Q9HO9Ptzp9/giv+P9YYEnCMSXh61migj2w==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-netbsd-arm64/-/typescript-netbsd-arm64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [arm64]
@@ -2848,6 +2821,7 @@ packages:
     resolution:
       {
         integrity: sha512-FzdTfSzhRYb6hlav6K3cI5RVgcvCTvNAu/vc+t7B6AmZkThQ+t/1ntnvT5fnHmY1Az2RIBw7/b+qtCEG61HJTQ==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-netbsd-x64/-/typescript-netbsd-x64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [x64]
@@ -2857,6 +2831,7 @@ packages:
     resolution:
       {
         integrity: sha512-PQGhlxfNig+0YQ9Wwzd0USPBkt6w/ZqkBQWsU7G/0JkTzunJel+jSWwhKw4947pak/m7hGSeYiI04xReDLGZww==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-openbsd-arm64/-/typescript-openbsd-arm64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [arm64]
@@ -2866,6 +2841,7 @@ packages:
     resolution:
       {
         integrity: sha512-WJ7NYgO2mHmLUkI/tZ+hl8lFd26QPJqO8ONOHNuYbdsybLvSB6B6sep222JIVrOfPRDGvFinbGGB+l3m1FWRWA==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-openbsd-x64/-/typescript-openbsd-x64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [x64]
@@ -2875,6 +2851,7 @@ packages:
     resolution:
       {
         integrity: sha512-UYjDeUxd765V9qcwlUPk4pEXyL0i3G76CJm9baK4i99u1pGO1psf3nXDw4MMmElVOPvGbZag99ZR/O59E2OX6w==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-sunos-x64/-/typescript-sunos-x64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [x64]
@@ -2893,6 +2870,7 @@ packages:
     resolution:
       {
         integrity: sha512-98R3+OqDr/r0/PLWEoXu88AE0lGVLNd335Ew8ONgzK1JWkNs4ou/5BGt3Or1ij4iXjH+c7PRL+jFjCbtWze+EA==,
+        tarball: https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.1-rc.tgz,
       }
     engines: { node: '>=16.20.0' }
     cpu: [x64]
@@ -6548,6 +6526,7 @@ packages:
     engines: { node: '>= 12.0.0' }
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   lightningcss-linux-arm64-musl@1.32.0:
     resolution:
@@ -6557,6 +6536,7 @@ packages:
     engines: { node: '>= 12.0.0' }
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   lightningcss-linux-x64-gnu@1.32.0:
     resolution:
@@ -6566,6 +6546,7 @@ packages:
     engines: { node: '>= 12.0.0' }
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   lightningcss-linux-x64-musl@1.32.0:
     resolution:
@@ -6575,6 +6556,7 @@ packages:
     engines: { node: '>= 12.0.0' }
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   lightningcss-win32-arm64-msvc@1.32.0:
     resolution:
@@ -10355,6 +10337,8 @@ snapshots:
 
   '@gitborlando/geo@5.2.0': {}
 
+  '@gitborlando/geo@5.3.0': {}
+
   '@gitborlando/signal@1.0.2(react@18.3.1)':
     dependencies:
       react: 18.3.1
@@ -10783,30 +10767,6 @@ snapshots:
   '@supabase/auth-js@2.108.2':
     dependencies:
       tslib: 2.8.1
-
-  '@supabase/cli-darwin-arm64@2.107.0':
-    optional: true
-
-  '@supabase/cli-darwin-x64@2.107.0':
-    optional: true
-
-  '@supabase/cli-linux-arm64-musl@2.107.0':
-    optional: true
-
-  '@supabase/cli-linux-arm64@2.107.0':
-    optional: true
-
-  '@supabase/cli-linux-x64-musl@2.107.0':
-    optional: true
-
-  '@supabase/cli-linux-x64@2.107.0':
-    optional: true
-
-  '@supabase/cli-windows-arm64@2.107.0':
-    optional: true
-
-  '@supabase/cli-windows-x64@2.107.0':
-    optional: true
 
   '@supabase/functions-js@2.108.2':
     dependencies:
@@ -14936,16 +14896,7 @@ snapshots:
       tinyglobby: 0.2.17
       ts-interface-checker: 0.1.13
 
-  supabase@2.107.0:
-    optionalDependencies:
-      '@supabase/cli-darwin-arm64': 2.107.0
-      '@supabase/cli-darwin-x64': 2.107.0
-      '@supabase/cli-linux-arm64': 2.107.0
-      '@supabase/cli-linux-arm64-musl': 2.107.0
-      '@supabase/cli-linux-x64': 2.107.0
-      '@supabase/cli-linux-x64-musl': 2.107.0
-      '@supabase/cli-windows-arm64': 2.107.0
-      '@supabase/cli-windows-x64': 2.107.0
+  supabase@2.107.0: {}
 
   supports-color@7.2.0:
     dependencies:
