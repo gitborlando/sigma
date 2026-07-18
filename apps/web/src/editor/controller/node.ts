@@ -39,6 +39,7 @@ export class NodeController extends Service {
     ).map((id) => [id, true])
     const selection = Object.fromEntries(selectIds)
     this.handleSelect.replaceSelection(selection)
+    this.undo.track('client', t('select all nodes'))
   }
 
   deleteSelectedNodes() {

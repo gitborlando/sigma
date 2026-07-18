@@ -68,6 +68,7 @@
   "save current zoom and offset": "储存当前缩放和偏移",
   "add and select page": "添加并选择页面",
   "delete page": "删除页面",
+  "select all nodes": "选择全部节点",
   "delete nodes": "删除节点",
   "paste nodes": "粘贴节点",
   "reorder nodes": "重排节点",

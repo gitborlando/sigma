@@ -68,6 +68,7 @@
   "save current zoom and offset": "save zoom and offset",
   "add and select page": "add and select page",
   "delete page": "delete page",
+  "select all nodes": "select all nodes",
   "delete nodes": "delete nodes",
   "paste nodes": "paste nodes",
   "reorder nodes": "reorder nodes",
