@@ -10,7 +10,7 @@ import { Text } from 'src/view/component/text'
 import { useEditorServices } from 'src/view/hooks/editor'
 
 export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
-  const { handlePage, handleSelect, undo, setting } = useEditorServices()
+  const { yState, undo, setting } = useEditorServices()
   const [showHistory, setShowHistory] = useState(false)
   const { next, stack } = undo
   return (
@@ -33,7 +33,7 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
               title='Print current schema'
               icon={<Lucide icon={Braces} />}
               onMouseDown={(e) => e.stopPropagation()}
-              onClick={() => handlePage.DEV_logPageSchema(handleSelect.selectPageId)}
+              onClick={() => console.log(yState.state)}
             />
           )
         }

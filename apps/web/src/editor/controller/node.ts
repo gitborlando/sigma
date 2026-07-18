@@ -1,5 +1,6 @@
 import { firstOne, iife, objKeys } from '@gitborlando/utils'
 import { Undo } from 'src/editor/core/undo'
+import { Matrix } from 'src/editor/geometry'
 import { MRect } from 'src/editor/geometry/mrect'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandleSelect, type Selection } from 'src/editor/handle/select'
@@ -116,16 +117,23 @@ export class NodeController extends Service {
     const rect = AABB.rect(AABB.merge(aabbList))
 
     const frameNode = this.schemaCreator.frame({
-      ...MRect.identity(rect.width, rect.height),
+      ...MRect.identity(rect.width, rect.height).shift(rect).plain(),
     })
+
     const oldParent = this.yState.find<S.NodeParent>(selected[0].parentId)
     const index = oldParent.childIds.indexOf(selected[0].id)
 
     this.yState.transact(() => {
+      selected.forEach((node) => this.handleNode.removeChild(oldParent.id, node.id))
       this.handleNode.addNodes([frameNode])
       this.handleNode.insertChildAt(oldParent, frameNode, index)
-      selected.forEach((node) => this.handleNode.removeChild(oldParent, node))
-      selected.forEach((node) => this.handleNode.insertChildAt(frameNode, node))
+      selected.forEach((node) => {
+        this.handleNode.insertChildAt(frameNode, node)
+        this.yState.set<S.Node>(
+          [node.id, 'matrix'],
+          Matrix.of(node.matrix).shift({ x: -rect.x, y: -rect.y }).plain(),
+        )
+      })
     })
     this.handleSelect.replaceSelection({ [frameNode.id]: true })
 

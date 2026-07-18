@@ -32,10 +32,11 @@ export class HandleNode extends Service {
     this.yState.set<S.Node>([node.id, 'parentId'], parent.id)
   }
 
-  removeChild(parent: S.NodeParent, node: S.Node) {
-    const index = parent.childIds.indexOf(node.id)
+  removeChild(parentId: ID, nodeId: ID) {
+    const parent = this.yState.find<S.NodeParent>(parentId)
+    const index = parent.childIds.indexOf(nodeId)
     this.yState.delete<S.NodeParent>([parent.id, 'childIds', index])
-    this.yState.set<S.Node>([node.id, 'parentId'], '')
+    this.yState.set<S.Node>([nodeId, 'parentId'], '')
   }
 
   deleteChild(parent: S.NodeParent, node: S.Node) {

@@ -1,5 +1,5 @@
 import { Signal } from '@gitborlando/signal'
-import { clone } from '@gitborlando/utils'
+import { clone, ThisAsAny } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { Service } from 'src/global/service'
@@ -78,6 +78,7 @@ export class YState extends Service {
 
   private handlePlainChange = ({ patches }: YPlainChange<S.Schema>) => {
     if (!patches.length) return
+    isDEV && (ThisAsAny.schema = this.state)
 
     this.patches.push(...clone(patches))
     this.listeners.forEach((listener) => listener(patches))
