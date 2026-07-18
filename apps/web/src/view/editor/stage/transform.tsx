@@ -33,7 +33,7 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
     stageEvent.disablePointEvent(true)
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()
-      stageTransformer.move(e.hostEvent)
+      stageTransformer.onMove(e.hostEvent)
     }
   }
 
@@ -102,8 +102,7 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
     e.stopPropagation()
     stageCursor.lock()
     if (stageTransformer.isSelectOneLine) {
-      stageTransformer.move(e.hostEvent)
-      return
+      return stageTransformer.onMove(e.hostEvent)
     }
     stageTransformer.onResize([type], { e: e.hostEvent, shiftKey: hotkeys.shift })
   }

@@ -4,7 +4,7 @@ import { makeObservable } from 'mobx'
 import { NodeController } from 'src/editor/controller/node'
 import { Setting } from 'src/editor/core/setting'
 import { Undo } from 'src/editor/core/undo'
-import { IMRect, Matrix, MRect } from 'src/editor/geometry'
+import { HitTest, IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { HandleNode } from 'src/editor/handle/node'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createStageDragger } from 'src/editor/stage/dragger'
@@ -110,7 +110,27 @@ export class StageTransformer extends Service {
     return this.mrect
   }
 
-  move(e: MouseEvent) {
+  isPointIn(xy: IXY) {
+    const { width, height, matrix } = this.mrect
+    xy = Matrix.of(matrix).invert().applyXY(xy)
+    return HitTest.hitRoundRect(width, height, 0)(xy)
+  }
+
+  flip(axis: 'x' | 'y') {
+    if (this.nodeController.selectNodes.length < 2) return
+
+    const { startMRect } = this.onStartTransform()
+    const { center } = startMRect
+    this.action = 'flip'
+    this.diffMatrix = Matrix.identity().set(
+      axis === 'x' ? { a: -1, tx: center.x * 2 } : { d: -1, ty: center.y * 2 },
+    )
+
+    this.transform()
+    this.onEndTransform()
+  }
+
+  onMove(e: MouseEvent) {
     const { startMRect, startMatrix } = this.onStartTransform()
     const startAABB = startMRect.aabb
 
@@ -138,20 +158,6 @@ export class StageTransformer extends Service {
         }
       })
       .start(e)
-  }
-
-  flip(axis: 'x' | 'y') {
-    if (this.nodeController.selectNodes.length < 2) return
-
-    const { startMRect } = this.onStartTransform()
-    const { center } = startMRect
-    this.action = 'flip'
-    this.diffMatrix = Matrix.identity().set(
-      axis === 'x' ? { a: -1, tx: center.x * 2 } : { d: -1, ty: center.y * 2 },
-    )
-
-    this.transform()
-    this.onEndTransform()
   }
 
   onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {

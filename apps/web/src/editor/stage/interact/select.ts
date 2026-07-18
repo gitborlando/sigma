@@ -1,7 +1,7 @@
 import { type IRect } from '@gitborlando/geo'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { firstOne } from '@gitborlando/utils'
-import { listen } from '@gitborlando/utils/browser'
+import { isLeftMouse, listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { SelectController } from 'src/editor/controller/select'
@@ -48,7 +48,6 @@ export class StageSelect extends Service {
       this.renderTree.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
       this.renderSurface.addEvent('dblclick', this.onDoubleClick),
       this.renderSurface.addEvent('mousemove', this.onHover),
-      // this.renderSurface.addEvent('contextmenu', this.onContextMenu),
       listen('pointerdown', () => (this.isPointerDown = true)),
       listen('pointerup', () => (this.isPointerDown = false)),
     )
@@ -86,15 +85,24 @@ export class StageSelect extends Service {
 
   private onSceneRootMouseDown(e: ElemMouseEvent) {
     this.lastSelection = { ...this.handleSelect.selectIdMap }
+    const leftMouse = isLeftMouse(e.hostEvent)
+    const isPointInTransformer = this.stageTransformer.isPointIn(e.xy)
+
+    if (isPointInTransformer) {
+      if (leftMouse) this.stageTransformer.onMove(e.hostEvent)
+      return
+    }
 
     if (!this.hoverId || SchemaHelper.isFirstLayerFrame(this.hoverId)) {
-      this.selectController.clearSelect()
-      this.onMarqueeSelect()
+      if (leftMouse) {
+        this.selectController.clearSelect()
+        this.onMarqueeSelect()
+      }
       return
     }
 
     this.selectController.onStageSelect(this.hoverId)
-    this.stageTransformer.move(e.hostEvent)
+    if (leftMouse) this.stageTransformer.onMove(e.hostEvent)
   }
 
   private onMarqueeSelect() {

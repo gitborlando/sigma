@@ -13,10 +13,10 @@ import { EditorContext, useEditor, useEditorServices } from 'src/view/hooks/edit
 
 export const StageComp: FC<{}> = observer(({}) => {
   const editor = useEditor()
-  const { command, selectController, renderTree, stageSelect, handleSelect } =
+  const { command, renderTree, stageSelect, stageViewport, stageTransformer } =
     useEditorServices()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     return renderElem(
       <EditorContext.Provider value={editor}>
         <StageGridComp />
@@ -37,9 +37,8 @@ export const StageComp: FC<{}> = observer(({}) => {
     const baseMenus = [copyPasteGroup, undoRedoGroup]
 
     if (
-      !hoverId ||
-      !handleSelect.selectIdList.length ||
-      SchemaHelper.isFirstLayerFrame(hoverId)
+      (!hoverId || SchemaHelper.isFirstLayerFrame(hoverId)) &&
+      !stageTransformer.isPointIn(stageViewport.toSceneXY(XY.client(e)))
     ) {
       ContextMenu.context = {}
       ContextMenu.menus = baseMenus
@@ -47,7 +46,6 @@ export const StageComp: FC<{}> = observer(({}) => {
       return
     }
 
-    selectController.onStageSelect(hoverId)
     ContextMenu.context = { id: hoverId }
     ContextMenu.menus = [...baseMenus, nodeGroup, nodeReHierarchyGroup]
     ContextMenu.openMenu(e)
