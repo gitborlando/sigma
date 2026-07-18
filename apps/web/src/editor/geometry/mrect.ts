@@ -1,4 +1,4 @@
-import { AABB, IRect } from '@gitborlando/geo'
+import { AABB } from '@gitborlando/geo'
 import { IMatrix, Matrix } from 'src/editor/geometry/matrix'
 
 export interface IMRect {
@@ -237,7 +237,7 @@ export class MRect {
     return new MRect(width, height, matrix, aspectRatio)
   }
 
-  static fromRect(rect: IRect, matrix: IMatrix) {
+  static fromRect(rect: { width: number; height: number }, matrix: IMatrix) {
     const { width, height } = rect
     return new MRect(width, height, Matrix.plain(matrix))
   }
