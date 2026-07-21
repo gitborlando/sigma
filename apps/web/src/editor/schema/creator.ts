@@ -7,7 +7,6 @@ import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
 import { T } from 'src/utils/common'
 import { mergeOverrideArray } from 'src/utils/export'
-import { Assets } from 'src/view/assets/assets'
 import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
 
@@ -165,9 +164,7 @@ export class SchemaCreator extends Service {
     }
   }
 
-  fillImage(
-    url: string = Assets.editor.RP.operate.picker.defaultImage,
-  ): S.FillImage {
+  fillImage(url: string): S.FillImage {
     return {
       type: 'image',
       visible: true,

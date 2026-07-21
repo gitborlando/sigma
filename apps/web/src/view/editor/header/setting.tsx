@@ -23,7 +23,7 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
         width={400}
         center
         title={t('settings')}
-        showFunc={setShowSetting}>
+        onShow={setShowSetting}>
         {/* <SwitchBar
           options={[
             { label: t('general settings'), value: 'common' },

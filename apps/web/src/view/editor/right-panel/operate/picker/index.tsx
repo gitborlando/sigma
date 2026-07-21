@@ -1,5 +1,5 @@
 import { getSet } from '@gitborlando/utils'
-import { useClean } from '@gitborlando/utils/react'
+import { useClean, withPrepare } from '@gitborlando/utils/react'
 import Color from 'color'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { IRGBA } from 'src/utils/color'
@@ -16,53 +16,56 @@ const createFillCache = (
 ): S.Fill => {
   if (type === 'color') return schemaCreator.fillColor()
   if (type === 'linearGradient') return schemaCreator.fillLinearGradient()
-  return schemaCreator.fillImage()
+  return schemaCreator.fillImage(Assets.editor.design.fill.defaultImage)
 }
 const fillCache = new Map<S.Fill['type'], S.Fill>()
 
-export const FillPickerComp: FC<{}> = observer(({}) => {
-  const { t } = useTranslation()
-  const { fillPicker, operateFill, schemaCreator, undo } = useEditorServices()
-  const { fillIndex, fillType, pickerPos, changeFill } = fillPicker
-  const fill = operateFill.fills[fillIndex]
+export const FillPickerComp = observer(
+  withPrepare<{ fill: S.Fill }>(
+    () => {
+      const { fillPicker, designFill } = useEditorServices()
+      const fill = designFill.fills[fillPicker.fillIndex]
+      return fill ? { fill } : null
+    },
+    observer(({ fill }) => {
+      const { fillPicker, schemaCreator, undo } = useEditorServices()
+      const { fillIndex, fillType, pickerPos, changeFill } = fillPicker
 
-  useEffect(() => {
-    fillCache.set(fill.type, fill)
-  }, [fill])
+      useEffect(() => {
+        fillCache.set(fill.type, fill)
+      }, [fill])
 
-  useClean(() => {
-    fillCache.clear()
-  })
+      useClean(() => {
+        fillCache.clear()
+      })
 
-  // useEffect(() => {
-  //   StageTransform.show.dispatch(false)
-  //   return () => void StageTransform.show.dispatch(true)
-  // })
+      const handleChangeFill = (value: S.Fill['type']) => {
+        fillPicker.fillType = value
+        changeFill(
+          getSet(fillCache, value, () => createFillCache(schemaCreator, value)),
+        )
+        undo.track('state', t('change fill type'))
+      }
 
-  const handleChangeFill = (value: S.Fill['type']) => {
-    fillPicker.fillType = value
-    changeFill(getSet(fillCache, value, () => createFillCache(schemaCreator, value)))
-    undo.track('state', t('change fill type'))
-  }
-
-  return (
-    <DragPanel
-      title={t('color picker')}
-      clickAwayClose={true}
-      xy={pickerPos}
-      className={cls()}
-      showFunc={(show) => !show && fillPicker.hidePicker()}>
-      <G vertical className={cls('content')} gap={12}>
-        <Segments
-          options={[
-            { label: t('solid color'), value: 'color' },
-            { label: t('linear'), value: 'linearGradient' },
-            { label: t('image'), value: 'image' },
-          ]}
-          value={fillType}
-          onChange={(value) => handleChangeFill(value as S.Fill['type'])}
-        />
-        {/* <Radio.Group
+      return (
+        <DragPanel
+          title={t('color picker')}
+          clickAwayClose={true}
+          xy={pickerPos}
+          className={cls()}
+          show={fillPicker.isShowPicker}
+          onShow={(show) => !show && fillPicker.hidePicker()}>
+          <G vertical className={cls('content')} gap={12}>
+            <Segments
+              options={[
+                { label: t('solid color'), value: 'color' },
+                { label: t('linear'), value: 'linearGradient' },
+                { label: t('image'), value: 'image' },
+              ]}
+              value={fillType}
+              onChange={(value) => handleChangeFill(value as S.Fill['type'])}
+            />
+            {/* <Radio.Group
           type='button'
           value={fillType}
           size='mini'
@@ -71,39 +74,48 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
           <Radio value='linearGradient'>{t('linear')}</Radio>
           <Radio value='image'>{t('image')}</Radio>
         </Radio.Group> */}
-        {fill.type === 'color' && (
-          <PickerSolidComp fill={fill as S.FillColor} index={fillIndex} />
-        )}
-        {fill.type === 'linearGradient' && (
-          <PickerLinearGradientComp
-            fill={fill as S.FillLinearGradient}
-            index={fillIndex}
-          />
-        )}
-        {fill.type === 'image' && <PickerImageComp fill={fill as S.FillImage} />}
-      </G>
-    </DragPanel>
-  )
-})
+            {fill.type === 'color' && (
+              <PickerSolidComp fill={fill as S.FillColor} index={fillIndex} />
+            )}
+            {fill.type === 'linearGradient' && (
+              <PickerLinearGradientComp
+                fill={fill as S.FillLinearGradient}
+                index={fillIndex}
+              />
+            )}
+            {fill.type === 'image' && <PickerImageComp fill={fill as S.FillImage} />}
+          </G>
+        </DragPanel>
+      )
+    }),
+  ),
+)
 
-export const PickerSolidComp: FC<{ fill: S.FillColor; index: number }> = memo(
+export const PickerSolidComp: FC<{ fill: S.FillColor; index: number }> = observer(
   ({ fill, index }) => {
-    const { operateFill } = useEditorServices()
+    const { designFill, undo } = useEditorServices()
     const getRgbaFromSolidFill = (fill: S.FillColor) => {
       const { color, alpha } = fill
       return Color(color).alpha(alpha).toString()
     }
     const handleChange = (rgba: IRGBA) => {
       const rgb = Color.rgb(rgba.r, rgba.g, rgba.b).string()
-      operateFill.setFill(index, (draft) => {
+      designFill.setFill(index, (draft) => {
         if (draft.type !== 'color') return
         draft.color = rgb
         draft.alpha = rgba.a
       })
     }
+    const handleEnd = () => {
+      undo.track('state', t('adjust color'))
+    }
     return (
       <G>
-        <ColorPicker color={getRgbaFromSolidFill(fill)} onChange={handleChange} />
+        <ColorPicker
+          color={getRgbaFromSolidFill(fill)}
+          onChange={handleChange}
+          onEnd={handleEnd}
+        />
       </G>
     )
   },

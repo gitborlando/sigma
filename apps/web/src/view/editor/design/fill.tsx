@@ -2,15 +2,54 @@ import { iife, matchCase } from '@gitborlando/utils'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { withSuspense } from '@gitborlando/utils/react'
 import Color from 'color'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Minus, Plus } from 'lucide-react'
 import { Image } from 'src/global/service/image'
 import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
+import { Btn } from 'src/view/component/btn'
+import { Input } from 'src/view/component/input'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
+import { Text } from 'src/view/component/text'
+import {
+  OpFieldComp,
+  OpFieldContentComp,
+  OpFieldHeaderComp,
+} from 'src/view/editor/right-panel/operate/components/op-field'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { suspend } from 'suspend-react'
 
-export const EditorRPOperateFillItemComp: FC<{ fill: S.Fill; index: number }> = ({
+export const DesignFillComp: FC<{}> = observer(({}) => {
+  const { designFill } = useEditorServices()
+  const { fills, isMixedFills, addFill, deleteFill } = designFill
+
+  return (
+    <OpFieldComp>
+      <OpFieldHeaderComp
+        title={t('fill')}
+        headerSlot={
+          <Btn size={30} icon={<Lucide icon={Plus} />} onClick={addFill} />
+        }
+      />
+      <OpFieldContentComp x-if={fills.length > 0}>
+        {fills.map((fill, index) => (
+          <G horizontal='1fr auto' center gap={8} key={index}>
+            <DesignFillItemComp fill={fill} index={index} />
+            <Btn
+              size={30}
+              icon={<Lucide icon={Minus} />}
+              onClick={() => deleteFill(index)}
+            />
+          </G>
+        ))}
+      </OpFieldContentComp>
+      <OpFieldContentComp x-if={isMixedFills}>
+        <Text className={cls('mixed-fills')}>{t('mixed fills')}</Text>
+      </OpFieldContentComp>
+    </OpFieldComp>
+  )
+})
+
+export const DesignFillItemComp: FC<{ fill: S.Fill; index: number }> = ({
   fill,
   index,
 }) => {
@@ -61,7 +100,7 @@ const ImgComp = withSuspense<{ url: string }>(({ url }) => {
 
 const HexInputComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
-    const { operateFill } = useEditorServices()
+    const { designFill } = useEditorServices()
     const isSolidFill = fill.type === 'color'
 
     const validateColor = (value: string) => {
@@ -72,49 +111,47 @@ const HexInputComp: FC<{ fill: S.Fill; index: number }> = observer(
       return false
     }
 
-    const setColor = (color: string) => {
-      if (!isSolidFill) {
-        return
-      }
-      operateFill.setFill(index, (fill) => {
+    const setColor = (color: string | Nil) => {
+      if (!isSolidFill) return
+      designFill.setFill(index, (fill) => {
         T<S.FillColor>(fill).color = Color(`#${color}`).toString()
       })
     }
 
     const value = matchCase(fill.type, {
       color: Color(T<S.FillColor>(fill).color).hex().slice(1),
-      linearGradient: t('linear gradient'),
+      linearGradient: t('linear gradient fill'),
       image: t('image fill'),
     })
 
-    return null
-    // return (
-    //   <Input
-    //     className={cls('hex')}
-    //     noHoverFocusStyle
-    //     readOnly={!isSolidFill}
-    //     value={value}
-    //     onEnd={(value) => setColor(value)}
-    //     onFocus={(e) => isSolidFill && e.target.select()}
-    //     validate={validateColor}
-    //   />
-    // )
+    return (
+      <Input
+        className={cls('hex')}
+        readOnly={!isSolidFill}
+        value={value}
+        onEnd={(value) => setColor(value)}
+        onFocus={(e) => isSolidFill && e.target.select()}
+        validate={validateColor}
+        needFocusStyle={false}
+        disabled={!isSolidFill}
+      />
+    )
   },
 )
 
 const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
-    const { operateFill } = useEditorServices()
+    const { designFill } = useEditorServices()
     const setAlpha = (value: number) => {
       console.log('value: ', value)
-      operateFill.setFill(index, (fill) => {
+      designFill.setFill(index, (fill) => {
         fill.alpha = value / 100
       })
     }
     return (
       <InputNum
         value={fill.alpha * 100}
-        onEnd={(value) => setAlpha(value ?? 0)}
+        onEnd={(value) => setAlpha(Number(value) ?? 0)}
         className={cls('alpha')}
         min={0}
         max={100}
@@ -129,9 +166,9 @@ const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
 
 const VisibleComp: FC<{ fill: S.Fill; index: number }> = observer(
   ({ fill, index }) => {
-    const { operateFill } = useEditorServices()
+    const { designFill } = useEditorServices()
     const toggleVisible = () => {
-      operateFill.setFill(index, (fill) => {
+      designFill.setFill(index, (fill) => {
         fill.visible = !fill.visible
       })
     }
@@ -164,12 +201,16 @@ const cls = classes(css`
     cursor: pointer;
   }
   &-hex {
-    width: 54px;
+    width: 64px;
     height: 24px;
     ${styles.textLabel}
     display: grid;
     justify-items: center;
     align-items: center;
+    opacity: 1;
+    & > input {
+      line-height: 0.8rem;
+    }
   }
   &-alpha {
     width: 36px;
@@ -177,5 +218,9 @@ const cls = classes(css`
     ${styles.textLabel}
     padding-inline: 0;
     gap: 0;
+  }
+  &-mixed-fills {
+    height: 30px;
+    opacity: 0.65;
   }
 `)

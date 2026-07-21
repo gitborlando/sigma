@@ -25,7 +25,7 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
         show={showHistory}
         center
         title={t('history')}
-        showFunc={setShowHistory}
+        onShow={setShowHistory}
         headerSlot={
           isDEV && (
             <Btn

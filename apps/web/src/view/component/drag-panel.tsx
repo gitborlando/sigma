@@ -25,7 +25,7 @@ type DragPanelProps = {
   center?: boolean
   className?: string
   clickAwayClose?: boolean
-  showFunc: (show: boolean) => void
+  onShow: (show: boolean) => void
   onMove?(newXY: IXY): void
 }
 
@@ -48,7 +48,7 @@ export const DragPanel: FC<DragPanelProps> = ({
   id,
   show = true,
   title,
-  showFunc,
+  onShow,
   clickAwayClose,
   children,
   xy,
@@ -108,8 +108,16 @@ export const DragPanel: FC<DragPanelProps> = ({
   }, [])
 
   useEffect(() => {
-    return listen('mousedown', () => {
-      if (show && clickAwayClose) showFunc(false)
+    const isPointIn = (e: MouseEvent) => {
+      let parent = e.target as HTMLElement | null
+      while (parent) {
+        if (parent === ref.current) return true
+        parent = parent.parentElement
+      }
+    }
+    return listen('mousedown', { capture: true }, (e) => {
+      if (isPointIn(e)) return
+      if (show && clickAwayClose) onShow(false)
     })
   }, [show, clickAwayClose])
 
@@ -117,7 +125,7 @@ export const DragPanel: FC<DragPanelProps> = ({
   const needFirstPopup = autoPopup && !isFirstShow.current
 
   useEffect(() => {
-    needFirstPopup && showFunc(true)
+    needFirstPopup && onShow(true)
     isFirstShow.current = true
   }, [])
 
@@ -167,7 +175,7 @@ export const DragPanel: FC<DragPanelProps> = ({
             size={24}
             icon={<Lucide icon={X} />}
             onMouseDown={stopPropagation()}
-            onClick={() => showFunc(false)}
+            onClick={() => onShow(false)}
           />
         </G>
       </CommonBalanceItem>

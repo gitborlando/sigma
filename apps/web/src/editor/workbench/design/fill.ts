@@ -7,8 +7,8 @@ import { NodeController } from 'src/editor/controller/node'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
-import { Undo } from '../core/undo'
-import { YState } from '../y-adapter/y-state'
+import { Undo } from '../../core/undo'
+import { YState } from '../../y-adapter/y-state'
 
 type DynamicYStateMutation = {
   insert: (path: YPlainPath, value: unknown) => boolean
@@ -17,9 +17,9 @@ type DynamicYStateMutation = {
 }
 
 @reflection
-export class OperateFill extends Service {
+export class DesignFill extends Service {
   @observable.ref fills = <S.Fill[]>[]
-  isMultiFills = false
+  isMixedFills = false
 
   constructor(
     private readonly yState: YState,
@@ -29,40 +29,38 @@ export class OperateFill extends Service {
   ) {
     super()
     autoBind(makeObservable(this))
-    this.effect(autorun(this.setupFills))
-    this.effect(
-      this.yState.listen((patches) => {
-        if (!patches.some((p) => p.keys[1] === 'fills')) return
-        this.updateFills()
-      }),
-    )
+    this.effect(autorun(this.setup))
   }
 
-  @action
-  setupFills() {
+  private setup() {
     this.fills = []
-    this.isMultiFills = false
+    this.isMixedFills = false
     const nodes = this.nodeController.selectNodes
     if (nodes.length === 1) return (this.fills = clone(nodes[0].fills))
     if (nodes.length > 1) {
       if (this.isSameFills(nodes)) return (this.fills = clone(nodes[0].fills))
-      return (this.isMultiFills = true)
+      return (this.isMixedFills = true)
     }
   }
 
-  updateFills() {
-    const nodes = this.nodeController.selectNodes
-    this.fills = clone(nodes[0].fills)
+  private setFills(setter: (draft: S.Fill[]) => any) {
+    const [fills, patches] = produceWithPatches(this.fills, setter)
+    this.fills = fills
+    this.applyPatchToYState(patches)
   }
 
   newFill() {
     return this.schemaCreator.fillColor(COLOR.gray, this.fills.length ? 0.25 : 1)
   }
 
-  setFills(setter: (draft: S.Fill[]) => any) {
-    const [fills, patches] = produceWithPatches(this.fills, setter)
-    this.fills = fills
-    this.applyChangeToYState(patches)
+  addFill() {
+    this.setFills((fills) => void fills.push(this.newFill()))
+    this.undo.track('state', t('add fill'))
+  }
+
+  deleteFill(index: number) {
+    this.setFills((fills) => void fills.splice(index, 1))
+    this.undo.track('state', t('delete fill'))
   }
 
   setFill<T extends S.Fill>(index: number, setter: (fill: T) => T | void) {
@@ -74,20 +72,15 @@ export class OperateFill extends Service {
     })
   }
 
-  onAfterSetFills() {
-    this.undo.track('state', t('change fill'))
-  }
-
-  applyChangeToYState(patches: Patch[]) {
+  private applyPatchToYState(patches: Patch[]) {
     const nodes = this.nodeController.selectNodes
     this.yState.transact(() => {
       nodes.forEach((node) => {
-        if (this.isMultiFills) {
-          this.yState.set<S.Node>([node.id, 'fills'], [])
-        }
+        if (this.isMixedFills) this.yState.set<S.Node>([node.id, 'fills'], [])
         applyFillPatches(this.yState, node.id, patches)
       })
     })
+    if (this.isMixedFills) this.isMixedFills = false
   }
 
   private isSameFills(nodes: S.Node[]) {

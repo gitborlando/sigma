@@ -1,59 +1,45 @@
 import Color from 'color'
 import equal from 'fast-deep-equal'
 import { PipetteIcon } from 'lucide-react'
-import { createContext, RefObject } from 'react'
+import { createContext, Dispatch, RefObject, SetStateAction } from 'react'
 import { max, min } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
 import { IRGBA } from 'src/utils/color'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditorServices } from 'src/view/hooks/editor'
 
-const Context = createContext({
-  hue: 0,
-  saturation: 0,
-  value: 0,
-  alpha: 0,
-  setHue: (hue: number) => {},
-  setSaturation: (saturation: number) => {},
-  setValue: (value: number) => {},
-  setAlpha: (alpha: number) => {},
-})
+const createColorState = (color: Parameters<typeof Color>[0]) => {
+  const result = Color(color)
+  return {
+    hue: result.hue(),
+    saturation: result.saturationl(),
+    value: result.value(),
+    alpha: result.alpha(),
+  }
+}
+
+const Context = createContext<{
+  state: ReturnType<typeof createColorState>
+  setState: Dispatch<SetStateAction<ReturnType<typeof createColorState>>>
+  onEnd: () => void
+}>(null!)
 
 export const ColorPicker: FC<{
   color: Parameters<typeof Color>[0]
   onChange: (color: IRGBA) => void
+  onEnd: () => void
   className?: string
-}> = observer(({ color, onChange, className }) => {
-  const result = Color(color)
-
-  const [hue, setHue] = useState(result.hue())
-  const [saturation, setSaturation] = useState(result.saturationl())
-  const [value, setValue] = useState(result.value())
-  const [alpha, setAlpha] = useState(result.alpha())
-  const lastState = useRef({ hue, saturation, value, alpha })
+}> = observer(({ color, onChange, onEnd, className }) => {
+  const [state, setState] = useState(() => createColorState(color))
 
   useEffect(() => {
-    if (equal(lastState.current, { hue, saturation, value: value, alpha })) return
-
+    const { hue, saturation, value, alpha } = state
     const { r, g, b } = Color.hsv(hue, saturation, value).rgb().object()
     onChange({ r: r | 0, g: g | 0, b: b | 0, a: alpha })
-
-    lastState.current = { hue, saturation, value, alpha }
-  }, [hue, saturation, value, alpha])
+  }, [state, onChange])
 
   return (
-    <Context.Provider
-      value={{
-        hue,
-        saturation,
-        value,
-        alpha,
-        setHue,
-        setSaturation,
-        setValue,
-        setAlpha,
-      }}>
+    <Context.Provider value={{ state, setState, onEnd }}>
       <G className={cx(cls(), className)}>
         <SquareComp />
         <G
@@ -72,8 +58,8 @@ export const ColorPicker: FC<{
 })
 
 const SquareComp: FC<{}> = observer(({}) => {
-  const { undo } = useEditorServices()
-  const { hue, saturation, value, setSaturation, setValue } = useContext(Context)
+  const { state, setState, onEnd } = useContext(Context)
+  const { hue, saturation, value } = state
 
   const [x, setX] = useState(saturation / 100)
   const [y, setY] = useState(1 - value / 100)
@@ -90,8 +76,7 @@ const SquareComp: FC<{}> = observer(({}) => {
     const { left, top, width, height } = ref.current!.getBoundingClientRect()
     x = max(0, min(1, (x - left) / width))
     y = max(0, min(1, (y - top) / height))
-    setSaturation(x * 100)
-    setValue((1 - y) * 100)
+    setState((state) => ({ ...state, saturation: x * 100, value: (1 - y) * 100 }))
     setX(x)
     setY(y)
   }
@@ -110,7 +95,7 @@ const SquareComp: FC<{}> = observer(({}) => {
         if (equal(lastXY, current) && !moved) return
         lastXY.x = current.x
         lastXY.y = current.y
-        undo.track('state', t('adjust color'))
+        onEnd()
       })
       .start(e)
   }
@@ -140,8 +125,8 @@ function useSlider(
   ref: RefObject<HTMLDivElement>,
   init: number,
   onValueChange: (value: number) => void,
+  onEnd: () => void,
 ) {
-  const { undo } = useEditorServices()
   const [x, setX] = useState(init)
   const lastValue = useRef(init)
 
@@ -162,7 +147,7 @@ function useSlider(
       .onDestroy(({ current }) => {
         if (lastValue.current === current.x) return
         lastValue.current = current.x
-        undo.track('state', t('adjust color'))
+        onEnd()
       })
       .start(e)
   }
@@ -171,11 +156,15 @@ function useSlider(
 }
 
 const HueComp: FC<{}> = observer(({}) => {
-  const { hue, setHue } = useContext(Context)
+  const { state, setState, onEnd } = useContext(Context)
+  const { hue } = state
   const ref = useRef<HTMLDivElement>(null)
-  const { value, handleMove } = useSlider(ref, hue / 360, (x) => {
-    setHue(x * 360)
-  })
+  const { value, handleMove } = useSlider(
+    ref,
+    hue / 360,
+    (x) => setState((state) => ({ ...state, hue: x * 360 })),
+    onEnd,
+  )
   return (
     <G className={cls('hue')} ref={ref} onMouseDown={handleMove}>
       <G
@@ -192,8 +181,14 @@ const HueComp: FC<{}> = observer(({}) => {
 
 const AlphaComp: FC<{}> = observer(({}) => {
   const ref = useRef<HTMLDivElement>(null)
-  const { alpha, setAlpha } = useContext(Context)
-  const { value, handleMove } = useSlider(ref, alpha, (x) => setAlpha(x))
+  const { state, setState, onEnd } = useContext(Context)
+  const { alpha } = state
+  const { value, handleMove } = useSlider(
+    ref,
+    alpha,
+    (alpha) => setState((state) => ({ ...state, alpha })),
+    onEnd,
+  )
   return (
     <G className={cls('alpha')} ref={ref} onMouseDown={handleMove}>
       <G
@@ -209,7 +204,7 @@ const AlphaComp: FC<{}> = observer(({}) => {
 })
 
 const EyeDropperComp: FC<{}> = observer(({}) => {
-  const { setHue, setSaturation, setValue: setValue, setAlpha } = useContext(Context)
+  const { setState } = useContext(Context)
   const handleEyeDropper = async () => {
     try {
       // @ts-expect-error - EyeDropper API is experimental
@@ -218,10 +213,7 @@ const EyeDropperComp: FC<{}> = observer(({}) => {
       const color = Color(result.sRGBHex)
       const [h, s, l] = color.hsl().array()
 
-      setHue(h)
-      setSaturation(s)
-      setValue(l)
-      setAlpha(1)
+      setState({ hue: h, saturation: s, value: l, alpha: 1 })
     } catch (error) {}
   }
   return (

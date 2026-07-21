@@ -8,14 +8,18 @@ export const PickerLinearGradientComp: FC<{
   fill: S.FillLinearGradient
   index: number
 }> = memo(({ fill, index }) => {
-  const { operateFill } = useEditorServices()
+  const { designFill, undo } = useEditorServices()
   const [stopIndex, setStopIndex] = useState(0)
   useEffect(() => setStopIndex(0), [index])
 
   const setStopColor = (color: string) => {
-    operateFill.setFill<S.FillLinearGradient>(index, (draft) => {
+    designFill.setFill<S.FillLinearGradient>(index, (draft) => {
       draft.stops[stopIndex].color = color
     })
+  }
+
+  const handleEnd = () => {
+    undo.track('state', t('adjust color'))
   }
 
   return (
@@ -29,6 +33,7 @@ export const PickerLinearGradientComp: FC<{
       <ColorPicker
         color={fill.stops[stopIndex].color}
         onChange={(color) => setStopColor(rgbaFromObject(color))}
+        onEnd={handleEnd}
       />
     </G>
   )
@@ -40,14 +45,14 @@ const StopsBar: FC<{
   stopIndex: number
   setStopIndex: (index: number) => void
 }> = ({ fill, index, stopIndex, setStopIndex }) => {
-  const { operateFill, undo } = useEditorServices()
+  const { designFill, undo } = useEditorServices()
   const stopBarRef = useRef<HTMLDivElement>(null)
 
   const handleMove = (e: React.MouseEvent, stopIndex: number) => {
     setStopIndex(stopIndex)
     Drag.onMove(({ delta }) => {
       const deltaOffset = delta.x / stopBarRef.current!.clientWidth
-      operateFill.setFill<S.FillLinearGradient>(index, (draft) => {
+      designFill.setFill<S.FillLinearGradient>(index, (draft) => {
         const oldOffset = draft.stops[stopIndex].offset
         draft.stops[stopIndex].offset = min(max(oldOffset + deltaOffset, 0), 1)
       })

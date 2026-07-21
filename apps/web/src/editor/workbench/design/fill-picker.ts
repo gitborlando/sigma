@@ -1,4 +1,4 @@
-import { OperateFill } from 'src/editor/operate/fill'
+import { DesignFill } from 'src/editor/workbench/design/fill'
 import { Service } from 'src/global/service'
 
 @reflection
@@ -8,7 +8,7 @@ export class FillPicker extends Service {
   @observable isShowPicker = false
   @observable fillType: S.Fill['type'] = 'color'
 
-  constructor(private readonly operateFill: OperateFill) {
+  constructor(private readonly designFill: DesignFill) {
     super()
     autoBind(makeObservable(this))
   }
@@ -18,7 +18,7 @@ export class FillPicker extends Service {
     this.fillIndex = fillIndex
     this.pickerPos = pos
     this.isShowPicker = true
-    this.fillType = this.operateFill.fills[fillIndex].type
+    this.fillType = this.designFill.fills[fillIndex].type
   }
 
   @action
@@ -28,7 +28,7 @@ export class FillPicker extends Service {
   }
 
   changeFill(newFill: S.Fill) {
-    this.operateFill.setFill(this.fillIndex, () => newFill)
+    this.designFill.setFill(this.fillIndex, () => newFill)
   }
 
   getRgbaFromSolidFill(fill: S.FillColor) {
@@ -37,7 +37,7 @@ export class FillPicker extends Service {
   }
 
   setRgbaToSolidFill(color: string, alpha: number) {
-    this.operateFill.setFill(this.fillIndex, (draft) => {
+    this.designFill.setFill(this.fillIndex, (draft) => {
       if (draft.type !== 'color') return draft
       draft.color = color
       draft.alpha = alpha

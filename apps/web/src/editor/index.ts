@@ -10,7 +10,6 @@ import { Undo } from 'src/editor/core/undo'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { HandleSelect } from 'src/editor/handle/select'
-import { OperateFill } from 'src/editor/operate/fill'
 import { ElemDrawer } from 'src/editor/render/drawer'
 import { Renderer } from 'src/editor/render/renderer'
 import { RenderSurface } from 'src/editor/render/surface'
@@ -25,6 +24,7 @@ import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { DesignAlign } from 'src/editor/workbench/design/align'
+import { DesignFill } from 'src/editor/workbench/design/fill'
 import { FillPicker } from 'src/editor/workbench/design/fill-picker'
 import { DesignGeom } from 'src/editor/workbench/design/geom'
 import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
@@ -76,7 +76,7 @@ const editorServices = {
   /** workbench.design */
   fillPicker: FillPicker,
   designAlign: DesignAlign,
-  operateFill: OperateFill,
+  designFill: DesignFill,
   designGeom: DesignGeom,
 
   /** workbench.layer */
