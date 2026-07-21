@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { format, resolveConfig } from 'prettier'
 import { globSync, isDynamicPattern } from 'tinyglobby'
 import type { Plugin, ResolvedConfig } from 'vite'
 
@@ -291,7 +292,7 @@ const normalizeImportVars = (files: AssetFile[], map: Map<string, string>) =>
     importVarName: map.get(file.importPath) ?? file.importVarName,
   }))
 
-const generateAssets = (inputOptions: ResolvedNestedAssetsOptions) => {
+const generateAssets = async (inputOptions: ResolvedNestedAssetsOptions) => {
   const options = {
     ...inputOptions,
     base: normalizePath(inputOptions.base),
@@ -337,9 +338,13 @@ const generateAssets = (inputOptions: ResolvedNestedAssetsOptions) => {
   const code = ['// 自动生成的静态资源路径常量', imports, '', exportCode, '']
     .filter((line, index) => index !== 1 || line)
     .join('\n')
+  const formattedCode = await format(code, {
+    ...(await resolveConfig(options.output)),
+    filepath: options.output,
+  })
 
   fs.mkdirSync(path.dirname(options.output), { recursive: true })
-  fs.writeFileSync(options.output, code, 'utf8')
+  fs.writeFileSync(options.output, formattedCode, 'utf8')
 
   return { fileCount: files.length, output: options.output }
 }
@@ -389,7 +394,7 @@ export const vitePluginNestedAssets = (
     )
   }
 
-  const run = () => logGenerated(generateAssets(resolvedOptions))
+  const run = async () => logGenerated(await generateAssets(resolvedOptions))
 
   const scheduleRun = () => {
     if (timer) clearTimeout(timer)
@@ -413,7 +418,7 @@ export const vitePluginNestedAssets = (
       resolvedOptions = resolvePluginOptions(config, options)
     },
     buildStart() {
-      run()
+      return run()
     },
     configureServer(server) {
       server.watcher.add(resolvedOptions.base)
