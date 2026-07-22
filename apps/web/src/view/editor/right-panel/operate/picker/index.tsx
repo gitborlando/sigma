@@ -20,7 +20,7 @@ const createFillCache = (
 }
 const fillCache = new Map<S.Fill['type'], S.Fill>()
 
-export const FillPickerComp = observer(
+export const DesignPickerComp = observer(
   withPrepare<{ fill: S.Fill }>(
     () => {
       const { fillPicker, designFill } = useEditorServices()
@@ -65,15 +65,6 @@ export const FillPickerComp = observer(
               value={fillType}
               onChange={(value) => handleChangeFill(value as S.Fill['type'])}
             />
-            {/* <Radio.Group
-          type='button'
-          value={fillType}
-          size='mini'
-          onChange={handleChangeFill}>
-          <Radio value='color'>{t('solid color')}</Radio>
-          <Radio value='linearGradient'>{t('linear')}</Radio>
-          <Radio value='image'>{t('image')}</Radio>
-        </Radio.Group> */}
             {fill.type === 'color' && (
               <PickerSolidComp fill={fill as S.FillColor} index={fillIndex} />
             )}

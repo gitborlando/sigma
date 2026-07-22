@@ -25,8 +25,8 @@ import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { DesignAlign } from 'src/editor/workbench/design/align'
 import { DesignFill } from 'src/editor/workbench/design/fill'
-import { FillPicker } from 'src/editor/workbench/design/fill-picker'
 import { DesignGeom } from 'src/editor/workbench/design/geom'
+import { DesignPicker } from 'src/editor/workbench/design/picker'
 import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { LayerPageList } from 'src/editor/workbench/layer/page-list'
 import { YAware } from 'src/editor/y-adapter/y-aware'
@@ -74,7 +74,7 @@ const editorServices = {
   stageTransformer: StageTransformer,
 
   /** workbench.design */
-  fillPicker: FillPicker,
+  fillPicker: DesignPicker,
   designAlign: DesignAlign,
   designFill: DesignFill,
   designGeom: DesignGeom,

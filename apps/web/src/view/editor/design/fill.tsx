@@ -220,7 +220,6 @@ const cls = classes(css`
     gap: 0;
   }
   &-mixed-fills {
-    height: 30px;
     opacity: 0.65;
   }
 `)

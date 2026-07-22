@@ -1,17 +1,16 @@
 import { NodeController } from 'src/editor/controller/node'
 import { SchemaCreator } from 'src/editor/schema/creator'
-import { COLOR } from 'src/utils/color'
 import { Undo } from '../../core/undo'
 import { YState } from '../../y-adapter/y-state'
 import { DesignEffect } from './effect'
 
 @reflection
-export class DesignFill extends DesignEffect<'fills'> {
-  get fills() {
+export class DesignStroke extends DesignEffect<'strokes'> {
+  get strokes() {
     return this.items
   }
 
-  get isMixedFills() {
+  get isMixedStrokes() {
     return this.isMixed
   }
 
@@ -21,26 +20,26 @@ export class DesignFill extends DesignEffect<'fills'> {
     private readonly undo: Undo,
     nodeController: NodeController,
   ) {
-    super(yState, nodeController, 'fills')
+    super(yState, nodeController, 'strokes')
     autoBind(this)
     this.effect(autorun(this.setupItems))
   }
 
-  newFill() {
-    return this.schemaCreator.fillColor(COLOR.gray, this.fills.length ? 0.25 : 1)
+  newStroke() {
+    return this.schemaCreator.stroke({ fill: this.schemaCreator.fillColor() })
   }
 
-  addFill() {
-    this.addItem(this.newFill())
-    this.undo.track('state', t('add fill'))
+  addStroke() {
+    this.addItem(this.newStroke())
+    this.undo.track('state', t('add stroke'))
   }
 
-  deleteFill(index: number) {
+  deleteStroke(index: number) {
     this.deleteItem(index)
-    this.undo.track('state', t('delete fill'))
+    this.undo.track('state', t('delete stroke'))
   }
 
-  setFill<T extends S.Fill>(index: number, setter: (fill: T) => T | void) {
+  setStroke<T extends S.Stroke>(index: number, setter: (stroke: T) => T | void) {
     this.updateItem(index, setter)
   }
 }

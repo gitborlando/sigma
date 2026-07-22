@@ -6,7 +6,7 @@ import {
   OpFieldHeaderComp,
 } from 'src/view/editor/right-panel/operate/components/op-field'
 
-export const EditorRPOperateStrokeComp: FC<{}> = ({}) => {
+export const DesignStrokeComp: FC<{}> = ({}) => {
   return (
     <OpFieldComp>
       <OpFieldHeaderComp

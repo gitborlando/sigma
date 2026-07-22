@@ -2,7 +2,7 @@ import { DesignFill } from 'src/editor/workbench/design/fill'
 import { Service } from 'src/global/service'
 
 @reflection
-export class FillPicker extends Service {
+export class DesignPicker extends Service {
   @observable pickerPos = XY.$()
   @observable fillIndex = -1
   @observable isShowPicker = false
