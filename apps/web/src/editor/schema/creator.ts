@@ -182,6 +182,7 @@ export class SchemaCreator extends Service {
       width: 1,
       cap: 'round',
       join: 'round',
+      side: { type: 'all' },
       ...option,
     }
   }
