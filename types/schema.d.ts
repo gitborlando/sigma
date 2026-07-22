@@ -129,9 +129,14 @@ namespace S {
     width: number
     fill: Fill
     align: 'inner' | 'center' | 'outer'
+    side: StrokeSide
     cap: CanvasRenderingContext2D['lineCap']
     join: CanvasRenderingContext2D['lineJoin']
   }
+
+  type StrokeSide =
+    | { type: 'all' | 'top' | 'bottom' | 'left' | 'right' }
+    | { type: 'custom'; top: number; bottom: number; left: number; right: number }
 
   type Shadow = {
     visible: boolean
