@@ -102,7 +102,7 @@ export class SchemaCreator extends Service {
       points,
       ...nodeBase,
       fills: [this.fillColor(COLOR.black, 1)],
-      strokes: [this.stroke()],
+      stroke: this.stroke(),
       ...option,
       height: 0,
     }
@@ -188,7 +188,7 @@ export class SchemaCreator extends Service {
   }
 
   solidStroke(color = COLOR.black, width = 1) {
-    return this.stroke({ fill: this.fillColor(color), width })
+    return this.stroke({ fills: [this.fillColor(color)], width })
   }
 
   shadow(option?: Partial<S.Shadow>): S.Shadow {
@@ -229,7 +229,7 @@ export class SchemaCreator extends Service {
       opacity: 1,
       flip: 0,
       fills: [this.fillColor()],
-      strokes: [],
+      stroke: this.stroke(),
       blurs: [],
       shadows: [],
     }

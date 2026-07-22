@@ -51,7 +51,7 @@ namespace S {
     opacity: number
     flip: 0 | 1 | 2 | 3
     fills: Fill[]
-    strokes: Stroke[]
+    stroke: Stroke
     blurs: any[]
     shadows: Shadow[]
     outline?: Outline
@@ -127,8 +127,8 @@ namespace S {
   type Stroke = {
     visible: boolean
     width: number
-    fill: Fill
     align: 'inner' | 'center' | 'outer'
+    fills: Fill[]
     side: StrokeSide
     cap: CanvasRenderingContext2D['lineCap']
     join: CanvasRenderingContext2D['lineJoin']
