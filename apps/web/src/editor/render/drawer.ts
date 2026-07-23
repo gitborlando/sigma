@@ -52,10 +52,10 @@ export class ElemDrawer extends Service {
       this.ctx.restore()
     })
 
-    this.node.strokes.forEach((stroke, i) => {
+    this.node.stroke.fills.forEach((fill, i) => {
       this.ctx.save()
       this.drawShadow(this.node.shadows[i])
-      this.drawStroke(stroke)
+      this.drawStroke(this.node.stroke, fill)
       this.ctx.restore()
     })
 
@@ -77,12 +77,16 @@ export class ElemDrawer extends Service {
       if (shadowBounds) paintBounds.push(shadowBounds)
     })
 
-    this.node.strokes.forEach((stroke, i) => {
+    const { stroke } = this.node
+    if (stroke.visible && stroke.fills.some((fill) => fill.visible)) {
       const strokeBounds = this.getStrokeBounds(shapeBounds, stroke)
-      const shadowBounds = this.getShadowBounds(this.node.shadows[i], strokeBounds)
-      if (shadowBounds) paintBounds.push(shadowBounds)
-      if (stroke.visible) paintBounds.push(strokeBounds)
-    })
+      stroke.fills.forEach((fill, i) => {
+        if (!fill.visible) return
+        const shadowBounds = this.getShadowBounds(this.node.shadows[i], strokeBounds)
+        if (shadowBounds) paintBounds.push(shadowBounds)
+      })
+      paintBounds.push(strokeBounds)
+    }
 
     const antialiasPadding = 1 / (dpr * this.stageViewport.zoom)
     return AABB.extend(AABB.merge(paintBounds), antialiasPadding)
@@ -339,18 +343,18 @@ export class ElemDrawer extends Service {
     }
   }
 
-  private drawStroke = (stroke: S.Stroke) => {
-    if (!stroke.visible) return
+  private drawStroke = (stroke: S.Stroke, fill: S.Fill) => {
+    if (!stroke.visible || !fill.visible) return
 
     this.ctx.lineWidth = stroke.width
     this.ctx.lineCap = stroke.cap
     this.ctx.lineJoin = stroke.join
 
-    this.ctx.globalAlpha = stroke.fill.alpha
+    this.ctx.globalAlpha = fill.alpha
 
-    switch (stroke.fill.type) {
+    switch (fill.type) {
       case 'color':
-        this.ctx.strokeStyle = stroke.fill.color
+        this.ctx.strokeStyle = fill.color
         this.ctx.stroke(this.path2d)
         break
 
@@ -462,13 +466,13 @@ export class ElemDrawer extends Service {
 
       case 'path':
       case 'line':
-        const { points, strokes } = this.node
+        const { points, stroke } = this.node
         this.elem.eventHandle.cacheHitTest(() => {
           if (this.node.type === 'line') {
-            return this.createPolylineHitTest([points], strokes)
+            return this.createPolylineHitTest([points], stroke)
           }
-          return this.createPathHitTest(strokes)
-        }, [points, strokes])
+          return this.createPathHitTest(stroke)
+        }, [points, stroke])
         break
 
       case 'text': {
@@ -482,20 +486,24 @@ export class ElemDrawer extends Service {
     }
   }
 
-  private createPolylineHitTest(polylines: IXY[][], strokes: S.Stroke[]) {
-    const strokeWidth = Math.max(0, ...strokes.map((s) => s.width))
-    if (strokeWidth === 0) return () => false
+  private createPolylineHitTest(polylines: IXY[][], stroke: S.Stroke) {
+    if (
+      !stroke.visible ||
+      stroke.width <= 0 ||
+      !stroke.fills.some((fill) => fill.visible)
+    )
+      return () => false
 
     const hitTests = polylines
       .filter((xys) => xys.length > 1)
-      .map((xys) => HitTest.hitPolyline(xys, strokeWidth * 2))
+      .map((xys) => HitTest.hitPolyline(xys, stroke.width * 2))
 
     return (xy: IXY) => hitTests.some((hitTest) => hitTest(xy))
   }
 
-  private createPathHitTest(strokes: S.Stroke[]) {
+  private createPathHitTest(stroke: S.Stroke) {
     const { polylines, polygons } = this.getPathCollideInfo()
-    const strokeHitTest = this.createPolylineHitTest(polylines, strokes)
+    const strokeHitTest = this.createPolylineHitTest(polylines, stroke)
     const polygonHitTests = polygons
       .filter((xys) => xys.length > 2)
       .map((xys) => HitTest.hitPolygon(xys))
