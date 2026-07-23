@@ -62,7 +62,11 @@ export const DesignFillItemComp: FC<{ fill: S.Fill; index: number }> = ({
 
   const openPicker = () => {
     const outerRefBound = outerRef.current!.getBoundingClientRect()
-    fillPicker.showPicker(index, XY.of(outerRefBound).plus(XY.$(-240 - 24, 0)))
+    fillPicker.showPicker(
+      index,
+      XY.of(outerRefBound).plus(XY.$(-240 - 24, 0)),
+      'fill',
+    )
   }
 
   return (

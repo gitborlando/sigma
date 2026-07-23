@@ -27,6 +27,7 @@ import { DesignAlign } from 'src/editor/workbench/design/align'
 import { DesignFill } from 'src/editor/workbench/design/fill'
 import { DesignGeom } from 'src/editor/workbench/design/geom'
 import { DesignPicker } from 'src/editor/workbench/design/picker'
+import { DesignStroke } from 'src/editor/workbench/design/stroke'
 import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { LayerPageList } from 'src/editor/workbench/layer/page-list'
 import { YAware } from 'src/editor/y-adapter/y-aware'
@@ -78,6 +79,7 @@ const editorServices = {
   designAlign: DesignAlign,
   designFill: DesignFill,
   designGeom: DesignGeom,
+  designStroke: DesignStroke,
 
   /** workbench.layer */
   layerPageList: LayerPageList,
