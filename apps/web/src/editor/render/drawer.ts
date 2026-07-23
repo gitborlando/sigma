@@ -5,7 +5,6 @@ import { Setting } from 'src/editor/core/setting'
 import { HitTest, Matrix } from 'src/editor/geometry'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
 import { ISplitText, TextBreaker } from 'src/editor/render/text-break/text-breaker'
-import { RenderTree } from 'src/editor/render/tree'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 import { Image } from 'src/global/service/image'
@@ -25,7 +24,6 @@ export class ElemDrawer extends Service {
   constructor(
     private readonly setting: Setting,
     private readonly stageViewport: StageViewport,
-    private readonly renderTree: RenderTree,
   ) {
     super()
     autoBind(this)

@@ -7,8 +7,9 @@ import { NodeController } from 'src/editor/controller/node'
 import { Service } from 'src/global/service'
 import { YState } from '../../y-adapter/y-state'
 
-type DesignEffectKey = 'fills' | 'strokes'
-type DesignEffectItem<Key extends DesignEffectKey> = S.Node[Key][number]
+type DesignEffectKey = 'fills' | 'stroke'
+type DesignEffectValue<Key extends DesignEffectKey> = S.Node[Key]
+type MixedUpdateStrategy = 'patch' | 'replace'
 
 type DynamicYStateMutation = {
   insert: (path: YPlainPath, value: unknown) => boolean
@@ -17,56 +18,40 @@ type DynamicYStateMutation = {
 }
 
 export abstract class DesignEffect<Key extends DesignEffectKey> extends Service {
-  @observable.ref protected items = <DesignEffectItem<Key>[]>[]
+  @observable.ref protected value: DesignEffectValue<Key>
   @observable protected isMixed = false
 
   constructor(
     private readonly yState: YState,
     private readonly nodeController: NodeController,
     private readonly property: Key,
+    private readonly initialValue: DesignEffectValue<Key>,
+    private readonly mixedUpdateStrategy: MixedUpdateStrategy,
   ) {
     super()
+    this.value = clone(initialValue)
     makeObservable(this)
   }
 
-  protected setupItems() {
-    this.items = []
+  protected setupValue() {
+    this.value = clone(this.initialValue)
     this.isMixed = false
     const nodes = this.nodeController.selectNodes
     if (nodes.length === 0) return
 
-    const firstItems = nodes[0][this.property] as DesignEffectItem<Key>[]
-    if (nodes.length === 1 || this.isSameItems(nodes, firstItems)) {
-      this.items = clone(firstItems)
+    const firstValue = nodes[0][this.property]
+    if (nodes.length === 1 || this.isSameValue(nodes, firstValue)) {
+      this.value = clone(firstValue)
       return
     }
 
     this.isMixed = true
+    if (this.mixedUpdateStrategy === 'patch') this.value = clone(firstValue)
   }
 
-  protected addItem(item: DesignEffectItem<Key>) {
-    this.updateItems((items) => void items.push(item))
-  }
-
-  protected deleteItem(index: number) {
-    this.updateItems((items) => void items.splice(index, 1))
-  }
-
-  protected updateItem<T extends DesignEffectItem<Key>>(
-    index: number,
-    setter: (item: T) => T | void,
-  ) {
-    this.updateItems((items) => {
-      if (!items[index]) return
-
-      const result = setter(items[index] as T)
-      if (result) items[index] = result
-    })
-  }
-
-  private updateItems(setter: (items: DesignEffectItem<Key>[]) => any) {
-    const [items, patches] = produceWithPatches(this.items, setter)
-    this.items = items
+  protected updateValue(setter: (value: DesignEffectValue<Key>) => any) {
+    const [value, patches] = produceWithPatches(this.value, setter)
+    this.value = value
     this.applyPatches(patches)
   }
 
@@ -74,7 +59,10 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
     const nodes = this.nodeController.selectNodes
     this.yState.transact(() => {
       nodes.forEach((node) => {
-        if (this.isMixed) this.yState.set<S.Node>([node.id, this.property], [])
+        if (this.isMixed && this.mixedUpdateStrategy === 'replace') {
+          this.yState.set<S.Node>([node.id, this.property], clone(this.value))
+          return
+        }
         this.applyNodePatches(node.id, patches)
       })
     })
@@ -103,7 +91,7 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
     })
   }
 
-  private isSameItems(nodes: S.Node[], firstItems: DesignEffectItem<Key>[]) {
-    return nodes.every((node) => equal(node[this.property], firstItems))
+  private isSameValue(nodes: S.Node[], firstValue: DesignEffectValue<Key>) {
+    return nodes.every((node) => equal(node[this.property], firstValue))
   }
 }

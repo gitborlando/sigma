@@ -8,7 +8,7 @@ import { DesignEffect } from './effect'
 @reflection
 export class DesignFill extends DesignEffect<'fills'> {
   get fills() {
-    return this.items
+    return this.value
   }
 
   get isMixedFills() {
@@ -21,9 +21,9 @@ export class DesignFill extends DesignEffect<'fills'> {
     private readonly undo: Undo,
     nodeController: NodeController,
   ) {
-    super(yState, nodeController, 'fills')
+    super(yState, nodeController, 'fills', [], 'replace')
     autoBind(this)
-    this.effect(autorun(this.setupItems))
+    this.effect(autorun(this.setupValue))
   }
 
   newFill() {
@@ -31,16 +31,21 @@ export class DesignFill extends DesignEffect<'fills'> {
   }
 
   addFill() {
-    this.addItem(this.newFill())
+    this.updateValue((fills) => void fills.push(this.newFill()))
     this.undo.track('state', t('add fill'))
   }
 
   deleteFill(index: number) {
-    this.deleteItem(index)
+    this.updateValue((fills) => void fills.splice(index, 1))
     this.undo.track('state', t('delete fill'))
   }
 
   setFill<T extends S.Fill>(index: number, setter: (fill: T) => T | void) {
-    this.updateItem(index, setter)
+    this.updateValue((fills) => {
+      if (!fills[index]) return
+
+      const result = setter(fills[index] as T)
+      if (result) fills[index] = result
+    })
   }
 }
