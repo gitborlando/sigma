@@ -3,6 +3,7 @@ import { Btn } from 'src/view/component/btn'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
 import { SelectOption } from 'src/view/component/select-option'
+import { Icon } from 'src/view/component/svg-icon'
 import { Text } from 'src/view/component/text'
 import { DesignFillItemComp } from 'src/view/editor/design/fill'
 import {
@@ -51,8 +52,12 @@ export const DesignStrokeComp: FC<{}> = observer(({}) => {
                 value={stroke.width}
                 min={0}
                 max={1000}
-                prefix={<span className={cls('input-label')}>W</span>}
-                suffix='px'
+                prefix={<Icon src={Assets.editor.design.geom.width} />}
+                onSlide={(delta) =>
+                  designStroke.setStroke((stroke) => {
+                    stroke.width = Math.min(1000, Math.max(0, stroke.width + delta))
+                  })
+                }
                 onEnd={(value) =>
                   setStroke(t('change stroke width'), (stroke) => {
                     stroke.width = Math.max(0, Number(value ?? 0))
@@ -105,11 +110,6 @@ const cls = classes(css`
   }
   &-mixed-strokes {
     opacity: 0.65;
-  }
-  &-input-label {
-    color: rgba(0, 0, 0, 0.45);
-    font-size: 10px;
-    font-weight: 600;
   }
   &-align {
     width: 100%;
