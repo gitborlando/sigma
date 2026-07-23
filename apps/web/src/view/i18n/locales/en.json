@@ -47,6 +47,7 @@
   "language": "language",
   "mixed": "mixed",
   "mixed fills": "mixed fills, press + to reset",
+  "mixed strokes": "mixed strokes, press + to reset",
   "select node": "select node",
   "unselect node": "unselect node",
   "select page": "select page",

@@ -49,10 +49,13 @@ export const DesignFillComp: FC<{}> = observer(({}) => {
   )
 })
 
-export const DesignFillItemComp: FC<{ fill: S.Fill; index: number }> = ({
-  fill,
-  index,
-}) => {
+type DesignFillTarget = 'fill' | 'stroke'
+
+export const DesignFillItemComp: FC<{
+  fill: S.Fill
+  index: number
+  target?: DesignFillTarget
+}> = ({ fill, index, target = 'fill' }) => {
   const { fillPicker } = useEditorServices()
   const isColorType = fill.type === 'color'
   const isLinearType = fill.type === 'linearGradient'
@@ -65,7 +68,7 @@ export const DesignFillItemComp: FC<{ fill: S.Fill; index: number }> = ({
     fillPicker.showPicker(
       index,
       XY.of(outerRefBound).plus(XY.$(-240 - 24, 0)),
-      'fill',
+      target,
     )
   }
 
@@ -83,9 +86,9 @@ export const DesignFillItemComp: FC<{ fill: S.Fill; index: number }> = ({
         {isLinearType && <G style={{ background: makeLinearGradientCss(fill) }}></G>}
         {isImageType && <ImgComp url={fill.url} />}
       </G>
-      <HexInputComp fill={fill} index={index} />
-      <AlphaInputComp fill={fill} index={index} />
-      <VisibleComp fill={fill} index={index} />
+      <HexInputComp fill={fill} index={index} target={target} />
+      <AlphaInputComp fill={fill} index={index} target={target} />
+      <VisibleComp fill={fill} index={index} target={target} />
     </G>
   )
 }
@@ -102,9 +105,9 @@ const ImgComp = withSuspense<{ url: string }>(({ url }) => {
   return <img src={image.objectUrl} style={{ ...imageBound }}></img>
 })
 
-const HexInputComp: FC<{ fill: S.Fill; index: number }> = observer(
-  ({ fill, index }) => {
-    const { designFill } = useEditorServices()
+const HexInputComp: FC<{ fill: S.Fill; index: number; target: DesignFillTarget }> =
+  observer(({ fill, index, target }) => {
+    const { designFill, designStroke } = useEditorServices()
     const isSolidFill = fill.type === 'color'
 
     const validateColor = (value: string) => {
@@ -117,9 +120,11 @@ const HexInputComp: FC<{ fill: S.Fill; index: number }> = observer(
 
     const setColor = (color: string | Nil) => {
       if (!isSolidFill) return
-      designFill.setFill(index, (fill) => {
+      const setter = (fill: S.Fill) => {
         T<S.FillColor>(fill).color = Color(`#${color}`).toString()
-      })
+      }
+      if (target === 'fill') designFill.setFill(index, setter)
+      else designStroke.setFill(index, setter)
     }
 
     const value = matchCase(fill.type, {
@@ -140,17 +145,17 @@ const HexInputComp: FC<{ fill: S.Fill; index: number }> = observer(
         disabled={!isSolidFill}
       />
     )
-  },
-)
+  })
 
-const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
-  ({ fill, index }) => {
-    const { designFill } = useEditorServices()
+const AlphaInputComp: FC<{ fill: S.Fill; index: number; target: DesignFillTarget }> =
+  observer(({ fill, index, target }) => {
+    const { designFill, designStroke } = useEditorServices()
     const setAlpha = (value: number) => {
-      console.log('value: ', value)
-      designFill.setFill(index, (fill) => {
+      const setter = (fill: S.Fill) => {
         fill.alpha = value / 100
-      })
+      }
+      if (target === 'fill') designFill.setFill(index, setter)
+      else designStroke.setFill(index, setter)
     }
     return (
       <InputNum
@@ -165,16 +170,17 @@ const AlphaInputComp: FC<{ fill: S.Fill; index: number }> = observer(
         needFocusStyle={false}
       />
     )
-  },
-)
+  })
 
-const VisibleComp: FC<{ fill: S.Fill; index: number }> = observer(
-  ({ fill, index }) => {
-    const { designFill } = useEditorServices()
+const VisibleComp: FC<{ fill: S.Fill; index: number; target: DesignFillTarget }> =
+  observer(({ fill, index, target }) => {
+    const { designFill, designStroke } = useEditorServices()
     const toggleVisible = () => {
-      designFill.setFill(index, (fill) => {
+      const setter = (fill: S.Fill) => {
         fill.visible = !fill.visible
-      })
+      }
+      if (target === 'fill') designFill.setFill(index, setter)
+      else designStroke.setFill(index, setter)
     }
     return (
       <Lucide
@@ -184,8 +190,7 @@ const VisibleComp: FC<{ fill: S.Fill; index: number }> = observer(
         style={{ cursor: 'pointer' }}
       />
     )
-  },
-)
+  })
 
 const cls = classes(css`
   width: 185px;

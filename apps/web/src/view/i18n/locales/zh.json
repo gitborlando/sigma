@@ -47,6 +47,7 @@
   "language": "语言",
   "mixed": "多个值",
   "mixed fills": "混合填充, 点击 + 号重置",
+  "mixed strokes": "混合描边, 点击 + 号重置",
   "select node": "选择节点",
   "unselect node": "取消选择节点",
   "select page": "选择页面",
