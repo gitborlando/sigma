@@ -88,15 +88,17 @@ export class SchemaCreator extends Service {
 
   ellipse(option?: Partial<S.Ellipse>): S.Ellipse {
     const nodeBase = this.createNodeBase()
-    return {
-      type: 'ellipse',
-      points: [],
-      innerRate: 0,
-      startAngle: 0,
-      sweepAngle: 360,
-      ...nodeBase,
-      ...option,
-    }
+    return mergeOverrideArray(
+      {
+        type: 'ellipse',
+        points: [],
+        innerRate: 0,
+        startAngle: 0,
+        sweepAngle: 360,
+        ...nodeBase,
+      },
+      { ...option },
+    )
   }
 
   line(option?: Partial<S.Line>): S.Line {
@@ -184,7 +186,7 @@ export class SchemaCreator extends Service {
   stroke(option?: Partial<S.Stroke>): S.Stroke {
     return {
       visible: true,
-      fills: [this.fillColor(COLOR.black)],
+      fills: [],
       align: 'center',
       width: 1,
       cap: 'round',

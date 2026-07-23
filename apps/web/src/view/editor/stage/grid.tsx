@@ -66,7 +66,7 @@ const Line: FC<{
       schemaCreator.point({ x: start.x, y: start.y, isStart: true }),
       schemaCreator.point({ x: snappedEnd.x, y: snappedEnd.y, isEnd: true }),
     ],
-    strokes: [schemaCreator.solidStroke(rgba(204, 204, 204, 0.33), 1 / zoom)],
+    stroke: schemaCreator.solidStroke(rgba(204, 204, 204, 0.33), 1 / zoom),
   })
 
   return <elem node={line} />

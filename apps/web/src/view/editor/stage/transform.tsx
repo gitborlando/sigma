@@ -84,7 +84,7 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
   const line = schemaCreator.line({
     id: `transform-line-${type}`,
     points: [schemaCreator.point(p1), schemaCreator.point(p2)],
-    strokes: [schemaCreator.solidStroke(themeColor(), 1 / zoom)],
+    stroke: schemaCreator.solidStroke(themeColor(), 1 / zoom),
   })
 
   const mouseover = (e: ElemMouseEvent) => {
@@ -133,7 +133,7 @@ const VertexComp: FC<{
 
   const rect = schemaCreator.rect({
     id: `transform-vertex-${type}`,
-    strokes: [schemaCreator.solidStroke(themeColor(), 1 / zoom)],
+    stroke: schemaCreator.solidStroke(themeColor(), 1 / zoom),
     fills: [schemaCreator.fillColor(COLOR.white)],
     radius: 2 / zoom,
     ...vertexMRect.plain(),
@@ -191,7 +191,7 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
 
   const rotatePoint = schemaCreator.ellipse({
     id: `transform-rotatePoint-${index}`,
-    fills: [schemaCreator.fillColor(COLOR.transparent)],
+    fills: [schemaCreator.fillColor(COLOR.black, 0)],
     width: size,
     height: size,
     matrix: matrix,

@@ -26,7 +26,7 @@ export class DesignStroke extends DesignEffect<'strokes'> {
   }
 
   newStroke() {
-    return this.schemaCreator.stroke({ fill: this.schemaCreator.fillColor() })
+    return this.schemaCreator.stroke({ fills: [this.schemaCreator.fillColor()] })
   }
 
   addStroke() {

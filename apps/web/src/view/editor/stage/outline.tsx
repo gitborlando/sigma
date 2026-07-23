@@ -70,9 +70,10 @@ const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer
         width: strokeWidth / zoom,
       })
     } else if (strokeWidth) {
-      T<S.Node>(outline).strokes = [
-        schemaCreator.solidStroke(strokeColor, strokeWidth / zoom),
-      ]
+      T<S.Node>(outline).stroke = schemaCreator.solidStroke(
+        strokeColor,
+        strokeWidth / zoom,
+      )
     }
 
     return <elem node={outline} />
