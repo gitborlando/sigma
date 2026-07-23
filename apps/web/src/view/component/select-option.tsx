@@ -141,6 +141,8 @@ const cls = classes(css`
     }
 
     &-content {
+      position: relative;
+      z-index: 1000;
       width: 100%;
       max-height: inherit;
       padding: 6px;

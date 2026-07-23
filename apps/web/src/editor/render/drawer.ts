@@ -347,6 +347,7 @@ export class ElemDrawer extends Service {
     this.ctx.lineWidth = stroke.width
     this.ctx.lineCap = stroke.cap
     this.ctx.lineJoin = stroke.join
+    this.ctx.setLineDash(stroke.style === 'dashed' ? [stroke.dash, stroke.gap] : [])
 
     this.ctx.globalAlpha = fill.alpha
 

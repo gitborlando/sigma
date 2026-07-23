@@ -130,6 +130,9 @@ namespace S {
     width: number
     align: 'inner' | 'center' | 'outer'
     fills: Fill[]
+    style: 'solid' | 'dashed'
+    dash: number
+    gap: number
     cap: CanvasRenderingContext2D['lineCap']
     join: CanvasRenderingContext2D['lineJoin']
   }

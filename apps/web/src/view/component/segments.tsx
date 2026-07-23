@@ -3,7 +3,12 @@ import { SegmentGroup } from '@ark-ui/react'
 type SegmentSize = 'sm' | 'md' | 'lg'
 type SegmentVariant = 'solid' | 'outline'
 
-export type SegmentOption = { label: string; value: string; disabled?: boolean }
+export type SegmentOption = {
+  label: ReactNode
+  value: string
+  title?: string
+  disabled?: boolean
+}
 
 export const Segments = forwardRef<
   HTMLDivElement,
@@ -14,6 +19,7 @@ export const Segments = forwardRef<
     onChange?: (value: string) => void
     size?: SegmentSize
     variant?: SegmentVariant
+    itemWidth?: number
     disabled?: boolean
   }
 >(
@@ -26,7 +32,9 @@ export const Segments = forwardRef<
       onChange,
       size = 'sm',
       variant = 'solid',
+      itemWidth,
       disabled,
+      style,
       ...rest
     },
     ref,
@@ -38,15 +46,25 @@ export const Segments = forwardRef<
         defaultValue={defaultValue ?? options[0]?.value}
         onValueChange={(e) => e.value && onChange?.(e.value)}
         disabled={disabled}
+        data-fixed-item-width={itemWidth ? true : undefined}
+        style={
+          {
+            ...style,
+            '--segment-item-width': itemWidth ? `${itemWidth}px` : undefined,
+          } as CSSProperties
+        }
         className={cx(cls(), cls(size), cls(variant), className)}
         {...rest}>
         {options.map((option) => (
           <SegmentGroup.Item
             key={option.value}
             value={option.value}
+            title={option.title}
             disabled={option.disabled}
             className={cls('item')}>
-            <SegmentGroup.ItemText>{option.label}</SegmentGroup.ItemText>
+            <SegmentGroup.ItemText className={cls('item-text')}>
+              {option.label}
+            </SegmentGroup.ItemText>
             <SegmentGroup.ItemHiddenInput />
           </SegmentGroup.Item>
         ))}
@@ -127,6 +145,22 @@ const cls = classes(css`
         opacity: 0.4;
         cursor: not-allowed;
       }
+    }
+
+    &[data-fixed-item-width] &-item {
+      flex: 0 0 var(--segment-item-width);
+      width: var(--segment-item-width);
+      min-width: var(--segment-item-width);
+      max-width: var(--segment-item-width);
+      padding-inline: 0;
+    }
+
+    &-item-text {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
     }
 
     /* Indicator (sliding background) */
