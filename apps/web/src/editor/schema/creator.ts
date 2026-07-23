@@ -76,7 +76,14 @@ export class SchemaCreator extends Service {
 
   rect(option?: Partial<S.Rectangle>): S.Rectangle {
     const nodeBase = this.createNodeBase()
-    return { type: 'rect', points: [], radius: 0, ...nodeBase, ...option }
+    return {
+      type: 'rect',
+      points: [],
+      radius: 0,
+      strokeSide: { type: 'all' },
+      ...nodeBase,
+      ...option,
+    }
   }
 
   ellipse(option?: Partial<S.Ellipse>): S.Ellipse {
@@ -174,15 +181,14 @@ export class SchemaCreator extends Service {
     }
   }
 
-  stroke(option?: Partial<S.Stroke>) {
-    return <S.Stroke>{
+  stroke(option?: Partial<S.Stroke>): S.Stroke {
+    return {
       visible: true,
-      fill: this.fillColor(COLOR.black),
+      fills: [this.fillColor(COLOR.black)],
       align: 'center',
       width: 1,
       cap: 'round',
       join: 'round',
-      side: { type: 'all' },
       ...option,
     }
   }
@@ -192,7 +198,7 @@ export class SchemaCreator extends Service {
   }
 
   shadow(option?: Partial<S.Shadow>): S.Shadow {
-    return <S.Shadow>{
+    return {
       visible: true,
       offsetX: 5,
       offsetY: 5,

@@ -80,9 +80,8 @@ namespace S {
 
   type VectorBase = { points: Point[] }
 
-  type Path = NodeBase & VectorBase & { type: 'path' }
-
-  type Rectangle = NodeBase & VectorBase & { type: 'rect'; radius: number }
+  type Rectangle = NodeBase &
+    VectorBase & { type: 'rect'; radius: number; strokeSide: StrokeSide }
 
   type Ellipse = NodeBase &
     VectorBase & {
@@ -93,6 +92,8 @@ namespace S {
     }
 
   type Line = NodeBase & VectorBase & { type: 'line' }
+
+  type Path = NodeBase & VectorBase & { type: 'path' }
 
   type Text = NodeBase & {
     type: 'text'
@@ -129,7 +130,6 @@ namespace S {
     width: number
     align: 'inner' | 'center' | 'outer'
     fills: Fill[]
-    side: StrokeSide
     cap: CanvasRenderingContext2D['lineCap']
     join: CanvasRenderingContext2D['lineJoin']
   }
