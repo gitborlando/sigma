@@ -1,0 +1,4 @@
+- frame name rendering
+- line snap
+- frame children collide and nodeTreePanel
+- nodeTreePanel rename
