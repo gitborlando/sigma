@@ -30,7 +30,9 @@ export class NodeController extends Service {
   }
 
   @computed get selectNodes() {
-    return this.handleSelect.selectIdList.map((id) => this.yState.find<S.Node>(id))
+    return this.handleSelect.selectIdList.map(
+      (id) => this.yState.observedState[id] as S.Node,
+    )
   }
 
   selectAllNodes() {

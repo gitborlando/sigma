@@ -1,24 +1,26 @@
-export const OpFieldComp: FC<{ children: ReactNode }> = observer(({ children }) => {
-  return (
-    <G vertical='auto 1fr' className={cls()}>
-      {children}
-    </G>
-  )
-})
+export const DesignFieldComp: FC<{ children: ReactNode }> = observer(
+  ({ children }) => {
+    return (
+      <G vertical='auto 1fr' className={cls()}>
+        {children}
+      </G>
+    )
+  },
+)
 
-export const OpFieldHeaderComp: FC<{ title: string; headerSlot: ReactNode }> =
+export const DesignFieldHeaderComp: FC<{ title: string; headerSlot: ReactNode }> =
   observer(({ title, headerSlot }) => {
     return (
       <G horizontal='auto 1fr' center className={cls('header')}>
         <h4 className={cls('header-title')}>{title}</h4>
-        <G horizontal center className={cls('header-slot')} gap={8}>
+        <G horizontal center className={cls('header-slot')}>
           {headerSlot}
         </G>
       </G>
     )
   })
 
-export const OpFieldContentComp: FC<{ children: ReactNode }> = observer(
+export const DesignFieldContentComp: FC<{ children: ReactNode }> = observer(
   ({ children }) => {
     return (
       <G className={cls('content')} gap={8}>

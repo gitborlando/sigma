@@ -59,7 +59,7 @@ const InputZoomComp: FC<{}> = observer(({}) => {
         ${styles.borderRadiusSM}
       `}
       value={~~((stageViewport.zoom || 0) * 100)}
-      onEnd={(value) => updateZoom((value || 0) / 100)}
+      onEnd={(value) => updateZoom(((value as number) || 0) / 100)}
       formatter={(value) => `${value}%`}
       parser={(value) => Number(value?.replace('%', ''))}
       needControls

@@ -61,6 +61,7 @@ export const DragPanel: FC<DragPanelProps> = ({
   onMove,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
+  const isMouseDownInsideReactTreeRef = useRef(false)
   const dragPanelInfo = id ? dragPanelInfosStorage.read()?.[id] : undefined
 
   const [zIndex, setZIndex] = useState(maxZIndex)
@@ -108,18 +109,18 @@ export const DragPanel: FC<DragPanelProps> = ({
   }, [])
 
   useEffect(() => {
-    const isPointIn = (e: MouseEvent) => {
-      let parent = e.target as HTMLElement | null
-      while (parent) {
-        if (parent === ref.current) return true
-        parent = parent.parentElement
-      }
-    }
     return listen('mousedown', { capture: true }, (e) => {
-      if (isPointIn(e)) return
-      if (show && clickAwayClose) onShow(false)
+      const panel = ref.current
+      const isInsidePanel = panel ? e.composedPath().includes(panel) : false
+      setTimeout(() => {
+        const isInsideReactTree = isMouseDownInsideReactTreeRef.current
+        isMouseDownInsideReactTreeRef.current = false
+        if (!show || !clickAwayClose) return
+        if (isInsidePanel || isInsideReactTree) return
+        onShow(false)
+      }, 0)
     })
-  }, [show, clickAwayClose])
+  }, [show, clickAwayClose, onShow])
 
   const isFirstShow = useRef(false)
   const needFirstPopup = autoPopup && !isFirstShow.current
@@ -144,7 +145,10 @@ export const DragPanel: FC<DragPanelProps> = ({
         ...(height && { height }),
       }}
       onMouseDown={stopPropagation()}
-      onMouseDownCapture={() => panelCount > 1 && setZIndex(maxZIndex++)}>
+      onMouseDownCapture={() => {
+        isMouseDownInsideReactTreeRef.current = true
+        if (panelCount > 1) setZIndex(maxZIndex++)
+      }}>
       <CommonBalanceItem
         isHeader
         label={title}

@@ -51,7 +51,7 @@ namespace S {
     opacity: number
     flip: 0 | 1 | 2 | 3
     fills: Fill[]
-    strokes: Stroke[]
+    stroke: Stroke
     blurs: any[]
     shadows: Shadow[]
     outline?: Outline
@@ -59,7 +59,8 @@ namespace S {
 
   type NodeBase = NodeMeta & NodeEffect & MRect
 
-  type Frame = NodeBase & NodeParentBase & { type: 'frame'; radius: number }
+  type Frame = NodeBase &
+    NodeParentBase & { type: 'frame'; radius: number; strokeSide: StrokeSide }
 
   type Group = NodeBase & NodeParentBase & { type: 'group' }
 
@@ -80,9 +81,8 @@ namespace S {
 
   type VectorBase = { points: Point[] }
 
-  type Path = NodeBase & VectorBase & { type: 'path' }
-
-  type Rectangle = NodeBase & VectorBase & { type: 'rect'; radius: number }
+  type Rectangle = NodeBase &
+    VectorBase & { type: 'rect'; radius: number; strokeSide: StrokeSide }
 
   type Ellipse = NodeBase &
     VectorBase & {
@@ -93,6 +93,8 @@ namespace S {
     }
 
   type Line = NodeBase & VectorBase & { type: 'line' }
+
+  type Path = NodeBase & VectorBase & { type: 'path' }
 
   type Text = NodeBase & {
     type: 'text'
@@ -127,11 +129,18 @@ namespace S {
   type Stroke = {
     visible: boolean
     width: number
-    fill: Fill
     align: 'inner' | 'center' | 'outer'
+    fills: Fill[]
+    style: 'solid' | 'dashed'
+    dash: number
+    gap: number
     cap: CanvasRenderingContext2D['lineCap']
     join: CanvasRenderingContext2D['lineJoin']
   }
+
+  type StrokeSide =
+    | { type: 'all' | 'top' | 'bottom' | 'left' | 'right' }
+    | { type: 'custom'; top: number; bottom: number; left: number; right: number }
 
   type Shadow = {
     visible: boolean

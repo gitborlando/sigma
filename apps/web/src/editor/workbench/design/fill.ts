@@ -1,124 +1,49 @@
-import { clone } from '@gitborlando/utils'
-import type { YPlainPath } from '@gitborlando/y-plain'
-import equal from 'fast-deep-equal'
-import { Patch, produceWithPatches } from 'immer'
-import { makeObservable } from 'mobx'
 import { NodeController } from 'src/editor/controller/node'
 import { SchemaCreator } from 'src/editor/schema/creator'
-import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
 import { Undo } from '../../core/undo'
 import { YState } from '../../y-adapter/y-state'
-
-type DynamicYStateMutation = {
-  insert: (path: YPlainPath, value: unknown) => boolean
-  set: (path: YPlainPath, value: unknown) => boolean
-  delete: (path: YPlainPath) => boolean
-}
+import { DesignEffect } from './effect'
 
 @reflection
-export class DesignFill extends Service {
-  @observable.ref fills = <S.Fill[]>[]
-  isMixedFills = false
+export class DesignFill extends DesignEffect<'fills'> {
+  get fills() {
+    return this.value
+  }
 
   constructor(
-    private readonly yState: YState,
+    protected readonly yState: YState,
+    protected readonly nodeController: NodeController,
     private readonly schemaCreator: SchemaCreator,
     private readonly undo: Undo,
-    private readonly nodeController: NodeController,
   ) {
-    super()
-    autoBind(makeObservable(this))
-    this.effect(autorun(this.setup))
-  }
-
-  private setup() {
-    this.fills = []
-    this.isMixedFills = false
-    const nodes = this.nodeController.selectNodes
-    if (nodes.length === 1) return (this.fills = clone(nodes[0].fills))
-    if (nodes.length > 1) {
-      if (this.isSameFills(nodes)) return (this.fills = clone(nodes[0].fills))
-      return (this.isMixedFills = true)
-    }
-  }
-
-  private setFills(setter: (draft: S.Fill[]) => any) {
-    const [fills, patches] = produceWithPatches(this.fills, setter)
-    this.fills = fills
-    this.applyPatchToYState(patches)
+    super('fills', () => [schemaCreator.fillColor()], yState, nodeController)
+    autoBind(this)
   }
 
   newFill() {
-    return this.schemaCreator.fillColor(COLOR.gray, this.fills.length ? 0.25 : 1)
+    return this.schemaCreator.fillColor(COLOR.gray, this.fills?.length ? 0.25 : 1)
   }
 
   addFill() {
-    this.setFills((fills) => void fills.push(this.newFill()))
+    this.updateValue((fills) => {
+      if (!this.fills) return
+      void fills.push(this.newFill())
+    })
     this.undo.track('state', t('add fill'))
   }
 
   deleteFill(index: number) {
-    this.setFills((fills) => void fills.splice(index, 1))
+    this.updateValue((fills) => void fills.splice(index, 1))
     this.undo.track('state', t('delete fill'))
   }
 
   setFill<T extends S.Fill>(index: number, setter: (fill: T) => T | void) {
-    this.setFills((fills) => {
-      if (fills[index]) {
-        const result = setter(fills[index] as T)
-        if (result) fills[index] = result
-      }
+    this.updateValue((fills) => {
+      if (!fills[index]) return
+
+      const result = setter(fills[index] as T)
+      if (result) fills[index] = result
     })
   }
-
-  private applyPatchToYState(patches: Patch[]) {
-    const nodes = this.nodeController.selectNodes
-    this.yState.transact(() => {
-      nodes.forEach((node) => {
-        if (this.isMixedFills) this.yState.set<S.Node>([node.id, 'fills'], [])
-        applyFillPatches(this.yState, node.id, patches)
-      })
-    })
-    if (this.isMixedFills) this.isMixedFills = false
-  }
-
-  private isSameFills(nodes: S.Node[]) {
-    let isSame = true
-    const firstNode = nodes[0]
-
-    nodes.forEach((node) => {
-      if (!isSame) return
-      if (node.fills.length !== firstNode.fills.length) return (isSame = false)
-      firstNode.fills.forEach((fill, index) => {
-        const otherFill = node.fills[index]
-        if (fill.type !== otherFill.type) return (isSame = false)
-        if (!equal(fill, otherFill)) return (isSame = false)
-      })
-    })
-
-    return isSame
-  }
-}
-
-function applyFillPatches(yState: YState, id: ID, patches: Patch[]) {
-  const mutation = yState as unknown as DynamicYStateMutation
-
-  patches.forEach((patch) => {
-    const path: YPlainPath = [id, 'fills', ...patch.path]
-
-    switch (patch.op) {
-      case 'add':
-        if (!Number.isNaN(Number(path[path.length - 1]))) {
-          mutation.insert(path, clone(patch.value))
-        } else {
-          mutation.set(path, clone(patch.value))
-        }
-        return
-      case 'replace':
-        return mutation.set(path, clone(patch.value))
-      case 'remove':
-        return mutation.delete(path)
-    }
-  })
 }

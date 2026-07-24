@@ -65,6 +65,7 @@ export class SchemaCreator extends Service {
       childIds: [],
       ...nodeBase,
       fills: [this.fillColor(COLOR.white)],
+      strokeSide: { type: 'all' },
       ...option,
     }
   }
@@ -76,20 +77,29 @@ export class SchemaCreator extends Service {
 
   rect(option?: Partial<S.Rectangle>): S.Rectangle {
     const nodeBase = this.createNodeBase()
-    return { type: 'rect', points: [], radius: 0, ...nodeBase, ...option }
+    return {
+      type: 'rect',
+      points: [],
+      radius: 0,
+      strokeSide: { type: 'all' },
+      ...nodeBase,
+      ...option,
+    }
   }
 
   ellipse(option?: Partial<S.Ellipse>): S.Ellipse {
     const nodeBase = this.createNodeBase()
-    return {
-      type: 'ellipse',
-      points: [],
-      innerRate: 0,
-      startAngle: 0,
-      sweepAngle: 360,
-      ...nodeBase,
-      ...option,
-    }
+    return mergeOverrideArray(
+      {
+        type: 'ellipse',
+        points: [],
+        innerRate: 0,
+        startAngle: 0,
+        sweepAngle: 360,
+        ...nodeBase,
+      },
+      { ...option },
+    )
   }
 
   line(option?: Partial<S.Line>): S.Line {
@@ -102,7 +112,7 @@ export class SchemaCreator extends Service {
       points,
       ...nodeBase,
       fills: [this.fillColor(COLOR.black, 1)],
-      strokes: [this.stroke()],
+      stroke: this.solidStroke(),
       ...option,
       height: 0,
     }
@@ -174,12 +184,15 @@ export class SchemaCreator extends Service {
     }
   }
 
-  stroke(option?: Partial<S.Stroke>) {
-    return <S.Stroke>{
+  stroke(option?: Partial<S.Stroke>): S.Stroke {
+    return {
       visible: true,
-      fill: this.fillColor(COLOR.black),
+      fills: [],
       align: 'center',
       width: 1,
+      style: 'solid',
+      dash: 2,
+      gap: 2,
       cap: 'round',
       join: 'round',
       ...option,
@@ -187,11 +200,11 @@ export class SchemaCreator extends Service {
   }
 
   solidStroke(color = COLOR.black, width = 1) {
-    return this.stroke({ fill: this.fillColor(color), width })
+    return this.stroke({ fills: [this.fillColor(color)], width })
   }
 
   shadow(option?: Partial<S.Shadow>): S.Shadow {
-    return <S.Shadow>{
+    return {
       visible: true,
       offsetX: 5,
       offsetY: 5,
@@ -228,7 +241,7 @@ export class SchemaCreator extends Service {
       opacity: 1,
       flip: 0,
       fills: [this.fillColor()],
-      strokes: [],
+      stroke: this.stroke(),
       blurs: [],
       shadows: [],
     }

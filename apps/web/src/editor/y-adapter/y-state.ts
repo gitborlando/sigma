@@ -1,6 +1,7 @@
 import { Signal } from '@gitborlando/signal'
 import { clone, ThisAsAny } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
+import { createAtom } from 'mobx'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { Service } from 'src/global/service'
 import * as Y from 'yjs'
@@ -18,14 +19,16 @@ export class YState extends Service {
 
   private patches: YStatePatch[] = []
   private listeners = new Set<YStateListener>()
+  private stateAtom = createAtom('YState.observedState')
 
   constructor() {
     super()
     autoBind(this)
   }
 
-  get schema() {
-    return this.state
+  get observedState() {
+    this.stateAtom.reportObserved()
+    return this.plain.state
   }
 
   get state() {
@@ -84,5 +87,7 @@ export class YState extends Service {
     this.listeners.forEach((listener) => listener(patches))
 
     patches.forEach((patch) => this.flushPatch$.dispatch(patch))
+
+    this.stateAtom.reportChanged()
   }
 }

@@ -218,7 +218,7 @@ function createSnapshotState(
   stageViewport: StageViewport,
 ): SnapshotState {
   return {
-    schema: toPlain(yState.schema),
+    schema: toPlain(yState.state),
     undoStack: toPlain(undo.stack),
     undoNext: undo.next,
     savedAt: Date.now(),

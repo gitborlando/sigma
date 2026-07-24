@@ -8,12 +8,12 @@ export const PickerLinearGradientComp: FC<{
   fill: S.FillLinearGradient
   index: number
 }> = memo(({ fill, index }) => {
-  const { designFill, undo } = useEditorServices()
+  const { fillPicker, undo } = useEditorServices()
   const [stopIndex, setStopIndex] = useState(0)
   useEffect(() => setStopIndex(0), [index])
 
   const setStopColor = (color: string) => {
-    designFill.setFill<S.FillLinearGradient>(index, (draft) => {
+    fillPicker.setFill<S.FillLinearGradient>((draft) => {
       draft.stops[stopIndex].color = color
     })
   }
@@ -45,14 +45,14 @@ const StopsBar: FC<{
   stopIndex: number
   setStopIndex: (index: number) => void
 }> = ({ fill, index, stopIndex, setStopIndex }) => {
-  const { designFill, undo } = useEditorServices()
+  const { fillPicker, undo } = useEditorServices()
   const stopBarRef = useRef<HTMLDivElement>(null)
 
   const handleMove = (e: React.MouseEvent, stopIndex: number) => {
     setStopIndex(stopIndex)
     Drag.onMove(({ delta }) => {
       const deltaOffset = delta.x / stopBarRef.current!.clientWidth
-      designFill.setFill<S.FillLinearGradient>(index, (draft) => {
+      fillPicker.setFill<S.FillLinearGradient>((draft) => {
         const oldOffset = draft.stops[stopIndex].offset
         draft.stops[stopIndex].offset = min(max(oldOffset + deltaOffset, 0), 1)
       })

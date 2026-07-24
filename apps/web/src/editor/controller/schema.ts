@@ -46,7 +46,7 @@ export class SchemaController extends Service {
     this.undo.setup()
 
     SchemaHelper.setup({ find: this.yState.find })
-    setupSchemaTraverse(() => this.yState.schema)
+    setupSchemaTraverse(() => this.yState.state)
 
     this.handleSelect.selectPage(schema.meta.pageIds[0])
     this.undo.mobxUndo.rebase()

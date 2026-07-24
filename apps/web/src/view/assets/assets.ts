@@ -19,6 +19,19 @@ import editorDesignGeomRotate from './editor/design/geom/rotate.svg'
 import editorDesignGeomWidth from './editor/design/geom/width.svg'
 import editorDesignGeomX from './editor/design/geom/x.svg'
 import editorDesignGeomY from './editor/design/geom/y.svg'
+import editorDesignMiscConfig from './editor/design/misc/config.svg'
+import editorDesignStrokeCapButt from './editor/design/stroke/cap-butt.svg'
+import editorDesignStrokeCapRound from './editor/design/stroke/cap-round.svg'
+import editorDesignStrokeCapSquare from './editor/design/stroke/cap-square.svg'
+import editorDesignStrokeJoinBevel from './editor/design/stroke/join-bevel.svg'
+import editorDesignStrokeJoinMiter from './editor/design/stroke/join-miter.svg'
+import editorDesignStrokeJoinRound from './editor/design/stroke/join-round.svg'
+import editorDesignStrokeSideAll from './editor/design/stroke/side-all.svg'
+import editorDesignStrokeSideBottom from './editor/design/stroke/side-bottom.svg'
+import editorDesignStrokeSideLeft from './editor/design/stroke/side-left.svg'
+import editorDesignStrokeSideRight from './editor/design/stroke/side-right.svg'
+import editorDesignStrokeSideTop from './editor/design/stroke/side-top.svg'
+import editorDesignStrokeStrokeWidth from './editor/design/stroke/stroke-width.svg'
 import editorHeaderMove from './editor/header/move.svg'
 import editorHeaderSelect from './editor/header/select.svg'
 import editorNodeEllipse from './editor/node/ellipse.svg'
@@ -58,6 +71,21 @@ export const Assets = {
         width: editorDesignGeomWidth,
         x: editorDesignGeomX,
         y: editorDesignGeomY,
+      },
+      misc: { config: editorDesignMiscConfig },
+      stroke: {
+        capButt: editorDesignStrokeCapButt,
+        capRound: editorDesignStrokeCapRound,
+        capSquare: editorDesignStrokeCapSquare,
+        joinBevel: editorDesignStrokeJoinBevel,
+        joinMiter: editorDesignStrokeJoinMiter,
+        joinRound: editorDesignStrokeJoinRound,
+        sideAll: editorDesignStrokeSideAll,
+        sideBottom: editorDesignStrokeSideBottom,
+        sideLeft: editorDesignStrokeSideLeft,
+        sideRight: editorDesignStrokeSideRight,
+        sideTop: editorDesignStrokeSideTop,
+        strokeWidth: editorDesignStrokeStrokeWidth,
       },
     },
     header: { move: editorHeaderMove, select: editorHeaderSelect },

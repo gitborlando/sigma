@@ -94,13 +94,11 @@ export const Tick: FC<{
       schemaCreator.point({ x: lineStart.x, y: lineStart.y, isStart: true }),
       schemaCreator.point({ x: lineEnd.x, y: lineEnd.y, isEnd: true }),
     ],
-    strokes: [
-      schemaCreator.stroke({
-        fill: schemaCreator.fillColor(RULER_COLOR, 1),
-        width: 1 / zoom,
-        cap: 'butt',
-      }),
-    ],
+    stroke: schemaCreator.stroke({
+      fills: [schemaCreator.fillColor(RULER_COLOR, 1)],
+      width: 1 / zoom,
+      cap: 'butt',
+    }),
   })
   const text = schemaCreator.text({
     id: `ruler-${type}-tick-text-${value}`,

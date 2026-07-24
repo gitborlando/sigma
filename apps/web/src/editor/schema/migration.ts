@@ -207,4 +207,15 @@ export const migrationList = [
       delete legacyNode.rotation
     },
   },
+  {
+    version: 7,
+    desc: `为描边新增 style、dash、gap 属性`,
+    transform: ({ item }) => {
+      if (!SchemaHelper.isNode(item)) return
+
+      item.stroke.style ??= 'solid'
+      item.stroke.dash ??= 2
+      item.stroke.gap ??= 2
+    },
+  },
 ] satisfies Migration[]

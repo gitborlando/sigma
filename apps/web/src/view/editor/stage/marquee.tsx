@@ -15,7 +15,7 @@ export const StageMarqueeComp: FC<{}> = observer(({}) => {
   const rect = schemaCreator.rect({
     id: 'marquee',
     ...marquee,
-    strokes: [schemaCreator.solidStroke(themeColor(), 1 / zoom)],
+    stroke: schemaCreator.solidStroke(themeColor(), 1 / zoom),
     fills: [schemaCreator.fillColor(rgbToRgba(themeColor(55), 0.05))],
     matrix: Matrix.identity().shift(marquee),
   })

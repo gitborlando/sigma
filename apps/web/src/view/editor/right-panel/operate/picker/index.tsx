@@ -20,11 +20,11 @@ const createFillCache = (
 }
 const fillCache = new Map<S.Fill['type'], S.Fill>()
 
-export const FillPickerComp = observer(
+export const DesignPickerComp = observer(
   withPrepare<{ fill: S.Fill }>(
     () => {
-      const { fillPicker, designFill } = useEditorServices()
-      const fill = designFill.fills[fillPicker.fillIndex]
+      const { fillPicker } = useEditorServices()
+      const fill = fillPicker.fill
       return fill ? { fill } : null
     },
     observer(({ fill }) => {
@@ -65,15 +65,6 @@ export const FillPickerComp = observer(
               value={fillType}
               onChange={(value) => handleChangeFill(value as S.Fill['type'])}
             />
-            {/* <Radio.Group
-          type='button'
-          value={fillType}
-          size='mini'
-          onChange={handleChangeFill}>
-          <Radio value='color'>{t('solid color')}</Radio>
-          <Radio value='linearGradient'>{t('linear')}</Radio>
-          <Radio value='image'>{t('image')}</Radio>
-        </Radio.Group> */}
             {fill.type === 'color' && (
               <PickerSolidComp fill={fill as S.FillColor} index={fillIndex} />
             )}
@@ -93,14 +84,14 @@ export const FillPickerComp = observer(
 
 export const PickerSolidComp: FC<{ fill: S.FillColor; index: number }> = observer(
   ({ fill, index }) => {
-    const { designFill, undo } = useEditorServices()
+    const { fillPicker, undo } = useEditorServices()
     const getRgbaFromSolidFill = (fill: S.FillColor) => {
       const { color, alpha } = fill
       return Color(color).alpha(alpha).toString()
     }
     const handleChange = (rgba: IRGBA) => {
       const rgb = Color.rgb(rgba.r, rgba.g, rgba.b).string()
-      designFill.setFill(index, (draft) => {
+      fillPicker.setFill((draft) => {
         if (draft.type !== 'color') return
         draft.color = rgb
         draft.alpha = rgba.a
