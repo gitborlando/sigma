@@ -1,3 +1,4 @@
+import { clamp } from 'es-toolkit'
 import {
   Circle,
   CornerDownRight,
@@ -87,7 +88,7 @@ export const DesignStrokeComp: FC<{}> = observer(({}) => {
                 prefix={<Icon src={Assets.editor.design.geom.width} />}
                 onSlide={(delta) =>
                   designStroke.setStroke((stroke) => {
-                    stroke.width = Math.min(1000, Math.max(0, stroke.width + delta))
+                    stroke.width = clamp(stroke.width + delta, 0, 1000)
                   })
                 }
                 onEnd={(value) =>
@@ -113,7 +114,7 @@ export const DesignStrokeComp: FC<{}> = observer(({}) => {
               />
             </G>
 
-            <G vertical gap={8} className={cls('fills')}>
+            <G vertical gap={8}>
               {stroke.fills.map((fill, index) => (
                 <G horizontal='1fr auto' center gap={8} key={index}>
                   <DesignFillItemComp fill={fill} index={index} target='stroke' />
@@ -210,10 +211,7 @@ const StrokeSettingsPanel: FC<StrokeSettingsPanelProps> = observer(
                     prefix={<Icon src={Assets.editor.design.geom.width} />}
                     onSlide={(delta) =>
                       designStroke.setStroke((stroke) => {
-                        stroke.dash = Math.min(
-                          1000,
-                          Math.max(0, stroke.dash + delta),
-                        )
+                        stroke.dash = clamp(stroke.dash + delta, 0, 1000)
                       })
                     }
                     onEnd={(value) =>
@@ -232,7 +230,7 @@ const StrokeSettingsPanel: FC<StrokeSettingsPanelProps> = observer(
                     prefix={<Icon src={Assets.editor.design.geom.width} />}
                     onSlide={(delta) =>
                       designStroke.setStroke((stroke) => {
-                        stroke.gap = Math.min(1000, Math.max(0, stroke.gap + delta))
+                        stroke.gap = clamp(stroke.gap + delta, 0, 1000)
                       })
                     }
                     onEnd={(value) =>
@@ -315,10 +313,5 @@ const cls = classes(css`
   &-settings-body {
     padding: 12px;
     overflow-y: auto;
-  }
-  &-fills {
-    padding-top: 4px;
-    margin-top: 2px;
-    border-top: 1px solid var(--gray-border);
   }
 `)
