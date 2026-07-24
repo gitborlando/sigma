@@ -53,7 +53,7 @@ const joinOptions = [
 ]
 
 export const DesignStrokeComp: FC<{}> = observer(({}) => {
-  const { designStroke, fillPicker, undo } = useEditorServices()
+  const { designStroke, fillPicker, undo, stageViewport } = useEditorServices()
   const { stroke, isMixedStroke, addFill, deleteFill } = designStroke
 
   const setStroke = (
@@ -85,6 +85,7 @@ export const DesignStrokeComp: FC<{}> = observer(({}) => {
                 value={stroke.width}
                 min={0}
                 max={1000}
+                slideRate={1 / stageViewport.zoom}
                 prefix={<Icon src={Assets.editor.design.geom.width} />}
                 onSlide={(delta) =>
                   designStroke.setStroke((stroke) => {
@@ -150,6 +151,7 @@ interface StrokeSettingsPanelProps {
 
 const StrokeSettingsPanel: FC<StrokeSettingsPanelProps> = observer(
   ({ stroke, designStroke, setStroke }) => {
+    const { stageViewport } = useEditorServices()
     const triggerRef = useRef<HTMLButtonElement>(null)
     const [show, setShow] = useState(false)
     const [panelXY, setPanelXY] = useState<IXY>()
@@ -208,6 +210,7 @@ const StrokeSettingsPanel: FC<StrokeSettingsPanelProps> = observer(
                     value={stroke.dash}
                     min={0}
                     max={1000}
+                    slideRate={1 / stageViewport.zoom}
                     prefix={<Icon src={Assets.editor.design.geom.width} />}
                     onSlide={(delta) =>
                       designStroke.setStroke((stroke) => {
@@ -227,6 +230,7 @@ const StrokeSettingsPanel: FC<StrokeSettingsPanelProps> = observer(
                     value={stroke.gap}
                     min={0}
                     max={1000}
+                    slideRate={1 / stageViewport.zoom}
                     prefix={<Icon src={Assets.editor.design.geom.width} />}
                     onSlide={(delta) =>
                       designStroke.setStroke((stroke) => {
