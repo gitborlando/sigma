@@ -139,7 +139,7 @@ export class StageTransformer extends Service {
         this.action = 'move'
         this.isMoving = true
 
-        const aabb = AABB.shift(startAABB, shift)
+        const aabb = AABB.shift(AABB.clone(startAABB), shift)
         const snapDelta = XY.$(
           snapGridRound(aabb.minX, this.setting.snapToGrid) - aabb.minX,
           snapGridRound(aabb.minY, this.setting.snapToGrid) - aabb.minY,
