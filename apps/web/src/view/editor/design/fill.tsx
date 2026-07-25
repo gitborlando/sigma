@@ -1,4 +1,4 @@
-import { iife, matchCase } from '@gitborlando/utils'
+import { iife, match } from '@gitborlando/utils'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { withSuspense } from '@gitborlando/utils/react'
 import Color from 'color'
@@ -131,7 +131,7 @@ const HexInputComp: FC<{ fill: S.Fill; index: number; target: DesignFillTarget }
       else designStroke.setFill(index, setter)
     }
 
-    const value = matchCase(fill.type, {
+    const value = match(fill.type, {
       color: Color(T<S.FillColor>(fill).color).hex().slice(1),
       linearGradient: t('linear gradient fill'),
       image: t('image fill'),

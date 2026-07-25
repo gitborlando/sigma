@@ -1,4 +1,4 @@
-import { matchCase, NoopFunc } from '@gitborlando/utils'
+import { match, NoopFunc } from '@gitborlando/utils'
 import { Service } from 'src/global/service'
 import { StageCreate } from './create'
 import { StageMove } from './move'
@@ -24,11 +24,11 @@ export class StageInteract extends Service {
   onInteract() {
     const dispose = autorun(() => {
       this.offInteract?.()
-      this.offInteract = matchCase(this.interaction, {
+      this.offInteract = match(this.interaction, {
         select: () => this.stageSelect.startInteract(),
         move: () => this.stageMove.startInteract(),
         create: () => this.stageCreate.startInteract(),
-      })?.()
+      })
     })
     this.effect(dispose, () => this.offInteract?.())
   }

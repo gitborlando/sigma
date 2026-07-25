@@ -53,8 +53,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/toolkit
       '@gitborlando/utils':
-        specifier: ^5.5.0
-        version: 5.5.0(react@18.3.1)
+        specifier: ^5.9.0
+        version: 5.9.0(react@18.3.1)
       '@gitborlando/vite-plugin-nested-assets':
         specifier: workspace:*
         version: link:../../packages/nested-assets
@@ -1690,10 +1690,10 @@ packages:
     peerDependencies:
       react: '>=18.0.0'
 
-  '@gitborlando/utils@5.5.0':
+  '@gitborlando/utils@5.9.0':
     resolution:
       {
-        integrity: sha512-0C0vRgHGWTNXdtItbVM3LaYHbaJmbiLNW9adFNgWdd1OmH7S5usge2Vytu+CgBUGf/LzhCjimS+/EZiXoGF/PA==,
+        integrity: sha512-CKQ+NUGKaWtnEciNHFBj1KDigcIcjOQCi6zu7qPmvrJwyHzb18ebZOdRjEuldl8nkS+M9wmAtX4nDsXOz3sAhg==,
       }
     peerDependencies:
       react: '>=16.8.0'
@@ -10373,7 +10373,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@gitborlando/utils@5.5.0(react@18.3.1)':
+  '@gitborlando/utils@5.9.0(react@18.3.1)':
     dependencies:
       camelcase: 8.0.0
       react: 18.3.1

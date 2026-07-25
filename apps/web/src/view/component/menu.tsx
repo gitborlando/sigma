@@ -1,6 +1,6 @@
 import type { MenuRootProps } from '@ark-ui/react'
 import { Menu as ArkMenu, Portal } from '@ark-ui/react'
-import { matchCase } from '@gitborlando/utils'
+import { match } from '@gitborlando/utils'
 import { ChevronRight } from 'lucide-react'
 import {
   OptionBalanceItem,
@@ -32,7 +32,7 @@ export const Menu = forwardRef<HTMLDivElement, MenuProps>(
 
     return (
       <ArkMenu.Root positioning={positioning} {...rest}>
-        {matchCase(triggerType, {
+        {match(triggerType, {
           click: <ArkMenu.Trigger asChild>{trigger}</ArkMenu.Trigger>,
           context: (
             <ArkMenu.ContextTrigger asChild>{trigger}</ArkMenu.ContextTrigger>

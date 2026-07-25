@@ -1,10 +1,10 @@
-import { matchCase } from '@gitborlando/utils'
+import { match } from '@gitborlando/utils'
 import { ComponentPropsWithRef } from 'react'
 
 export const Text: FC<
   ComponentPropsWithRef<'div'> & { variant?: 'label' | 'head' | 'common' }
 > = observer(({ children, className, style, variant = 'label', ...rest }) => {
-  const classes = matchCase(variant, {
+  const classes = match(variant, {
     label: cls('label'),
     head: cls('head'),
     common: cls('common'),

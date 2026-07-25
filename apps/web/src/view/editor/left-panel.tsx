@@ -1,4 +1,4 @@
-import { matchCase } from '@gitborlando/utils'
+import { match } from '@gitborlando/utils'
 import { Layers } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
@@ -31,7 +31,7 @@ export const SwitchBarComp: FC<{}> = observer(({}) => {
   return (
     <G center vertical className={cls('switchBar')} gap={8}>
       {EditorLeftPanelIds.map((id) => {
-        const icon = matchCase(id, { layer: <Lucide icon={Layers} size={17} /> })
+        const icon = match(id, { layer: <Lucide icon={Layers} size={17} /> })
         return (
           <Btn
             key={id}

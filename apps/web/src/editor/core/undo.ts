@@ -1,5 +1,5 @@
 import { MobxUndo, MobxUndoState } from '@gitborlando/mobx-undo'
-import { matchCase } from '@gitborlando/utils'
+import { match } from '@gitborlando/utils'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
 import { YState, YStatePatch } from 'src/editor/y-adapter/y-state'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
@@ -101,7 +101,7 @@ export class Undo extends Service {
     const replayYState = () => this.yUndo?.[type]()
     const replayClientState = () => this.mobxUndo[type]()
 
-    matchCase(info.type, {
+    match(info.type, {
       state: () => replayYState(),
       client: () => replayClientState(),
       all: () => {
@@ -113,6 +113,6 @@ export class Undo extends Service {
           replayClientState()
         }
       },
-    })?.()
+    })
   }
 }

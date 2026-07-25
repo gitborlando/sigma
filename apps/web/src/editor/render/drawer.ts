@@ -1,5 +1,5 @@
 import { AABB, type IXY } from '@gitborlando/geo'
-import { getSet, iife, loopFor } from '@gitborlando/utils'
+import { getSet, iife, loopFor, match } from '@gitborlando/utils'
 import { clamp } from 'es-toolkit'
 import { Setting } from 'src/editor/core/setting'
 import { HitTest, Matrix } from 'src/editor/geometry'
@@ -370,23 +370,15 @@ export class ElemDrawer extends Service {
       this.ctx.stroke(this.path2d)
     }
 
-    switch (fill.type) {
-      case 'color':
-        this.ctx.strokeStyle = fill.color
-        makeStroke()
-        break
+    const strokeStyle = match(fill, 'type', {
+      color: (fill) => fill.color,
+      linearGradient: (fill) => this.createLinearGradient(fill),
+      image: (fill) => this.createImagePattern(fill),
+    })
 
-      case 'linearGradient':
-        this.ctx.strokeStyle = this.createLinearGradient(fill)
-        makeStroke()
-        break
-
-      case 'image':
-        const pattern = this.createImagePattern(fill)
-        if (!pattern) break
-        this.ctx.strokeStyle = pattern
-        makeStroke()
-        break
+    if (strokeStyle) {
+      this.ctx.strokeStyle = strokeStyle
+      makeStroke()
     }
   }
 
