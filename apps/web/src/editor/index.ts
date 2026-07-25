@@ -91,11 +91,12 @@ const editorServices = {
   yState: YState,
 }
 
-export type EditorServiceId = keyof typeof editorServices
-
-export type EditorServices = {
-  [K in EditorServiceId]: InstanceType<(typeof editorServices)[K]>
+type ServiceInstances<T> = {
+  [K in keyof T]: T[K] extends ClassConstructor<infer S> ? S : never
 }
+
+export type EditorServices = ServiceInstances<typeof editorServices>
+export type EditorServiceId = keyof EditorServices
 
 export class Editor extends Service {
   private static editor: Editor
@@ -126,7 +127,7 @@ export class Editor extends Service {
     })
   }
 
-  resolve = <K extends EditorServiceId>(key: K) => {
+  resolve = <K extends EditorServiceId>(key: K): EditorServices[K] => {
     return this.container.singleton(
       editorServices[key] as ClassConstructor<EditorServices[K]>,
     )

@@ -10,7 +10,7 @@ export function useEditor() {
 
 const serviceProxyMap = new WeakMap<Editor, EditorServices>()
 
-export function useEditorServices() {
+export function useEditorServices(): EditorServices {
   const editor = useEditor()
   const existed = serviceProxyMap.get(editor)
   if (existed) return existed
