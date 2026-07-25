@@ -1,4 +1,5 @@
 import { SegmentGroup } from '@ark-ui/react'
+import { CSSProperties } from 'react'
 
 type SegmentSize = 'sm' | 'md' | 'lg'
 type SegmentVariant = 'solid' | 'outline'
