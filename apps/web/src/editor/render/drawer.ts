@@ -309,18 +309,10 @@ export class ElemDrawer extends Service {
             return Math.max(rateW, rateH)
           })
           const path2d = new Path2D(this.path2d)
+          const sourceRect = [0, 0, width / rate, height / rate] as const
+          const destRect = [0, 0, width, height] as const
           this.ctx.clip(path2d)
-          this.ctx.drawImage(
-            image.image,
-            0,
-            0,
-            width / rate,
-            height / rate,
-            0,
-            0,
-            width,
-            height,
-          )
+          this.ctx.drawImage(image.image, ...sourceRect, ...destRect)
         }
         break
     }
