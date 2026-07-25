@@ -64,6 +64,8 @@ const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer
       matrix: matrix,
     })
 
+    if ('strokeSide' in outline) outline.strokeSide = { type: 'all' }
+
     if (node.type === 'text') {
       T<S.Text>(outline).style.decoration = schemaCreator.textDecoration({
         color: strokeColor!,
