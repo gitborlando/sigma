@@ -94,6 +94,10 @@ export class Renderer extends Service {
   }
 
   private onViewportChange() {
+    const { width, height } = this.stageViewport.bound
+    this.bufferCanvas.width = width * dpr
+    this.bufferCanvas.height = height * dpr
+
     return Disposer.combine(
       reaction(
         () => this.stageViewport.zoom,
