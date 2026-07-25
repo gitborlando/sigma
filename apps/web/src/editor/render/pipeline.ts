@@ -25,7 +25,7 @@ export type SurfaceRenderType =
   | 'partialRender'
 
 @reflection
-export class Renderer extends Service {
+export class RenderPipeline extends Service {
   renderTopCanvas$ = Signal.create<CanvasRenderingContext2D>()
 
   private bufferCanvas = new OffscreenCanvas(0, 0)

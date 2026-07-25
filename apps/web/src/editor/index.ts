@@ -11,7 +11,7 @@ import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { HandleSelect } from 'src/editor/handle/select'
 import { ElemDrawer } from 'src/editor/render/drawer'
-import { Renderer } from 'src/editor/render/renderer'
+import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { SchemaCreator } from 'src/editor/schema/creator'
@@ -57,7 +57,7 @@ const editorServices = {
   elemDrawer: ElemDrawer,
   renderTree: RenderTree,
   renderSurface: RenderSurface,
-  renderer: Renderer,
+  renderPipeline: RenderPipeline,
 
   /** schema */
   schemaCreator: SchemaCreator,

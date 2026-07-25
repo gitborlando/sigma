@@ -5,7 +5,7 @@ import { listen } from '@gitborlando/utils/browser'
 import { untracked } from 'mobx'
 import { Matrix } from 'src/editor/geometry'
 import { Elem } from 'src/editor/render/elem'
-import { Renderer } from 'src/editor/render/renderer'
+import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -22,7 +22,7 @@ export class StageEvent extends Service {
     private readonly renderTree: RenderTree,
     private readonly renderSurface: RenderSurface,
     private readonly stageViewport: StageViewport,
-    private readonly renderer: Renderer,
+    private readonly renderPipeline: RenderPipeline,
   ) {
     super()
     autoBind(this)
@@ -66,7 +66,7 @@ export class StageEvent extends Service {
     const canvasXY = this.stageViewport.toCanvasXY(xy)
     this.eventXY = this.stageViewport.sceneMatrix.invertXY(canvasXY)
     this.elemsFromPoint.length = 0
-    this.renderer.updateRenderPriorityXY(this.eventXY)
+    this.renderPipeline.updateRenderPriorityXY(this.eventXY)
   }
 
   private traverseLayerList(
@@ -125,7 +125,7 @@ export class StageEvent extends Service {
 
   private onPointerEvents() {
     const onMouseEvent = (e: MouseEvent) => {
-      if (this.isPointerEventNone || this.renderer.isSliceRendering) return
+      if (this.isPointerEventNone || this.renderPipeline.isSliceRendering) return
 
       if (e.type === 'mousedown' && document.activeElement instanceof HTMLElement) {
         document.activeElement.blur()

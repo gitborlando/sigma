@@ -1,5 +1,5 @@
 import { HandleSelect } from 'src/editor/handle/select'
-import { Renderer } from 'src/editor/render/renderer'
+import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { StageEvent } from 'src/editor/stage/event'
@@ -10,7 +10,7 @@ import { Service } from 'src/global/service'
 export class StageController extends Service {
   constructor(
     private readonly renderSurface: RenderSurface,
-    private readonly renderer: Renderer,
+    private readonly renderPipeline: RenderPipeline,
     private readonly stageEvent: StageEvent,
     private readonly renderTree: RenderTree,
     private readonly handleSelect: HandleSelect,
@@ -22,7 +22,7 @@ export class StageController extends Service {
 
   onCanvasInited() {
     this.renderSurface.onCanvasInited()
-    this.renderer.onCanvasInited()
+    this.renderPipeline.onCanvasInited()
     this.stageEvent.onCanvasInited()
     this.stageInteract.onInteract()
     this.renderTree.onPatchRender()
