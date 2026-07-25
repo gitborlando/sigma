@@ -85,15 +85,21 @@ export class EditorCommand extends Service {
       {
         name: t('rename'),
         callback: ({ id }: IDPayload) => {
-          // UILeftPanelLayer.enterReName.dispatch(id)
+          this.nodeController.renamingNodeId = id
         },
       },
-      { name: t('create frame'), callback: () => this.nodeController.wrapInFrame() },
-
+      {
+        name: t('create frame'),
+        callback: () => {
+          this.nodeController.wrapInFrame()
+        },
+      },
       {
         name: t('delete'),
         shortcut: 'del',
-        callback: () => this.nodeController.deleteSelectedNodes(),
+        callback: () => {
+          this.nodeController.deleteSelectedNodes()
+        },
       },
     ]
 

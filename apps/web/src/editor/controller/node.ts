@@ -13,6 +13,8 @@ import { Service } from 'src/global/service'
 
 @reflection
 export class NodeController extends Service {
+  @observable renamingNodeId = ''
+
   constructor(
     private readonly handleNode: HandleNode,
     private readonly handleSelect: HandleSelect,
@@ -22,7 +24,7 @@ export class NodeController extends Service {
     private readonly renderTree: RenderTree,
   ) {
     super()
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   @computed get datumXY() {
@@ -33,6 +35,13 @@ export class NodeController extends Service {
     return this.handleSelect.selectIdList.map(
       (id) => this.yState.observedState[id] as S.Node,
     )
+  }
+
+  renameNode(id: string, name: string) {
+    this.yState.transact(() => {
+      this.yState.set<S.Node>([id, 'name'], name)
+    })
+    this.undo.track('state', t('rename node'))
   }
 
   selectAllNodes() {

@@ -5,20 +5,22 @@ import { ChevronRight } from 'lucide-react'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { LayerNodeTreeInfo } from 'src/editor/workbench/layer/node-tree'
 import { ContextMenu } from 'src/global/context-menu'
+import { Input } from 'src/view/component/input'
 import { Lucide } from 'src/view/component/lucide'
 import { Icon } from 'src/view/component/svg-icon'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
+import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { LayerNodeTreePathIcon } from './path-icon'
 
 export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observer(
   ({ nodeInfo }) => {
-    const { command, layerNodeTree, stageSelect, selectController, yState } =
+    const { command, layerNodeTree, stageSelect, selectController, nodeController } =
       useEditorServices()
     const { id, indent, ancestorIds } = nodeInfo
     const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
+    const node = useSchema((schema) => schema[id] as S.Node)
 
-    const node = yState.find<S.Node>(id)
     const isParent = SchemaHelper.isNodeParent(node)
     const expanded = getNodeExpanded(id)
 
@@ -37,7 +39,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
     }
     const handleDoubleClick = () => {
       selectController.onPanelSelect(id)
-      toggleNodeExpanded(id, true)
+      nodeController.renamingNodeId = id
     }
     const handleContextMenu = (e: React.MouseEvent) => {
       ContextMenu.context = { id }
@@ -94,11 +96,39 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
             src={Assets.editor.node[node.type as keyof typeof Assets.editor.node]}
           />
         )}
-        <G className={cls('name')}>{node.name || '未命名'}</G>
+        <RenameComp node={node} />
       </G>
     )
   },
 )
+
+const RenameComp: FC<{ node: S.Node }> = observer(({ node }) => {
+  const ref = useRef<HTMLInputElement>(null)
+  const { nodeController } = useEditorServices()
+  const { renamingNodeId } = nodeController
+  const canRename = renamingNodeId === node.id
+
+  useLayoutEffect(() => {
+    canRename && ref.current?.focus()
+  }, [canRename])
+
+  return canRename ? (
+    <Input
+      ref={ref}
+      className={renameCls()}
+      needFocusStyle={false}
+      value={node.name || '未命名'}
+      validate={(name) => !!name}
+      onBlur={() => (nodeController.renamingNodeId = '')}
+      onEnd={(name) => {
+        nodeController.renameNode(node.id, name!)
+        nodeController.renamingNodeId = ''
+      }}
+    />
+  ) : (
+    <G className={renameCls()}>{node.name || '未命名'}</G>
+  )
+})
 
 const cls = classes(css`
   width: 100%;
@@ -119,11 +149,13 @@ const cls = classes(css`
   &[data-dragging='true'] {
     opacity: 0.5;
   }
-  &-name {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+`)
+
+const renameCls = classes(css`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-inline: 4px;
 `)

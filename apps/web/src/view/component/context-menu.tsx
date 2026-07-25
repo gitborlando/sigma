@@ -1,3 +1,4 @@
+import { Menu as ArkMenu } from '@ark-ui/react'
 import { Fragment } from 'react/jsx-runtime'
 import { ContextMenu } from 'src/global/context-menu'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
@@ -19,17 +20,18 @@ export const ContextMenuComp: FC<{}> = observer(({}) => {
           const disabled = item.when && !item.when()
           return (
             <Fragment key={item.name}>
-              <OptionBalanceItem
-                className={cls('item')}
-                key={item.name}
-                label={item.name}
-                reserveIconSpace={false}
-                disabled={disabled}
-                onClick={() => !disabled && item.callback(ContextMenu.context)}>
-                <Text x-if={!!item.shortcut} className={cls('item-shortcut')}>
-                  {item.shortcut}
-                </Text>
-              </OptionBalanceItem>
+              <ArkMenu.Item value={item.name} disabled={disabled} asChild>
+                <OptionBalanceItem
+                  className={cls('item')}
+                  label={item.name}
+                  reserveIconSpace={false}
+                  disabled={disabled}
+                  onClick={() => !disabled && item.callback(ContextMenu.context)}>
+                  <Text x-if={!!item.shortcut} className={cls('item-shortcut')}>
+                    {item.shortcut}
+                  </Text>
+                </OptionBalanceItem>
+              </ArkMenu.Item>
               <Divider
                 x-if={index === group.length - 1 && groupIndex !== menus.length - 1}
                 key={`divider-${index}`}
