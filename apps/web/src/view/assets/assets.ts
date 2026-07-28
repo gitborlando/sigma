@@ -1,6 +1,4 @@
 // 自动生成的静态资源路径常量
-import editorCursorResize from './editor/cursor/resize.svg'
-import editorCursorSelect from './editor/cursor/select.svg'
 import editorDesignAlignAlignCenter from './editor/design/align/align-center.svg'
 import editorDesignAlignAlignLeft from './editor/design/align/align-left.svg'
 import editorDesignAlignAlignRight from './editor/design/align/align-right.svg'
@@ -48,7 +46,6 @@ import favIconSigmaLogo from './fav-icon/sigma-logo.jpg'
 
 export const Assets = {
   editor: {
-    cursor: { resize: editorCursorResize, select: editorCursorSelect },
     design: {
       align: {
         alignCenter: editorDesignAlignAlignCenter,
