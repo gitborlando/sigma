@@ -3,7 +3,7 @@ import { useShallow } from 'src/view/hooks/schema/use-shallow'
 
 export function useSelectNodes() {
   const { handleSelect } = useEditorServices()
-  const selectIds = handleSelect.selectIdList
+  const selectIds = handleSelect.selectIds
   return useSchema(useShallow((state) => selectIds.map((id) => state[id] as S.Node)))
 }
 

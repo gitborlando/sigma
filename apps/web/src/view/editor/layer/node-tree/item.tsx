@@ -9,13 +9,13 @@ import { Input } from 'src/view/component/input'
 import { Lucide } from 'src/view/component/lucide'
 import { Icon } from 'src/view/component/svg-icon'
 import { useEditorServices } from 'src/view/hooks/editor'
-import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
+import { useSelection } from 'src/view/hooks/schema/use-y-client'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { LayerNodeTreePathIcon } from './path-icon'
 
 export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observer(
   ({ nodeInfo }) => {
-    const { command, layerNodeTree, stageSelect, selectController, nodeController } =
+    const { command, layerNodeTree, stageEvent, selectController, nodeController } =
       useEditorServices()
     const { id, indent, ancestorIds } = nodeInfo
     const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
@@ -24,9 +24,9 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
     const isParent = SchemaHelper.isNodeParent(node)
     const expanded = getNodeExpanded(id)
 
-    const selectIdMap = useSelectIdMap()
-    const selected = selectIdMap[id]
-    const subSelected = ancestorIds.some((ancestor) => selectIdMap[ancestor])
+    const selection = useSelection()
+    const selected = selection[id]
+    const subSelected = ancestorIds.some((ancestor) => selection[ancestor])
 
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
       useSortable({ id, disabled: false })
@@ -47,10 +47,10 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
       ContextMenu.openMenu(e)
     }
     const handleMouseEnter = () => {
-      stageSelect.hoverId = id
+      stageEvent.hoverId = id
     }
     const handleMouseLeave = () => {
-      stageSelect.hoverId = undefined
+      stageEvent.hoverId = undefined
     }
 
     return (
@@ -67,7 +67,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
         {...listeners}
         horizontal='auto auto 1fr auto'
         center
-        data-hover={stageSelect.hoverId === id}
+        data-hover={stageEvent.hoverId === id}
         data-selected={selected}
         data-sub-selected={subSelected}
         data-dragging={isDragging}

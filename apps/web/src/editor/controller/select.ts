@@ -35,7 +35,7 @@ export class SelectController extends Service {
   }
 
   private singleSelect(id: ID, trackMsg?: string) {
-    if (this.handleSelect.selectIdMap[id]) return
+    if (this.handleSelect.selection[id]) return
 
     if (hotkeys.shift) this.handleSelect.appendSelection({ [id]: true })
     else this.handleSelect.replaceSelection({ [id]: true })

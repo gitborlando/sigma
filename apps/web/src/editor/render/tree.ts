@@ -6,7 +6,7 @@ import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
-import { Elem } from './elem'
+import { Elem } from './elem/elem'
 
 export type RenderDirtyType = 'widget' | 'scene'
 

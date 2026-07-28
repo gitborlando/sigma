@@ -16,25 +16,25 @@ export const StageOutlineComp: FC<{}> = observer(({}) => {
 })
 
 export const StageOutlineCompInner: FC<{}> = observer(({}) => {
-  const { stageSelect, handleSelect, yAware } = useEditorServices()
-  const { hoverId } = stageSelect
+  const { stageEvent, handleSelect, yAware } = useEditorServices()
+  const { hoverId } = stageEvent
   const others = yAware.others
 
   const outlineInfoLMap = iife(() => {
     const map: Record<string, OutlineInfo> = {}
     for (const [_, client] of entries(others)) {
-      for (const id of Object.keys(client.selectIdMap || {})) {
+      for (const id of Object.keys(client.selection || {})) {
         map[id] = {
           hovered: hoverId === id,
-          selected: client.selectIdMap[id],
+          selected: client.selection[id],
           color: client.color,
         }
       }
     }
-    if (hoverId && !SchemaHelper.isFirstLayerFrame(hoverId)) {
+    if (hoverId && !SchemaHelper.isRootFrame(hoverId)) {
       map[hoverId] = { hovered: true }
     }
-    for (const id of handleSelect.selectIdList) {
+    for (const id of handleSelect.selectIds) {
       map[id] = { hovered: hoverId === id, selected: true }
     }
     return map

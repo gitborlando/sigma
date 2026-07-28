@@ -4,6 +4,7 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { ContextMenu } from 'src/global/context-menu'
 import { StageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
+import { StageFrameLabelComp } from 'src/view/editor/stage/frame-label'
 import { StageGridComp } from 'src/view/editor/stage/grid'
 import { StageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { StageOutlineComp } from 'src/view/editor/stage/outline'
@@ -13,7 +14,7 @@ import { EditorContext, useEditor, useEditorServices } from 'src/view/hooks/edit
 
 export const StageComp: FC<{}> = observer(({}) => {
   const editor = useEditor()
-  const { command, renderTree, stageSelect, stageViewport, stageTransformer } =
+  const { command, renderTree, stageEvent, stageViewport, stageTransformer } =
     useEditorServices()
 
   useLayoutEffect(() => {
@@ -25,19 +26,20 @@ export const StageComp: FC<{}> = observer(({}) => {
         <StageMarqueeComp />
         <StageCursorsComp />
         <StageRulerComp />
+        <StageFrameLabelComp />
       </EditorContext.Provider>,
       renderTree.widgetRoot,
     )
   }, [editor, renderTree])
 
   const handleContextMenu = (e: React.MouseEvent) => {
-    const { hoverId } = stageSelect
+    const { hoverId } = stageEvent
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
       command
     const baseMenus = [copyPasteGroup, undoRedoGroup]
 
     if (
-      (!hoverId || SchemaHelper.isFirstLayerFrame(hoverId)) &&
+      (!hoverId || SchemaHelper.isRootFrame(hoverId)) &&
       !stageTransformer.isPointIn(stageViewport.toSceneXY(XY.client(e)))
     ) {
       ContextMenu.context = {}

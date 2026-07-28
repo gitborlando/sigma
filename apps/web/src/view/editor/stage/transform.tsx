@@ -1,7 +1,7 @@
-import { isLeftMouse } from '@gitborlando/utils/browser'
+import { isLeftMouse, stopPropagation } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { Matrix, MRect } from 'src/editor/geometry'
-import { ElemMouseEvent } from 'src/editor/render/elem'
+import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { arrayLoopGet, TRBL } from 'src/editor/utils/misc'
 import { COLOR } from 'src/utils/color'
 import { useEditorServices } from 'src/view/hooks/editor'
@@ -33,7 +33,7 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
     stageEvent.disablePointEvent(true)
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()
-      stageTransformer.onMove(e.hostEvent)
+      stageTransformer.onMove(e)
     }
   }
 
@@ -87,7 +87,7 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
     stroke: schemaCreator.solidStroke(themeColor(), 1 / zoom),
   })
 
-  const mouseover = (e: ElemMouseEvent) => {
+  const hover = (e: ElemMouseEvent) => {
     if (!e.hovered) return stageCursor.setCursor('select')
 
     if (stageTransformer.isSelectOneLine) {
@@ -102,12 +102,12 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
     e.stopPropagation()
     stageCursor.lock()
     if (stageTransformer.isSelectOneLine) {
-      return stageTransformer.onMove(e.hostEvent)
+      return stageTransformer.onMove(e)
     }
     stageTransformer.onResize([type], { e: e.hostEvent, shiftKey: hotkeys.shift })
   }
 
-  return <elem node={line} events={{ hover: mouseover, mousedown }} />
+  return <elem node={line} events={{ hover, mousedown }} />
 })
 
 const VertexComp: FC<{
@@ -139,7 +139,7 @@ const VertexComp: FC<{
     ...vertexMRect.plain(),
   })
 
-  const mouseenter = (e: ElemMouseEvent) => {
+  const hover = stopPropagation((e: ElemMouseEvent) => {
     if (!e.hovered) return stageCursor.setCursor('select')
 
     if (stageTransformer.isSelectOneLine) {
@@ -148,7 +148,7 @@ const VertexComp: FC<{
 
     const extraRotation = type === 'topLeft' || type === 'bottomRight' ? 45 : -45
     stageCursor.setCursor('resize', stageTransformer.mrect.rotation + extraRotation)
-  }
+  })
 
   const mousedown = (e: ElemMouseEvent) => {
     e.stopPropagation()
@@ -159,16 +159,7 @@ const VertexComp: FC<{
     })
   }
 
-  return (
-    <elem
-      node={rect}
-      events={{
-        hover: mouseenter,
-        mousemove: (e) => e.stopPropagation(),
-        mousedown,
-      }}
-    />
-  )
+  return <elem node={rect} events={{ hover, mousedown }} />
 })
 
 const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
@@ -197,7 +188,7 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
     matrix: matrix,
   })
 
-  const mouseenter = (e: ElemMouseEvent) => {
+  const hover = (e: ElemMouseEvent) => {
     if (!e.hovered) return stageCursor.setCursor('select')
     stageCursor.setCursor('rotate')
   }
@@ -208,5 +199,5 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
     stageTransformer.onRotate()
   }
 
-  return <elem node={rotatePoint} events={{ hover: mouseenter, mousedown }} />
+  return <elem node={rotatePoint} events={{ hover, mousedown }} />
 })

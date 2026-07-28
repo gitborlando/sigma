@@ -67,6 +67,7 @@ export function createSchemaTraverse<ExtendCtx extends AnyObject = {}>(
         item,
         index,
         depth,
+        childIds,
         forwardCtx,
         parent: ctxParent,
         ancestors,

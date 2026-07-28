@@ -1,0 +1,3 @@
+line snap
+frame children collide and nodeTreePanel
+

@@ -335,8 +335,8 @@ function normalizeLocalState(yState: YState, state: MobxUndoState) {
 function normalizeSelectState(yState: YState, state: HandleSelectState) {
   return {
     ...state,
-    selectIdMap: Object.fromEntries(
-      Object.entries(state.selectIdMap || {}).filter(([id]) => yState.state[id]),
+    selection: Object.fromEntries(
+      Object.entries(state.selection || {}).filter(([id]) => yState.state[id]),
     ),
     selectPageId: getValidPageId(yState, state.selectPageId),
   }

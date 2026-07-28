@@ -49,7 +49,7 @@ export class YAware extends Service {
     this.effect(
       reaction(
         () => ({
-          selectIdMap: this.handleSelect.selectIdMap,
+          selection: this.handleSelect.selection,
           selectPageId: this.handleSelect.selectPageId,
         }),
         () => this.syncSelectState(),
@@ -78,7 +78,7 @@ export class YAware extends Service {
 
   private createClient(): S.Client {
     return {
-      selectIdMap: {},
+      selection: {},
       selectPageId: '',
       cursor: XY.$(0, 0),
       color: COLOR.random(),
@@ -90,7 +90,7 @@ export class YAware extends Service {
   }
 
   private syncSelectState = () => {
-    this.client.selectIdMap = this.handleSelect.selectIdMap
+    this.client.selection = this.handleSelect.selection
     this.client.selectPageId = this.handleSelect.selectPageId
   }
 
@@ -102,7 +102,7 @@ export class YAware extends Service {
 
     const clientKeys = Object.keys(this.client) as (keyof S.Client)[]
     const commonKeys = clientKeys.filter(
-      (key) => key !== 'selectIdMap' && key !== 'selectPageId',
+      (key) => key !== 'selection' && key !== 'selectPageId',
     )
     const disposer = new Disposer()
 
@@ -116,10 +116,7 @@ export class YAware extends Service {
     })
     disposer.register(
       this.handleSelect.afterSelect.hook(() => {
-        awareness.setLocalStateField(
-          'selectIdMap',
-          toJS(this.handleSelect.selectIdMap),
-        )
+        awareness.setLocalStateField('selection', toJS(this.handleSelect.selection))
         awareness.setLocalStateField(
           'selectPageId',
           toJS(this.handleSelect.selectPageId),

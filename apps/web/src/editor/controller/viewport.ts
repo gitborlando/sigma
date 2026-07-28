@@ -22,7 +22,7 @@ export class ViewportController extends Service {
 
   zoomToFitSelection() {
     this.zoomToFit(
-      this.handleSelect.selectIdList.map((id) => this.renderTree.findElem(id).aabb),
+      this.handleSelect.selectIds.map((id) => this.renderTree.findElem(id).aabb),
     )
   }
 

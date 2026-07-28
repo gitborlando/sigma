@@ -1,4 +1,4 @@
-import { getSet } from '@gitborlando/utils'
+import { getSet, match } from '@gitborlando/utils'
 import { useClean, withPrepare } from '@gitborlando/utils/react'
 import Color from 'color'
 import { SchemaCreator } from 'src/editor/schema/creator'
@@ -65,16 +65,13 @@ export const DesignPickerComp = observer(
               value={fillType}
               onChange={(value) => handleChangeFill(value as S.Fill['type'])}
             />
-            {fill.type === 'color' && (
-              <PickerSolidComp fill={fill as S.FillColor} index={fillIndex} />
-            )}
-            {fill.type === 'linearGradient' && (
-              <PickerLinearGradientComp
-                fill={fill as S.FillLinearGradient}
-                index={fillIndex}
-              />
-            )}
-            {fill.type === 'image' && <PickerImageComp fill={fill as S.FillImage} />}
+            {match(fill, 'type', {
+              color: (fill) => <PickerSolidComp fill={fill} index={fillIndex} />,
+              linearGradient: (fill) => (
+                <PickerLinearGradientComp fill={fill} index={fillIndex} />
+              ),
+              image: (fill) => <PickerImageComp fill={fill as S.FillImage} />,
+            })}
           </G>
         </DragPanel>
       )

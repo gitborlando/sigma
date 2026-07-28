@@ -21,7 +21,7 @@ namespace S {
     userId: string
     userName: string
     userAvatar: string
-    selectIdMap: Record<string, boolean>
+    selection: Record<string, boolean>
     selectPageId: string
     cursor: IXY
     color: string

@@ -1,13 +1,13 @@
 import { type IRect } from '@gitborlando/geo'
 import { Disposer } from '@gitborlando/toolkit/disposer'
-import { firstOne } from '@gitborlando/utils'
+import { clone, firstOne } from '@gitborlando/utils'
 import { isLeftMouse, listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { SelectController } from 'src/editor/controller/select'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
 import { HandleSelect, type Selection } from 'src/editor/handle/select'
-import { ElemMouseEvent } from 'src/editor/render/elem'
+import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { SchemaHelper } from 'src/editor/schema/helper'
@@ -23,7 +23,10 @@ import { Undo } from '../../core/undo'
 @reflection
 export class StageSelect extends Service {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
-  @observable hoverId?: string
+
+  @computed private get hoverId() {
+    return this.stageEvent.hoverId
+  }
 
   private lastSelection = <Selection>{}
   private isPointerDown = false
@@ -45,55 +48,45 @@ export class StageSelect extends Service {
 
   startInteract() {
     return Disposer.combine(
-      this.renderTree.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
+      this.renderTree.sceneRoot.addEvent('mousedown', this.onMouseDown),
       this.renderSurface.addEvent('dblclick', this.onDoubleClick),
-      this.renderSurface.addEvent('mousemove', this.onHover),
       listen('pointerdown', () => (this.isPointerDown = true)),
       listen('pointerup', () => (this.isPointerDown = false)),
     )
   }
 
-  private onHover(e: MouseEvent) {
-    if (this.isPointerDown) return
-    const hovered = firstOne(
-      this.stageEvent
-        .getElemsFromPoint(XY.client(e))
-        .filter((elem) => elem.type === 'sceneElem'),
-    )
-    this.hoverId = hovered?.id
-  }
-
   private onDoubleClick(e: Event) {
     if (!this.hoverId) return
 
-    const selectIdList = this.handleSelect.selectIdList
-    const hoverSelected = !!this.handleSelect.selectIdMap[this.hoverId]
+    const selectIds = this.handleSelect.selectIds
+    const hoverSelected = !!this.handleSelect.selection[this.hoverId]
     const hoverNode = this.yState.find<S.Node>(this.hoverId)
 
     if (hoverSelected) {
       if (hoverNode.type === 'text') {
         this.onEditText(hoverNode)
       }
-    } else if (selectIdList.length === 1) {
+    } else if (selectIds.length === 1) {
       const ancestor = SchemaHelper.findAncestor(
         this.hoverId,
-        (node) => node.parentId === firstOne(selectIdList),
+        (node) => node.parentId === firstOne(selectIds),
       )
       this.selectController.onStageSelect(ancestor.id)
     }
   }
 
-  private onSceneRootMouseDown(e: ElemMouseEvent) {
-    this.lastSelection = { ...this.handleSelect.selectIdMap }
+  private onMouseDown(e: ElemMouseEvent) {
+    this.lastSelection = clone(this.handleSelect.selection)
+
     const leftMouse = isLeftMouse(e.hostEvent)
     const isPointInTransformer = this.stageTransformer.isPointIn(e.xy)
 
     if (isPointInTransformer) {
-      if (leftMouse) this.stageTransformer.onMove(e.hostEvent)
+      if (leftMouse) this.stageTransformer.onMove(e)
       return
     }
 
-    if (!this.hoverId || SchemaHelper.isFirstLayerFrame(this.hoverId)) {
+    if (!this.hoverId || SchemaHelper.isRootFrame(this.hoverId)) {
       if (leftMouse) {
         this.selectController.clearSelect()
         this.onMarqueeSelect()
@@ -102,7 +95,7 @@ export class StageSelect extends Service {
     }
 
     this.selectController.onStageSelect(this.hoverId)
-    if (leftMouse) this.stageTransformer.onMove(e.hostEvent)
+    if (leftMouse) this.stageTransformer.onMove(e)
   }
 
   private onMarqueeSelect() {
@@ -122,7 +115,9 @@ export class StageSelect extends Service {
         const { item, depth, childIds, forwardCtx } = ctx
         const elem = this.renderTree.findElem(item.id)
 
-        if (!this.stageEvent.isElemVisible(elem)) return false
+        if (!this.stageEvent.isElemVisible(elem)) {
+          return false
+        }
 
         if (childIds?.length && depth === 0) {
           if (AABB.include(marqueeAABB, elem.aabb) === 1) {
@@ -165,7 +160,7 @@ export class StageSelect extends Service {
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
 
-        if (!equal(this.handleSelect.selectIdMap, this.lastSelection)) {
+        if (!equal(this.handleSelect.selection, this.lastSelection)) {
           this.undo.track('client', t('select nodes with marquee'))
         }
       })

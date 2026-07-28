@@ -5,13 +5,13 @@ import { makeObservable } from 'mobx'
 import { Undo } from 'src/editor/core/undo'
 import { Service } from 'src/global/service'
 
-export type HandleSelectState = { selectIdMap: Selection; selectPageId: ID | '' }
+export type HandleSelectState = { selection: Selection; selectPageId: ID | '' }
 
 export type Selection = Record<string, boolean>
 
 @reflection
 export class HandleSelect extends Service {
-  @observable.ref selectIdMap: Selection = {}
+  @observable.ref selection: Selection = {}
   @observable selectPageId: ID | '' = ''
   afterSelect = Signal.create<void>()
 
@@ -22,57 +22,57 @@ export class HandleSelect extends Service {
     autoBind(makeObservable(this))
 
     this.selectUndo = this.undo.mobxUndo.register('select', this, [
-      'selectIdMap',
+      'selection',
       'selectPageId',
     ])
   }
 
-  @computed get selectIdList() {
-    return Object.keys(this.selectIdMap)
+  @computed get selectIds() {
+    return Object.keys(this.selection)
   }
 
   select(id: ID) {
-    if (this.selectIdMap[id]) return
+    if (this.selection[id]) return
 
     this.selectUndo.set((state) => {
-      state.selectIdMap[id] = true
+      state.selection[id] = true
     })
   }
 
   unselect(id: ID) {
-    if (!this.selectIdMap[id]) return
+    if (!this.selection[id]) return
 
     this.selectUndo.set((state) => {
-      delete state.selectIdMap[id]
+      delete state.selection[id]
     })
   }
 
   clearSelect() {
-    if (this.selectIdList.length === 0) return
+    if (this.selectIds.length === 0) return
 
     this.selectUndo.set((state) => {
-      state.selectIdMap = {}
+      state.selection = {}
     })
   }
 
   replaceSelection(selection: Selection) {
-    if (equal(this.selectIdMap, selection)) return
+    if (equal(this.selection, selection)) return
 
     this.selectUndo.set((state) => {
-      state.selectIdMap = { ...selection }
+      state.selection = { ...selection }
     })
   }
 
   appendSelection(selection: Selection) {
-    this.replaceSelection({ ...this.selectIdMap, ...selection })
+    this.replaceSelection({ ...this.selection, ...selection })
   }
 
   selectPage(id: ID) {
-    if (this.selectPageId === id && this.selectIdList.length === 0) return
+    if (this.selectPageId === id && this.selectIds.length === 0) return
 
     this.selectUndo.set((state) => {
       state.selectPageId = id
-      state.selectIdMap = {}
+      state.selection = {}
     })
   }
 }

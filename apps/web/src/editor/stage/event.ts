@@ -1,10 +1,9 @@
 import type { IXY } from '@gitborlando/geo'
-import { Disposer } from '@gitborlando/toolkit/disposer'
-import type { NoopFunc } from '@gitborlando/utils'
+import { firstOne, type NoopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { untracked } from 'mobx'
 import { Matrix } from 'src/editor/geometry'
-import { Elem } from 'src/editor/render/elem'
+import { Elem } from 'src/editor/render/elem/elem'
 import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
@@ -14,6 +13,8 @@ import { Service } from 'src/global/service'
 
 @reflection
 export class StageEvent extends Service {
+  @observable hoverId?: string
+
   private eventXY = XY.$(0, 0)
   private elemsFromPoint: Elem[] = []
   private isPointerEventNone = false
@@ -25,11 +26,12 @@ export class StageEvent extends Service {
     private readonly renderPipeline: RenderPipeline,
   ) {
     super()
-    autoBind(this)
+    autoBind(makeObservable(this))
   }
 
   onCanvasInited() {
-    this.effect(this.onPointerEvents())
+    this.effect(this.renderSurface.addEvent('mousedown', this.onMouseEvent))
+    this.effect(this.renderSurface.addEvent('mousemove', this.onMouseEvent))
   }
 
   getElemsFromPoint(e?: IXY) {
@@ -37,11 +39,15 @@ export class StageEvent extends Service {
 
     this.prepareHitTest(e)
 
-    this.traverseLayerList(({ elem, hitList, xy }) => {
+    this.traverseRootElems(({ elem, hitList, xy }) => {
       if (elem.hitTest(xy!)) hitList?.push(elem)
     })
 
     return this.elemsFromPoint
+  }
+
+  enablePointEvent() {
+    this.isPointerEventNone = false
   }
 
   disablePointEvent(setbackOnPointerUp = true) {
@@ -52,10 +58,6 @@ export class StageEvent extends Service {
     }
 
     return this.enablePointEvent
-  }
-
-  enablePointEvent() {
-    this.isPointerEventNone = false
   }
 
   isElemVisible(elem: Elem) {
@@ -69,85 +71,73 @@ export class StageEvent extends Service {
     this.renderPipeline.updateRenderPriorityXY(this.eventXY)
   }
 
-  private traverseLayerList(
-    func: (props: {
+  private traverseRootElems(
+    walk: (props: {
       elem: Elem
-      capture: boolean
       stopped: boolean
       stopPropagation: NoopFunc
       hitList?: Elem[]
       xy?: IXY
     }) => any,
-    noBubble?: boolean,
   ) {
     let stopped = false
     const stopPropagation = () => (stopped = true)
 
-    const traverse = (props: {
-      layerIndex: number
-      elem: Elem
-      hitList?: Elem[]
-      xy?: IXY
-    }) => {
-      const { layerIndex, elem, hitList } = props
+    const traverse = (props: { elem: Elem; hitList?: Elem[]; xy?: IXY }) => {
+      const { elem, hitList } = props
       let xy = props.xy
       if (!this.isElemVisible(elem)) return
 
       if (xy) {
         if (elem.node?.matrix) xy = Matrix.of(elem.renderMatrix).invertXY(xy)
 
-        func({ elem, capture: true, stopped, stopPropagation, hitList, xy })
-
         const subHitList: Elem[] = []
         reverseFor(elem.children, (child) =>
-          traverse({ layerIndex, elem: child, hitList: subHitList, xy }),
+          traverse({ elem: child, hitList: subHitList, xy }),
         )
         this.elemsFromPoint.push(...subHitList)
-
-        if (!noBubble) {
-          func({ elem, capture: false, stopped, stopPropagation, hitList, xy })
-        }
+        walk({ elem, stopped, stopPropagation, hitList, xy })
       } else {
-        func({ elem, capture: true, stopped, stopPropagation })
-
-        reverseFor(elem.children, (child) => traverse({ layerIndex, elem: child }))
-
-        if (!noBubble) {
-          func({ elem, capture: false, stopped, stopPropagation })
-        }
+        reverseFor(elem.children, (child) => traverse({ elem: child }))
+        walk({ elem, stopped, stopPropagation })
       }
     }
 
-    reverseFor(this.renderTree.rootElems, (elem, layerIndex) =>
-      traverse({ layerIndex, elem, xy: this.eventXY, hitList: [] }),
+    traverse({ elem: this.renderTree.widgetRoot, xy: this.eventXY, hitList: [] })
+    traverse({ elem: this.renderTree.sceneRoot, xy: this.eventXY, hitList: [] })
+
+    const hover = firstOne(
+      this.elemsFromPoint.filter((elem) => elem.type === 'sceneElem'),
     )
+    this.hoverId = this.hoverId !== hover?.id ? hover?.id : this.hoverId
   }
 
-  private onPointerEvents() {
-    const onMouseEvent = (e: MouseEvent) => {
-      if (this.isPointerEventNone || this.renderPipeline.isSliceRendering) return
+  private onMouseEvent(e: MouseEvent) {
+    if (this.isPointerEventNone || this.renderPipeline.isSliceRendering) return
 
-      if (e.type === 'mousedown' && document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur()
-      }
-
-      const point = XY.client(e)
-      this.prepareHitTest(point)
-
-      this.traverseLayerList(
-        ({ elem, capture, stopped, stopPropagation, hitList, xy }) => {
-          const hit = elem.hitTest(xy!)
-          if (hit) hitList?.push(elem)
-          if (!stopped) {
-            elem.eventHandle.triggerMouseEvent(e, xy!, hit, capture, stopPropagation)
-          }
-        },
-      )
+    if (e.type === 'mousedown' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
     }
 
-    return Disposer.combine(
-      this.renderSurface.addEvent('mousedown', onMouseEvent, { capture: true }),
-      this.renderSurface.addEvent('mousemove', onMouseEvent, { capture: true }),
-    )
+    const point = XY.client(e)
+    this.prepareHitTest(point)
+
+    this.traverseRootElems(({ elem, stopped, stopPropagation, hitList, xy }) => {
+      const hit = elem.hitTest(xy!)
+
+      if (hit) {
+        hitList?.push(elem)
+      }
+
+      if (!stopped) {
+        elem.eventHandle.triggerEvent({
+          e,
+          xy: xy!,
+          hit,
+          stopPropagation,
+          ancestors: hitList || [],
+        })
+      }
+    })
   }
 }

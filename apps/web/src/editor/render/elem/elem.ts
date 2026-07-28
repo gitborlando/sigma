@@ -1,6 +1,10 @@
 import { AABB, type IXY } from '@gitborlando/geo'
-import { getSet, type NoopFunc } from '@gitborlando/utils'
 import { type IMatrix, Matrix, MRect } from 'src/editor/geometry'
+import {
+  ElemEventFunc,
+  ElemEventHandler,
+  ElemEventType,
+} from 'src/editor/render/elem/event'
 import { memorized } from 'src/utils/export'
 
 declare module 'react' {
@@ -14,9 +18,11 @@ declare module 'react' {
 export type ElemProps = {
   node: S.Node
   hidden?: boolean
-  events?: Partial<Record<ElemEventType, ElemEventFunc>>
   children?: ReactNode[]
+  events?: Partial<ElemEventsMap>
 }
+
+export type ElemEventsMap = Record<ElemEventType, ElemEventFunc>
 
 export type ElemContext = { collectDirty: (elem: Elem) => void }
 
@@ -145,7 +151,7 @@ export class Elem {
     this.dirty()
   }
 
-  eventHandle = new ElemEventHandler(this)
+  eventHandle = new ElemEventHandler()
 
   get hitTest() {
     return this.eventHandle.hitTest
@@ -154,134 +160,17 @@ export class Elem {
     this.eventHandle.hitTest = hitTest
   }
 
-  addEvent(
-    type: ElemEventType,
-    func: ElemEventFunc,
-    option?: { capture?: boolean },
-  ) {
-    return this.eventHandle.addEvent(type, func, option)
+  addEvent(type: ElemEventType, func: ElemEventFunc) {
+    return this.eventHandle.addEvent(type, func)
   }
 
-  removeEvent(
-    type: ElemEventType,
-    func: ElemEventFunc,
-    option?: { capture?: boolean },
-  ) {
-    return this.eventHandle.removeEvent(type, func, option)
+  removeEvent(type: ElemEventType, func: ElemEventFunc) {
+    return this.eventHandle.removeEvent(type, func)
   }
 
   destroy() {
     this.dirty()
     this.eventHandle.dispose()
     this.parent?.removeChild(this)
-  }
-}
-
-export type ElemEventType = 'mousedown' | 'mousemove' | 'hover'
-
-type ElemEventBase = { hostEvent: Event; stopPropagation: () => void }
-
-export type ElemEvent = ElemMouseEvent
-
-export type ElemMouseEvent = ElemEventBase & {
-  xy: IXY
-  hovered: boolean
-  hostEvent: MouseEvent
-}
-
-export type ElemEventFunc = (e: ElemMouseEvent) => void
-
-class ElemEventHandler {
-  hitTest = (xy: IXY) => false
-  private lastHit = [false, false]
-
-  private mousedown: ElemEventFunc[][] = [[], []]
-  private mousemove: ElemEventFunc[][] = [[], []]
-  private hover: ElemEventFunc[][] = [[], []]
-  private eventCount = 0
-
-  constructor(private elem: Elem) {}
-
-  private hitTestCache = new Map<string, (xy: IXY) => boolean>()
-
-  cacheHitTest = (createHitTest: () => (xy: IXY) => boolean, deps: any[]) => {
-    this.hitTest = getSet(this.hitTestCache, 'hitTest', createHitTest, deps)
-  }
-
-  addEvent = (
-    type: ElemEventType,
-    func: ElemEventFunc,
-    option?: { capture?: boolean },
-  ) => {
-    const capture = option?.capture ? 0 : 1
-
-    this[type][capture].push(func)
-    this.eventCount++
-
-    return () => {
-      const index = this[type][capture].indexOf(func)
-      if (index === -1) return
-
-      this[type][capture].splice(index, 1)
-      this.eventCount--
-    }
-  }
-
-  removeEvent = (
-    type: ElemEventType,
-    func: ElemEventFunc,
-    option?: { capture?: boolean },
-  ) => {
-    const capture = option?.capture ? 0 : 1
-    const index = this[type][capture].indexOf(func)
-    if (index === -1) return
-
-    this[type][capture].splice(index, 1)
-    this.eventCount--
-  }
-
-  dispose() {
-    this.mousedown = [[], []]
-    this.mousemove = [[], []]
-    this.hover = [[], []]
-    this.eventCount = 0
-    this.hitTestCache.clear()
-  }
-
-  triggerMouseEvent = (
-    e: MouseEvent,
-    xy: IXY,
-    hit: boolean,
-    isCapture: boolean,
-    stopPropagation: NoopFunc,
-  ) => {
-    if (this.eventCount === 0) return
-
-    const capture = isCapture ? 0 : 1
-    const mouseEvent = { xy, stopPropagation, hostEvent: e as MouseEvent }
-
-    switch (e.type) {
-      case 'mousedown':
-        if (hit) {
-          this.mousedown[capture].forEach((func) =>
-            func({ ...mouseEvent, hovered: true }),
-          )
-        }
-        break
-
-      case 'mousemove':
-        if (hit) {
-          this.mousemove[capture].forEach((func) =>
-            func({ ...mouseEvent, hovered: true }),
-          )
-        }
-        if (hit !== this.lastHit[capture]) {
-          this.lastHit[capture] = hit
-          this.hover[capture].forEach((func) =>
-            func({ ...mouseEvent, hovered: hit }),
-          )
-        }
-        break
-    }
   }
 }

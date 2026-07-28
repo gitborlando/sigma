@@ -32,7 +32,7 @@ export class NodeController extends Service {
   }
 
   @computed get selectNodes() {
-    return this.handleSelect.selectIdList.map(
+    return this.handleSelect.selectIds.map(
       (id) => this.yState.observedState[id] as S.Node,
     )
   }
@@ -61,7 +61,7 @@ export class NodeController extends Service {
           this.handleNode.deleteChild(parent, item)
         },
       })
-      traverse(this.handleSelect.selectIdList)
+      traverse(this.handleSelect.selectIds)
       this.handleSelect.clearSelect()
     })
     this.undo.track('all', t('delete nodes'))
@@ -70,7 +70,7 @@ export class NodeController extends Service {
   copiedIds = <ID[]>[]
 
   copySelectedNodes() {
-    this.copiedIds = [...this.handleSelect.selectIdList]
+    this.copiedIds = [...this.handleSelect.selectIds]
   }
 
   pasteNodes() {
@@ -153,7 +153,7 @@ export class NodeController extends Service {
   }
 
   private getDatumXY() {
-    const selectIds = this.handleSelect.selectIdList
+    const selectIds = this.handleSelect.selectIds
     let datumId = ''
 
     if (selectIds.length === 1) {

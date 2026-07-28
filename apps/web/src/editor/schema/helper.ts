@@ -44,7 +44,7 @@ export class SchemaHelper {
     return 'childIds' in node
   }
 
-  static isFirstLayerFrame(id: ID) {
+  static isRootFrame(id: ID) {
     const node = this.find(id)
     return node.type === 'frame' && this.isPageById(node.parentId)
   }

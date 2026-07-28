@@ -29,7 +29,7 @@ export class ElemDrawer extends Service {
     autoBind(this)
   }
 
-  private textBreaker?: TextBreaker
+  textBreaker?: TextBreaker
 
   setTextBreaker(textBreaker: TextBreaker) {
     this.textBreaker = textBreaker

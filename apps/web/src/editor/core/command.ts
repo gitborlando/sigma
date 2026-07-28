@@ -35,7 +35,7 @@ export class EditorCommand extends Service {
       {
         name: t('copy'),
         shortcut: 'ctrl+c',
-        when: () => !!this.handleSelect.selectIdList.length,
+        when: () => !!this.handleSelect.selectIds.length,
         callback: () => this.nodeController.copySelectedNodes(),
       },
       {
@@ -108,7 +108,7 @@ export class EditorCommand extends Service {
         {
           name: t('print schema'),
           callback: () => {
-            this.handleSelect.selectIdList.forEach((id) =>
+            this.handleSelect.selectIds.forEach((id) =>
               console.log(this.yState.find<S.SchemaItem>(id)),
             )
           },
@@ -116,7 +116,7 @@ export class EditorCommand extends Service {
         {
           name: t('print element'),
           callback: () => {
-            this.handleSelect.selectIdList.forEach((id) =>
+            this.handleSelect.selectIds.forEach((id) =>
               console.log(this.renderTree.findElem(id)),
             )
           },

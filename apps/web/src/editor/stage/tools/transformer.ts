@@ -6,6 +6,7 @@ import { Setting } from 'src/editor/core/setting'
 import { Undo } from 'src/editor/core/undo'
 import { HitTest, IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { HandleNode } from 'src/editor/handle/node'
+import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -130,7 +131,7 @@ export class StageTransformer extends Service {
     this.onEndTransform()
   }
 
-  onMove(e: MouseEvent) {
+  onMove(e: ElemMouseEvent) {
     const { startMRect, startMatrix } = this.onStartTransform()
     const startAABB = startMRect.aabb
 
@@ -157,7 +158,7 @@ export class StageTransformer extends Service {
           this.undo.track('state', t('move nodes'))
         }
       })
-      .start(e)
+      .start(e.hostEvent)
   }
 
   onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {

@@ -1,28 +1,7 @@
-import { objKeys } from '@gitborlando/utils'
+import { match, objKeys } from '@gitborlando/utils'
 import { ReactNode } from 'react'
 import Reconciler, { HostConfig } from 'react-reconciler'
-import { Elem, ElemProps } from 'src/editor/render/elem'
-
-function applyProps(elem: Elem, props: ElemProps, oldProps?: ElemProps) {
-  const oldEvents = oldProps?.events || {}
-  for (const key of objKeys(oldEvents)) {
-    elem.removeEvent(key, oldEvents[key]!)
-  }
-
-  for (const key of objKeys(props)) {
-    if (key === 'events') {
-      const events = props.events || {}
-      for (const eventType of objKeys(events)) {
-        elem.addEvent(eventType, events[eventType]!)
-      }
-    } else if (key === 'node') {
-      elem.node = props.node
-      elem.dirty()
-    } else if (key !== 'children') {
-      elem[key] = props[key] as any
-    }
-  }
-}
+import { Elem, ElemEventsMap, ElemProps } from 'src/editor/render/elem/elem'
 
 const hostConfig: HostConfig<
   'elem',
@@ -155,4 +134,32 @@ export function renderElem(reactNode: ReactNode, elem: Elem) {
   )
   reconciler.updateContainer(reactNode, root, null, () => {})
   return () => void reconciler.updateContainer(null, root, null, () => {})
+}
+
+function applyProps(elem: Elem, props: ElemProps, oldProps?: ElemProps) {
+  handleEvents('remove', elem, oldProps?.events || {})
+
+  for (const key of objKeys(props)) {
+    match(key, {
+      node: () => {
+        elem.node = props.node
+        elem.dirty()
+      },
+      events: (key) => handleEvents('add', elem, props[key] || {}),
+      children: () => {},
+      _: () => ((elem as any)[key] = props[key]),
+    })
+  }
+}
+
+function handleEvents(
+  action: 'add' | 'remove',
+  elem: Elem,
+  events: Partial<ElemEventsMap>,
+) {
+  for (const key of objKeys(events)) {
+    action === 'add'
+      ? elem.addEvent(key, events[key]!)
+      : elem.removeEvent(key, events[key]!)
+  }
 }

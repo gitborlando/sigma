@@ -53,9 +53,7 @@ export class StageCreate extends Service {
   }
 
   startInteract() {
-    const disposer = this.renderTree.sceneRoot.addEvent('mousedown', this.create, {
-      capture: true,
-    })
+    const disposer = this.renderTree.sceneRoot.addEvent('mousedown', this.create)
     this.stageCursor.setCursor('add').lock()
 
     return () => {

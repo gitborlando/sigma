@@ -6,7 +6,7 @@ import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
 import { setupSchemaTraverse } from 'src/editor/schema/traverse'
-import { mock_transform_v } from 'src/editor/utils/mock/transfrom_v'
+import { mock_frame_name } from 'src/editor/utils/mock/frame-name'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { YSync } from 'src/editor/y-adapter/y-sync'
@@ -56,7 +56,7 @@ export class SchemaController extends Service {
 
   private async fetchSchema(fileId: string) {
     if (fileId === 'mock') {
-      const schema = mock_transform_v(this.schemaCreator)
+      const schema = mock_frame_name(this.schemaCreator)
       if (schema) return schema
       throw new Error('Failed to initialize mock schema')
     }

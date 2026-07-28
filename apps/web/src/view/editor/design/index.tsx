@@ -10,8 +10,8 @@ import { DesignGeomComp } from './geom'
 export const DesignPanelComp = observer(
   withPrepare(
     () => {
-      const selectIdList = useSelectIds()
-      return selectIdList.length ? { selectIdList } : null
+      const selectIds = useSelectIds()
+      return selectIds.length ? { selectIds } : null
     },
     () => (
       <Scrollbars>
