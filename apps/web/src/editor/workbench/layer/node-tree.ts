@@ -2,7 +2,7 @@ import { makeObservable } from 'mobx'
 import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YState, YStatePatch } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
 export type LayerNodeTreeInfo = { id: string; indent: number; ancestorIds: string[] }
@@ -30,7 +30,6 @@ export class LayerNodeTree extends Service {
   ) {
     super()
     autoBind(makeObservable(this))
-    this.effect(this.onNodeHierarchyChange())
   }
 
   getNodeExpanded(id: string) {
@@ -52,6 +51,17 @@ export class LayerNodeTree extends Service {
     traverse(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId))
   }
 
+  onYStatePatch(patches: YStatePatch[]) {
+    patches.forEach((patch) => {
+      const [id, prop] = patch.keys as [string, string]
+      if (prop !== 'childIds') return
+      if (SchemaHelper.isPageById(id)) this.nodeInfoVersion++
+      if (this.expandedNodeMap.get(id)) this.nodeInfoVersion++
+      if (SchemaHelper.isById(id, 'frame') && patch.type === 'add')
+        this.expandedNodeMap.set(id, true)
+    })
+  }
+
   private getNodeInfoList() {
     const nodeInfoList: LayerNodeTreeInfo[] = []
     const traverse = createSchemaTraverse({
@@ -67,16 +77,5 @@ export class LayerNodeTree extends Service {
     })
     traverse(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId))
     return nodeInfoList
-  }
-
-  private onNodeHierarchyChange() {
-    return this.yState.listen((patches) => {
-      patches.forEach((patch) => {
-        const [id, prop] = patch.keys as [string, string]
-        if (prop !== 'childIds') return
-        if (SchemaHelper.isPageById(id)) this.nodeInfoVersion++
-        if (this.expandedNodeMap.get(id)) this.nodeInfoVersion++
-      })
-    })
   }
 }

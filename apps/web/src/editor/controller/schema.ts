@@ -7,6 +7,7 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { migrationSchema } from 'src/editor/schema/migration'
 import { setupSchemaTraverse } from 'src/editor/schema/traverse'
 import { mock_frame_name } from 'src/editor/utils/mock/frame-name'
+import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { YSync } from 'src/editor/y-adapter/y-sync'
@@ -24,6 +25,7 @@ export class SchemaController extends Service {
     private readonly yAware: YAware,
     private readonly undo: Undo,
     private readonly handleSelect: HandleSelect,
+    private readonly layerNodeTree: LayerNodeTree,
   ) {
     super()
     autoBind(this)
@@ -37,6 +39,8 @@ export class SchemaController extends Service {
     if (fileId === this.sessionFileId) return
 
     this.yState.setup(schema)
+    this.yState.register(this.layerNodeTree.onYStatePatch)
+
     // 开发中暂时不启用y-sync
     // this.ySync.init(fileId, this.yState.doc)
     // this.yAware.init({

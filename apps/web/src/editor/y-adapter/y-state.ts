@@ -8,7 +8,7 @@ import * as Y from 'yjs'
 
 export type YStatePatch = YPlainPatch
 
-type YStateListener = (patches: YStatePatch[]) => void
+type YStateDownstream = (patches: YStatePatch[]) => void
 
 @reflection
 export class YState extends Service {
@@ -18,7 +18,7 @@ export class YState extends Service {
   flushPatch$ = Signal.create<YStatePatch>()
 
   private patches: YStatePatch[] = []
-  private listeners = new Set<YStateListener>()
+  private downstream = new Set<YStateDownstream>()
   private stateAtom = createAtom('YState.observedState')
 
   constructor() {
@@ -59,9 +59,9 @@ export class YState extends Service {
     return this.state[id] as T
   }
 
-  listen(listener: YStateListener) {
-    this.listeners.add(listener)
-    return () => void this.listeners.delete(listener)
+  register(downstream: YStateDownstream) {
+    this.downstream.add(downstream)
+    return () => void this.downstream.delete(downstream)
   }
 
   setup(schema: S.Schema) {
@@ -70,7 +70,7 @@ export class YState extends Service {
     this.effect(() => this.doc.destroy())
     this.plain = autoBind(new YPlain(this.doc.getMap<unknown>('schema'), schema))
     this.effect(this.plain.observe())
-    this.effect(this.plain.subscribe(this.handlePlainChange))
+    this.effect(this.plain.subscribe(this.distribute))
   }
 
   getPatches() {
@@ -79,13 +79,12 @@ export class YState extends Service {
     return patches
   }
 
-  private handlePlainChange = ({ patches }: YPlainChange<S.Schema>) => {
+  private distribute = ({ patches }: YPlainChange<S.Schema>) => {
     if (!patches.length) return
     isDEV && (ThisAsAny.schema = this.state)
 
     this.patches.push(...clone(patches))
-    this.listeners.forEach((listener) => listener(patches))
-
+    this.downstream.forEach((handle) => handle(patches))
     patches.forEach((patch) => this.flushPatch$.dispatch(patch))
 
     this.stateAtom.reportChanged()

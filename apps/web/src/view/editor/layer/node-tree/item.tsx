@@ -57,8 +57,8 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
       <G
         ref={setNodeRef}
         style={{
-          transform: CSS.Transform.toString(transform),
           transition,
+          transform: CSS.Transform.toString(transform),
           opacity: isDragging ? 0.5 : 1,
           paddingLeft: 8 + indent * 16,
         }}
@@ -78,12 +78,13 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}>
         <Lucide
+          x-if={isParent}
           size={14}
           icon={ChevronRight}
-          x-if={isParent}
           onClick={handleToggleExpand}
-          onMouseDown={(e) => e.stopPropagation()}
+          onMouseDown={stopPropagation()}
           style={{
+            visibility: isParent && node.childIds.length ? 'visible' : 'hidden',
             transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s',
           }}

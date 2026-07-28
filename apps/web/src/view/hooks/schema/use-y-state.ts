@@ -15,5 +15,5 @@ export function useSelectPage() {
 
 export function useSchema<T>(selector: (state: S.Schema) => T): T {
   const { yState } = useEditorServices()
-  return useSyncExternalStore(yState.listen, () => selector(yState.state))
+  return useSyncExternalStore(yState.register, () => selector(yState.state))
 }
