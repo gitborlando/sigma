@@ -10,7 +10,7 @@ import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { snapGridRound, TRBL } from 'src/editor/utils/misc'
+import { snapGridRound, snapGridRoundXY, TRBL } from 'src/editor/utils/misc'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
@@ -267,7 +267,10 @@ export class StageTransformer extends Service {
       .onMove(({ shift }) => {
         this.action = 'resize'
 
-        const movedPoint = XY.of(movingPoint).plus(shift).$()
+        const movedPoint = snapGridRoundXY(
+          XY.of(movingPoint).plus(shift),
+          this.setting.snapToGrid,
+        )
         const lineStart = isMoveStartHandler ? movedPoint : fixedPoint
         const lineEnd = isMoveStartHandler ? fixedPoint : movedPoint
         const width = XY.distance(lineStart, lineEnd)

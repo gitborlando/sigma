@@ -143,7 +143,7 @@ const VertexComp: FC<{
     if (!e.hovered) return stageCursor.setCursor('select')
 
     if (stageTransformer.isSelectOneLine) {
-      return stageCursor.setCursor('resize', mrect.rotation)
+      return stageCursor.setCursor('move', mrect.rotation)
     }
 
     const extraRotation = type === 'topLeft' || type === 'bottomRight' ? 45 : -45
