@@ -4,21 +4,21 @@ import { clone, firstOne } from '@gitborlando/utils'
 import { isLeftMouse, listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
-import { SelectController } from 'src/editor/controller/select'
+import { SelectAction } from 'src/editor/action/select'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
-import { HandleSelect, type Selection } from 'src/editor/handle/select'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { Select, type Selection } from 'src/editor/select'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
-import { Undo } from '../../core/undo'
+import { Undo } from '../../action/undo'
 
 @reflection
 export class StageSelect extends Service {
@@ -36,8 +36,8 @@ export class StageSelect extends Service {
     private readonly renderSurface: RenderSurface,
     private readonly stageEvent: StageEvent,
     private readonly stageTransformer: StageTransformer,
-    private readonly handleSelect: HandleSelect,
-    private readonly selectController: SelectController,
+    private readonly select: Select,
+    private readonly selectAction: SelectAction,
     private readonly undo: Undo,
     private readonly yState: YState,
     private readonly stageViewport: StageViewport,
@@ -58,8 +58,8 @@ export class StageSelect extends Service {
   private onDoubleClick(e: Event) {
     if (!this.hoverId) return
 
-    const selectIds = this.handleSelect.selectIds
-    const hoverSelected = !!this.handleSelect.selection[this.hoverId]
+    const selectIds = this.select.selectIds
+    const hoverSelected = !!this.select.selection[this.hoverId]
     const hoverNode = this.yState.find<S.Node>(this.hoverId)
 
     if (hoverSelected) {
@@ -71,12 +71,12 @@ export class StageSelect extends Service {
         this.hoverId,
         (node) => node.parentId === firstOne(selectIds),
       )
-      this.selectController.onStageSelect(ancestor.id)
+      this.selectAction.onStageSelect(ancestor.id)
     }
   }
 
   private onMouseDown(e: ElemMouseEvent) {
-    this.lastSelection = clone(this.handleSelect.selection)
+    this.lastSelection = clone(this.select.selection)
 
     const leftMouse = isLeftMouse(e.hostEvent)
     const isPointInTransformer = this.stageTransformer.isPointIn(e.xy)
@@ -88,13 +88,13 @@ export class StageSelect extends Service {
 
     if (!this.hoverId || SchemaHelper.isRootFrame(this.hoverId)) {
       if (leftMouse) {
-        this.selectController.clearSelect()
+        this.selectAction.clearSelect()
         this.onMarqueeSelect()
       }
       return
     }
 
-    this.selectController.onStageSelect(this.hoverId)
+    this.selectAction.onStageSelect(this.hoverId)
     if (leftMouse) this.stageTransformer.onMove(e)
   }
 
@@ -150,8 +150,8 @@ export class StageSelect extends Service {
         this.marquee = marquee
         AABB.updateFromRect(marqueeAABB, marquee)
         marqueeSelection = {}
-        traverser(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId))
-        this.selectController.replaceSelection(
+        traverser(SchemaHelper.getPageChildIds(this.select.selectPageId))
+        this.selectAction.replaceSelection(
           hotkeys.shift
             ? { ...this.lastSelection, ...marqueeSelection }
             : marqueeSelection,
@@ -160,7 +160,7 @@ export class StageSelect extends Service {
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
 
-        if (!equal(this.handleSelect.selection, this.lastSelection)) {
+        if (!equal(this.select.selection, this.lastSelection)) {
           this.undo.track('client', t('select nodes with marquee'))
         }
       })

@@ -1,12 +1,12 @@
 import hotkeys from 'hotkeys-js'
-import { Undo } from 'src/editor/core/undo'
-import { HandleSelect, type Selection } from 'src/editor/handle/select'
+import { Undo } from 'src/editor/action/undo'
+import { Select, type Selection } from 'src/editor/select'
 import { Service } from 'src/global/service'
 
 @reflection
-export class SelectController extends Service {
+export class SelectAction extends Service {
   constructor(
-    private readonly handleSelect: HandleSelect,
+    private readonly select: Select,
     private readonly undo: Undo,
   ) {
     super()
@@ -15,7 +15,7 @@ export class SelectController extends Service {
 
   clearSelect() {
     if (hotkeys.shift) return
-    this.handleSelect.clearSelect()
+    this.select.clearSelect()
   }
 
   onStageSelect(id: ID) {
@@ -31,14 +31,14 @@ export class SelectController extends Service {
   }
 
   replaceSelection(selection: Selection) {
-    this.handleSelect.replaceSelection(selection)
+    this.select.replaceSelection(selection)
   }
 
   private singleSelect(id: ID, trackMsg?: string) {
-    if (this.handleSelect.selection[id]) return
+    if (this.select.selection[id]) return
 
-    if (hotkeys.shift) this.handleSelect.appendSelection({ [id]: true })
-    else this.handleSelect.replaceSelection({ [id]: true })
+    if (hotkeys.shift) this.select.appendSelection({ [id]: true })
+    else this.select.replaceSelection({ [id]: true })
 
     if (trackMsg) this.undo.track('client', trackMsg)
   }

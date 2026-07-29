@@ -1,4 +1,5 @@
-import { expandOneStep, snapSceneXYToHalfPixel } from 'src/editor/utils/misc'
+import { Fragment } from 'react'
+import { snapSceneXYToHalfPixel } from 'src/editor/utils'
 import { rgba } from 'src/utils/color'
 import { useEditorServices } from 'src/view/hooks/editor'
 
@@ -7,16 +8,25 @@ export const StageGridComp: FC<{}> = observer(({}) => {
   if (stageViewport.zoom < 10.96) return null
 
   return (
-    <>
+    <Fragment>
       <Lines type='horizontal' />
       <Lines type='vertical' />
-    </>
+    </Fragment>
   )
 })
 
 export const Lines: FC<{ type: 'horizontal' | 'vertical' }> = observer(
   ({ type }) => {
     const { stageViewport } = useEditorServices()
+
+    const expandOneStep = (
+      number: number,
+      step: number,
+      direction: 'left' | 'right',
+    ) => {
+      const n = (number / step) | 0
+      return direction === 'left' ? (n - 1) * step : (n + 1) * step
+    }
 
     const getTicks = () => {
       const ticks: { x: number; y: number; length: number }[] = []

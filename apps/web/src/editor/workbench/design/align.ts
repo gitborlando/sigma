@@ -1,10 +1,9 @@
 import { AABB } from '@gitborlando/geo'
-import { NodeController } from 'src/editor/controller/node'
+import { NodeAction } from 'src/editor/action/node'
 import { MRect } from 'src/editor/geometry'
-import { HandleNode } from 'src/editor/handle/node'
 import { RenderTree } from 'src/editor/render/tree'
 import { Service } from 'src/global/service'
-import { Undo } from '../../core/undo'
+import { Undo } from '../../action/undo'
 import { SchemaHelper } from '../../schema/helper'
 import { YState } from '../../y-adapter/y-state'
 
@@ -31,8 +30,7 @@ export class DesignAlign extends Service {
     private readonly yState: YState,
     private readonly undo: Undo,
     private readonly renderTree: RenderTree,
-    private readonly nodeController: NodeController,
-    private readonly handleNode: HandleNode,
+    private readonly nodeAction: NodeAction,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -51,7 +49,7 @@ export class DesignAlign extends Service {
   }
 
   private setup() {
-    const selectedNodes = this.nodeController.selectNodes
+    const selectedNodes = this.nodeAction.selectNodes
 
     if (selectedNodes.length === 0) {
       this.canAlign = false
@@ -122,7 +120,7 @@ export class DesignAlign extends Service {
   private setAlignState(node: S.Node, shift: IXY) {
     if (shift.x === 0 && shift.y === 0) return
 
-    const mrect = this.handleNode.getMRect(node)
+    const mrect = SchemaHelper.getMRect(node)
     const newMRect = MRect.of(mrect).shift(shift)
     this.yState.set<S.Node>([node.id, 'matrix'], newMRect.matrix)
     this.aligned = true

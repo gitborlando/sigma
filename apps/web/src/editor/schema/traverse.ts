@@ -22,8 +22,8 @@ export type SchemaTraverseContext<ExtendCtx extends AnyObject = {}> = {
 
 let defaultGetSchema: (() => S.Schema) | undefined
 
-export function setupSchemaTraverse(schemaMapGetter: () => S.Schema) {
-  defaultGetSchema = schemaMapGetter
+export function setupSchemaTraverse(schemaGetter: () => S.Schema) {
+  defaultGetSchema = schemaGetter
 }
 
 export function createSchemaTraverse<ExtendCtx extends AnyObject = {}>(

@@ -40,7 +40,7 @@ export const StageFrameLabelComp: FC<{}> = observer(({}) => {
 })
 
 const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
-  const { stageViewport, schemaCreator, stageEvent, selectController, elemDrawer } =
+  const { stageViewport, schemaCreator, stageEvent, selectAction, elemDrawer } =
     useEditorServices()
   const { zoom } = stageViewport
   const [hovered, setHovered] = useState(false)
@@ -81,7 +81,7 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
           setHovered(hovered)
         },
         mousedown: stopPropagation(() => {
-          selectController.onPanelSelect(frame.id)
+          selectAction.onPanelSelect(frame.id)
         }),
       }}
     />

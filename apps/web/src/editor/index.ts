@@ -1,20 +1,20 @@
 import { DI, type ClassConstructor } from 'first-di'
-import { NodeController } from 'src/editor/controller/node'
-import { SchemaController } from 'src/editor/controller/schema'
-import { SelectController } from 'src/editor/controller/select'
-import { StageController } from 'src/editor/controller/stage'
-import { ViewportController } from 'src/editor/controller/viewport'
-import { EditorCommand } from 'src/editor/core/command'
-import { Setting } from 'src/editor/core/setting'
-import { Undo } from 'src/editor/core/undo'
-import { HandleNode } from 'src/editor/handle/node'
-import { HandlePage } from 'src/editor/handle/page'
-import { HandleSelect } from 'src/editor/handle/select'
+import { Command } from 'src/editor/action/command'
+import { NodeAction } from 'src/editor/action/node'
+import { PageAction } from 'src/editor/action/page'
+import { SchemaAction } from 'src/editor/action/schema'
+import { SelectAction } from 'src/editor/action/select'
+import { StageAction } from 'src/editor/action/stage'
+import { Undo } from 'src/editor/action/undo'
+import { ViewportAction } from 'src/editor/action/viewport'
 import { ElemDrawer } from 'src/editor/render/elem/drawer'
 import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { SchemaCreator } from 'src/editor/schema/creator'
+import { SchemaMutator } from 'src/editor/schema/mutator'
+import { Select } from 'src/editor/select'
+import { Setting } from 'src/editor/setting'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageCreate } from 'src/editor/stage/interact/create'
@@ -36,22 +36,15 @@ import { YSync } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
 const editorServices = {
-  /** controller */
-  nodeController: NodeController,
-  selectController: SelectController,
-  viewportController: ViewportController,
-  stageController: StageController,
-  schemaController: SchemaController,
-
-  /** core */
-  setting: Setting,
-  command: EditorCommand,
+  /** action */
   undo: Undo,
-
-  /** handle */
-  handleNode: HandleNode,
-  handlePage: HandlePage,
-  handleSelect: HandleSelect,
+  command: Command,
+  nodeAction: NodeAction,
+  pageAction: PageAction,
+  selectAction: SelectAction,
+  viewportAction: ViewportAction,
+  stageAction: StageAction,
+  schemaAction: SchemaAction,
 
   /** render */
   elemDrawer: ElemDrawer,
@@ -61,6 +54,7 @@ const editorServices = {
 
   /** schema */
   schemaCreator: SchemaCreator,
+  schemaMutator: SchemaMutator,
 
   /** stage */
   stageCreate: StageCreate,
@@ -69,7 +63,7 @@ const editorServices = {
   stageSelect: StageSelect,
   stageEvent: StageEvent,
 
-  /** tools */
+  /** stage.tools */
   stageCursor: StageCursor,
   stageViewport: StageViewport,
   stageTransformer: StageTransformer,
@@ -89,6 +83,10 @@ const editorServices = {
   yAware: YAware,
   ySync: YSync,
   yState: YState,
+
+  /** misc */
+  setting: Setting,
+  select: Select,
 }
 
 type ServiceInstances<T> = {

@@ -5,12 +5,12 @@ import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
 
 export const LayerPageListHeaderComp: FC<{}> = observer(({}) => {
-  const { handlePage, layerPageList } = useEditorServices()
+  const { pageAction, layerPageList } = useEditorServices()
   const { isCollapsed } = layerPageList
   const selectPage = useSelectPage()
   const addPage = () => {
     layerPageList.isCollapsed = false
-    handlePage.addPage()
+    pageAction.addPage()
   }
 
   return (

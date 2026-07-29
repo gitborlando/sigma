@@ -1,7 +1,7 @@
 import { objectId } from '@gitborlando/utils'
 import { Braces, Copy, History } from 'lucide-react'
 import Scrollbars from 'react-custom-scrollbars-2'
-import type { UndoInfo } from 'src/editor/core/undo'
+import type { UndoInfo } from 'src/editor/action/undo'
 import { BalanceItem, OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'

@@ -4,15 +4,14 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { createTraverser } from '@gitborlando/toolkit/traverser'
 import type { NoopFunc } from '@gitborlando/utils'
 import { untracked } from 'mobx'
-import { Setting } from 'src/editor/core/setting'
 import { max } from 'src/editor/geometry'
 import { abs, round } from 'src/editor/geometry/base'
 import { ElemDrawer } from 'src/editor/render/elem/drawer'
 import { Elem } from 'src/editor/render/elem/elem'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree, type RenderDirtyType } from 'src/editor/render/tree'
+import { Setting } from 'src/editor/setting'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Raf } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
@@ -33,7 +32,7 @@ export class RenderPipeline extends Service {
 
   private renderType?: SurfaceRenderType
   private renderTasks: NoopFunc[] = []
-  private raf = new Raf()
+  private rafRequest = this.createRafRequest()
 
   private hasRequestedRenderTopCanvas = false
 
@@ -143,7 +142,7 @@ export class RenderPipeline extends Service {
       isPartialRender ? this.partialRender() : this.fullRender()
     })
 
-    this.raf.cancelAll().request((next) => {
+    this.rafRequest((next) => {
       this.renderSurface.ctxSaveRestore(() => this.renderTasks.pop()?.())
       this.renderType = undefined
       if (this.renderTasks.length) next()
@@ -366,5 +365,18 @@ export class RenderPipeline extends Service {
 
       ctx.restore()
     })
+  }
+
+  private createRafRequest() {
+    type RafCallback = (next: () => void) => void
+    const ids: number[] = []
+    const request = (callback: RafCallback) => {
+      ids.push(requestAnimationFrame(() => callback(() => request(callback))))
+    }
+    return (callback: RafCallback) => {
+      ids.forEach(cancelAnimationFrame)
+      ids.length = 0
+      return request(callback)
+    }
   }
 }

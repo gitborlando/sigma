@@ -3,7 +3,7 @@ import type { YPlainPath } from '@gitborlando/y-plain'
 import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
 import { makeObservable } from 'mobx'
-import { NodeController } from 'src/editor/controller/node'
+import { NodeAction } from 'src/editor/action/node'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
@@ -24,7 +24,7 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
     private readonly property: Key,
     private readonly getInitialValue: () => DesignEffectValue<Key>,
     protected readonly yState: YState,
-    protected readonly nodeController: NodeController,
+    protected readonly nodeAction: NodeAction,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -32,7 +32,7 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
   }
 
   protected get nodes() {
-    return this.nodeController.selectNodes
+    return this.nodeAction.selectNodes
   }
 
   protected onSetupValue() {

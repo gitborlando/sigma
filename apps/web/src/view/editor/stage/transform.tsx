@@ -2,7 +2,7 @@ import { isLeftMouse, stopPropagation } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
-import { arrayLoopGet, TRBL } from 'src/editor/utils/misc'
+import { TRBL } from 'src/editor/utils'
 import { COLOR } from 'src/utils/color'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
@@ -201,3 +201,8 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
 
   return <elem node={rotatePoint} events={{ hover, mousedown }} />
 })
+
+const arrayLoopGet = <T,>(arr: T[], index: number) => {
+  const loopIndex = index < 0 ? arr.length - 1 : index >= arr.length ? 0 : index
+  return arr[loopIndex]
+}

@@ -1,8 +1,8 @@
 import { XY } from '@gitborlando/geo'
-import { clone, getSet, miniId } from '@gitborlando/utils'
+import { getSet, miniId } from '@gitborlando/utils'
 import { MRect } from 'src/editor/geometry'
 import { createLine } from 'src/editor/geometry/point'
-import { getLatestVersion } from 'src/editor/schema/migration'
+import { getLatestVersion } from 'src/editor/schema/migrate'
 import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
 import { T } from 'src/utils/common'
@@ -262,12 +262,5 @@ export class SchemaCreator extends Service {
   addChild(parent: S.NodeParent, child: S.Node) {
     parent.childIds.push(child.id)
     child.parentId = parent.id
-  }
-
-  clone<T extends S.SchemaItem>(item: T, option?: Partial<T>) {
-    const newItem = clone(item)
-    newItem.id = item.type === 'page' ? `page_${miniId(8)}` : miniId(8)
-    if ('childIds' in newItem) newItem.childIds = []
-    return mergeOverrideArray(newItem, option || {}) as T
   }
 }

@@ -1,21 +1,13 @@
-import { clampIndex, getSet } from '@gitborlando/utils'
+import { clampIndex } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
-import { MRect } from 'src/editor/geometry'
 import { Service } from 'src/global/service'
 import { YState } from '../y-adapter/y-state'
 
 @reflection
-export class HandleNode extends Service {
-  private mrectCache = new Map<ID, MRect>()
-
+export class SchemaMutator extends Service {
   constructor(private readonly yState: YState) {
     super()
     autoBind(makeObservable(this))
-  }
-
-  getMRect(node: S.Node) {
-    const compare = [node.width, node.height, node.matrix, node.aspectRatio]
-    return getSet(this.mrectCache, node.id, () => MRect.of(node), compare)
   }
 
   addNodes(nodes: S.Node[]) {

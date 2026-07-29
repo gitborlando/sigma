@@ -1,12 +1,12 @@
 import { jsonParse } from '@gitborlando/utils'
 import JSZip from 'jszip'
-import { Undo } from 'src/editor/core/undo'
-import { HandleSelect } from 'src/editor/handle/select'
+import { Undo } from 'src/editor/action/undo'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { migrationSchema } from 'src/editor/schema/migration'
+import { migrateSchema } from 'src/editor/schema/migrate'
+import { mock_schema } from 'src/editor/schema/mock'
 import { setupSchemaTraverse } from 'src/editor/schema/traverse'
-import { mock_frame_name } from 'src/editor/utils/mock/frame-name'
+import { Select } from 'src/editor/select'
 import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YState } from 'src/editor/y-adapter/y-state'
@@ -15,7 +15,7 @@ import { Service } from 'src/global/service'
 import { FileService } from 'src/global/service/file'
 
 @reflection
-export class SchemaController extends Service {
+export class SchemaAction extends Service {
   private sessionFileId = ''
 
   constructor(
@@ -24,7 +24,7 @@ export class SchemaController extends Service {
     private readonly ySync: YSync,
     private readonly yAware: YAware,
     private readonly undo: Undo,
-    private readonly handleSelect: HandleSelect,
+    private readonly select: Select,
     private readonly layerNodeTree: LayerNodeTree,
   ) {
     super()
@@ -32,7 +32,7 @@ export class SchemaController extends Service {
   }
 
   async loadSchema(fileId: string) {
-    return migrationSchema(await this.fetchSchema(fileId))
+    return migrateSchema(await this.fetchSchema(fileId))
   }
 
   setupSchema(fileId: string, schema: S.Schema) {
@@ -52,7 +52,7 @@ export class SchemaController extends Service {
     SchemaHelper.setup({ find: this.yState.find })
     setupSchemaTraverse(() => this.yState.state)
 
-    this.handleSelect.selectPage(schema.meta.pageIds[0])
+    this.select.selectPage(schema.meta.pageIds[0])
     this.undo.mobxUndo.rebase()
 
     this.sessionFileId = fileId
@@ -60,7 +60,7 @@ export class SchemaController extends Service {
 
   private async fetchSchema(fileId: string) {
     if (fileId === 'mock') {
-      const schema = mock_frame_name(this.schemaCreator)
+      const schema = mock_schema(this.schemaCreator)
       if (schema) return schema
       throw new Error('Failed to initialize mock schema')
     }

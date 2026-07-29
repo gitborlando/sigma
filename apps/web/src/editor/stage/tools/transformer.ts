@@ -1,16 +1,16 @@
 import { Dragger } from '@gitborlando/toolkit/browser'
 import { iife } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
-import { NodeController } from 'src/editor/controller/node'
-import { Setting } from 'src/editor/core/setting'
-import { Undo } from 'src/editor/core/undo'
+import { NodeAction } from 'src/editor/action/node'
+import { Undo } from 'src/editor/action/undo'
 import { HitTest, IMRect, Matrix, MRect } from 'src/editor/geometry'
-import { HandleNode } from 'src/editor/handle/node'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { SchemaMutator } from 'src/editor/schema/mutator'
+import { Setting } from 'src/editor/setting'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { snapGridRound, snapGridRoundXY, TRBL } from 'src/editor/utils/misc'
+import { snapGridRound, snapGridRoundXY, TRBL } from 'src/editor/utils'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
@@ -63,11 +63,11 @@ export class StageTransformer extends Service {
   @observable isMoving = false
 
   @computed get isSingleSelect() {
-    return this.nodeController.selectNodes.length === 1
+    return this.nodeAction.selectNodes.length === 1
   }
   @computed get isSelectOneLine() {
-    if (this.nodeController.selectNodes.length !== 1) return false
-    return SchemaHelper.is(this.nodeController.selectNodes[0], 'line')
+    if (this.nodeAction.selectNodes.length !== 1) return false
+    return SchemaHelper.is(this.nodeAction.selectNodes[0], 'line')
   }
 
   private action: TransformerAction = 'move'
@@ -85,8 +85,8 @@ export class StageTransformer extends Service {
     private readonly undo: Undo,
     private readonly stageViewport: StageViewport,
     private readonly setting: Setting,
-    private readonly nodeController: NodeController,
-    private readonly handleNode: HandleNode,
+    private readonly nodeAction: NodeAction,
+    private readonly schemaMutator: SchemaMutator,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -118,7 +118,7 @@ export class StageTransformer extends Service {
   }
 
   flip(axis: 'x' | 'y') {
-    if (this.nodeController.selectNodes.length < 2) return
+    if (this.nodeAction.selectNodes.length < 2) return
 
     const { startMRect } = this.onStartTransform()
     const { center } = startMRect
@@ -164,7 +164,7 @@ export class StageTransformer extends Service {
   onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {
     this.isResizing = true
     const { startMRect, startMatrix } = this.onStartTransform()
-    const node = this.nodeController.selectNodes[0]
+    const node = this.nodeAction.selectNodes[0]
 
     if (this.isSelectOneLine) {
       this.resizeLine(node as S.Line, startMRect, directions, options?.e)
@@ -328,7 +328,7 @@ export class StageTransformer extends Service {
   private mrectCache = new Map<ID, IMRect>()
 
   private onStartTransform() {
-    this.nodeController.selectNodes.forEach((node) => {
+    this.nodeAction.selectNodes.forEach((node) => {
       this.mrectCache.set(node.id, MRect.of(node))
     })
     const startMRect = this.mrect.clone()
@@ -351,7 +351,7 @@ export class StageTransformer extends Service {
 
   private transform() {
     this.yState.transact(() => {
-      this.nodeController.selectNodes.forEach(this.applyToNode)
+      this.nodeAction.selectNodes.forEach(this.applyToNode)
     })
   }
 
@@ -362,7 +362,7 @@ export class StageTransformer extends Service {
     const startMRect = MRect.of(mrect)
     const ancestorsMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
 
-    if (this.nodeController.selectNodes.length === 1 && this.action === 'resize') {
+    if (this.nodeAction.selectNodes.length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
     } else {
       const localDiff = Matrix.of(ancestorsMatrix)
@@ -445,7 +445,7 @@ export class StageTransformer extends Service {
       this.yState.set<S.Node>([node.id, 'width'], mrect.width)
       this.yState.set<S.Node>([node.id, 'height'], mrect.height)
     } else {
-      this.handleNode.setNodeSize(node, mrect.width, mrect.height)
+      this.schemaMutator.setNodeSize(node, mrect.width, mrect.height)
     }
     this.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
   }

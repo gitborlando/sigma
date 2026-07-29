@@ -2,9 +2,9 @@ import type { MobxUndoState } from '@gitborlando/mobx-undo'
 import { Circle, Play, Square } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import type { EditorServices } from 'src/editor'
-import type { UndoInfo } from 'src/editor/core/undo'
+import type { UndoInfo } from 'src/editor/action/undo'
 import { type IMatrix, Matrix } from 'src/editor/geometry'
-import type { HandleSelectState } from 'src/editor/handle/select'
+import type { SelectState } from 'src/editor/select'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 import { useEditorServices } from 'src/view/hooks/editor'
@@ -318,7 +318,7 @@ function applyReplayLocalState(yState: YState, undo: Undo, info: UndoInfo) {
   }
 
   if (mobxUndo.has('select')) {
-    const select = mobxUndo.get<HandleSelectState>('select')
+    const select = mobxUndo.get<SelectState>('select')
     mobxUndo.applyState({ select: normalizeSelectState(yState, select) })
   }
 }
@@ -328,11 +328,11 @@ function normalizeLocalState(yState: YState, state: MobxUndoState) {
 
   return {
     ...state,
-    select: normalizeSelectState(yState, state.select as HandleSelectState),
+    select: normalizeSelectState(yState, state.select as SelectState),
   }
 }
 
-function normalizeSelectState(yState: YState, state: HandleSelectState) {
+function normalizeSelectState(yState: YState, state: SelectState) {
   return {
     ...state,
     selection: Object.fromEntries(

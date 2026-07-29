@@ -2,52 +2,52 @@ import { Disposer } from '@gitborlando/toolkit'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { makeObservable } from 'mobx'
-import { NodeController } from 'src/editor/controller/node'
-import { Setting } from 'src/editor/core/setting'
-import { Undo } from 'src/editor/core/undo'
-import { HandlePage } from 'src/editor/handle/page'
-import { HandleSelect } from 'src/editor/handle/select'
+import { NodeAction } from 'src/editor/action/node'
+import { PageAction } from 'src/editor/action/page'
+import { Undo } from 'src/editor/action/undo'
 import { RenderTree } from 'src/editor/render/tree'
+import { Select } from 'src/editor/select'
+import { Setting } from 'src/editor/setting'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { YState } from 'src/editor/y-adapter/y-state'
-import { Command } from 'src/global/context-menu'
+import { ICommand } from 'src/global/context-menu'
 import { Service } from 'src/global/service'
 
 @reflection
-export class EditorCommand extends Service {
+export class Command extends Service {
   constructor(
-    private readonly handlePage: HandlePage,
-    private readonly handleSelect: HandleSelect,
+    private readonly pageAction: PageAction,
+    private readonly select: Select,
     private readonly setting: Setting,
     private readonly undo: Undo,
     private readonly renderTree: RenderTree,
     private readonly stageInteract: StageInteract,
     private readonly yState: YState,
-    private readonly nodeController: NodeController,
+    private readonly nodeAction: NodeAction,
   ) {
     super()
     autoBind(makeObservable(this))
     this.effect(this.bindHotkeys())
   }
 
-  get copyPasteGroup(): Command[] {
+  get copyPasteGroup(): ICommand[] {
     return [
       {
         name: t('copy'),
         shortcut: 'ctrl+c',
-        when: () => !!this.handleSelect.selectIds.length,
-        callback: () => this.nodeController.copySelectedNodes(),
+        when: () => !!this.select.selectIds.length,
+        callback: () => this.nodeAction.copySelectedNodes(),
       },
       {
         name: t('paste'),
         shortcut: 'ctrl+v',
-        when: () => !!this.nodeController.copiedIds.length,
-        callback: () => this.nodeController.pasteNodes(),
+        when: () => !!this.nodeAction.copiedIds.length,
+        callback: () => this.nodeAction.pasteNodes(),
       },
     ]
   }
 
-  get undoRedoGroup(): Command[] {
+  get undoRedoGroup(): ICommand[] {
     return [
       { name: t('undo'), shortcut: 'ctrl+z', callback: () => this.undo.undo() },
       {
@@ -58,12 +58,12 @@ export class EditorCommand extends Service {
     ]
   }
 
-  get pageGroup(): Command[] {
+  get pageGroup(): ICommand[] {
     const commands = [
       {
         name: t('delete page'),
         callback: ({ id }: IDPayload) => {
-          this.handlePage.removePage(this.yState.find<S.Page>(id))
+          this.pageAction.removePage(this.yState.find<S.Page>(id))
         },
       },
     ]
@@ -72,7 +72,7 @@ export class EditorCommand extends Service {
       commands.push({
         name: t('print schema'),
         callback: ({ id }: IDPayload) => {
-          this.handlePage.DEV_logPageSchema(id)
+          this.pageAction.DEV_logPageSchema(id)
         },
       })
     }
@@ -80,25 +80,25 @@ export class EditorCommand extends Service {
     return commands
   }
 
-  get nodeGroup(): Command[] {
+  get nodeGroup(): ICommand[] {
     const commands = [
       {
         name: t('rename'),
         callback: ({ id }: IDPayload) => {
-          this.nodeController.renamingNodeId = id
+          this.nodeAction.renamingNodeId = id
         },
       },
       {
         name: t('create frame'),
         callback: () => {
-          this.nodeController.wrapInFrame()
+          this.nodeAction.wrapInFrame()
         },
       },
       {
         name: t('delete'),
         shortcut: 'del',
         callback: () => {
-          this.nodeController.deleteSelectedNodes()
+          this.nodeAction.deleteSelectedNodes()
         },
       },
     ]
@@ -108,7 +108,7 @@ export class EditorCommand extends Service {
         {
           name: t('print schema'),
           callback: () => {
-            this.handleSelect.selectIds.forEach((id) =>
+            this.select.selectIds.forEach((id) =>
               console.log(this.yState.find<S.SchemaItem>(id)),
             )
           },
@@ -116,7 +116,7 @@ export class EditorCommand extends Service {
         {
           name: t('print element'),
           callback: () => {
-            this.handleSelect.selectIds.forEach((id) =>
+            this.select.selectIds.forEach((id) =>
               console.log(this.renderTree.findElem(id)),
             )
           },
@@ -127,42 +127,42 @@ export class EditorCommand extends Service {
     return commands
   }
 
-  get selectionGroup(): Command[] {
+  get selectionGroup(): ICommand[] {
     return [
       {
         name: t('select all nodes'),
         shortcut: 'ctrl+a',
-        callback: () => this.nodeController.selectAllNodes(),
+        callback: () => this.nodeAction.selectAllNodes(),
       },
     ]
   }
 
-  get nodeReHierarchyGroup(): Command[] {
+  get nodeReHierarchyGroup(): ICommand[] {
     return [
       {
         name: t('move up'),
         shortcut: 'ctrl+]',
-        callback: () => this.nodeController.reHierarchySelectedNode('up'),
+        callback: () => this.nodeAction.reHierarchySelectedNode('up'),
       },
       {
         name: t('move down'),
         shortcut: 'ctrl+[',
-        callback: () => this.nodeController.reHierarchySelectedNode('down'),
+        callback: () => this.nodeAction.reHierarchySelectedNode('down'),
       },
       {
         name: t('move to top'),
         shortcut: 'ctrl+alt+]',
-        callback: () => this.nodeController.reHierarchySelectedNode('top'),
+        callback: () => this.nodeAction.reHierarchySelectedNode('top'),
       },
       {
         name: t('move to bottom'),
         shortcut: 'ctrl+alt+[',
-        callback: () => this.nodeController.reHierarchySelectedNode('bottom'),
+        callback: () => this.nodeAction.reHierarchySelectedNode('bottom'),
       },
     ]
   }
 
-  get createShapeGroup(): Command[] {
+  get createShapeGroup(): ICommand[] {
     return [
       {
         name: t('select'),
@@ -177,7 +177,7 @@ export class EditorCommand extends Service {
     ]
   }
 
-  get fileGroup(): Command[] {
+  get fileGroup(): ICommand[] {
     return [
       { name: t('delete file'), callback: () => {} },
       { name: t('export file'), callback: () => {} },
@@ -195,7 +195,7 @@ export class EditorCommand extends Service {
       this.nodeReHierarchyGroup,
       this.createShapeGroup,
       this.fileGroup,
-    ].flat() as Command[]
+    ].flat() as ICommand[]
 
     commandList.forEach(({ shortcut, callback, when }) => {
       if (!shortcut) return

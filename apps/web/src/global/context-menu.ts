@@ -1,14 +1,14 @@
 import { AnyObject } from '@gitborlando/utils'
 import { type MouseEvent } from 'react'
 
-export type Command = {
+export type ICommand = {
   name: string
   callback: (context: any) => any
   shortcut?: string
   when?: () => boolean
 }
 
-export type MenuItem = Command & { children?: MenuItem[][] }
+export type MenuItem = ICommand & { children?: MenuItem[][] }
 
 class ContextMenuClass {
   @observable menus: MenuItem[][] = []

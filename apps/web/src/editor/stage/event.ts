@@ -8,7 +8,6 @@ import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { reverseFor } from 'src/editor/utils/misc'
 import { Service } from 'src/global/service'
 
 @reflection
@@ -82,6 +81,13 @@ export class StageEvent extends Service {
   ) {
     let stopped = false
     const stopPropagation = () => (stopped = true)
+
+    const reverseFor = <T>(
+      items: T[],
+      callback: (item: T, index: number) => any,
+    ) => {
+      for (let i = items.length - 1; i >= 0; i--) callback(items[i], i)
+    }
 
     const traverse = (props: { elem: Elem; hitList?: Elem[]; xy?: IXY }) => {
       const { elem, hitList } = props

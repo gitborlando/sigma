@@ -5,8 +5,8 @@ import { listen } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { makeObservable } from 'mobx'
 import { IMatrix, Matrix } from 'src/editor/geometry'
-import { HandleSelect } from 'src/editor/handle/select'
 import { RenderSurface } from 'src/editor/render/surface'
+import { Select } from 'src/editor/select'
 import { Service } from 'src/global/service'
 
 const createInitBound = () => ({
@@ -35,7 +35,7 @@ export class StageViewport extends Service {
   private boundAABB = new AABB(0, 0, 0, 0)
   private wheeler = new Wheeler()
 
-  constructor(private readonly handleSelect: HandleSelect) {
+  constructor(private readonly select: Select) {
     super()
     autoBind(makeObservable(this))
     this.effect(this.onBoundChange())
@@ -149,7 +149,7 @@ export class StageViewport extends Service {
         this.sceneAABB = this.sceneMatrix.invertAABB(this.boundAABB)
         this.prevSceneAABB = this.prevSceneMatrix.invertAABB(this.boundAABB)
         this.pageSceneMatrix.set(
-          this.handleSelect.selectPageId,
+          this.select.selectPageId,
           Matrix.of(this.sceneMatrix),
         )
       },
@@ -169,7 +169,7 @@ export class StageViewport extends Service {
 
   private onCurrentPageChange() {
     return reaction(
-      () => this.handleSelect.selectPageId,
+      () => this.select.selectPageId,
       (pageId) => {
         const getMatrix = () => Matrix.identity()
         const matrix = getSet(this.pageSceneMatrix, pageId, getMatrix)

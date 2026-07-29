@@ -3,20 +3,20 @@ import { Signal } from '@gitborlando/signal'
 import type { DragData } from '@gitborlando/toolkit/browser'
 import { clone } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
-import { SelectController } from 'src/editor/controller/select'
-import { Setting } from 'src/editor/core/setting'
-import { Undo } from 'src/editor/core/undo'
+import { SelectAction } from 'src/editor/action/select'
+import { Undo } from 'src/editor/action/undo'
 import { createLine, Matrix, MRect } from 'src/editor/geometry'
-import { HandleNode } from 'src/editor/handle/node'
-import { HandleSelect } from 'src/editor/handle/select'
 import { RenderTree } from 'src/editor/render/tree'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { SchemaMutator } from 'src/editor/schema/mutator'
+import { Select } from 'src/editor/select'
+import { Setting } from 'src/editor/setting'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils/misc'
+import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
@@ -39,14 +39,14 @@ export class StageCreate extends Service {
     private readonly renderTree: RenderTree,
     private readonly stageEvent: StageEvent,
     private readonly stageCursor: StageCursor,
-    private readonly handleNode: HandleNode,
+    private readonly schemaMutator: SchemaMutator,
     private readonly undo: Undo,
     private readonly schemaCreator: SchemaCreator,
     private readonly yState: YState,
-    private readonly handleSelect: HandleSelect,
+    private readonly select: Select,
     private readonly stageViewport: StageViewport,
     private readonly setting: Setting,
-    private readonly selectController: SelectController,
+    private readonly selectAction: SelectAction,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -82,11 +82,11 @@ export class StageCreate extends Service {
     this.node = this.createNode(dragData)
 
     this.yState.transact(() => {
-      this.handleNode.addNodes([this.node])
-      this.handleNode.insertChildAt(this.parent, this.node)
+      this.schemaMutator.addNodes([this.node])
+      this.schemaMutator.insertChildAt(this.parent, this.node)
     })
 
-    this.selectController.onCreateSelect(this.node.id)
+    this.selectAction.onCreateSelect(this.node.id)
     this.stageEvent.disablePointEvent()
 
     if (this.createType === 'line') {
@@ -182,6 +182,6 @@ export class StageCreate extends Service {
       .find((elem) => SchemaHelper.isById(elem.id, 'frame'))
 
     if (frame) return this.yState.find<S.NodeParent>(frame.id)
-    return this.yState.find<S.Page>(this.handleSelect.selectPageId)
+    return this.yState.find<S.Page>(this.select.selectPageId)
   }
 }

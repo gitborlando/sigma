@@ -1,23 +1,23 @@
 import { firstOne, iife, objKeys } from '@gitborlando/utils'
-import { Undo } from 'src/editor/core/undo'
+import { Undo } from 'src/editor/action/undo'
 import { Matrix } from 'src/editor/geometry'
 import { MRect } from 'src/editor/geometry/mrect'
-import { HandleNode } from 'src/editor/handle/node'
-import { HandleSelect, type Selection } from 'src/editor/handle/select'
 import { RenderTree } from 'src/editor/render/tree'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { SchemaMutator } from 'src/editor/schema/mutator'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { Select, type Selection } from 'src/editor/select'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
 @reflection
-export class NodeController extends Service {
+export class NodeAction extends Service {
   @observable renamingNodeId = ''
 
   constructor(
-    private readonly handleNode: HandleNode,
-    private readonly handleSelect: HandleSelect,
+    private readonly schemaMutator: SchemaMutator,
+    private readonly select: Select,
     private readonly yState: YState,
     private readonly undo: Undo,
     private readonly schemaCreator: SchemaCreator,
@@ -32,9 +32,7 @@ export class NodeController extends Service {
   }
 
   @computed get selectNodes() {
-    return this.handleSelect.selectIds.map(
-      (id) => this.yState.observedState[id] as S.Node,
-    )
+    return this.select.selectIds.map((id) => this.yState.observedState[id] as S.Node)
   }
 
   renameNode(id: string, name: string) {
@@ -45,11 +43,11 @@ export class NodeController extends Service {
   }
 
   selectAllNodes() {
-    const selectIds = SchemaHelper.getPageChildIds(
-      this.handleSelect.selectPageId,
-    ).map((id) => [id, true])
+    const selectIds = SchemaHelper.getPageChildIds(this.select.selectPageId).map(
+      (id) => [id, true],
+    )
     const selection = Object.fromEntries(selectIds)
-    this.handleSelect.replaceSelection(selection)
+    this.select.replaceSelection(selection)
     this.undo.track('client', t('select all nodes'))
   }
 
@@ -58,11 +56,11 @@ export class NodeController extends Service {
       const traverse = createSchemaTraverse({
         leave: ({ item, parent }) => {
           if (!parent || !SchemaHelper.isNode(item)) return
-          this.handleNode.deleteChild(parent, item)
+          this.schemaMutator.deleteChild(parent, item)
         },
       })
-      traverse(this.handleSelect.selectIds)
-      this.handleSelect.clearSelect()
+      traverse(this.select.selectIds)
+      this.select.clearSelect()
     })
     this.undo.track('all', t('delete nodes'))
   }
@@ -70,7 +68,7 @@ export class NodeController extends Service {
   copiedIds = <ID[]>[]
 
   copySelectedNodes() {
-    this.copiedIds = [...this.handleSelect.selectIds]
+    this.copiedIds = [...this.select.selectIds]
   }
 
   pasteNodes() {
@@ -85,11 +83,11 @@ export class NodeController extends Service {
           if (!parent || !SchemaHelper.isNode(item)) return false
 
           const newParent = forwardCtx?.newNode || parent
-          const newNode = this.schemaCreator.clone(item, {
+          const newNode = SchemaHelper.clone(item, {
             name: this.schemaCreator.createNodeName(item.type),
           })
-          this.handleNode.addNodes([newNode])
-          this.handleNode.insertChildAt(newParent as S.NodeParent, newNode)
+          this.schemaMutator.addNodes([newNode])
+          this.schemaMutator.insertChildAt(newParent as S.NodeParent, newNode)
           ctx.newNode = newNode
           if (depth === 0) newSelection[newNode.id] = true
         },
@@ -98,7 +96,7 @@ export class NodeController extends Service {
       this.copiedIds = []
     })
 
-    this.handleSelect.replaceSelection(newSelection)
+    this.select.replaceSelection(newSelection)
 
     this.undo.track('all', `${t('paste nodes')}: ${objKeys(newSelection).length}`)
   }
@@ -114,7 +112,7 @@ export class NodeController extends Service {
           if (type === 'top') return 0
           return parent.childIds.length - 1
         })
-        this.handleNode.reHierarchy(parent, node, index)
+        this.schemaMutator.reHierarchy(parent, node, index)
       })
     })
 
@@ -136,24 +134,26 @@ export class NodeController extends Service {
     const index = oldParent.childIds.indexOf(selected[0].id)
 
     this.yState.transact(() => {
-      selected.forEach((node) => this.handleNode.removeChild(oldParent.id, node.id))
-      this.handleNode.addNodes([frameNode])
-      this.handleNode.insertChildAt(oldParent, frameNode, index)
+      selected.forEach((node) =>
+        this.schemaMutator.removeChild(oldParent.id, node.id),
+      )
+      this.schemaMutator.addNodes([frameNode])
+      this.schemaMutator.insertChildAt(oldParent, frameNode, index)
       selected.forEach((node) => {
-        this.handleNode.insertChildAt(frameNode, node)
+        this.schemaMutator.insertChildAt(frameNode, node)
         this.yState.set<S.Node>(
           [node.id, 'matrix'],
           Matrix.of(node.matrix).shift({ x: -rect.x, y: -rect.y }).plain(),
         )
       })
     })
-    this.handleSelect.replaceSelection({ [frameNode.id]: true })
+    this.select.replaceSelection({ [frameNode.id]: true })
 
     this.undo.track('all', t('create frame'))
   }
 
   private getDatumXY() {
-    const selectIds = this.handleSelect.selectIds
+    const selectIds = this.select.selectIds
     let datumId = ''
 
     if (selectIds.length === 1) {

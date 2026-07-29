@@ -1,6 +1,7 @@
 import { clamp } from 'es-toolkit'
 import { max } from 'src/editor/geometry/base'
-import { HandleNode } from 'src/editor/handle/node'
+import { SchemaHelper } from 'src/editor/schema/helper'
+import { SchemaMutator } from 'src/editor/schema/mutator'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { MIXED_VALUE } from 'src/global/constant'
 
@@ -23,7 +24,7 @@ export type DesignGeomInfo = Record<
   DesignGeomFieldValue | typeof MIXED_VALUE
 >
 
-export type DesignGeomFieldContext = { handleNode: HandleNode; yState: YState }
+export type DesignGeomFieldContext = { schemaMutator: SchemaMutator; yState: YState }
 
 type DesignGeomFieldBase<Value extends DesignGeomFieldValue> = {
   key: DesignGeomKey
@@ -78,11 +79,11 @@ const createMRectField = (key: DesignOBBKey): DesignNumberField => ({
   key,
   interaction: 'number',
   supports: () => true,
-  read: (node, { handleNode }) => handleNode.getMRect(node)[key],
-  apply: (node, value, { handleNode, yState }) => {
+  read: (node) => SchemaHelper.getMRect(node)[key],
+  apply: (node, value, { schemaMutator, yState }) => {
     if (key === 'height' && node.type === 'line') return
 
-    const mrect = handleNode.getMRect(node)
+    const mrect = SchemaHelper.getMRect(node)
     mrect[key] = value
 
     if (key === 'x' || key === 'y' || key === 'rotation') {
@@ -90,7 +91,7 @@ const createMRectField = (key: DesignOBBKey): DesignNumberField => ({
       return
     }
 
-    handleNode.setNodeSize(node, mrect.width, mrect.height)
+    schemaMutator.setNodeSize(node, mrect.width, mrect.height)
   },
 })
 
@@ -98,9 +99,9 @@ const aspectRatioField: DesignToggleField = {
   key: 'aspectRatio',
   interaction: 'toggle',
   supports: () => true,
-  read: (node, { handleNode }) => handleNode.getMRect(node).aspectRatio > 0,
-  apply: (node, value, { handleNode, yState }) => {
-    const mrect = handleNode.getMRect(node)
+  read: (node) => SchemaHelper.getMRect(node).aspectRatio > 0,
+  apply: (node, value, { yState }) => {
+    const mrect = SchemaHelper.getMRect(node)
     mrect.lockAspectRatio(value)
     yState.set<S.Node>([node.id, 'aspectRatio'], mrect.aspectRatio)
   },

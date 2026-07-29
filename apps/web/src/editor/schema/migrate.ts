@@ -24,7 +24,7 @@ type LegacyObbNode = {
   rotation: number
 }
 
-export function migrationSchema(schema: any) {
+export function migrateSchema(schema: any) {
   const version = schema?.meta?.version
 
   const newSchema = clone(schema) as S.Schema

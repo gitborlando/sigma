@@ -1,8 +1,8 @@
 import { Signal } from '@gitborlando/signal'
 import { clone } from '@gitborlando/utils'
-import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { Select } from 'src/editor/select'
 import type { YStatePatch } from 'src/editor/y-adapter/y-state'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
@@ -28,7 +28,7 @@ export class RenderTree extends Service {
   }
 
   constructor(
-    private readonly handleSelect: HandleSelect,
+    private readonly select: Select,
     private readonly yState: YState,
   ) {
     super()
@@ -48,7 +48,7 @@ export class RenderTree extends Service {
         if (!SchemaHelper.isNode(item)) return false
         this.render('add', [item.id])
       },
-    })(SchemaHelper.getPageChildIds(this.handleSelect.selectPageId))
+    })(SchemaHelper.getPageChildIds(this.select.selectPageId))
   }
 
   onPatchRender() {

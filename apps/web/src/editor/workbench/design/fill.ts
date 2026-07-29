@@ -1,7 +1,7 @@
-import { NodeController } from 'src/editor/controller/node'
+import { NodeAction } from 'src/editor/action/node'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { COLOR } from 'src/utils/color'
-import { Undo } from '../../core/undo'
+import { Undo } from '../../action/undo'
 import { YState } from '../../y-adapter/y-state'
 import { DesignEffect } from './effect'
 
@@ -13,11 +13,11 @@ export class DesignFill extends DesignEffect<'fills'> {
 
   constructor(
     protected readonly yState: YState,
-    protected readonly nodeController: NodeController,
+    protected readonly nodeAction: NodeAction,
     private readonly schemaCreator: SchemaCreator,
     private readonly undo: Undo,
   ) {
-    super('fills', () => [schemaCreator.fillColor()], yState, nodeController)
+    super('fills', () => [schemaCreator.fillColor()], yState, nodeAction)
     autoBind(this)
   }
 

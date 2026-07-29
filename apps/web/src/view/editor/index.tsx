@@ -14,19 +14,19 @@ export const EditorComp = withSuspense(
     const { fileId } = useParams<{ fileId: string }>()
     const editor = Editor.getInstance()
 
-    const schemaController = editor.resolve('schemaController')
+    const schemaAction = editor.resolve('schemaAction')
     const stageCursor = editor.resolve('stageCursor')
-    const stageController = editor.resolve('stageController')
+    const stageAction = editor.resolve('stageAction')
     const elemDrawer = editor.resolve('elemDrawer')
 
-    const schema = suspend(() => schemaController.loadSchema(fileId!), [fileId])
+    const schema = suspend(() => schemaAction.loadSchema(fileId!), [fileId])
     const textBreaker = suspend(() => createTextBreaker(), ['text-breaker'])
 
-    schemaController.setupSchema(fileId!, schema)
+    schemaAction.setupSchema(fileId!, schema)
     elemDrawer.setTextBreaker(textBreaker)
 
     useEffect(() => {
-      stageController.onCanvasInited()
+      stageAction.onCanvasInited()
       stageCursor.setCursor('select')
 
       return () => editor.dispose()

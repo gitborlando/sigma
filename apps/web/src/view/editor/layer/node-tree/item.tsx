@@ -15,7 +15,7 @@ import { LayerNodeTreePathIcon } from './path-icon'
 
 export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observer(
   ({ nodeInfo }) => {
-    const { command, layerNodeTree, stageEvent, selectController, nodeController } =
+    const { command, layerNodeTree, stageEvent, selectAction, nodeAction } =
       useEditorServices()
     const { id, indent, ancestorIds } = nodeInfo
     const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
@@ -34,12 +34,12 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
     const handleToggleExpand = stopPropagation(() => {
       toggleNodeExpanded(id, !expanded)
     })
-    const handleSelect = () => {
-      selectController.onPanelSelect(id)
+    const select = () => {
+      selectAction.onPanelSelect(id)
     }
     const handleDoubleClick = () => {
-      selectController.onPanelSelect(id)
-      nodeController.renamingNodeId = id
+      selectAction.onPanelSelect(id)
+      nodeAction.renamingNodeId = id
     }
     const handleContextMenu = (e: React.MouseEvent) => {
       ContextMenu.context = { id }
@@ -72,7 +72,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
         data-sub-selected={subSelected}
         data-dragging={isDragging}
         className={cls()}
-        onMouseDown={handleSelect}
+        onMouseDown={select}
         onDoubleClick={handleDoubleClick}
         onContextMenu={handleContextMenu}
         onMouseEnter={handleMouseEnter}
@@ -105,8 +105,8 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
 
 const RenameComp: FC<{ node: S.Node }> = observer(({ node }) => {
   const ref = useRef<HTMLInputElement>(null)
-  const { nodeController } = useEditorServices()
-  const { renamingNodeId } = nodeController
+  const { nodeAction } = useEditorServices()
+  const { renamingNodeId } = nodeAction
   const canRename = renamingNodeId === node.id
 
   useLayoutEffect(() => {
@@ -120,10 +120,10 @@ const RenameComp: FC<{ node: S.Node }> = observer(({ node }) => {
       needFocusStyle={false}
       value={node.name || '未命名'}
       validate={(name) => !!name}
-      onBlur={() => (nodeController.renamingNodeId = '')}
+      onBlur={() => (nodeAction.renamingNodeId = '')}
       onEnd={(name) => {
-        nodeController.renameNode(node.id, name!)
-        nodeController.renamingNodeId = ''
+        nodeAction.renameNode(node.id, name!)
+        nodeAction.renamingNodeId = ''
       }}
     />
   ) : (

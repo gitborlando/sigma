@@ -1,5 +1,7 @@
+import { clone, getSet, miniId } from '@gitborlando/utils'
 import { isNil } from 'es-toolkit'
-import { Matrix } from 'src/editor/geometry'
+import { Matrix, MRect } from 'src/editor/geometry'
+import { mergeOverrideArray } from 'src/utils/export'
 
 type SchemaFinder = <T extends S.SchemaItem>(id: string) => T
 type SpecificSchemaItem<T extends S.SchemaItem['type']> = Extract<
@@ -13,6 +15,7 @@ const missingFinder: SchemaFinder = () => {
 
 export class SchemaHelper {
   private static find: SchemaFinder = missingFinder
+  private static mrectCache = new Map<ID, MRect>()
 
   static setup(option: { find: SchemaFinder }) {
     this.find = option.find
@@ -47,6 +50,18 @@ export class SchemaHelper {
   static isRootFrame(id: ID) {
     const node = this.find(id)
     return node.type === 'frame' && this.isPageById(node.parentId)
+  }
+
+  static clone<T extends S.SchemaItem>(item: T, option?: Partial<T>) {
+    const newItem = clone(item)
+    newItem.id = item.type === 'page' ? `page_${miniId(8)}` : miniId(8)
+    if ('childIds' in newItem) newItem.childIds = []
+    return mergeOverrideArray(newItem, option || {}) as T
+  }
+
+  static getMRect(node: S.Node) {
+    const compare = [node.width, node.height, node.matrix, node.aspectRatio]
+    return getSet(this.mrectCache, node.id, () => MRect.of(node), compare)
   }
 
   static getChildren(id: ID | S.NodeParent) {

@@ -6,14 +6,14 @@ import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
 type IPageItemComp = { name: string; id: string }
 
 export const LayerPageListItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const { command, handleSelect, undo } = useEditorServices()
+  const { command, select, undo } = useEditorServices()
   const openMenu = (e: React.MouseEvent) => {
     ContextMenu.context = { id }
     ContextMenu.menus = [command.pageGroup]
     ContextMenu.openMenu(e)
   }
   const selectPage = () => {
-    handleSelect.selectPage(id)
+    select.selectPage(id)
     undo.track('client', t('select page'))
   }
 

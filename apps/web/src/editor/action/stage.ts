@@ -1,19 +1,19 @@
-import { HandleSelect } from 'src/editor/handle/select'
 import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
+import { Select } from 'src/editor/select'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { Service } from 'src/global/service'
 
 @reflection
-export class StageController extends Service {
+export class StageAction extends Service {
   constructor(
     private readonly renderSurface: RenderSurface,
     private readonly renderPipeline: RenderPipeline,
     private readonly renderTree: RenderTree,
-    private readonly handleSelect: HandleSelect,
+    private readonly select: Select,
     private readonly stageInteract: StageInteract,
     private readonly stageSelect: StageSelect,
     private readonly stageEvent: StageEvent,
@@ -32,7 +32,7 @@ export class StageController extends Service {
   }
 
   private renderPage() {
-    if (this.handleSelect.selectPageId) {
+    if (this.select.selectPageId) {
       this.renderSurface.clearSurface()
       this.renderTree.pageFirstRender()
     }

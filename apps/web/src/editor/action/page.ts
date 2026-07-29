@@ -1,16 +1,16 @@
-import { HandleSelect } from 'src/editor/handle/select'
 import { SchemaCreator } from 'src/editor/schema/creator'
+import { Select } from 'src/editor/select'
 import { Service } from 'src/global/service'
-import { Undo } from '../core/undo'
 import { YState } from '../y-adapter/y-state'
+import { Undo } from './undo'
 
 @reflection
-export class HandlePage extends Service {
+export class PageAction extends Service {
   constructor(
     private readonly schemaCreator: SchemaCreator,
     private readonly yState: YState,
     private readonly undo: Undo,
-    private readonly handleSelect: HandleSelect,
+    private readonly select: Select,
   ) {
     super()
     autoBind(this)
@@ -21,7 +21,7 @@ export class HandlePage extends Service {
       this.yState.set<S.Page>([page.id], page)
       this.yState.insert<S.Meta>(['meta', 'pageIds'], page.id)
     })
-    this.handleSelect.selectPage(page.id)
+    this.select.selectPage(page.id)
     this.undo.track('all', t('add and select page'))
   }
 
@@ -33,7 +33,7 @@ export class HandlePage extends Service {
       this.yState.delete<S.Page>([page.id])
       this.yState.delete<S.Meta>(['meta', 'pageIds', pageIds.indexOf(page.id)])
     })
-    this.handleSelect.selectPage(pageIds[0])
+    this.select.selectPage(pageIds[0])
     this.undo.track('all', t('delete page'))
   }
 

@@ -1,7 +1,8 @@
 import { MRect, createRegularPolygon } from 'src/editor/geometry'
 import { SchemaCreator } from 'src/editor/schema/creator'
 
-export function mock_frame_name(schemaCreator: SchemaCreator) {
+/** frame name */
+export function mock_schema(schemaCreator: SchemaCreator) {
   const schema = <S.Schema>{}
 
   const meta = schemaCreator.meta()

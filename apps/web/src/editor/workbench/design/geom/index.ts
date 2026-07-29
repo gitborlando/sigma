@@ -1,6 +1,6 @@
 import { objKeys } from '@gitborlando/utils'
 import { reflection } from 'first-di'
-import { HandleNode } from 'src/editor/handle/node'
+import { SchemaMutator } from 'src/editor/schema/mutator'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { MIXED_VALUE } from 'src/global/constant'
 import { Service } from 'src/global/service'
@@ -27,7 +27,7 @@ export class DesignGeom extends Service {
   @observable.ref currentFields = <DesignGeomField[]>[]
 
   constructor(
-    private readonly handleNode: HandleNode,
+    private readonly schemaMutator: SchemaMutator,
     private readonly yState: YState,
   ) {
     super()
@@ -99,7 +99,7 @@ export class DesignGeom extends Service {
   }
 
   private createFieldContext(): DesignGeomFieldContext {
-    return { handleNode: this.handleNode, yState: this.yState }
+    return { schemaMutator: this.schemaMutator, yState: this.yState }
   }
 
   private applyChangeToNode(

@@ -2,7 +2,7 @@ import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import { Matrix } from 'src/editor/geometry'
-import { HandleSelect } from 'src/editor/handle/select'
+import { Select } from 'src/editor/select'
 import { Service } from 'src/global/service'
 import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
@@ -23,7 +23,7 @@ export class YAware extends Service {
     return others[this.observingClientId]
   }
 
-  constructor(private readonly handleSelect: HandleSelect) {
+  constructor(private readonly select: Select) {
     super()
     makeObservable(this, {
       client: observable,
@@ -49,8 +49,8 @@ export class YAware extends Service {
     this.effect(
       reaction(
         () => ({
-          selection: this.handleSelect.selection,
-          selectPageId: this.handleSelect.selectPageId,
+          selection: this.select.selection,
+          selectPageId: this.select.selectPageId,
         }),
         () => this.syncSelectState(),
       ),
@@ -90,8 +90,8 @@ export class YAware extends Service {
   }
 
   private syncSelectState = () => {
-    this.client.selection = this.handleSelect.selection
-    this.client.selectPageId = this.handleSelect.selectPageId
+    this.client.selection = this.select.selection
+    this.client.selectPageId = this.select.selectPageId
   }
 
   private syncSelf = () => {
@@ -115,12 +115,9 @@ export class YAware extends Service {
       )
     })
     disposer.register(
-      this.handleSelect.afterSelect.hook(() => {
-        awareness.setLocalStateField('selection', toJS(this.handleSelect.selection))
-        awareness.setLocalStateField(
-          'selectPageId',
-          toJS(this.handleSelect.selectPageId),
-        )
+      this.select.afterSelect.hook(() => {
+        awareness.setLocalStateField('selection', toJS(this.select.selection))
+        awareness.setLocalStateField('selectPageId', toJS(this.select.selectPageId))
       }),
     )
 

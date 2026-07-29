@@ -68,8 +68,8 @@ const InputZoomComp: FC<{}> = observer(({}) => {
 })
 
 const ZoomingOptionsComp: FC<{}> = observer(({}) => {
-  const { stageViewport, viewportController } = useEditorServices()
-  const { zoomToFitAll, zoomToFitSelection } = viewportController
+  const { stageViewport, viewportAction } = useEditorServices()
+  const { zoomToFitAll, zoomToFitSelection } = viewportAction
 
   return (
     <>

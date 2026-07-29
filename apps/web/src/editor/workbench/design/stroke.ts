@@ -1,5 +1,5 @@
-import { NodeController } from 'src/editor/controller/node'
-import { Undo } from 'src/editor/core/undo'
+import { NodeAction } from 'src/editor/action/node'
+import { Undo } from 'src/editor/action/undo'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { DesignEffect } from 'src/editor/workbench/design/effect'
 import { YState } from 'src/editor/y-adapter/y-state'
@@ -15,9 +15,9 @@ export class DesignStroke extends DesignEffect<'stroke'> {
     protected readonly undo: Undo,
     protected readonly yState: YState,
     protected readonly schemaCreator: SchemaCreator,
-    protected readonly nodeController: NodeController,
+    protected readonly nodeAction: NodeAction,
   ) {
-    super('stroke', () => schemaCreator.stroke(), yState, nodeController)
+    super('stroke', () => schemaCreator.stroke(), yState, nodeAction)
     autoBind(this)
   }
 

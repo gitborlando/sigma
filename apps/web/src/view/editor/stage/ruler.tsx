@@ -1,5 +1,5 @@
 import { Matrix } from 'src/editor/geometry'
-import { snapSceneXYToHalfPixel } from 'src/editor/utils/misc'
+import { snapSceneXYToHalfPixel } from 'src/editor/utils'
 import { useEditorServices } from 'src/view/hooks/editor'
 
 const RULER_COLOR = '#9f9f9f'
@@ -26,9 +26,9 @@ export const StageRulerComp: FC<{}> = observer(({}) => {
 
 export const Ruler: FC<{ type: 'horizontal' | 'vertical' }> = observer(
   ({ type }) => {
-    const { stageViewport, nodeController } = useEditorServices()
+    const { stageViewport, nodeAction } = useEditorServices()
     const { bound, zoom, offset: offsetXY } = stageViewport
-    const datumXY = nodeController.datumXY
+    const datumXY = nodeAction.datumXY
 
     const getTicks = () => {
       const ticks: { offset: number; value: number }[] = []
