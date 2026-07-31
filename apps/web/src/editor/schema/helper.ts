@@ -94,7 +94,7 @@ export class SchemaHelper {
       node = this.find<S.Node>(node.parentId)
       if (node.matrix) matrix.prepend(node.matrix)
     }
-    return matrix.plain()
+    return matrix
   }
 
   static getRootMatrix(node: S.Node) {

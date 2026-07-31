@@ -52,7 +52,7 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
       `500 ${FONT_SIZE}px GoogleSansCode`,
     ) || TEXT_WIDTH
 
-  const textMatrix = Matrix.of(SchemaHelper.getAncestorMatrix(frame))
+  const textMatrix = SchemaHelper.getAncestorMatrix(frame)
     .append(Matrix.of(frame.matrix))
     .append(Matrix.identity().shift({ x: 0, y: -(LINE_HEIGHT + 4) / zoom }))
 

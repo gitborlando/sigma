@@ -291,7 +291,7 @@ export class StageTransformer extends Service {
         const width = XY.distance(lineStart, lineEnd)
         const rotation = Angle.sweep(XY.vector(lineEnd, lineStart))
         const sceneMatrix = Matrix.identity().rotate(rotation).shift(lineStart)
-        const matrix = Matrix.of(forwardMatrix).invert().append(sceneMatrix).plain()
+        const matrix = forwardMatrix.invert().append(sceneMatrix).plain()
         const result: ResizeResult = {
           mrect: new MRect(width, 0, matrix),
           points: [
@@ -380,7 +380,7 @@ export class StageTransformer extends Service {
     if (this.select.selectIds.length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
     } else {
-      const localDiff = Matrix.of(ancestorsMatrix)
+      const localDiff = ancestorsMatrix
         .invert()
         .append(this.diffMatrix)
         .append(ancestorsMatrix)
