@@ -176,11 +176,9 @@ export class StageCreate extends Service {
   }
 
   private findParent() {
-    const frame = this.stageEvent
-      .getElemsFromPoint()
-      .filter((elem) => elem.type === 'sceneElem')
-      .find((elem) => SchemaHelper.isById(elem.id, 'frame'))
-
+    const frame = this.stageEvent.hitSceneElems.find((elem) =>
+      SchemaHelper.isById(elem.id, 'frame'),
+    )
     if (frame) return this.yState.find<S.NodeParent>(frame.id)
     return this.yState.find<S.Page>(this.select.selectPageId)
   }

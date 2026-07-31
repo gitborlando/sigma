@@ -1,5 +1,6 @@
 import { clampIndex } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
+import { IMatrix } from 'src/editor/geometry'
 import { Service } from 'src/global/service'
 import { YState } from '../y-adapter/y-state'
 
@@ -62,5 +63,9 @@ export class SchemaMutator extends Service {
 
     this.yState.set<S.Node>([node.id, 'width'], width)
     this.yState.set<S.Node>([node.id, 'height'], height)
+  }
+
+  setMatrix(nodeOrPage: S.Node | S.Page, matrix: IMatrix) {
+    this.yState.set<S.Node | S.Page>([nodeOrPage.id, 'matrix'], matrix)
   }
 }

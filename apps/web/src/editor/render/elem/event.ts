@@ -15,6 +15,8 @@ export type ElemMouseEvent = ElemEventBase & {
   xy: IXY
   hovered: boolean
   hostEvent: MouseEvent
+  localXY: IXY
+  globalXY: IXY
 }
 
 export type ElemEventFunc = (e: ElemEvent) => void
@@ -60,16 +62,17 @@ export class ElemEventHandler {
   triggerEvent = (props: {
     e: MouseEvent
     xy: IXY
+    globalXY: IXY
     hit: boolean
     stopPropagation: NoopFunc
     ancestors: Elem[]
   }) => {
     if (this.eventCount === 0) return
 
-    const { e, xy, hit, stopPropagation, ancestors } = props
+    const { e, xy, globalXY, hit, stopPropagation, ancestors } = props
     const mouseEvent = { xy, stopPropagation, hostEvent: e as MouseEvent, ancestors }
     const mouseEventCallback = (func: ElemEventFunc) =>
-      func({ ...mouseEvent, hovered: hit })
+      func({ ...mouseEvent, hovered: hit, localXY: xy, globalXY })
 
     match(e.type, {
       mousedown: () => {

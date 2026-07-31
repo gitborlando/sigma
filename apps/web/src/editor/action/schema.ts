@@ -1,5 +1,6 @@
 import { jsonParse } from '@gitborlando/utils'
 import JSZip from 'jszip'
+import { NodeAction } from 'src/editor/action/node'
 import { Undo } from 'src/editor/action/undo'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
@@ -26,6 +27,7 @@ export class SchemaAction extends Service {
     private readonly undo: Undo,
     private readonly select: Select,
     private readonly layerNodeTree: LayerNodeTree,
+    private readonly nodeAction: NodeAction,
   ) {
     super()
     autoBind(this)
@@ -40,6 +42,7 @@ export class SchemaAction extends Service {
 
     this.yState.setup(schema)
     this.yState.register(this.layerNodeTree.onYStatePatch)
+    // this.yState.onPatch(this.nodeAction.onYStatePatch)
 
     // 开发中暂时不启用y-sync
     // this.ySync.init(fileId, this.yState.doc)
@@ -56,6 +59,7 @@ export class SchemaAction extends Service {
     this.undo.mobxUndo.rebase()
 
     this.sessionFileId = fileId
+    this.effect(() => (this.sessionFileId = ''))
   }
 
   private async fetchSchema(fileId: string) {

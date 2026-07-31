@@ -42,6 +42,7 @@ export class SchemaCreator extends Service {
       id: `page_${miniId(8)}`,
       childIds: [],
       name: this.createNodeName('page'),
+      ...MRect.identity(Infinity, Infinity).plain(),
     }
   }
 

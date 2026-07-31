@@ -77,7 +77,7 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
       node={text}
       events={{
         hover: ({ hovered }) => {
-          hovered && (stageEvent.hoverId = frame.id)
+          stageEvent.hintId = hovered ? frame.id : undefined
           setHovered(hovered)
         },
         mousedown: stopPropagation(() => {

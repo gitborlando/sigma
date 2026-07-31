@@ -1,5 +1,4 @@
 import { iife } from '@gitborlando/utils'
-import { withPrepare } from '@gitborlando/utils/react'
 import { entries } from 'mobx'
 import { Fragment } from 'react'
 import { SchemaHelper } from 'src/editor/schema/helper'
@@ -7,62 +6,59 @@ import { useEditorServices } from 'src/view/hooks/editor'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
-type OutlineInfo = { hovered: boolean; selected?: boolean; color?: string }
+type OutlineInfo = {
+  hovered?: boolean
+  hinted?: boolean
+  selected?: boolean
+  color?: string
+}
 
-export const StageOutlineComp: FC<{}> = observer(
-  withPrepare(
-    ({}) => {
-      const { stageTransformer, stageViewport, stageMove } = useEditorServices()
-      if (stageTransformer.isMoving) return null
-      if (stageViewport.isZooming) return null
-      if (stageMove.isMoving) return null
-      return {}
-    },
-    observer(({}) => {
-      const { stageEvent, select, yAware } = useEditorServices()
-      const { hoverId } = stageEvent
-      const others = yAware.others
+export const StageOutlineComp: FC<{}> = observer(({}) => {
+  const { stageEvent, select, yAware } = useEditorServices()
+  const { hoverId, hintId } = stageEvent
+  const others = yAware.others
 
-      const outlineInfoLMap = iife(() => {
-        const map: Record<string, OutlineInfo> = {}
-        for (const [_, client] of entries(others)) {
-          for (const id of Object.keys(client.selection || {})) {
-            map[id] = {
-              hovered: hoverId === id,
-              selected: client.selection[id],
-              color: client.color,
-            }
-          }
+  const outlineInfoLMap = iife(() => {
+    const map: Record<string, OutlineInfo> = {}
+    for (const [_, client] of entries(others)) {
+      for (const id of Object.keys(client.selection || {})) {
+        map[id] = {
+          hovered: hoverId === id,
+          selected: client.selection[id],
+          color: client.color,
         }
-        if (hoverId && !SchemaHelper.isRootFrame(hoverId)) {
-          map[hoverId] = { hovered: true }
-        }
-        for (const id of select.selectIds) {
-          map[id] = { hovered: hoverId === id, selected: true }
-        }
-        return map
-      })
+      }
+    }
+    if (hintId) map[hintId] = { hinted: true }
+    if (hoverId) map[hoverId] = { hovered: true }
+    for (const id of select.selectIds) {
+      map[id] = { hovered: hoverId === id, selected: true }
+    }
+    return map
+  })
 
-      return (
-        <Fragment>
-          {Object.entries(outlineInfoLMap).map(([id, outlineInfo]) => (
-            <SingleOutline key={id} id={id} outlineInfo={outlineInfo} />
-          ))}
-        </Fragment>
-      )
-    }),
-  ),
-)
+  return (
+    <Fragment>
+      {Object.entries(outlineInfoLMap).map(([id, outlineInfo]) => (
+        <SingleOutline key={id} id={id} outlineInfo={outlineInfo} />
+      ))}
+    </Fragment>
+  )
+})
 
 const SingleOutline: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
   ({ id, outlineInfo }) => {
-    const { schemaCreator, stageViewport } = useEditorServices()
+    const { schemaCreator, stageViewport, stageTransformer } = useEditorServices()
+    const { color, hovered, hinted, selected } = outlineInfo
     const zoom = stageViewport.zoom
-    const { color, hovered, selected } = outlineInfo
     const node = T<S.Node>(useSchema((schema) => schema[id]))
-    const strokeColor = hovered || selected ? themeColor() : color
-    const strokeWidth = selected ? 1 : 2
-    const matrix = SchemaHelper.getSceneMatrix(node)
+    const strokeColor = hovered || hinted || selected ? themeColor() : color
+    const strokeWidth = iife(() => {
+      let width = selected ? 1 : 2
+      if (stageTransformer.isMoving && !hinted) width = 0
+      return width
+    })
+    const matrix = SchemaHelper.getRootMatrix(node)
     const outline = SchemaHelper.clone<S.Node>(node, {
       id: `${id}-outline`,
       fills: [],

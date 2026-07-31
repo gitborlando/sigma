@@ -7,6 +7,7 @@ import { HitTest, IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { SchemaMutator } from 'src/editor/schema/mutator'
+import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -63,11 +64,11 @@ export class StageTransformer extends Service {
   @observable isMoving = false
 
   @computed get isSingleSelect() {
-    return this.nodeAction.selectNodes.length === 1
+    return this.select.selectedNodes.length === 1
   }
   @computed get isSelectOneLine() {
-    if (this.nodeAction.selectNodes.length !== 1) return false
-    return SchemaHelper.is(this.nodeAction.selectNodes[0], 'line')
+    if (this.select.selectedNodes.length !== 1) return false
+    return SchemaHelper.is(this.select.selectedNodes[0], 'line')
   }
 
   private action: TransformerAction = 'move'
@@ -85,8 +86,9 @@ export class StageTransformer extends Service {
     private readonly undo: Undo,
     private readonly stageViewport: StageViewport,
     private readonly setting: Setting,
-    private readonly nodeAction: NodeAction,
+    private readonly select: Select,
     private readonly schemaMutator: SchemaMutator,
+    private readonly nodeAction: NodeAction,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -98,12 +100,12 @@ export class StageTransformer extends Service {
 
     if (selectNodes.length === 1) {
       const node = selectNodes[0]
-      const matrix = SchemaHelper.getSceneMatrix(node)
+      const matrix = SchemaHelper.getRootMatrix(node)
       return (this.mrect = MRect.of({ ...node, matrix }))
     }
 
     const aabbList = selectNodes.map((node) => {
-      const matrix = SchemaHelper.getSceneMatrix(node)
+      const matrix = SchemaHelper.getRootMatrix(node)
       return MRect.fromRect(node, matrix).aabb
     })
     const rect = AABB.rect(AABB.merge(aabbList))
@@ -118,7 +120,7 @@ export class StageTransformer extends Service {
   }
 
   flip(axis: 'x' | 'y') {
-    if (this.nodeAction.selectNodes.length < 2) return
+    if (this.select.selectedNodes.length < 2) return
 
     const { startMRect } = this.onStartTransform()
     const { center } = startMRect
@@ -134,6 +136,8 @@ export class StageTransformer extends Service {
   onMove(e: ElemMouseEvent) {
     const { startMRect, startMatrix } = this.onStartTransform()
     const startAABB = startMRect.aabb
+    let hasMovedNodesInOrOutFrame = false
+    let previousMatrix = startMatrix
 
     this.dragger
       .onMove(({ shift }) => {
@@ -147,15 +151,26 @@ export class StageTransformer extends Service {
         )
 
         const newMatrix = Matrix.of(startMatrix).shift(shift).shift(snapDelta)
-        this.diffMatrix = newMatrix.divide(startMatrix)
+        this.diffMatrix = Matrix.of(newMatrix).divide(previousMatrix)
+        previousMatrix = newMatrix
 
         this.transform()
+
+        hasMovedNodesInOrOutFrame = this.nodeAction.moveNodesInOrOutFrame(
+          XY.of(e.globalXY).plus(shift),
+        )
+        this.select.getSelectedNodes().forEach((node) => {
+          this.mrectCache.set(node.id, MRect.of(node))
+        })
       })
       .onDestroy(({ moved }) => {
         this.isMoving = false
         this.onEndTransform()
         if (moved) {
-          this.undo.track('state', t('move nodes'))
+          const desc = hasMovedNodesInOrOutFrame
+            ? 'moved nodes in or out frame'
+            : 'moved nodes'
+          this.undo.track('state', t(desc))
         }
       })
       .start(e.hostEvent)
@@ -164,7 +179,7 @@ export class StageTransformer extends Service {
   onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {
     this.isResizing = true
     const { startMRect, startMatrix } = this.onStartTransform()
-    const node = this.nodeAction.selectNodes[0]
+    const node = this.select.selectedNodes[0]
 
     if (this.isSelectOneLine) {
       this.resizeLine(node as S.Line, startMRect, directions, options?.e)
@@ -260,7 +275,7 @@ export class StageTransformer extends Service {
     const isMoveStartHandler = directions.includes('left')
     const fixedPoint = isMoveStartHandler ? end : start
     const movingPoint = isMoveStartHandler ? start : end
-    const forwardMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
+    const forwardMatrix = SchemaHelper.getAncestorMatrix(node)
     const [startPoint, endPoint] = node.points
 
     this.dragger
@@ -328,7 +343,7 @@ export class StageTransformer extends Service {
   private mrectCache = new Map<ID, IMRect>()
 
   private onStartTransform() {
-    this.nodeAction.selectNodes.forEach((node) => {
+    this.select.selectedNodes.forEach((node) => {
       this.mrectCache.set(node.id, MRect.of(node))
     })
     const startMRect = this.mrect.clone()
@@ -351,7 +366,7 @@ export class StageTransformer extends Service {
 
   private transform() {
     this.yState.transact(() => {
-      this.nodeAction.selectNodes.forEach(this.applyToNode)
+      this.select.getSelectedNodes().forEach(this.applyToNode)
     })
   }
 
@@ -360,9 +375,9 @@ export class StageTransformer extends Service {
     if (!this.diffMatrix || !mrect) return
 
     const startMRect = MRect.of(mrect)
-    const ancestorsMatrix = SchemaHelper.getForwardAccumulatedMatrix(node)
+    const ancestorsMatrix = SchemaHelper.getAncestorMatrix(node)
 
-    if (this.nodeAction.selectNodes.length === 1 && this.action === 'resize') {
+    if (this.select.selectIds.length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
     } else {
       const localDiff = Matrix.of(ancestorsMatrix)

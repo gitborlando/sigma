@@ -4,7 +4,6 @@ import { NodeAction } from 'src/editor/action/node'
 import { PageAction } from 'src/editor/action/page'
 import { SchemaAction } from 'src/editor/action/schema'
 import { SelectAction } from 'src/editor/action/select'
-import { StageAction } from 'src/editor/action/stage'
 import { Undo } from 'src/editor/action/undo'
 import { ViewportAction } from 'src/editor/action/viewport'
 import { ElemDrawer } from 'src/editor/render/elem/drawer'
@@ -15,13 +14,14 @@ import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaMutator } from 'src/editor/schema/mutator'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
+import { Stage } from 'src/editor/stage'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageMove } from 'src/editor/stage/interact/move'
 import { StageSelect } from 'src/editor/stage/interact/select'
-import { StageTransformer } from 'src/editor/stage/tools/transformer'
+import { StageTransformer } from 'src/editor/stage/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { DesignAlign } from 'src/editor/workbench/design/align'
 import { DesignFill } from 'src/editor/workbench/design/fill'
@@ -43,7 +43,7 @@ const editorServices = {
   pageAction: PageAction,
   selectAction: SelectAction,
   viewportAction: ViewportAction,
-  stageAction: StageAction,
+  stage: Stage,
   schemaAction: SchemaAction,
 
   /** render */

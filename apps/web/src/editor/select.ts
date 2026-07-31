@@ -3,6 +3,7 @@ import { Signal } from '@gitborlando/signal'
 import equal from 'fast-deep-equal'
 import { makeObservable } from 'mobx'
 import { Undo } from 'src/editor/action/undo'
+import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
 export type SelectState = { selection: Selection; selectPageId: ID | '' }
@@ -17,10 +18,12 @@ export class Select extends Service {
 
   private selectUndo: MobxUndoSlice<SelectState>
 
-  constructor(private readonly undo: Undo) {
+  constructor(
+    private readonly undo: Undo,
+    private readonly yState: YState,
+  ) {
     super()
     autoBind(makeObservable(this))
-
     this.selectUndo = this.undo.mobxUndo.register('select', this, [
       'selection',
       'selectPageId',
@@ -29,6 +32,22 @@ export class Select extends Service {
 
   @computed get selectIds() {
     return Object.keys(this.selection)
+  }
+
+  @computed get selectedNodes() {
+    return this.selectIds.map((id) => this.yState.state[id] as S.Node)
+  }
+
+  @computed get selectedNodes$() {
+    return this.selectIds.map((id) => this.yState.observedState[id] as S.Node)
+  }
+
+  @computed get selectedPage() {
+    return this.yState.state[this.selectPageId] as S.Page
+  }
+
+  getSelectedNodes() {
+    return this.selectIds.map((id) => this.yState.state[id] as S.Node)
   }
 
   select(id: ID) {

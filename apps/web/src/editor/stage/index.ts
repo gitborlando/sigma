@@ -4,18 +4,16 @@ import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { StageSelect } from 'src/editor/stage/interact/select'
 import { Service } from 'src/global/service'
 
 @reflection
-export class StageAction extends Service {
+export class Stage extends Service {
   constructor(
     private readonly renderSurface: RenderSurface,
     private readonly renderPipeline: RenderPipeline,
     private readonly renderTree: RenderTree,
     private readonly select: Select,
     private readonly stageInteract: StageInteract,
-    private readonly stageSelect: StageSelect,
     private readonly stageEvent: StageEvent,
   ) {
     super()

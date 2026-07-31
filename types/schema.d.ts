@@ -32,7 +32,8 @@ namespace S {
 
   type NodeParentBase = { childIds: string[] }
 
-  type Page = NodeParentBase & { type: 'page'; id: `page_${string}`; name: string }
+  type Page = NodeParentBase &
+    MRect & { type: 'page'; id: `page_${string}`; name: string }
 
   type NodeParent = Frame | Group | Page
 

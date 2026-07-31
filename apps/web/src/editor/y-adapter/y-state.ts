@@ -64,6 +64,10 @@ export class YState extends Service {
     return () => void this.downstream.delete(downstream)
   }
 
+  onPatch(hook: (patches: YStatePatch) => void) {
+    this.effect(this.flushPatch$.hook(hook))
+  }
+
   setup(schema: S.Schema) {
     this.patches = []
     this.doc = new Y.Doc()

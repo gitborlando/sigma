@@ -1,6 +1,6 @@
 import { firstOne, iife, objKeys } from '@gitborlando/utils'
 import { Undo } from 'src/editor/action/undo'
-import { Matrix } from 'src/editor/geometry'
+import { HitTest, IMRect, Matrix } from 'src/editor/geometry'
 import { MRect } from 'src/editor/geometry/mrect'
 import { RenderTree } from 'src/editor/render/tree'
 import { SchemaCreator } from 'src/editor/schema/creator'
@@ -8,6 +8,7 @@ import { SchemaHelper } from 'src/editor/schema/helper'
 import { SchemaMutator } from 'src/editor/schema/mutator'
 import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { Select, type Selection } from 'src/editor/select'
+import { StageEvent } from 'src/editor/stage/event'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
@@ -22,6 +23,7 @@ export class NodeAction extends Service {
     private readonly undo: Undo,
     private readonly schemaCreator: SchemaCreator,
     private readonly renderTree: RenderTree,
+    private readonly stageEvent: StageEvent,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -47,21 +49,24 @@ export class NodeAction extends Service {
       (id) => [id, true],
     )
     const selection = Object.fromEntries(selectIds)
+
     this.select.replaceSelection(selection)
     this.undo.track('client', t('select all nodes'))
   }
 
   deleteSelectedNodes() {
+    const traverse = createSchemaTraverse({
+      leave: ({ item, parent }) => {
+        if (!parent || !SchemaHelper.isNode(item)) return
+        this.schemaMutator.deleteChild(parent, item)
+      },
+    })
+
     this.yState.transact(() => {
-      const traverse = createSchemaTraverse({
-        leave: ({ item, parent }) => {
-          if (!parent || !SchemaHelper.isNode(item)) return
-          this.schemaMutator.deleteChild(parent, item)
-        },
-      })
       traverse(this.select.selectIds)
       this.select.clearSelect()
     })
+
     this.undo.track('all', t('delete nodes'))
   }
 
@@ -75,27 +80,26 @@ export class NodeAction extends Service {
     if (!this.copiedIds.length) return
 
     const newSelection = <Selection>{}
+    const traverse = createSchemaTraverse<{ newNode?: S.Node | S.NodeParent }>({
+      enter: (ctx) => {
+        const { item, parent, forwardCtx, depth } = ctx
+        if (!parent || !SchemaHelper.isNode(item)) return false
+
+        const newParent = forwardCtx?.newNode || parent
+        const newNode = SchemaHelper.clone(item, {
+          name: this.schemaCreator.createNodeName(item.type),
+        })
+        this.schemaMutator.addNodes([newNode])
+        this.schemaMutator.insertChildAt(newParent as S.NodeParent, newNode)
+        ctx.newNode = newNode
+        if (depth === 0) newSelection[newNode.id] = true
+      },
+    })
 
     this.yState.transact(() => {
-      const traverse = createSchemaTraverse<{ newNode?: S.Node | S.NodeParent }>({
-        enter: (ctx) => {
-          const { item, parent, forwardCtx, depth } = ctx
-          if (!parent || !SchemaHelper.isNode(item)) return false
-
-          const newParent = forwardCtx?.newNode || parent
-          const newNode = SchemaHelper.clone(item, {
-            name: this.schemaCreator.createNodeName(item.type),
-          })
-          this.schemaMutator.addNodes([newNode])
-          this.schemaMutator.insertChildAt(newParent as S.NodeParent, newNode)
-          ctx.newNode = newNode
-          if (depth === 0) newSelection[newNode.id] = true
-        },
-      })
       traverse(this.copiedIds)
       this.copiedIds = []
     })
-
     this.select.replaceSelection(newSelection)
 
     this.undo.track('all', `${t('paste nodes')}: ${objKeys(newSelection).length}`)
@@ -150,6 +154,42 @@ export class NodeAction extends Service {
     this.select.replaceSelection({ [frameNode.id]: true })
 
     this.undo.track('all', t('create frame'))
+  }
+
+  moveNodesInOrOutFrame(sceneXY: IXY) {
+    const elems = this.stageEvent.hitSceneElems
+    const hitTopFrameElem = elems.find((elem) => elem.node.type === 'frame')
+    const estimatedParent: S.NodeParent & IMRect = hitTopFrameElem
+      ? (hitTopFrameElem.node as S.Frame)
+      : Object.assign(
+          this.select.selectedPage,
+          MRect.identity(Infinity, Infinity).plain(),
+        )
+    if (!estimatedParent) return false
+
+    let moved = false
+    const parent = estimatedParent
+    const parentRootMatrix =
+      parent.type === 'page' ? parent.matrix : SchemaHelper.getRootMatrix(parent)
+    const xy = Matrix.getLocalXY(sceneXY, parentRootMatrix)
+
+    this.selectNodes.forEach((node) => {
+      if (parent.id === node.parentId || parent.id === node.id) return
+
+      if (HitTest.hitRoundRect(parent.width, parent.height, 0)(xy)) {
+        const nodeRootMatrix = SchemaHelper.getRootMatrix(node)
+        const nodeLocalMatrix = Matrix.getLocal(nodeRootMatrix, parentRootMatrix)
+
+        this.schemaMutator.removeChild(node.parentId, node.id)
+        this.schemaMutator.insertChildAt(parent, node)
+        this.schemaMutator.setMatrix(node, nodeLocalMatrix.plain())
+
+        this.stageEvent.hintId = parent.type !== 'page' ? parent.id : ''
+        moved = true
+      }
+    })
+
+    return moved
   }
 
   private getDatumXY() {

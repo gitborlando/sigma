@@ -88,7 +88,7 @@ export class SchemaHelper {
     return node
   }
 
-  static getForwardAccumulatedMatrix(node: S.Node) {
+  static getAncestorMatrix(node: S.Node) {
     const matrix = Matrix.identity()
     while (node.parentId) {
       node = this.find<S.Node>(node.parentId)
@@ -97,16 +97,8 @@ export class SchemaHelper {
     return matrix.plain()
   }
 
-  static getSceneMatrix(node: S.Node) {
-    const matrix = Matrix.of(node.matrix)
-    while (node.parentId) {
-      const parent = this.find<S.Node>(node.parentId)
-      if (parent.matrix) {
-        matrix.prepend(Matrix.of(parent.matrix))
-      }
-      node = parent
-    }
-    return matrix.plain()
+  static getRootMatrix(node: S.Node) {
+    return Matrix.of(node.matrix).prepend(this.getAncestorMatrix(node))
   }
 
   static getPageChildIds(pageId: ID) {

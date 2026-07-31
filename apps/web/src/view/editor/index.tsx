@@ -13,36 +13,42 @@ export const EditorComp = withSuspense(
   ({}) => {
     const { fileId } = useParams<{ fileId: string }>()
     const editor = Editor.getInstance()
+    const [isSetup, setIsSetup] = useState(false)
 
     const schemaAction = editor.resolve('schemaAction')
     const stageCursor = editor.resolve('stageCursor')
-    const stageAction = editor.resolve('stageAction')
+    const stage = editor.resolve('stage')
     const elemDrawer = editor.resolve('elemDrawer')
 
     const schema = suspend(() => schemaAction.loadSchema(fileId!), [fileId])
     const textBreaker = suspend(() => createTextBreaker(), ['text-breaker'])
 
-    schemaAction.setupSchema(fileId!, schema)
-    elemDrawer.setTextBreaker(textBreaker)
+    useEffect(() => {
+      schemaAction.setupSchema(fileId!, schema)
+      elemDrawer.setTextBreaker(textBreaker)
+      setIsSetup(true)
+      return () => editor.dispose()
+    }, [schema, textBreaker])
 
     useEffect(() => {
-      stageAction.onCanvasInited()
+      if (!isSetup) return
+      stage.onCanvasInited()
       stageCursor.setCursor('select')
-
-      return () => editor.dispose()
-    }, [editor, fileId])
+    }, [isSetup])
 
     return (
-      <EditorContext.Provider value={editor}>
-        <G vertical='auto 1fr'>
-          <EditorHeaderComp />
-          <G horizontal='auto 1fr auto'>
-            <LeftPanelComp />
-            <StageComp />
-            <RightPanelComp />
+      isSetup && (
+        <EditorContext.Provider value={editor}>
+          <G vertical='auto 1fr'>
+            <EditorHeaderComp />
+            <G horizontal='auto 1fr auto'>
+              <LeftPanelComp />
+              <StageComp />
+              <RightPanelComp />
+            </G>
           </G>
-        </G>
-      </EditorContext.Provider>
+        </EditorContext.Provider>
+      )
     )
   },
   <Loading />,

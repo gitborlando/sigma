@@ -167,17 +167,43 @@ export class Matrix {
     return new Matrix(a, b, c, d, tx, ty)
   }
 
+  static isFlipped(matrix: IMatrix) {
+    return matrix.a * matrix.d - matrix.b * matrix.c < 0
+  }
+
   static plain(matrix: IMatrix) {
     const { a, b, c, d, tx, ty } = matrix
     return { a, b, c, d, tx, ty }
   }
 
-  static isFlipped(matrix: IMatrix) {
-    return matrix.a * matrix.d - matrix.b * matrix.c < 0
-  }
-
   static vector(matrix: IMatrix) {
     const { a, b, c, d } = matrix
     return new Matrix(a, b, c, d, 0, 0)
+  }
+
+  /**
+   * let A = ancestorRootMatrix
+   * let n = nodeLocalMatrix
+   * let N = nodeRootMatrix
+   * A * n = N =>
+   * A.invert * A * n = A.invert * N =>
+   * (A.invert * A) * n = A.invert * N =>
+   * n = A.invert * N
+   */
+  static getLocal(selfRootMatrix: IMatrix, ancestorRootMatrix: IMatrix) {
+    return Matrix.of(ancestorRootMatrix).invert().append(selfRootMatrix)
+  }
+
+  /**
+   * let A = ancestorRootMatrix
+   * let xy = nodeLocalMatrix
+   * let XY = rootXY
+   * A * xy = XY =>
+   * A.invert * A * xy = A.invert * XY =>
+   * (A.invert * A) * xy = A.invert * XY =>
+   * xy = A.invert * N
+   */
+  static getLocalXY(rootXY: IXY, parentRootMatrix: IMatrix) {
+    return Matrix.of(parentRootMatrix).invert().applyXY(rootXY)
   }
 }

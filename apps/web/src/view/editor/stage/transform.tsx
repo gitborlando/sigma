@@ -19,7 +19,8 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
   } = useEditorServices()
   const selectNodes = useSelectNodes()
   const { mrect, isMoving } = stageTransformer
-  const shouldHidden = isMoving || stageViewport.isZooming || stageMove.isMoving
+  const shouldHidden =
+    (false && isMoving) || stageViewport.isZooming || stageMove.isMoving
 
   useLayoutEffect(() => {
     stageTransformer.setup(selectNodes)
@@ -30,7 +31,6 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
   const mousedown = (e: ElemMouseEvent) => {
     if (stageInteract.interaction !== 'select') return
 
-    stageEvent.disablePointEvent(true)
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()
       stageTransformer.onMove(e)

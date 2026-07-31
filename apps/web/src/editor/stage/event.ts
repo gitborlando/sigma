@@ -7,22 +7,25 @@ import { Elem } from 'src/editor/render/elem/elem'
 import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 
 @reflection
 export class StageEvent extends Service {
   @observable hoverId?: string
+  @observable hintId?: string
+
+  hitSceneElems: Elem[] = []
 
   private eventXY = XY.$(0, 0)
-  private elemsFromPoint: Elem[] = []
   private isPointerEventNone = false
 
   constructor(
     private readonly renderTree: RenderTree,
     private readonly renderSurface: RenderSurface,
-    private readonly stageViewport: StageViewport,
     private readonly renderPipeline: RenderPipeline,
+    private readonly stageViewport: StageViewport,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -31,18 +34,7 @@ export class StageEvent extends Service {
   onCanvasInited() {
     this.effect(this.renderSurface.addEvent('mousedown', this.onMouseEvent))
     this.effect(this.renderSurface.addEvent('mousemove', this.onMouseEvent))
-  }
-
-  getElemsFromPoint(e?: IXY) {
-    if (!e) return this.elemsFromPoint
-
-    this.prepareHitTest(e)
-
-    this.traverseRootElems(({ elem, hitList, xy }) => {
-      if (elem.hitTest(xy!)) hitList?.push(elem)
-    })
-
-    return this.elemsFromPoint
+    this.effect(this.renderSurface.addEvent('mouseup', () => (this.hintId = '')))
   }
 
   enablePointEvent() {
@@ -64,9 +56,9 @@ export class StageEvent extends Service {
   }
 
   private prepareHitTest(xy: IXY) {
+    this.hitSceneElems.length = 0
     const canvasXY = this.stageViewport.toCanvasXY(xy)
     this.eventXY = this.stageViewport.sceneMatrix.invertXY(canvasXY)
-    this.elemsFromPoint.length = 0
     this.renderPipeline.updateRenderPriorityXY(this.eventXY)
   }
 
@@ -77,6 +69,7 @@ export class StageEvent extends Service {
       stopPropagation: NoopFunc
       hitList?: Elem[]
       xy?: IXY
+      globalXY?: IXY
     }) => any,
   ) {
     let stopped = false
@@ -97,14 +90,16 @@ export class StageEvent extends Service {
       if (xy) {
         if (elem.node?.matrix) xy = Matrix.of(elem.renderMatrix).invertXY(xy)
 
-        const subHitList: Elem[] = []
+        const hitChildElems: Elem[] = []
         reverseFor(elem.children, (child) =>
-          traverse({ elem: child, hitList: subHitList, xy }),
+          traverse({ elem: child, hitList: hitChildElems, xy }),
         )
-        this.elemsFromPoint.push(...subHitList)
-        walk({ elem, stopped, stopPropagation, hitList, xy })
+        if (elem.type === 'sceneElem') this.hitSceneElems.push(...hitChildElems)
+        walk({ elem, stopped, stopPropagation, hitList, xy, globalXY: this.eventXY })
       } else {
-        reverseFor(elem.children, (child) => traverse({ elem: child }))
+        reverseFor(elem.children, (child) => {
+          traverse({ elem: child })
+        })
         walk({ elem, stopped, stopPropagation })
       }
     }
@@ -112,10 +107,11 @@ export class StageEvent extends Service {
     traverse({ elem: this.renderTree.widgetRoot, xy: this.eventXY, hitList: [] })
     traverse({ elem: this.renderTree.sceneRoot, xy: this.eventXY, hitList: [] })
 
-    const hover = firstOne(
-      this.elemsFromPoint.filter((elem) => elem.type === 'sceneElem'),
-    )
-    this.hoverId = this.hoverId !== hover?.id ? hover?.id : this.hoverId
+    const hovered = firstOne(this.hitSceneElems)
+    if (!this.hintId) {
+      if (hovered?.id && SchemaHelper.isRootFrame(hovered.id)) return
+      this.hoverId = this.hoverId !== hovered?.id ? hovered?.id : this.hoverId
+    }
   }
 
   private onMouseEvent(e: MouseEvent) {
@@ -125,25 +121,27 @@ export class StageEvent extends Service {
       document.activeElement.blur()
     }
 
-    const point = XY.client(e)
-    this.prepareHitTest(point)
+    this.prepareHitTest(XY.client(e))
 
-    this.traverseRootElems(({ elem, stopped, stopPropagation, hitList, xy }) => {
-      const hit = elem.hitTest(xy!)
+    this.traverseRootElems(
+      ({ elem, stopped, stopPropagation, hitList, xy, globalXY }) => {
+        const hit = elem.hitTest(xy!)
 
-      if (hit) {
-        hitList?.push(elem)
-      }
+        if (hit) {
+          hitList?.push(elem)
+        }
 
-      if (!stopped) {
-        elem.eventHandle.triggerEvent({
-          e,
-          xy: xy!,
-          hit,
-          stopPropagation,
-          ancestors: hitList || [],
-        })
-      }
-    })
+        if (!stopped && xy && globalXY) {
+          elem.eventHandle.triggerEvent({
+            e,
+            xy,
+            globalXY,
+            hit,
+            stopPropagation,
+            ancestors: hitList || [],
+          })
+        }
+      },
+    )
   }
 }
