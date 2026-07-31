@@ -48,7 +48,7 @@ export class LayerNodeTree extends Service {
         this.expandedNodeMap.set(item.id, expanded)
       },
     })
-    traverse(SchemaHelper.getPageChildIds(this.select.selectPageId))
+    traverse(this.select.selectedPage.childIds)
   }
 
   onYStatePatch(patches: YStatePatch[]) {
@@ -75,7 +75,7 @@ export class LayerNodeTree extends Service {
         return !!this.expandedNodeMap.get(item.id)
       },
     })
-    traverse(SchemaHelper.getPageChildIds(this.select.selectPageId))
+    traverse(this.select.selectedPage.childIds)
     return nodeInfoList
   }
 }

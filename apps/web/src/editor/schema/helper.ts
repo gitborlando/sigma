@@ -100,8 +100,4 @@ export class SchemaHelper {
   static getRootMatrix(node: S.Node) {
     return Matrix.of(node.matrix).prepend(this.getAncestorMatrix(node))
   }
-
-  static getPageChildIds(pageId: ID) {
-    return this.find<S.Page>(pageId).childIds
-  }
 }

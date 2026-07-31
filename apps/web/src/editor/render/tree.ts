@@ -48,7 +48,7 @@ export class RenderTree extends Service {
         if (!SchemaHelper.isNode(item)) return false
         this.render('add', [item.id])
       },
-    })(SchemaHelper.getPageChildIds(this.select.selectPageId))
+    })(this.select.selectedPage.childIds)
   }
 
   onPatchRender() {

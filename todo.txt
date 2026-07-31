@@ -1,2 +1,2 @@
-SchemaHelper.getPageChildIds(this.select.selectPageId)
+
 

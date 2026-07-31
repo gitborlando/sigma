@@ -37,16 +37,15 @@ export class NodeAction extends Service {
     this.yState.transact(() => {
       this.yState.set<S.Node>([id, 'name'], name)
     })
+
     this.undo.track('state', t('rename node'))
   }
 
   selectAllNodes() {
-    const selectIds = SchemaHelper.getPageChildIds(this.select.selectPageId).map(
-      (id) => [id, true],
-    )
+    const selectIds = this.select.selectedPage.childIds.map((id) => [id, true])
     const selection = Object.fromEntries(selectIds)
-
     this.select.replaceSelection(selection)
+
     this.undo.track('client', t('select all nodes'))
   }
 
