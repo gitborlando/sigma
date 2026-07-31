@@ -169,7 +169,7 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
   const { width, height } = stageTransformer.mrect.plain()
   const mrect = MRect.identity(width, height)
   const xy = arrayLoopGet(mrect.vertices, index)
-  const size = 8 / zoom
+  const size = 12 / zoom
 
   let p1 = arrayLoopGet(mrect.vertices, index + 1)
   let p2 = arrayLoopGet(mrect.vertices, index - 1)
