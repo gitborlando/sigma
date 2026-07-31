@@ -1,7 +1,7 @@
 import { AABB } from '@gitborlando/geo'
-import { NodeAction } from 'src/editor/action/node'
 import { MRect } from 'src/editor/geometry'
 import { RenderTree } from 'src/editor/render/tree'
+import { Select } from 'src/editor/select'
 import { Service } from 'src/global/service'
 import { Undo } from '../../action/undo'
 import { SchemaHelper } from '../../schema/helper'
@@ -29,8 +29,8 @@ export class DesignAlign extends Service {
   constructor(
     private readonly yState: YState,
     private readonly undo: Undo,
+    private readonly select: Select,
     private readonly renderTree: RenderTree,
-    private readonly nodeAction: NodeAction,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -49,7 +49,7 @@ export class DesignAlign extends Service {
   }
 
   private setup() {
-    const selectedNodes = this.nodeAction.selectNodes
+    const selectedNodes = this.select.selectedNodes
 
     if (selectedNodes.length === 0) {
       this.canAlign = false

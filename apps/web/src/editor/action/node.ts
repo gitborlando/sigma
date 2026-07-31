@@ -33,10 +33,6 @@ export class NodeAction extends Service {
     return this.getDatumXY()
   }
 
-  @computed get selectNodes() {
-    return this.select.selectIds.map((id) => this.yState.observedState[id] as S.Node)
-  }
-
   renameNode(id: string, name: string) {
     this.yState.transact(() => {
       this.yState.set<S.Node>([id, 'name'], name)
@@ -107,7 +103,7 @@ export class NodeAction extends Service {
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
     this.yState.transact(() => {
-      this.selectNodes.forEach((node) => {
+      this.select.getSelectedNodes().forEach((node) => {
         const parent = this.yState.find<S.NodeParent>(node.parentId)
         let index = parent.childIds.indexOf(node.id)
         index = iife(() => {
@@ -124,7 +120,7 @@ export class NodeAction extends Service {
   }
 
   wrapInFrame() {
-    const selected = this.selectNodes
+    const selected = this.select.getSelectedNodes()
     if (selected.length === 0) return
 
     const aabbList = selected.map((node) => this.renderTree.findElem(node.id).aabb)
@@ -173,7 +169,7 @@ export class NodeAction extends Service {
       parent.type === 'page' ? parent.matrix : SchemaHelper.getRootMatrix(parent)
     const xy = Matrix.getLocalXY(sceneXY, parentRootMatrix)
 
-    this.selectNodes.forEach((node) => {
+    this.select.getSelectedNodes().forEach((node) => {
       if (parent.id === node.parentId || parent.id === node.id) return
 
       if (HitTest.hitRoundRect(parent.width, parent.height, 0)(xy)) {

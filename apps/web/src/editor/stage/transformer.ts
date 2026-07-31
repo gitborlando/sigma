@@ -120,7 +120,7 @@ export class StageTransformer extends Service {
   }
 
   flip(axis: 'x' | 'y') {
-    if (this.select.selectedNodes.length < 2) return
+    if (this.select.selectIds.length < 2) return
 
     const { startMRect } = this.onStartTransform()
     const { center } = startMRect
@@ -179,7 +179,7 @@ export class StageTransformer extends Service {
   onResize(directions: TRBL[], options?: { e?: MouseEvent; shiftKey?: boolean }) {
     this.isResizing = true
     const { startMRect, startMatrix } = this.onStartTransform()
-    const node = this.select.selectedNodes[0]
+    const node = this.select.getSelectedNodes()[0]
 
     if (this.isSelectOneLine) {
       this.resizeLine(node as S.Line, startMRect, directions, options?.e)
@@ -343,7 +343,7 @@ export class StageTransformer extends Service {
   private mrectCache = new Map<ID, IMRect>()
 
   private onStartTransform() {
-    this.select.selectedNodes.forEach((node) => {
+    this.select.getSelectedNodes().forEach((node) => {
       this.mrectCache.set(node.id, MRect.of(node))
     })
     const startMRect = this.mrect.clone()

@@ -4,6 +4,7 @@ import equal from 'fast-deep-equal'
 import { Patch, produceWithPatches } from 'immer'
 import { makeObservable } from 'mobx'
 import { NodeAction } from 'src/editor/action/node'
+import { Select } from 'src/editor/select'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
 
@@ -25,23 +26,21 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
     private readonly getInitialValue: () => DesignEffectValue<Key>,
     protected readonly yState: YState,
     protected readonly nodeAction: NodeAction,
+    protected readonly select: Select,
   ) {
     super()
     autoBind(makeObservable(this))
     this.effect(autorun(this.onSetupValue))
   }
 
-  protected get nodes() {
-    return this.nodeAction.selectNodes
-  }
-
   protected onSetupValue() {
+    const nodes = this.select.selectedNodes
     this.value = undefined
     this.isMixed = false
-    if (this.nodes.length === 0) return
+    if (nodes.length === 0) return
 
-    const firstValue = this.nodes[0][this.property]
-    if (this.allNodesSame(this.nodes, firstValue)) {
+    const firstValue = nodes[0][this.property]
+    if (this.allNodesSame(nodes, firstValue)) {
       this.value = clone(firstValue)
     }
   }
@@ -52,7 +51,7 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
     const [value, patches] = produceWithPatches(lastValue, setter)
 
     this.yState.transact(() => {
-      this.nodes.forEach((node) => {
+      this.select.getSelectedNodes().forEach((node) => {
         if (!isMixed) this.applyNodePatches(node.id, patches)
         else this.yState.set<S.Node>([node.id, this.property], value)
       })

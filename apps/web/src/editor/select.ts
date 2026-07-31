@@ -1,7 +1,7 @@
 import { MobxUndoSlice } from '@gitborlando/mobx-undo'
 import { Signal } from '@gitborlando/signal'
 import equal from 'fast-deep-equal'
-import { makeObservable } from 'mobx'
+import { makeObservable, untracked } from 'mobx'
 import { Undo } from 'src/editor/action/undo'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { Service } from 'src/global/service'
@@ -35,10 +35,6 @@ export class Select extends Service {
   }
 
   @computed get selectedNodes() {
-    return this.selectIds.map((id) => this.yState.state[id] as S.Node)
-  }
-
-  @computed get selectedNodes$() {
     return this.selectIds.map((id) => this.yState.observedState[id] as S.Node)
   }
 
@@ -47,7 +43,8 @@ export class Select extends Service {
   }
 
   getSelectedNodes() {
-    return this.selectIds.map((id) => this.yState.state[id] as S.Node)
+    const selectIds = untracked(() => this.selectIds)
+    return selectIds.map((id) => this.yState.state[id] as S.Node)
   }
 
   select(id: ID) {

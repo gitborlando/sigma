@@ -1,3 +1,2 @@
-node.selectNodes
 SchemaHelper.getPageChildIds(this.select.selectPageId)
 

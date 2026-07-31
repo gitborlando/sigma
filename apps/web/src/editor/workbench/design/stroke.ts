@@ -1,6 +1,7 @@
 import { NodeAction } from 'src/editor/action/node'
 import { Undo } from 'src/editor/action/undo'
 import { SchemaCreator } from 'src/editor/schema/creator'
+import { Select } from 'src/editor/select'
 import { DesignEffect } from 'src/editor/workbench/design/effect'
 import { YState } from 'src/editor/y-adapter/y-state'
 import { COLOR } from 'src/utils/color'
@@ -16,15 +17,17 @@ export class DesignStroke extends DesignEffect<'stroke'> {
     protected readonly yState: YState,
     protected readonly schemaCreator: SchemaCreator,
     protected readonly nodeAction: NodeAction,
+    protected readonly select: Select,
   ) {
-    super('stroke', () => schemaCreator.stroke(), yState, nodeAction)
+    super('stroke', () => schemaCreator.stroke(), yState, nodeAction, select)
     autoBind(this)
   }
 
   get strokeSide() {
-    if (this.nodes.length !== 1) return
+    const nodes = this.select.getSelectedNodes()
+    if (nodes.length !== 1) return
 
-    const node = this.nodes[0]
+    const node = nodes[0]
     if (!('strokeSide' in node)) return
 
     return node.strokeSide
@@ -38,7 +41,7 @@ export class DesignStroke extends DesignEffect<'stroke'> {
     if (!this.strokeSide) return
 
     this.yState.transact(() => {
-      this.nodes.forEach((node) => {
+      this.select.getSelectedNodes().forEach((node) => {
         this.yState.set<S.Rectangle>([node.id, 'strokeSide'], { type })
       })
     })
