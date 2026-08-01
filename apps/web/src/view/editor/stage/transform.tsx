@@ -1,5 +1,6 @@
 import { isLeftMouse, stopPropagation } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
+import { Fragment } from 'react'
 import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { TRBL } from 'src/editor/utils'
@@ -8,11 +9,15 @@ import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
+const arrayLoopGet = <T,>(arr: T[], index: number) => {
+  const loopIndex = index < 0 ? arr.length - 1 : index >= arr.length ? 0 : index
+  return arr[loopIndex]
+}
+
 export const StageTransformComp: FC<{}> = observer(({}) => {
   const {
     schemaCreator,
     stageInteract,
-    stageEvent,
     stageMove,
     stageTransformer,
     stageViewport,
@@ -202,7 +207,78 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
   return <elem node={rotatePoint} events={{ hover, mousedown }} />
 })
 
-const arrayLoopGet = <T,>(arr: T[], index: number) => {
-  const loopIndex = index < 0 ? arr.length - 1 : index >= arr.length ? 0 : index
-  return arr[loopIndex]
-}
+const FONT_SIZE = 11
+const LINE_HEIGHT = 14
+const TEXT_WIDTH = 54
+const GAP = 4
+
+const SizeLabelComp: FC<{}> = observer(({}) => {
+  const { stageViewport, schemaCreator, stageTransformer, elemDrawer } =
+    useEditorServices()
+  const { zoom } = stageViewport
+  const mrect = stageTransformer.mrect.plain()
+  const { width, height } = mrect
+
+  const label = `${twoDecimal(width)} × ${twoDecimal(height)}`
+  const textWidth =
+    elemDrawer.textBreaker?.measureWidth(
+      label,
+      `500 ${FONT_SIZE}px GoogleSansCode`,
+    ) || TEXT_WIDTH
+  const labelWidth = ceil(textWidth / zoom + 6)
+  const labelHeight = ceil(LINE_HEIGHT / zoom + 2)
+
+  const getMatrix = (rotation: number, x: number, y: number) =>
+    Matrix.identity()
+      .rotate(rotation)
+      .shift(XY.from(x, y).multiplyNum(1 / zoom))
+
+  const matrix1 = getMatrix(0, (width - labelWidth) / 2, height + GAP)
+  const matrix2 = getMatrix(90, -GAP, (height - labelWidth) / 2)
+  const matrix3 = getMatrix(180, (width + labelWidth) / 2, -GAP)
+  const matrix4 = getMatrix(270, width + GAP, (height + labelWidth) / 2)
+
+  const matrix = [matrix1, matrix2, matrix3, matrix4].find((matrix) => {
+    const rootMatrix = Matrix.of(mrect.matrix).append(matrix)
+    const rotation = new MRect(1, 1, rootMatrix, 1).rotation
+    return (
+      clamp(rotation, 0, 45) === rotation || clamp(rotation, 315, 360) === rotation
+    )
+  })
+
+  if (!matrix) return null
+
+  const rect = schemaCreator.rect({
+    id: 'transform-size-label-bg',
+    width: labelWidth,
+    height: labelHeight,
+    matrix: matrix.plain(),
+    radius: 4 / zoom,
+    fills: [schemaCreator.fillColor(themeColor())],
+  })
+
+  const text = schemaCreator.text({
+    id: 'transform-size-label',
+    content: label,
+    width: textWidth,
+    height: LINE_HEIGHT / zoom,
+    matrix: Matrix.identity().shift(XY.$(3, 2)).prepend(matrix).plain(),
+    style: {
+      fontSize: FONT_SIZE / zoom,
+      fontWeight: 500,
+      align: 'center',
+      fontFamily: 'GoogleSansCode',
+      fontStyle: 'normal',
+      letterSpacing: 0,
+      lineHeight: LINE_HEIGHT / zoom,
+    },
+    fills: [schemaCreator.fillColor(COLOR.white)],
+  })
+
+  return (
+    <Fragment>
+      <elem node={rect} />
+      <elem node={text} />
+    </Fragment>
+  )
+})

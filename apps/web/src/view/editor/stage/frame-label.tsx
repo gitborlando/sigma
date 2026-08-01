@@ -47,8 +47,6 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
   const [hovered, setHovered] = useState(false)
   const selected = useSelection()[frame.id]
 
-  const lineHeight = LINE_HEIGHT / zoom
-
   const textWidth =
     elemDrawer.textBreaker?.measureWidth(
       frame.name || 'no name',
@@ -58,20 +56,20 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
   const getTextMatrix = (rotation: number, x: number, y: number) =>
     SchemaHelper.getAncestorMatrix(frame)
       .append(Matrix.of(frame.matrix))
-      .append(Matrix.identity().rotate(rotation).shift({ x, y }))
+      .append(
+        Matrix.identity()
+          .rotate(rotation)
+          .shift(XY.from(x, y).multiplyNum(1 / zoom)),
+      )
 
-  const textMatrix1 = getTextMatrix(0, 0, -lineHeight)
-  const textMatrix2 = getTextMatrix(90, frame.width / zoom + lineHeight, 0)
-  const textMatrix3 = getTextMatrix(
-    180,
-    frame.width / zoom,
-    frame.height / zoom + lineHeight,
-  )
-  const textMatrix4 = getTextMatrix(270, -lineHeight, frame.height / zoom)
+  const textMatrix1 = getTextMatrix(0, 0, -LINE_HEIGHT)
+  const textMatrix2 = getTextMatrix(90, frame.width + LINE_HEIGHT, 0)
+  const textMatrix3 = getTextMatrix(180, frame.width, frame.height + LINE_HEIGHT)
+  const textMatrix4 = getTextMatrix(270, -LINE_HEIGHT, frame.height)
 
   const textMatrix = [textMatrix1, textMatrix2, textMatrix3, textMatrix4].find(
     (matrix) => {
-      const rotation = new MRect(100, 100, matrix, 1).rotation
+      const rotation = new MRect(1, 1, matrix, 1).rotation
       return (
         clamp(rotation, 0, 45) === rotation || clamp(rotation, 315, 360) === rotation
       )

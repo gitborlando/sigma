@@ -18,8 +18,8 @@ declare module 'react' {
 export type ElemProps = {
   node: S.Node
   hidden?: boolean
-  children?: ReactNode[]
   events?: Partial<ElemEventsMap>
+  children?: ReactNode
 }
 
 export type ElemEventsMap = Record<ElemEventType, ElemEventFunc>
