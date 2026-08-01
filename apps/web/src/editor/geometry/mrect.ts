@@ -128,9 +128,9 @@ export class MRect {
     return this._aabb || (this._aabb = this._calcAABB(this.vertices))
   }
 
-  private calcRotation() {
+  calcRotation(axis: IXY = XY.xAxis()) {
     const { a, b, c, d } = this.matrix
-    const transformedXY = Matrix.of({ a, b, c, d, tx: 0, ty: 0 }).applyXY(XY.xAxis())
+    const transformedXY = Matrix.of({ a, b, c, d, tx: 0, ty: 0 }).applyXY(axis)
     return Angle.sweep(transformedXY, XY.xAxis())
   }
 

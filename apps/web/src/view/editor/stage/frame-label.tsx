@@ -1,5 +1,5 @@
+import { iife } from '@gitborlando/utils'
 import { stopPropagation } from '@gitborlando/utils/browser'
-import { clamp } from 'es-toolkit'
 import { untracked } from 'mobx'
 import { Fragment } from 'react'
 import { Matrix, MRect } from 'src/editor/geometry'
@@ -53,37 +53,40 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
       `500 ${FONT_SIZE}px GoogleSansCode`,
     ) || TEXT_WIDTH
 
-  const getTextMatrix = (rotation: number, x: number, y: number) =>
-    SchemaHelper.getAncestorMatrix(frame)
-      .append(Matrix.of(frame.matrix))
-      .append(
-        Matrix.identity()
-          .rotate(rotation)
-          .shift(XY.from(x, y).multiplyNum(1 / zoom)),
-      )
+  const mrect = MRect.of(frame)
 
-  const textMatrix1 = getTextMatrix(0, 0, -LINE_HEIGHT)
-  const textMatrix2 = getTextMatrix(90, frame.width + LINE_HEIGHT, 0)
-  const textMatrix3 = getTextMatrix(180, frame.width, frame.height + LINE_HEIGHT)
-  const textMatrix4 = getTextMatrix(270, -LINE_HEIGHT, frame.height)
+  const getMatrix = (x: number, y: number, axis: IXY) => {
+    const frameRootMatrix = SchemaHelper.getRootMatrix(frame)
+    const xy = Matrix.of(frameRootMatrix).applyXY(XY.$(x, y))
+    return Matrix.identity().rotate(mrect.calcRotation(axis)).shift(xy)
+  }
 
-  const textMatrix = [textMatrix1, textMatrix2, textMatrix3, textMatrix4].find(
-    (matrix) => {
-      const rotation = new MRect(1, 1, matrix, 1).rotation
-      return (
-        clamp(rotation, 0, 45) === rotation || clamp(rotation, 315, 360) === rotation
-      )
-    },
-  )
+  const matrix1 = getMatrix(0, -LINE_HEIGHT, XY.xAxis())
+  const matrix2 = getMatrix(frame.width + LINE_HEIGHT, 0, XY.xAxis(90))
+  const matrix3 = getMatrix(frame.width, frame.height + LINE_HEIGHT, XY.xAxis(180))
+  const matrix4 = getMatrix(-LINE_HEIGHT, frame.height, XY.xAxis(270))
 
-  if (!textMatrix) return null
+  const matrix = iife(() => {
+    let min = 180
+    let m1 = matrix1
+    ;[matrix2, matrix3, matrix4].forEach((m) => {
+      const r = new MRect(1, 1, m).rotation % 180
+      if (r < min) {
+        min = r
+        m1 = m
+      }
+    })
+    return m1
+  })
+
+  if (!matrix) return null
 
   const text = schemaCreator.text({
     id: `frame-label-${frame.id}`,
     content: frame.name || 'no name',
     width: textWidth / zoom + 2,
     height: LINE_HEIGHT / zoom,
-    matrix: textMatrix,
+    matrix: matrix.plain(),
     style: {
       fontSize: FONT_SIZE / zoom,
       fontWeight: 500,
