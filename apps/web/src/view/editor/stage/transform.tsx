@@ -1,4 +1,7 @@
+import { twoDecimal } from '@gitborlando/geo'
 import { isLeftMouse, stopPropagation } from '@gitborlando/utils/browser'
+import { clamp } from 'es-toolkit'
+import { ceil } from 'es-toolkit/compat'
 import hotkeys from 'hotkeys-js'
 import { Fragment } from 'react'
 import { Matrix, MRect } from 'src/editor/geometry'
@@ -15,21 +18,13 @@ const arrayLoopGet = <T,>(arr: T[], index: number) => {
 }
 
 export const StageTransformComp: FC<{}> = observer(({}) => {
-  const {
-    schemaCreator,
-    stageInteract,
-    stageMove,
-    stageTransformer,
-    stageViewport,
-  } = useEditorServices()
+  const { schemaCreator, stageInteract, stageTransformer } = useEditorServices()
   const selectNodes = useSelectNodes()
-  const { mrect, isMoving } = stageTransformer
-  const shouldHidden =
-    (false && isMoving) || stageViewport.isZooming || stageMove.isMoving
+  const { mrect } = stageTransformer
 
   useLayoutEffect(() => {
     stageTransformer.setup(selectNodes)
-  }, [selectNodes, stageTransformer])
+  }, [selectNodes])
 
   const node = schemaCreator.rect({ id: 'transform', fills: [], ...mrect.plain() })
 
@@ -42,37 +37,35 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
     }
   }
 
+  if (selectNodes.length < 1 || stageTransformer.isMoving) {
+    return null
+  }
+
   if (stageTransformer.isSelectOneLine) {
     return (
-      <elem
-        x-if={selectNodes.length > 0}
-        hidden={shouldHidden}
-        node={node}
-        events={{ mousedown }}>
+      <elem x-if={selectNodes.length > 0} node={node} events={{ mousedown }}>
         <LineComp type='top' index={0} />
-        <VertexComp type='topLeft' index={0} directions={['left']} />
-        <VertexComp type='topRight' index={1} directions={['right']} />
+        <VertexComp type='top-left' index={0} />
+        <VertexComp type='top-right' index={1} />
       </elem>
     )
   }
+
   return (
-    <elem
-      x-if={selectNodes.length > 0}
-      hidden={shouldHidden}
-      node={node}
-      events={{ mousedown }}>
+    <elem x-if={selectNodes.length > 0} node={node} events={{ mousedown }}>
       <LineComp type='top' index={0} />
       <LineComp type='right' index={1} />
       <LineComp type='bottom' index={2} />
       <LineComp type='left' index={3} />
-      <VertexComp type='topLeft' index={0} directions={['top', 'left']} />
-      <VertexComp type='topRight' index={1} directions={['top', 'right']} />
-      <VertexComp type='bottomRight' index={2} directions={['bottom', 'right']} />
-      <VertexComp type='bottomLeft' index={3} directions={['bottom', 'left']} />
+      <VertexComp type='top-left' index={0} />
+      <VertexComp type='top-right' index={1} />
+      <VertexComp type='bottom-right' index={2} />
+      <VertexComp type='bottom-left' index={3} />
       <RotatePointComp index={0} />
       <RotatePointComp index={1} />
       <RotatePointComp index={2} />
       <RotatePointComp index={3} />
+      <SizeLabelComp />
     </elem>
   )
 })
@@ -93,12 +86,12 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
   })
 
   const hover = (e: ElemMouseEvent) => {
-    if (!e.hovered) return stageCursor.setCursor('select')
-
+    if (!e.hovered) {
+      return stageCursor.setCursor('select')
+    }
     if (stageTransformer.isSelectOneLine) {
       return stageCursor.setCursor('select')
     }
-
     const extraRotation = type === 'top' || type === 'bottom' ? 90 : 0
     stageCursor.setCursor('resize', stageTransformer.mrect.rotation + extraRotation)
   }
@@ -116,49 +109,47 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
 })
 
 const VertexComp: FC<{
-  type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'
+  type: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
   index: number
-  directions: TRBL[]
-}> = observer(({ type, index, directions }) => {
+}> = observer(({ type, index }) => {
   const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
     useEditorServices()
   const zoom = stageViewport.zoom
+  const radius = 4 / zoom
   const { width, height } = stageTransformer.mrect.plain()
-  const mrect = MRect.identity(width, height)
-  const xy = arrayLoopGet(mrect.vertices, index)
-  const size = 8 / zoom
 
-  const vertexMRect = MRect.of({
-    width: size,
-    height: size,
-    aspectRatio: -1,
-    matrix: Matrix.identity().shift(XY.of(xy).plusNum(-size / 2)),
-  })
-  vertexMRect.rotate(mrect.rotation)
+  const getMatrix = (x: number, y: number) => Matrix.identity().shift(XY.from(x, y))
+
+  const matrix1 = getMatrix(-radius, -radius)
+  const matrix2 = getMatrix(width - radius, -radius)
+  const matrix3 = getMatrix(width - radius, height - radius)
+  const matrix4 = getMatrix(-radius, height - radius)
 
   const rect = schemaCreator.rect({
     id: `transform-vertex-${type}`,
+    radius: 2 / zoom,
+    width: radius * 2,
+    height: radius * 2,
+    matrix: [matrix1, matrix2, matrix3, matrix4][index].plain(),
     stroke: schemaCreator.solidStroke(themeColor(), 1 / zoom),
     fills: [schemaCreator.fillColor(COLOR.white)],
-    radius: 2 / zoom,
-    ...vertexMRect.plain(),
   })
 
   const hover = stopPropagation((e: ElemMouseEvent) => {
-    if (!e.hovered) return stageCursor.setCursor('select')
-
-    if (stageTransformer.isSelectOneLine) {
-      return stageCursor.setCursor('move', mrect.rotation)
+    if (!e.hovered) {
+      return stageCursor.setCursor('select')
     }
-
-    const extraRotation = type === 'topLeft' || type === 'bottomRight' ? 45 : -45
+    if (stageTransformer.isSelectOneLine) {
+      return stageCursor.setCursor('move')
+    }
+    const extraRotation = type === 'top-left' || type === 'bottom-right' ? 45 : -45
     stageCursor.setCursor('resize', stageTransformer.mrect.rotation + extraRotation)
   })
 
   const mousedown = (e: ElemMouseEvent) => {
     e.stopPropagation()
     stageCursor.lock()
-    stageTransformer.onResize(directions, {
+    stageTransformer.onResize(type.split('-') as TRBL[], {
       e: e.hostEvent,
       shiftKey: hotkeys.shift,
     })
@@ -171,26 +162,23 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
   const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
     useEditorServices()
   const zoom = stageViewport.zoom
-  const { width, height } = stageTransformer.mrect.plain()
-  const mrect = MRect.identity(width, height)
-  const xy = arrayLoopGet(mrect.vertices, index)
   const size = 12 / zoom
+  const gap = 4 / zoom
+  const { width, height } = stageTransformer.mrect.plain()
 
-  let p1 = arrayLoopGet(mrect.vertices, index + 1)
-  let p2 = arrayLoopGet(mrect.vertices, index - 1)
-  if (Matrix.isFlipped(mrect.matrix)) [p1, p2] = [p2, p1]
+  const getMatrix = (x: number, y: number) => Matrix.identity().shift(XY.from(x, y))
 
-  const sweep = Angle.minor(Angle.sweep(XY.vector(xy, p1), XY.vector(xy, p2)))
-  const p1_ = XY.of(p1).rotate(xy, sweep / 2)
-  const offset = XY.lerp(xy, p1_, 16 / zoom)
-  const matrix = Matrix.identity().shift(XY.of(offset).plusNum(-size / 2))
+  const matrix1 = getMatrix(-(gap + size), -(gap + size))
+  const matrix2 = getMatrix(width + gap, -(gap + size))
+  const matrix3 = getMatrix(width + gap, height + gap)
+  const matrix4 = getMatrix(-(gap + size), height + gap)
 
-  const rotatePoint = schemaCreator.ellipse({
+  const ellipse = schemaCreator.ellipse({
     id: `transform-rotatePoint-${index}`,
-    fills: [schemaCreator.fillColor(COLOR.black, 0)],
     width: size,
     height: size,
-    matrix: matrix,
+    matrix: [matrix1, matrix2, matrix3, matrix4][index].plain(),
+    fills: [schemaCreator.fillColor(COLOR.black, 0)],
   })
 
   const hover = (e: ElemMouseEvent) => {
@@ -204,13 +192,12 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
     stageTransformer.onRotate()
   }
 
-  return <elem node={rotatePoint} events={{ hover, mousedown }} />
+  return <elem node={ellipse} events={{ hover, mousedown }} />
 })
 
 const FONT_SIZE = 11
 const LINE_HEIGHT = 14
 const TEXT_WIDTH = 54
-const GAP = 4
 
 const SizeLabelComp: FC<{}> = observer(({}) => {
   const { stageViewport, schemaCreator, stageTransformer, elemDrawer } =
@@ -225,18 +212,17 @@ const SizeLabelComp: FC<{}> = observer(({}) => {
       label,
       `500 ${FONT_SIZE}px GoogleSansCode`,
     ) || TEXT_WIDTH
-  const labelWidth = ceil(textWidth / zoom + 6)
-  const labelHeight = ceil(LINE_HEIGHT / zoom + 2)
+  const gap = 4 / zoom
+  const labelWidth = ceil(textWidth + 6) / zoom
+  const labelHeight = ceil(LINE_HEIGHT + 2) / zoom
 
   const getMatrix = (rotation: number, x: number, y: number) =>
-    Matrix.identity()
-      .rotate(rotation)
-      .shift(XY.from(x, y).multiplyNum(1 / zoom))
+    Matrix.identity().rotate(rotation).shift(XY.from(x, y))
 
-  const matrix1 = getMatrix(0, (width - labelWidth) / 2, height + GAP)
-  const matrix2 = getMatrix(90, -GAP, (height - labelWidth) / 2)
-  const matrix3 = getMatrix(180, (width + labelWidth) / 2, -GAP)
-  const matrix4 = getMatrix(270, width + GAP, (height + labelWidth) / 2)
+  const matrix1 = getMatrix(0, (width - labelWidth) / 2, height + gap)
+  const matrix2 = getMatrix(90, -gap, (height - labelWidth) / 2)
+  const matrix3 = getMatrix(180, (width + labelWidth) / 2, -gap)
+  const matrix4 = getMatrix(270, width + gap, (height + labelWidth) / 2)
 
   const matrix = [matrix1, matrix2, matrix3, matrix4].find((matrix) => {
     const rootMatrix = Matrix.of(mrect.matrix).append(matrix)
@@ -260,9 +246,9 @@ const SizeLabelComp: FC<{}> = observer(({}) => {
   const text = schemaCreator.text({
     id: 'transform-size-label',
     content: label,
-    width: textWidth,
+    width: textWidth / zoom,
     height: LINE_HEIGHT / zoom,
-    matrix: Matrix.identity().shift(XY.$(3, 2)).prepend(matrix).plain(),
+    matrix: matrix.shift(XY.$(3 / zoom, 2 / zoom)).plain(),
     style: {
       fontSize: FONT_SIZE / zoom,
       fontWeight: 500,
