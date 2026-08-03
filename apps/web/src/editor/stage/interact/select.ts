@@ -150,7 +150,7 @@ export class StageSelect extends Service {
         this.marquee = marquee
         AABB.updateFromRect(marqueeAABB, marquee)
         marqueeSelection = {}
-        traverser(this.select.selectedPage.childIds)
+        traverser(this.select.getSelectedPage().childIds)
         this.selectAction.replaceSelection(
           hotkeys.shift
             ? { ...this.lastSelection, ...marqueeSelection }

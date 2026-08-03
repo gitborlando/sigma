@@ -42,7 +42,7 @@ export class NodeAction extends Service {
   }
 
   selectAllNodes() {
-    const selectIds = this.select.selectedPage.childIds.map((id) => [id, true])
+    const selectIds = this.select.getSelectedPage().childIds.map((id) => [id, true])
     const selection = Object.fromEntries(selectIds)
     this.select.replaceSelection(selection)
 

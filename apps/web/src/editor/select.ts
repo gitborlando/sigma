@@ -38,10 +38,6 @@ export class Select extends Service {
     return this.selectIds.map((id) => this.yState.observedState[id] as S.Node)
   }
 
-  @computed get selectedPage() {
-    return this.yState.state[this.selectPageId] as S.Page
-  }
-
   getSelectedNodes() {
     const selectIds = untracked(() => this.selectIds)
     return selectIds.map((id) => this.yState.state[id] as S.Node)
