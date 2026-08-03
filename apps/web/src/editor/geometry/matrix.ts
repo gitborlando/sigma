@@ -154,6 +154,10 @@ export class Matrix {
     return this.applyAABB(aabb, true)
   }
 
+  static $() {
+    return new Matrix(1, 0, 0, 1, 0, 0)
+  }
+
   static identity() {
     return new Matrix(1, 0, 0, 1, 0, 0)
   }

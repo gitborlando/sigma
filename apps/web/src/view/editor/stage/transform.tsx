@@ -8,14 +8,10 @@ import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { TRBL } from 'src/editor/utils'
 import { COLOR } from 'src/utils/color'
+import { arrayLoopGet } from 'src/view/editor/stage/share'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
-
-const arrayLoopGet = <T,>(arr: T[], index: number) => {
-  const loopIndex = index < 0 ? arr.length - 1 : index >= arr.length ? 0 : index
-  return arr[loopIndex]
-}
 
 export const StageTransformComp: FC<{}> = observer(({}) => {
   const { schemaCreator, stageInteract, stageTransformer } = useEditorServices()
@@ -65,7 +61,7 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
       <RotatePointComp index={1} />
       <RotatePointComp index={2} />
       <RotatePointComp index={3} />
-      <SizeLabelComp />
+      {/* <SizeLabelComp /> */}
     </elem>
   )
 })

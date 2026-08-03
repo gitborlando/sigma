@@ -13,7 +13,7 @@ export function mock_schema(schemaCreator: SchemaCreator) {
 
   const rect = schemaCreator.frame({
     id: 'rect',
-    ...MRect.identity(100, 100).shift(XY.$(100, 100)).plain(),
+    ...MRect.identity(200, 100).shift(XY.$(300, 300)).plain(),
   })
   schemaCreator.addToSchema(schema, rect)
   schemaCreator.addChild(page, rect)
