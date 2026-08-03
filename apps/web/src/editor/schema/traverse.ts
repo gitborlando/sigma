@@ -33,14 +33,14 @@ export function createSchemaTraverse<ExtendCtx extends AnyObject = {}>(
 
   const traverse = (
     parent: S.NodeParent | undefined,
-    ids: string[],
+    childIds: string[],
     depth: number,
     forwardCtx?: SchemaTraverseContext<ExtendCtx>,
   ) => {
     let stopped = false
     const stopPropagation = () => (stopped = true)
 
-    ids.forEach((id, index) => {
+    childIds.forEach((id, index) => {
       if (stopped) return
 
       const getSchema = options.getSchema ?? defaultGetSchema

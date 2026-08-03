@@ -1,4 +1,4 @@
-import { firstOne, iife, objKeys } from '@gitborlando/utils'
+import { clone, firstOne, iife, objKeys } from '@gitborlando/utils'
 import { Undo } from 'src/editor/action/undo'
 import { HitTest, IMRect, Matrix } from 'src/editor/geometry'
 import { MRect } from 'src/editor/geometry/mrect'
@@ -157,7 +157,7 @@ export class NodeAction extends Service {
     const estimatedParent: S.NodeParent & IMRect = hitTopFrameElem
       ? (hitTopFrameElem.node as S.Frame)
       : Object.assign(
-          this.select.selectedPage,
+          clone(this.select.getSelectedPage()),
           MRect.identity(Infinity, Infinity).plain(),
         )
     if (!estimatedParent) return false
@@ -169,7 +169,7 @@ export class NodeAction extends Service {
     const xy = Matrix.getLocalXY(sceneXY, parentRootMatrix)
 
     this.select.getSelectedNodes().forEach((node) => {
-      if (parent.id === node.parentId || parent.id === node.id) return
+      if (this.select.selection[parent.id] || parent.id === node.parentId) return
 
       if (HitTest.hitRoundRect(parent.width, parent.height, 0)(xy)) {
         const nodeRootMatrix = SchemaHelper.getRootMatrix(node)

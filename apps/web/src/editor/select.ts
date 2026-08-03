@@ -47,6 +47,10 @@ export class Select extends Service {
     return selectIds.map((id) => this.yState.state[id] as S.Node)
   }
 
+  getSelectedPage() {
+    return this.yState.state[untracked(() => this.selectPageId)] as S.Page
+  }
+
   select(id: ID) {
     if (this.selection[id]) return
 

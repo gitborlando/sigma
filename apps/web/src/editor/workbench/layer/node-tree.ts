@@ -75,7 +75,7 @@ export class LayerNodeTree extends Service {
         return !!this.expandedNodeMap.get(item.id)
       },
     })
-    traverse(this.select.selectedPage.childIds)
+    traverse(this.select.getSelectedPage().childIds)
     return nodeInfoList
   }
 }

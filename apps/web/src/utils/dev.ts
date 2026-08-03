@@ -1,3 +1,10 @@
+export let debugId = ''
+
+export const setDebugId = (id: string) => {
+  debugId = id
+  return () => (debugId = '')
+}
+
 export const recordTime = (
   name: string,
   func: (
