@@ -18,7 +18,7 @@ const arrayLoopGet = <T,>(arr: T[], index: number) => {
 }
 
 export const StageTransformComp: FC<{}> = observer(({}) => {
-  const { schemaCreator, stageInteract, stageTransformer } = useEditorServices()
+  const { docCreator, stageInteract, stageTransformer } = useEditorServices()
   const selectNodes = useSelectNodes()
   const { mrect } = stageTransformer
 
@@ -26,7 +26,7 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
     stageTransformer.setup(selectNodes)
   }, [selectNodes])
 
-  const node = schemaCreator.rect({ id: 'transform', fills: [], ...mrect.plain() })
+  const node = docCreator.rect({ id: 'transform', fills: [], ...mrect.plain() })
 
   const mousedown = (e: ElemMouseEvent) => {
     if (stageInteract.interaction !== 'select') return
@@ -71,7 +71,7 @@ export const StageTransformComp: FC<{}> = observer(({}) => {
 })
 
 const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) => {
-  const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
+  const { docCreator, stageCursor, stageTransformer, stageViewport } =
     useEditorServices()
   const zoom = stageViewport.zoom
   const { width, height } = stageTransformer.mrect.plain()
@@ -79,10 +79,10 @@ const LineComp: FC<{ type: TRBL; index: number }> = observer(({ type, index }) =
   const p1 = arrayLoopGet(mrect.vertices, index)
   const p2 = arrayLoopGet(mrect.vertices, index + 1)
 
-  const line = schemaCreator.line({
+  const line = docCreator.line({
     id: `transform-line-${type}`,
-    points: [schemaCreator.point(p1), schemaCreator.point(p2)],
-    stroke: schemaCreator.solidStroke(themeColor(), 1 / zoom),
+    points: [docCreator.point(p1), docCreator.point(p2)],
+    stroke: docCreator.solidStroke(themeColor(), 1 / zoom),
   })
 
   const hover = (e: ElemMouseEvent) => {
@@ -112,7 +112,7 @@ const VertexComp: FC<{
   type: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
   index: number
 }> = observer(({ type, index }) => {
-  const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
+  const { docCreator, stageCursor, stageTransformer, stageViewport } =
     useEditorServices()
   const zoom = stageViewport.zoom
   const radius = 4 / zoom
@@ -125,14 +125,14 @@ const VertexComp: FC<{
   const matrix3 = getMatrix(width - radius, height - radius)
   const matrix4 = getMatrix(-radius, height - radius)
 
-  const rect = schemaCreator.rect({
+  const rect = docCreator.rect({
     id: `transform-vertex-${type}`,
     radius: 2 / zoom,
     width: radius * 2,
     height: radius * 2,
     matrix: [matrix1, matrix2, matrix3, matrix4][index].plain(),
-    stroke: schemaCreator.solidStroke(themeColor(), 1 / zoom),
-    fills: [schemaCreator.fillColor(COLOR.white)],
+    stroke: docCreator.solidStroke(themeColor(), 1 / zoom),
+    fills: [docCreator.fillColor(COLOR.white)],
   })
 
   const hover = stopPropagation((e: ElemMouseEvent) => {
@@ -159,7 +159,7 @@ const VertexComp: FC<{
 })
 
 const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
-  const { schemaCreator, stageCursor, stageTransformer, stageViewport } =
+  const { docCreator, stageCursor, stageTransformer, stageViewport } =
     useEditorServices()
   const zoom = stageViewport.zoom
   const size = 12 / zoom
@@ -173,12 +173,12 @@ const RotatePointComp: FC<{ index: number }> = observer(({ index }) => {
   const matrix3 = getMatrix(width + gap, height + gap)
   const matrix4 = getMatrix(-(gap + size), height + gap)
 
-  const ellipse = schemaCreator.ellipse({
+  const ellipse = docCreator.ellipse({
     id: `transform-rotatePoint-${index}`,
     width: size,
     height: size,
     matrix: [matrix1, matrix2, matrix3, matrix4][index].plain(),
-    fills: [schemaCreator.fillColor(COLOR.black, 0)],
+    fills: [docCreator.fillColor(COLOR.black, 0)],
   })
 
   const hover = (e: ElemMouseEvent) => {
@@ -200,7 +200,7 @@ const LINE_HEIGHT = 14
 const TEXT_WIDTH = 54
 
 const SizeLabelComp: FC<{}> = observer(({}) => {
-  const { stageViewport, schemaCreator, stageTransformer, elemDrawer } =
+  const { stageViewport, docCreator, stageTransformer, elemDrawer } =
     useEditorServices()
   const { zoom } = stageViewport
   const mrect = stageTransformer.mrect.plain()
@@ -234,16 +234,16 @@ const SizeLabelComp: FC<{}> = observer(({}) => {
 
   if (!matrix) return null
 
-  const rect = schemaCreator.rect({
+  const rect = docCreator.rect({
     id: 'transform-size-label-bg',
     width: labelWidth,
     height: labelHeight,
     matrix: matrix.plain(),
     radius: 4 / zoom,
-    fills: [schemaCreator.fillColor(themeColor())],
+    fills: [docCreator.fillColor(themeColor())],
   })
 
-  const text = schemaCreator.text({
+  const text = docCreator.text({
     id: 'transform-size-label',
     content: label,
     width: textWidth / zoom,
@@ -258,7 +258,7 @@ const SizeLabelComp: FC<{}> = observer(({}) => {
       letterSpacing: 0,
       lineHeight: LINE_HEIGHT / zoom,
     },
-    fills: [schemaCreator.fillColor(COLOR.white)],
+    fills: [docCreator.fillColor(COLOR.white)],
   })
 
   return (

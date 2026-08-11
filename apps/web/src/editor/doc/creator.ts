@@ -1,8 +1,8 @@
 import { XY } from '@gitborlando/geo'
 import { getSet, miniId } from '@gitborlando/utils'
+import { getLatestVersion } from 'src/editor/doc/migrate'
 import { MRect } from 'src/editor/geometry'
 import { createLine } from 'src/editor/geometry/point'
-import { getLatestVersion } from 'src/editor/schema/migrate'
 import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
 import { T } from 'src/utils/common'
@@ -11,17 +11,17 @@ import { t } from 'src/view/i18n/config'
 import { themeColor } from 'src/view/styles/color'
 
 @reflection
-export class SchemaCreator extends Service {
+export class DocCreator extends Service {
   constructor() {
     super()
     autoBind(this)
   }
 
-  schema(): S.Schema {
+  schema(): S.Doc {
     const page = this.page()
     const meta = this.meta()
     meta.pageIds = [page.id]
-    return Object.assign({ meta }, { [page.id]: page })
+    return Object.assign({ meta }, { graphs: { [page.id]: page }, points: {} })
   }
 
   meta(): S.Meta {
@@ -41,6 +41,7 @@ export class SchemaCreator extends Service {
       type: 'page',
       id: `page_${miniId(8)}`,
       childIds: [],
+      parentId: '',
       name: this.createNodeName('page'),
       ...MRect.identity(Infinity, Infinity).plain(),
     }
@@ -61,7 +62,7 @@ export class SchemaCreator extends Service {
   frame(option?: Partial<S.Frame>): S.Frame {
     const nodeBase = this.createNodeBase()
     return {
-      type: 'frame',
+      variant: 'frame',
       radius: 0,
       childIds: [],
       ...nodeBase,
@@ -73,14 +74,13 @@ export class SchemaCreator extends Service {
 
   group(option?: Partial<S.Group>): S.Group {
     const nodeBase = this.createNodeBase()
-    return { type: 'group', childIds: [], ...nodeBase, ...option }
+    return { variant: 'group', childIds: [], ...nodeBase, ...option }
   }
 
-  rect(option?: Partial<S.Rectangle>): S.Rectangle {
+  rect(option?: Partial<S.Rect>): S.Rect {
     const nodeBase = this.createNodeBase()
     return {
-      type: 'rect',
-      points: [],
+      variant: 'rect',
       radius: 0,
       strokeSide: { type: 'all' },
       ...nodeBase,
@@ -92,8 +92,7 @@ export class SchemaCreator extends Service {
     const nodeBase = this.createNodeBase()
     return mergeOverrideArray(
       {
-        type: 'ellipse',
-        points: [],
+        variant: 'ellipse',
         innerRate: 0,
         startAngle: 0,
         sweepAngle: 360,
@@ -109,7 +108,7 @@ export class SchemaCreator extends Service {
     const length = option?.width || nodeBase.width
     const points = createLine(start, length)
     return {
-      type: 'line',
+      variant: 'line',
       points,
       ...nodeBase,
       fills: [this.fillColor(COLOR.black, 1)],
@@ -121,10 +120,10 @@ export class SchemaCreator extends Service {
 
   path(option?: Partial<S.Path>): S.Path {
     const nodeBase = this.createNodeBase()
-    return { type: 'path', points: [], ...nodeBase, ...option }
+    return { variant: 'path', points: [], ...nodeBase, ...option }
   }
 
-  image(option?: Partial<S.Rectangle>): S.Rectangle {
+  image(option?: Partial<S.Rect>): S.Rect {
     const rect = this.rect(option)
     rect.fills.push(this.fillImage(''))
     return rect
@@ -136,7 +135,7 @@ export class SchemaCreator extends Service {
       mergeOverrideArray(
         {
           ...nodeBase,
-          type: 'text',
+          variant: 'text',
           content: '文本1',
           style: {
             fontSize: 16,
@@ -158,12 +157,9 @@ export class SchemaCreator extends Service {
     return { type: 'color', visible: true, color, alpha }
   }
 
-  fillLinearGradient(
-    start: IXY = XY.$(0, 0),
-    end: IXY = XY.$(1, 1),
-  ): S.FillLinearGradient {
+  fillLinear(start: IXY = XY.$(0, 0), end: IXY = XY.$(1, 1)): S.FillLinear {
     return {
-      type: 'linearGradient',
+      type: 'linear',
       visible: true,
       start,
       end,
@@ -227,18 +223,18 @@ export class SchemaCreator extends Service {
   private createSchemaMeta(): S.NodeMeta {
     return {
       id: miniId(8),
+      type: 'node',
       name: '',
       lock: false,
       visible: true,
       parentId: '',
-      __isNode: true,
+      ...MRect.identity(100, 100).plain(),
     }
   }
 
-  private createNodeBase(): S.NodeBase {
+  private createNodeBase(): S.NodeLike {
     return {
       ...this.createSchemaMeta(),
-      ...MRect.identity(100, 100).plain(),
       opacity: 1,
       flip: 0,
       fills: [this.fillColor()],
@@ -256,11 +252,13 @@ export class SchemaCreator extends Service {
     return `${t(type)} ${index + 1}`
   }
 
-  addToSchema(schema: S.Schema, item: S.SchemaItem) {
-    schema[item.id] = item
+  addPageToSchema(schema: S.Doc, page: S.Page) {
+    schema.graphs[page.id] = page
+    schema.meta.pageIds.push(page.id)
   }
 
-  addChild(parent: S.NodeParent, child: S.Node) {
+  addChild(schema: S.Doc, parent: S.Parent, child: S.Node) {
+    schema.graphs[child.id] = child
     parent.childIds.push(child.id)
     child.parentId = parent.id
   }

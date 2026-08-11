@@ -92,7 +92,7 @@ export class ElemDrawer extends Service {
 
   private getShapeBounds = () => {
     const shapeBounds = [this.elem.aabb]
-    if (this.node.type !== 'text') return AABB.merge(shapeBounds)
+    if (this.node.variant !== 'text') return AABB.merge(shapeBounds)
 
     this.breakText()
     const { width, height, style } = this.node
@@ -115,7 +115,7 @@ export class ElemDrawer extends Service {
     const node = this.node
     const { width, height } = node
 
-    switch (node.type) {
+    switch (node.variant) {
       case 'frame':
       case 'rect':
         this.drawRoundRect(width, height, node.radius)
@@ -277,7 +277,7 @@ export class ElemDrawer extends Service {
     this.ctx.globalAlpha = fill.alpha
 
     const makeFill = () => {
-      if (this.node.type === 'text') {
+      if (this.node.variant === 'text') {
         this.fillOrStrokeText('fillText')
       } else {
         this.ctx.fill(this.path2d, 'evenodd')
@@ -290,7 +290,7 @@ export class ElemDrawer extends Service {
         makeFill()
         break
 
-      case 'linearGradient':
+      case 'linear':
         this.ctx.fillStyle = this.createLinearGradient(fill)
         makeFill()
         break
@@ -328,7 +328,7 @@ export class ElemDrawer extends Service {
     this.ctx.globalAlpha = fill.alpha
 
     const makeStroke = () => {
-      if (this.node.type === 'text') {
+      if (this.node.variant === 'text') {
         this.ctx.lineWidth = stroke.width
         this.fillOrStrokeText('strokeText')
         return
@@ -364,7 +364,7 @@ export class ElemDrawer extends Service {
 
     const strokeStyle = match(fill, 'type', {
       color: (fill) => fill.color,
-      linearGradient: (fill) => this.createLinearGradient(fill),
+      linear: (fill) => this.createLinearGradient(fill),
       image: (fill) => this.createImagePattern(fill),
     })
 
@@ -374,7 +374,7 @@ export class ElemDrawer extends Service {
     }
   }
 
-  private createLinearGradient = (fill: S.FillLinearGradient) => {
+  private createLinearGradient = (fill: S.FillLinear) => {
     const start = XY.$(
       fill.start.x * this.node.width,
       fill.start.y * this.node.height,
@@ -434,8 +434,8 @@ export class ElemDrawer extends Service {
   }
 
   private isClosedPath = () => {
-    if (this.node.type === 'line' || this.node.type === 'text') return false
-    if (this.node.type !== 'path') return true
+    if (this.node.variant === 'line' || this.node.variant === 'text') return false
+    if (this.node.variant !== 'path') return true
     return this.node.points.some((point) => point.isEnd)
   }
 
@@ -504,7 +504,7 @@ export class ElemDrawer extends Service {
   }
 
   private drawTextDecoration() {
-    if (this.node.type !== 'text') return
+    if (this.node.variant !== 'text') return
     if (!this.node.style.decoration) return
 
     const { style, color, width } = this.node.style.decoration
@@ -530,7 +530,7 @@ export class ElemDrawer extends Service {
   private updateHitTest = () => {
     const { width, height } = this.elem.mrect
 
-    switch (this.node.type) {
+    switch (this.node.variant) {
       case 'frame':
       case 'rect':
         const radius = 'radius' in this.node ? this.node.radius : 0
@@ -554,7 +554,7 @@ export class ElemDrawer extends Service {
       case 'line':
         const { points, stroke } = this.node
         this.elem.eventHandle.cacheHitTest(() => {
-          if (this.node.type === 'line') {
+          if (this.node.variant === 'line') {
             return this.createPolylineHitTest([points], stroke)
           }
           return this.createPathHitTest(stroke)
@@ -562,7 +562,7 @@ export class ElemDrawer extends Service {
         break
 
       case 'text': {
-        const { content, style, width } = this.node
+        const { content, style, width } = this.node as S.Text
         this.elem.eventHandle.cacheHitTest(
           () => HitTest.hitPolyline(this.getTextCollideXys(), style.lineHeight),
           [content, style, width],

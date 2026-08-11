@@ -62,7 +62,7 @@ export const DesignFillItemComp: FC<{
 }> = ({ fill, index, target = 'fill' }) => {
   const { fillPicker } = useEditorServices()
   const isColorType = fill.type === 'color'
-  const isLinearType = fill.type === 'linearGradient'
+  const isLinearType = fill.type === 'linear'
   const isImageType = fill.type === 'image'
 
   const outerRef = useRef<HTMLDivElement>(null)
@@ -133,7 +133,7 @@ const HexInputComp: FC<{ fill: S.Fill; index: number; target: DesignFillTarget }
 
     const value = match(fill.type, {
       color: Color(T<S.FillColor>(fill).color).hex().slice(1),
-      linearGradient: t('linear gradient fill'),
+      linear: t('linear gradient fill'),
       image: t('image fill'),
     })
 

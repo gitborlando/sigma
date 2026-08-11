@@ -61,7 +61,7 @@ export const Tick: FC<{
   offset: number
   value: number
 }> = observer(({ type, offset, value }) => {
-  const { schemaCreator, stageViewport } = useEditorServices()
+  const { docCreator, stageViewport } = useEditorServices()
   const { sceneMatrix, zoom } = stageViewport
   const isVertical = type === 'vertical'
   const snapAxis = isVertical ? 'y' : 'x'
@@ -87,20 +87,20 @@ export const Tick: FC<{
     : XY.$(snappedOffset - TEXT_WIDTH / 2, TICK_SIZE + 2)
   const textOrigin = sceneMatrix.invertXY(textOriginScreen)
 
-  const line = schemaCreator.line({
+  const line = docCreator.line({
     id: `ruler-${type}-tick-line-${value}`,
     fills: [],
     points: [
-      schemaCreator.point({ x: lineStart.x, y: lineStart.y, isStart: true }),
-      schemaCreator.point({ x: lineEnd.x, y: lineEnd.y, isEnd: true }),
+      docCreator.point({ x: lineStart.x, y: lineStart.y, isStart: true }),
+      docCreator.point({ x: lineEnd.x, y: lineEnd.y, isEnd: true }),
     ],
-    stroke: schemaCreator.stroke({
-      fills: [schemaCreator.fillColor(RULER_COLOR, 1)],
+    stroke: docCreator.stroke({
+      fills: [docCreator.fillColor(RULER_COLOR, 1)],
       width: 1 / zoom,
       cap: 'butt',
     }),
   })
-  const text = schemaCreator.text({
+  const text = docCreator.text({
     id: `ruler-${type}-tick-text-${value}`,
     content: value.toString(),
     width: TEXT_WIDTH / zoom,
@@ -118,7 +118,7 @@ export const Tick: FC<{
       letterSpacing: 0,
       lineHeight: LINE_HEIGHT / zoom,
     },
-    fills: [schemaCreator.fillColor(RULER_COLOR, 1)],
+    fills: [docCreator.fillColor(RULER_COLOR, 1)],
   })
 
   return (

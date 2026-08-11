@@ -2,8 +2,8 @@ import { stopPropagation } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { untracked } from 'mobx'
 import { Fragment } from 'react'
+import { DocHelper } from 'src/editor/doc/helper'
 import { Matrix, MRect } from 'src/editor/geometry'
-import { SchemaHelper } from 'src/editor/schema/helper'
 import { useEditorServices } from 'src/view/hooks/editor'
 import { useShallow } from 'src/view/hooks/schema/use-shallow'
 import { useSelection } from 'src/view/hooks/schema/use-y-client'
@@ -18,16 +18,16 @@ const TEXT_WIDTH = 54
 export const StageFrameLabelComp: FC<{}> = observer(({}) => {
   const { renderTree, stageViewport } = useEditorServices()
 
-  const isRootFrame = (node: S.SchemaItem): node is S.Frame =>
-    SchemaHelper.isRootFrame(node.id)
+  const isRootFrame = (graph: S.Graph): graph is S.Frame =>
+    DocHelper.isRootFrame(graph.id)
   const isFrameVisible = (f: S.Frame) => {
     const sceneAABB = untracked(() => stageViewport.sceneAABB)
     return renderTree.elements.get(f.id)?.getVisible(sceneAABB)
   }
   const rootFrames = useSchema(
     useShallow((state) => {
-      const items = Object.values(state) as S.SchemaItem[]
-      return items.filter(isRootFrame).filter(isFrameVisible)
+      const graphs = Object.values(state.graphs) as S.Graph[]
+      return graphs.filter(isRootFrame).filter(isFrameVisible)
     }),
   )
 
@@ -41,7 +41,7 @@ export const StageFrameLabelComp: FC<{}> = observer(({}) => {
 })
 
 const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
-  const { stageViewport, schemaCreator, stageEvent, selectAction, elemDrawer } =
+  const { stageViewport, docCreator, stageEvent, selectAction, elemDrawer } =
     useEditorServices()
   const { zoom } = stageViewport
   const [hovered, setHovered] = useState(false)
@@ -54,7 +54,7 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
     ) || TEXT_WIDTH
 
   const getTextMatrix = (rotation: number, x: number, y: number) =>
-    SchemaHelper.getAncestorMatrix(frame)
+    DocHelper.getAncestorMatrix(frame)
       .append(Matrix.of(frame.matrix))
       .append(
         Matrix.identity()
@@ -78,7 +78,7 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
 
   if (!textMatrix) return null
 
-  const text = schemaCreator.text({
+  const text = docCreator.text({
     id: `frame-label-${frame.id}`,
     content: frame.name || 'no name',
     width: textWidth / zoom + 2,
@@ -93,9 +93,7 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
       letterSpacing: 0,
       lineHeight: LINE_HEIGHT / zoom,
     },
-    fills: [
-      schemaCreator.fillColor(hovered || selected ? themeColor() : RULER_COLOR),
-    ],
+    fills: [docCreator.fillColor(hovered || selected ? themeColor() : RULER_COLOR)],
   })
 
   return (

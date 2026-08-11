@@ -1,7 +1,7 @@
 import { objKeys } from '@gitborlando/utils'
 import { reflection } from 'first-di'
-import { SchemaMutator } from 'src/editor/schema/mutator'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { DocMutator } from 'src/editor/doc/mutator'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { MIXED_VALUE } from 'src/global/constant'
 import { Service } from 'src/global/service'
 import { createSlideSession } from 'src/utils/slide-session'
@@ -27,8 +27,8 @@ export class DesignGeom extends Service {
   @observable.ref currentFields = <DesignGeomField[]>[]
 
   constructor(
-    private readonly schemaMutator: SchemaMutator,
-    private readonly yState: YState,
+    private readonly docMutator: DocMutator,
+    private readonly yDoc: YDoc,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -75,7 +75,7 @@ export class DesignGeom extends Service {
         return origin
       },
       apply: (snapshot, delta) => {
-        this.yState.transact(() => {
+        this.yDoc.transact(() => {
           selectNodes.forEach((node) => {
             if (!field.supports(node)) return
             const startValue = snapshot.get(node.id)!
@@ -91,7 +91,7 @@ export class DesignGeom extends Service {
     const context = this.createFieldContext()
     const changingKeys = objKeys(geom) as DesignGeomKey[]
 
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       selectNodes.forEach((node) => {
         this.applyChangeToNode(node, geom, changingKeys, context)
       })
@@ -99,7 +99,7 @@ export class DesignGeom extends Service {
   }
 
   private createFieldContext(): DesignGeomFieldContext {
-    return { schemaMutator: this.schemaMutator, yState: this.yState }
+    return { docMutator: this.docMutator, yDoc: this.yDoc }
   }
 
   private applyChangeToNode(

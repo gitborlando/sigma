@@ -5,11 +5,12 @@ import { makeObservable } from 'mobx'
 import { NodeAction } from 'src/editor/action/node'
 import { PageAction } from 'src/editor/action/page'
 import { Undo } from 'src/editor/action/undo'
+import { findNode, findPage } from 'src/editor/doc/finder'
 import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { ICommand } from 'src/global/context-menu'
 import { Service } from 'src/global/service'
 
@@ -22,7 +23,7 @@ export class Command extends Service {
     private readonly undo: Undo,
     private readonly renderTree: RenderTree,
     private readonly stageInteract: StageInteract,
-    private readonly yState: YState,
+    private readonly yDoc: YDoc,
     private readonly nodeAction: NodeAction,
   ) {
     super()
@@ -63,7 +64,7 @@ export class Command extends Service {
       {
         name: t('delete page'),
         callback: ({ id }: IDPayload) => {
-          this.pageAction.removePage(this.yState.find<S.Page>(id))
+          this.pageAction.removePage(findPage(id))
         },
       },
     ]
@@ -108,9 +109,7 @@ export class Command extends Service {
         {
           name: t('print schema'),
           callback: () => {
-            this.select.selectIds.forEach((id) =>
-              console.log(this.yState.find<S.SchemaItem>(id)),
-            )
+            this.select.selectIds.forEach((id) => console.log(findNode(id)))
           },
         },
         {

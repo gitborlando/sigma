@@ -6,32 +6,32 @@ import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { Service } from 'src/global/service'
 import * as Y from 'yjs'
 
-export type YStatePatch = YPlainPatch
+export type YDocPatch = YPlainPatch
 
-type YStateDownstream = (patches: YStatePatch[]) => void
+type YDocDownstream = (patches: YDocPatch[]) => void
 
 @reflection
-export class YState extends Service {
-  doc!: Y.Doc
-  plain!: YPlain<S.Schema>
+export class YDoc extends Service {
+  yDoc!: Y.Doc
+  plain!: YPlain<S.Doc>
 
-  flushPatch$ = Signal.create<YStatePatch>()
+  flushPatch$ = Signal.create<YDocPatch>()
 
-  private patches: YStatePatch[] = []
-  private downstream = new Set<YStateDownstream>()
-  private stateAtom = createAtom('YState.observedState')
+  private patches: YDocPatch[] = []
+  private downstream = new Set<YDocDownstream>()
+  private stateAtom = createAtom('YDoc.observedDoc')
 
   constructor() {
     super()
     autoBind(this)
   }
 
-  get observedState() {
+  get observedDoc() {
     this.stateAtom.reportObserved()
     return this.plain.state
   }
 
-  get state() {
+  get doc() {
     return this.plain.state
   }
 
@@ -51,30 +51,26 @@ export class YState extends Service {
     return this.plain.delete
   }
 
+  setup(doc: S.Doc) {
+    this.patches = []
+    this.yDoc = new Y.Doc()
+    this.effect(() => this.yDoc.destroy())
+    this.plain = autoBind(new YPlain(this.yDoc.getMap<unknown>('doc'), doc))
+    this.effect(this.plain.observe())
+    this.effect(this.plain.subscribe(this.distribute))
+  }
+
   transact(callback: () => void, origin = Y_STATE_LOCAL_ORIGIN) {
     this.plain.transact(origin, callback)
   }
 
-  find<T extends S.SchemaItem>(id: string): T {
-    return this.state[id] as T
-  }
-
-  register(downstream: YStateDownstream) {
+  register(downstream: YDocDownstream) {
     this.downstream.add(downstream)
     return () => void this.downstream.delete(downstream)
   }
 
-  onPatch(hook: (patches: YStatePatch) => void) {
+  onPatch(hook: (patches: YDocPatch) => void) {
     this.effect(this.flushPatch$.hook(hook))
-  }
-
-  setup(schema: S.Schema) {
-    this.patches = []
-    this.doc = new Y.Doc()
-    this.effect(() => this.doc.destroy())
-    this.plain = autoBind(new YPlain(this.doc.getMap<unknown>('schema'), schema))
-    this.effect(this.plain.observe())
-    this.effect(this.plain.subscribe(this.distribute))
   }
 
   getPatches() {
@@ -83,9 +79,9 @@ export class YState extends Service {
     return patches
   }
 
-  private distribute = ({ patches }: YPlainChange<S.Schema>) => {
+  private distribute = ({ patches }: YPlainChange<S.Doc>) => {
     if (!patches.length) return
-    isDEV && (ThisAsAny.schema = this.state)
+    isDEV && (ThisAsAny.doc = this.doc)
 
     this.patches.push(...clone(patches))
     this.downstream.forEach((handle) => handle(patches))

@@ -5,12 +5,13 @@ import type { EditorServices } from 'src/editor'
 import type { UndoInfo } from 'src/editor/action/undo'
 import { type IMatrix, Matrix } from 'src/editor/geometry'
 import type { SelectState } from 'src/editor/select'
+import { GRAPHS } from 'src/global/constant'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 import { useEditorServices } from 'src/view/hooks/editor'
 
 type SnapshotState = {
-  schema: S.Schema
+  schema: S.Doc
   undoStack: UndoInfo[]
   undoNext: number
   savedAt: number
@@ -19,14 +20,14 @@ type SnapshotState = {
 
 type DevSnapshot = SnapshotState & { base?: SnapshotState }
 
-type YState = EditorServices['yState']
+type YDoc = EditorServices['yDoc']
 type Undo = EditorServices['undo']
 type StageViewport = EditorServices['stageViewport']
 
 const STORAGE_KEY_PREFIX = 'sigma:dev-snapshot'
 
 export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
-  const { yState, undo, stageViewport } = useEditorServices()
+  const { yDoc, undo, stageViewport } = useEditorServices()
   const { fileId } = useParams<{ fileId: string }>()
   const [searchParams] = useSearchParams()
   const applyRecord = searchParams.get('applyRecord') === 'true'
@@ -49,7 +50,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
       if (!storageKey) return
 
       const snapshot: DevSnapshot = {
-        ...createSnapshotState(yState, undo, stageViewport),
+        ...createSnapshotState(yDoc, undo, stageViewport),
         base,
       }
 
@@ -60,7 +61,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
         console.warn('Save dev snapshot failed', error)
       }
     },
-    [stageViewport, storageKey, undo, yState],
+    [stageViewport, storageKey, undo, yDoc],
   )
 
   const restoreSnapshot = useCallback(() => {
@@ -68,12 +69,12 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
     if (!snapshot) return false
 
     if (snapshot.base) {
-      restoreReplayableSnapshot(yState, undo, stageViewport, snapshot)
+      restoreReplayableSnapshot(yDoc, undo, stageViewport, snapshot)
     } else {
-      restoreFinalSnapshot(yState, undo, stageViewport, snapshot)
+      restoreFinalSnapshot(yDoc, undo, stageViewport, snapshot)
     }
     return true
-  }, [stageViewport, storageKey, undo, yState])
+  }, [stageViewport, storageKey, undo, yDoc])
 
   useEffect(() => {
     if (!applyRecord || !storageKey) return
@@ -93,12 +94,12 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
   }, [storageKey])
 
   const startRecording = useCallback(() => {
-    const base = createSnapshotState(yState, undo, stageViewport)
+    const base = createSnapshotState(yDoc, undo, stageViewport)
     baseSnapshotRef.current = base
     saveSnapshot(base)
     setAppliedRecord(false)
     setRecording(true)
-  }, [saveSnapshot, stageViewport, undo, yState])
+  }, [saveSnapshot, stageViewport, undo, yDoc])
 
   const stopRecording = useCallback(() => {
     saveSnapshot()
@@ -113,7 +114,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
       window.clearTimeout(timer)
       timer = window.setTimeout(saveSnapshot, 300)
     }
-    const unSub = yState.flushPatch$.hook(scheduleSave)
+    const unSub = yDoc.flushPatch$.hook(scheduleSave)
     const disposeHistoryReaction = reaction(
       () => [undo.next, undo.stack.length],
       scheduleSave,
@@ -130,7 +131,7 @@ export const EditorHeaderDevSnapshotComp: FC<{}> = observer(({}) => {
       disposeHistoryReaction()
       disposeSceneMatrixReaction()
     }
-  }, [recording, saveSnapshot, stageViewport, undo, yState])
+  }, [recording, saveSnapshot, stageViewport, undo, yDoc])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -213,12 +214,12 @@ function readSnapshot(storageKey: string) {
 }
 
 function createSnapshotState(
-  yState: YState,
+  yDoc: YDoc,
   undo: Undo,
   stageViewport: StageViewport,
 ): SnapshotState {
   return {
-    schema: toPlain(yState.state),
+    schema: toPlain(yDoc.doc),
     undoStack: toPlain(undo.stack),
     undoNext: undo.next,
     savedAt: Date.now(),
@@ -227,29 +228,29 @@ function createSnapshotState(
 }
 
 function restoreFinalSnapshot(
-  yState: YState,
+  yDoc: YDoc,
   undo: Undo,
   stageViewport: StageViewport,
   snapshot: SnapshotState,
 ) {
-  replaceSchema(yState, snapshot.schema)
-  restoreUndo(yState, undo, snapshot)
+  replaceSchema(yDoc, snapshot.schema)
+  restoreUndo(yDoc, undo, snapshot)
   restoreSceneMatrix(stageViewport, snapshot)
 }
 
 function restoreReplayableSnapshot(
-  yState: YState,
+  yDoc: YDoc,
   undo: Undo,
   stageViewport: StageViewport,
   snapshot: DevSnapshot,
 ) {
   const base = snapshot.base
-  if (!base) return restoreFinalSnapshot(yState, undo, stageViewport, snapshot)
+  if (!base) return restoreFinalSnapshot(yDoc, undo, stageViewport, snapshot)
 
-  replaceSchema(yState, base.schema)
-  if (!resetUndo(yState, undo)) return
+  replaceSchema(yDoc, base.schema)
+  if (!resetUndo(yDoc, undo)) return
 
-  replayHistoryFromBase(yState, undo, snapshot, base)
+  replayHistoryFromBase(yDoc, undo, snapshot, base)
   restoreSceneMatrix(stageViewport, snapshot)
 }
 
@@ -258,31 +259,31 @@ function restoreSceneMatrix(stageViewport: StageViewport, snapshot: SnapshotStat
   stageViewport.sceneMatrix = Matrix.of(snapshot.sceneMatrix)
 }
 
-function replaceSchema(yState: YState, schema: S.Schema) {
-  const currentKeys = Object.keys(yState.state)
-  const nextKeys = Object.keys(schema)
+function replaceSchema(yDoc: YDoc, schema: S.Doc) {
+  const currentKeys = Object.keys(yDoc.doc.graphs)
+  const nextKeys = Object.keys(schema.graphs)
 
-  yState.transact(() => {
+  yDoc.transact(() => {
     currentKeys.forEach((key) => {
-      if (!(key in schema)) yState.delete<any>([key])
+      if (!(key in schema)) yDoc.delete<any>([GRAPHS, key])
     })
-    nextKeys.forEach((key) => yState.set<any>([key], schema[key]))
+    nextKeys.forEach((key) => yDoc.set<any>([GRAPHS, key], schema.graphs[key]))
   })
 }
 
-function restoreUndo(yState: YState, undo: Undo, snapshot: SnapshotState) {
-  if (!resetUndo(yState, undo)) return
+function restoreUndo(yDoc: YDoc, undo: Undo, snapshot: SnapshotState) {
+  if (!resetUndo(yDoc, undo)) return
 
   undo.restoreHistory(toPlain(snapshot.undoStack || []), snapshot.undoNext || 0)
 }
 
-function resetUndo(yState: YState, undo: Undo) {
+function resetUndo(yDoc: YDoc, undo: Undo) {
   undo.setup()
   return true
 }
 
 function replayHistoryFromBase(
-  yState: YState,
+  yDoc: YDoc,
   undo: Undo,
   snapshot: DevSnapshot,
   base: SnapshotState,
@@ -291,90 +292,90 @@ function replayHistoryFromBase(
   const start = Math.min(base.undoNext || 0, stack.length)
   const end = Math.min(snapshot.undoNext || 0, stack.length)
 
-  stack.slice(start, end).forEach((info) => replayHistoryInfo(yState, undo, info))
+  stack.slice(start, end).forEach((info) => replayHistoryInfo(yDoc, undo, info))
 
   undo.restoreHistory(toPlain(stack), end)
 }
 
-function replayHistoryInfo(yState: YState, undo: Undo, info: UndoInfo) {
+function replayHistoryInfo(yDoc: YDoc, undo: Undo, info: UndoInfo) {
   if (info.type === 'client') {
-    applyReplayLocalState(yState, undo, info)
+    applyReplayLocalState(yDoc, undo, info)
     undo.track(info.type, info.description)
     return
   }
 
-  yState.transact(() => applyStatePatches(yState, info.statePatches))
-  if (info.type === 'all') applyReplayLocalState(yState, undo, info)
+  yDoc.transact(() => applyDocPatches(yDoc, info.statePatches))
+  if (info.type === 'all') applyReplayLocalState(yDoc, undo, info)
 
   undo.track(info.type, info.description)
 }
 
-function applyReplayLocalState(yState: YState, undo: Undo, info: UndoInfo) {
+function applyReplayLocalState(yDoc: YDoc, undo: Undo, info: UndoInfo) {
   const { mobxUndo } = undo
   const localState = info.clientState
   if (localState) {
-    mobxUndo.applyState(normalizeLocalState(yState, localState))
+    mobxUndo.applyDoc(normalizeLocalState(yDoc, localState))
     return
   }
 
   if (mobxUndo.has('select')) {
     const select = mobxUndo.get<SelectState>('select')
-    mobxUndo.applyState({ select: normalizeSelectState(yState, select) })
+    mobxUndo.applyDoc({ select: normalizeSelectState(yDoc, select) })
   }
 }
 
-function normalizeLocalState(yState: YState, state: MobxUndoState) {
+function normalizeLocalState(yDoc: YDoc, state: MobxUndoState) {
   if (!state.select) return state
 
   return {
     ...state,
-    select: normalizeSelectState(yState, state.select as SelectState),
+    select: normalizeSelectState(yDoc, state.select as SelectState),
   }
 }
 
-function normalizeSelectState(yState: YState, state: SelectState) {
+function normalizeSelectState(yDoc: YDoc, state: SelectState) {
   return {
     ...state,
     selection: Object.fromEntries(
-      Object.entries(state.selection || {}).filter(([id]) => yState.state[id]),
+      Object.entries(state.selection || {}).filter(([id]) => yDoc.doc.graphs[id]),
     ),
-    selectPageId: getValidPageId(yState, state.selectPageId),
+    selectPageId: getValidPageId(yDoc, state.selectPageId),
   }
 }
 
-function getValidPageId(yState: YState, pageId: string) {
-  if (pageId && yState.state[pageId]) return pageId
-  return yState.state.meta?.pageIds[0] || ''
+function getValidPageId(yDoc: YDoc, pageId: string) {
+  if (pageId && yDoc.doc.graphs[pageId]) return pageId
+  return yDoc.doc.meta?.pageIds[0] || ''
 }
 
-function applyStatePatches(yState: YState, patches: UndoInfo['statePatches']) {
+function applyDocPatches(yDoc: YDoc, patches: UndoInfo['statePatches']) {
   patches?.forEach((patch) => {
-    const plainYState = yState as any
+    const plainYDoc = yDoc as any
     const keys = patch.keys as [string, ...Array<string | number>]
     switch (patch.type) {
       case 'add':
-        if (shouldInsertPatch(yState, keys))
-          plainYState.insert(keys, toPlain(patch.value))
-        else plainYState.set(keys, toPlain(patch.value))
+        if (shouldInsertPatch(yDoc, keys))
+          plainYDoc.insert(keys, toPlain(patch.value))
+        else plainYDoc.set(keys, toPlain(patch.value))
         return
       case 'replace':
-        plainYState.set(keys, toPlain(patch.value))
+        plainYDoc.set(keys, toPlain(patch.value))
         return
       case 'remove':
-        plainYState.delete(keys)
+        plainYDoc.delete(keys)
     }
   })
 }
 
-function shouldInsertPatch(yState: YState, keys: readonly (string | number)[]) {
+function shouldInsertPatch(yDoc: YDoc, keys: readonly (string | number)[]) {
   const lastIndex = Number(keys[keys.length - 1])
   if (Number.isNaN(lastIndex)) return false
 
-  return Array.isArray(getSchemaValue(yState, keys.slice(0, -1)))
+  return Array.isArray(getSchemaValue(yDoc, keys.slice(0, -1)))
 }
 
-function getSchemaValue(yState: YState, keys: readonly (string | number)[]) {
-  let current: any = yState.state
+function getSchemaValue(yDoc: YDoc, keys: readonly (string | number)[]) {
+  let current: any = yDoc.doc
   keys.forEach((key) => {
     current = current?.[key]
   })

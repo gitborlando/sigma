@@ -64,19 +64,19 @@ const Line: FC<{
   y: number
   length: number
 }> = observer(({ type, x, y, length }) => {
-  const { schemaCreator, stageViewport } = useEditorServices()
+  const { docCreator, stageViewport } = useEditorServices()
   const zoom = stageViewport.zoom
   const axis = type === 'horizontal' ? 'y' : 'x'
   const end = type === 'horizontal' ? XY.$(x + length, y) : XY.$(x, y + length)
   const start = snapSceneXYToHalfPixel(XY.$(x, y), stageViewport.sceneMatrix, axis)
   const snappedEnd = snapSceneXYToHalfPixel(end, stageViewport.sceneMatrix, axis)
-  const line = schemaCreator.line({
+  const line = docCreator.line({
     fills: [],
     points: [
-      schemaCreator.point({ x: start.x, y: start.y, isStart: true }),
-      schemaCreator.point({ x: snappedEnd.x, y: snappedEnd.y, isEnd: true }),
+      docCreator.point({ x: start.x, y: start.y, isStart: true }),
+      docCreator.point({ x: snappedEnd.x, y: snappedEnd.y, isEnd: true }),
     ],
-    stroke: schemaCreator.solidStroke(rgba(204, 204, 204, 0.33), 1 / zoom),
+    stroke: docCreator.solidStroke(rgba(204, 204, 204, 0.33), 1 / zoom),
   })
 
   return <elem node={line} />

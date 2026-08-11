@@ -6,12 +6,12 @@ import { SchemaAction } from 'src/editor/action/schema'
 import { SelectAction } from 'src/editor/action/select'
 import { Undo } from 'src/editor/action/undo'
 import { ViewportAction } from 'src/editor/action/viewport'
+import { DocCreator } from 'src/editor/doc/creator'
+import { DocMutator } from 'src/editor/doc/mutator'
 import { ElemDrawer } from 'src/editor/render/elem/drawer'
 import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
-import { SchemaCreator } from 'src/editor/schema/creator'
-import { SchemaMutator } from 'src/editor/schema/mutator'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
 import { Stage } from 'src/editor/stage'
@@ -31,7 +31,7 @@ import { DesignStroke } from 'src/editor/workbench/design/stroke'
 import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { LayerPageList } from 'src/editor/workbench/layer/page-list'
 import { YAware } from 'src/editor/y-adapter/y-aware'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { YSync } from 'src/editor/y-adapter/y-sync'
 import { Service } from 'src/global/service'
 
@@ -53,8 +53,8 @@ const editorServices = {
   renderPipeline: RenderPipeline,
 
   /** schema */
-  schemaCreator: SchemaCreator,
-  schemaMutator: SchemaMutator,
+  docCreator: DocCreator,
+  docMutator: DocMutator,
 
   /** stage */
   stageCreate: StageCreate,
@@ -82,7 +82,7 @@ const editorServices = {
   /** yjs */
   yAware: YAware,
   ySync: YSync,
-  yState: YState,
+  yDoc: YDoc,
 
   /** misc */
   setting: Setting,

@@ -1,10 +1,12 @@
 import { Signal } from '@gitborlando/signal'
 import { clone } from '@gitborlando/utils'
-import { SchemaHelper } from 'src/editor/schema/helper'
-import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { findNode, findParent } from 'src/editor/doc/finder'
+import { DocHelper } from 'src/editor/doc/helper'
+import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { Select } from 'src/editor/select'
-import type { YStatePatch } from 'src/editor/y-adapter/y-state'
-import { YState } from 'src/editor/y-adapter/y-state'
+import type { YDocPatch } from 'src/editor/y-adapter/y-doc'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
+import { GRAPHS } from 'src/global/constant'
 import { Service } from 'src/global/service'
 import { Elem } from './elem/elem'
 
@@ -29,7 +31,7 @@ export class RenderTree extends Service {
 
   constructor(
     private readonly select: Select,
-    private readonly yState: YState,
+    private readonly yDoc: YDoc,
   ) {
     super()
     autoBind(this)
@@ -43,19 +45,19 @@ export class RenderTree extends Service {
   pageFirstRender() {
     ;[...this.sceneRoot.children].forEach((child) => this.unmountNode(child.id))
 
-    createSchemaTraverse({
-      enter: ({ item }) => {
-        if (!SchemaHelper.isNode(item)) return false
-        this.render('add', [item.id])
+    createGraphTraverse({
+      enter: ({ graph }) => {
+        if (!DocHelper.isNode(graph)) return false
+        this.render('add', [GRAPHS, graph.id])
       },
     })(this.select.getSelectedPage().childIds)
   }
 
   onPatchRender() {
     this.effect(
-      this.yState.flushPatch$.hook((op) => {
+      this.yDoc.flushPatch$.hook((op) => {
         const { type, keys } = op
-        if (keys[1] === 'childIds') this.reHierarchy(op)
+        if (keys[2] === 'childIds') this.reHierarchy(op)
         else this.render(type, keys as string[])
       }),
     )
@@ -76,18 +78,18 @@ export class RenderTree extends Service {
     })
   }
 
-  private render(op: YStatePatch['type'], keys: string[]) {
-    const id = keys[0]
-    if (id === 'meta' || id === 'client') return
+  private render(op: YDocPatch['type'], keys: string[]) {
+    if (keys[0] !== GRAPHS) return
 
-    const node = this.yState.find<S.Node>(id)
+    const id = keys[1]
+    const node = findNode(id)
 
     switch (true) {
-      case op === 'add' && keys.length === 1:
-        if (SchemaHelper.isPageById(id)) break
+      case op === 'add' && keys.length === 2:
+        if (DocHelper.isPageById(id)) break
         this.mountNode(node)
         break
-      case op === 'remove' && keys.length === 1:
+      case op === 'remove' && keys.length === 2:
         this.unmountNode(id)
         break
       default:
@@ -115,7 +117,7 @@ export class RenderTree extends Service {
     elem.optimize = true
     elem.dirty()
 
-    if (node.type === 'frame') elem.clip = true
+    if (node.variant === 'frame') elem.clip = true
   }
 
   private unmountNode(id: ID) {
@@ -129,9 +131,9 @@ export class RenderTree extends Service {
     this.elements.delete(id)
   }
 
-  private reHierarchy(patch: YStatePatch) {
-    const [id] = patch.keys as [ID, string, number]
-    const parentNode = this.yState.find<S.NodeParent>(id)
+  private reHierarchy(patch: YDocPatch) {
+    const id = patch.keys[1] as ID
+    const parentNode = findParent(id)
     if (!parentNode) return
 
     const parent = this.findElem(id) || this.sceneRoot

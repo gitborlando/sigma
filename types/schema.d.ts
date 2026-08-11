@@ -3,9 +3,7 @@ namespace S {
   type Matrix = import('src/editor/geometry/matrix').IMatrix
   type MRect = import('src/editor/geometry/mrect').IMRect
 
-  type Schema = { meta: Meta; [id: string & {}]: SchemaItem }
-
-  type SchemaItem = Node | Page
+  type Doc = { meta: Meta; graphs: Record<string, Graph> }
 
   type Meta = {
     type: 'meta'
@@ -17,53 +15,17 @@ namespace S {
     version: number
   }
 
-  type Client = {
-    userId: string
-    userName: string
-    userAvatar: string
-    selection: Record<string, boolean>
-    selectPageId: string
-    cursor: IXY
-    color: string
-    sceneMatrix: Matrix
-  }
+  type GraphLike = { id: string; name: string; parentId: string } & MRect
 
-  type Clients = { [clientId: number]: Client }
+  type Graph = Page | Node
 
-  type NodeParentBase = { childIds: string[] }
+  type ParentLike = { childIds: string[] }
 
-  type Page = NodeParentBase &
-    MRect & { type: 'page'; id: `page_${string}`; name: string }
+  type Parent = Extract<Graph, ParentLike>
 
-  type NodeParent = Frame | Group | Page
+  type Page = GraphLike & ParentLike & { type: 'page' }
 
-  type Node = Frame | Group | Rectangle | Ellipse | Text | Line | Path
-
-  type NodeMeta = {
-    id: string
-    name: string
-    lock: boolean
-    visible: boolean
-    parentId: string
-    __isNode: true
-  }
-
-  type NodeEffect = {
-    opacity: number
-    flip: 0 | 1 | 2 | 3
-    fills: Fill[]
-    stroke: Stroke
-    blurs: any[]
-    shadows: Shadow[]
-    outline?: Outline
-  }
-
-  type NodeBase = NodeMeta & NodeEffect & MRect
-
-  type Frame = NodeBase &
-    NodeParentBase & { type: 'frame'; radius: number; strokeSide: StrokeSide }
-
-  type Group = NodeBase & NodeParentBase & { type: 'group' }
+  type Node = Frame | Group | Rect | Ellipse | Line | Path | Text
 
   type Point = {
     id: string
@@ -78,27 +40,45 @@ namespace S {
     isEnd?: boolean
   }
 
-  type Vector = Rectangle | Ellipse | Line | Path
+  type NodeMeta = GraphLike & { type: 'node'; lock: boolean; visible: boolean }
 
-  type VectorBase = { points: Point[] }
+  type NodeEffect = {
+    opacity: number
+    /** 0: none, 1: horizontal, 2: vertical, 3: both */
+    flip: 0 | 1 | 2 | 3
+    fills: Fill[]
+    stroke: Stroke
+    blurs: any[]
+    shadows: Shadow[]
+    outline?: Outline
+  }
 
-  type Rectangle = NodeBase &
-    VectorBase & { type: 'rect'; radius: number; strokeSide: StrokeSide }
+  type NodeLike = NodeMeta & NodeEffect
 
-  type Ellipse = NodeBase &
-    VectorBase & {
-      type: 'ellipse'
-      innerRate: number
-      startAngle: number
-      sweepAngle: number
-    }
+  type Frame = NodeLike &
+    ParentLike & { variant: 'frame'; radius: number; strokeSide: StrokeSide }
 
-  type Line = NodeBase & VectorBase & { type: 'line' }
+  type Group = NodeLike & ParentLike & { variant: 'group' }
 
-  type Path = NodeBase & VectorBase & { type: 'path' }
+  type VectorLike = { points: Point[] }
 
-  type Text = NodeBase & {
-    type: 'text'
+  type Vector = Extract<Node, VectorLike>
+
+  type Rect = NodeLike & { variant: 'rect'; radius: number; strokeSide: StrokeSide }
+
+  type Ellipse = NodeLike & {
+    variant: 'ellipse'
+    innerRate: number
+    startAngle: number
+    sweepAngle: number
+  }
+
+  type Line = NodeLike & VectorLike & { variant: 'line' }
+
+  type Path = NodeLike & VectorLike & { variant: 'path' }
+
+  type Text = NodeLike & {
+    variant: 'text'
     content: string
     style: {
       align: 'left' | 'center' | 'right'
@@ -112,14 +92,14 @@ namespace S {
     }
   }
 
-  type Fill = FillColor | FillLinearGradient | FillImage
+  type Fill = FillColor | FillLinear | FillImage
 
   type FillMeta = { visible: boolean; alpha: number }
 
   type FillColor = FillMeta & { type: 'color'; color: string }
 
-  type FillLinearGradient = FillMeta & {
-    type: 'linearGradient'
+  type FillLinear = FillMeta & {
+    type: 'linear'
     start: IXY
     end: IXY
     stops: { offset: number; color: string }[]

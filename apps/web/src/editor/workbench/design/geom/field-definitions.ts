@@ -1,9 +1,9 @@
 import { clamp } from 'es-toolkit'
+import { DocHelper } from 'src/editor/doc/helper'
+import { DocMutator } from 'src/editor/doc/mutator'
 import { max } from 'src/editor/geometry/base'
-import { SchemaHelper } from 'src/editor/schema/helper'
-import { SchemaMutator } from 'src/editor/schema/mutator'
-import { YState } from 'src/editor/y-adapter/y-state'
-import { MIXED_VALUE } from 'src/global/constant'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
+import { GRAPHS, MIXED_VALUE } from 'src/global/constant'
 
 export const designOBBKeys = ['x', 'y', 'width', 'height', 'rotation'] as const
 export const designGeomKeys = [
@@ -24,7 +24,7 @@ export type DesignGeomInfo = Record<
   DesignGeomFieldValue | typeof MIXED_VALUE
 >
 
-export type DesignGeomFieldContext = { schemaMutator: SchemaMutator; yState: YState }
+export type DesignGeomFieldContext = { docMutator: DocMutator; yDoc: YDoc }
 
 type DesignGeomFieldBase<Value extends DesignGeomFieldValue> = {
   key: DesignGeomKey
@@ -79,19 +79,19 @@ const createMRectField = (key: DesignOBBKey): DesignNumberField => ({
   key,
   interaction: 'number',
   supports: () => true,
-  read: (node) => SchemaHelper.getMRect(node)[key],
-  apply: (node, value, { schemaMutator, yState }) => {
-    if (key === 'height' && node.type === 'line') return
+  read: (node) => DocHelper.getMRect(node)[key],
+  apply: (node, value, { docMutator, yDoc }) => {
+    if (key === 'height' && node.variant === 'line') return
 
-    const mrect = SchemaHelper.getMRect(node)
+    const mrect = DocHelper.getMRect(node)
     mrect[key] = value
 
     if (key === 'x' || key === 'y' || key === 'rotation') {
-      yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
+      yDoc.set<S.Node>([GRAPHS, node.id, 'matrix'], mrect.matrix)
       return
     }
 
-    schemaMutator.setNodeSize(node, mrect.width, mrect.height)
+    docMutator.setNodeSize(node, mrect.width, mrect.height)
   },
 })
 
@@ -99,11 +99,11 @@ const aspectRatioField: DesignToggleField = {
   key: 'aspectRatio',
   interaction: 'toggle',
   supports: () => true,
-  read: (node) => SchemaHelper.getMRect(node).aspectRatio > 0,
-  apply: (node, value, { yState }) => {
-    const mrect = SchemaHelper.getMRect(node)
+  read: (node) => DocHelper.getMRect(node).aspectRatio > 0,
+  apply: (node, value, { yDoc }) => {
+    const mrect = DocHelper.getMRect(node)
     mrect.lockAspectRatio(value)
-    yState.set<S.Node>([node.id, 'aspectRatio'], mrect.aspectRatio)
+    yDoc.set<S.Node>([GRAPHS, node.id, 'aspectRatio'], mrect.aspectRatio)
   },
 }
 
@@ -117,12 +117,13 @@ const createNumberField = (
   supports,
   read: (node) => T<any>(node)[key],
   apply: (node, value, context) => {
-    context.yState.set<any>([node.id, key], normalize(value))
+    context.yDoc.set<any>([GRAPHS, node.id, key], normalize(value))
   },
 })
 
-const supportRadius = (node: S.Node) => node.type === 'frame' || node.type === 'rect'
-const supportEllipse = (node: S.Node) => node.type === 'ellipse'
+const supportRadius = (node: S.Node) =>
+  node.variant === 'frame' || node.variant === 'rect'
+const supportEllipse = (node: S.Node) => node.variant === 'ellipse'
 
 export const designGeomFields: DesignGeomField[] = [
   aspectRatioField,

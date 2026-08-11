@@ -173,26 +173,74 @@ export type YPlainInsertValue<T, P extends YPlainPath> = P extends readonly [
     ? Item
     : never
 
-export type YPlainRecordPath<T, Depth extends YPlainDepthKey = 6> =
-  | readonly [string]
-  | readonly [string, ...YPlainTypedPath<T, Depth>]
+export type YPlainRecordPath<
+  T,
+  Depth extends YPlainDepthKey = 6,
+> = YPlainRecordPathAt<Record<string, T>, T, Depth>
 
-export type YPlainRecordPathValue<T, P extends YPlainPath> = P extends readonly [
-  string,
-]
-  ? T
-  : P extends readonly [string, ...infer Rest extends YPlainPath]
-    ? YPlainPathValue<T, Rest>
-    : never
+export type YPlainRecordPathValue<T, P extends YPlainPath> = YPlainRecordPathValueAt<
+  Record<string, T>,
+  T,
+  P
+>
 
-export type YPlainRecordInsertValue<T, P extends YPlainPath> = P extends readonly [
-  string,
-]
-  ? T extends readonly (infer Item)[]
+export type YPlainRecordInsertValue<
+  T,
+  P extends YPlainPath,
+> = YPlainRecordInsertValueAt<Record<string, T>, T, P>
+
+type YPlainRecordPathAt<Root, Item, Depth extends YPlainDepthKey = 6> = [
+  Depth,
+] extends [never]
+  ? YPlainPath
+  : string extends keyof Root
+    ? readonly [string] | readonly [string, ...YPlainTypedPath<Item, Depth>]
+    : Root extends AnyObject
+      ? {
+          [K in keyof Root & YPlainPathKey]: [Extract<Root[K], Item>] extends [never]
+            ? YPlainNestedRecordPath<K, Root[K], Item, YPlainDepth[Depth]>
+            : readonly [K] | YPlainNestedPath<K, Item, YPlainDepth[Depth]>
+        }[keyof Root & YPlainPathKey]
+      : never
+
+type YPlainRecordPathValueAt<
+  Root,
+  Item,
+  P extends YPlainPath,
+> = string extends keyof Root
+  ? P extends readonly [string]
     ? Item
+    : P extends readonly [string, ...infer Rest extends YPlainPath]
+      ? YPlainPathValue<Item, Rest>
+      : never
+  : P extends readonly [infer Key, ...infer Rest extends YPlainPath]
+    ? Key extends keyof Root
+      ? [Extract<Root[Key], Item>] extends [never]
+        ? YPlainRecordPathValueAt<Root[Key], Item, Rest>
+        : Rest extends readonly []
+          ? Item
+          : YPlainPathValue<Item, Rest>
+      : never
     : never
-  : P extends readonly [string, ...infer Rest extends YPlainPath]
-    ? YPlainInsertValue<T, Rest>
+
+type YPlainRecordInsertValueAt<
+  Root,
+  Item,
+  P extends YPlainPath,
+> = string extends keyof Root
+  ? P extends readonly [string]
+    ? Item extends readonly (infer Child)[]
+      ? Child
+      : never
+    : P extends readonly [string, ...infer Rest extends YPlainPath]
+      ? YPlainInsertValue<Item, Rest>
+      : never
+  : P extends readonly [infer Key, ...infer Rest extends YPlainPath]
+    ? Key extends keyof Root
+      ? [Extract<Root[Key], Item>] extends [never]
+        ? YPlainRecordInsertValueAt<Root[Key], Item, Rest>
+        : YPlainInsertValue<Item, Rest>
+      : never
     : never
 
 type YPlainNestedPath<
@@ -201,6 +249,18 @@ type YPlainNestedPath<
   Depth extends YPlainDepthKey,
 > =
   YPlainTypedPath<Value, Depth> extends infer Tail
+    ? Tail extends YPlainPath
+      ? readonly [Key, ...Tail]
+      : never
+    : never
+
+type YPlainNestedRecordPath<
+  Key extends YPlainPathKey,
+  Value,
+  Item,
+  Depth extends YPlainDepthKey,
+> =
+  YPlainRecordPathAt<Value, Item, Depth> extends infer Tail
     ? Tail extends YPlainPath
       ? readonly [Key, ...Tail]
       : never
@@ -295,17 +355,19 @@ export class YPlain<T extends AnyObject = AnyObject> {
   }
 
   get<const P extends YPlainTypedPath<T>>(path: P): YPlainPathValue<T, P>
-  get<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
-    path: P,
-  ): YPlainRecordPathValue<Item, P>
+  get<
+    Item,
+    const P extends YPlainRecordPathAt<T, Item> = YPlainRecordPathAt<T, Item>,
+  >(path: P): YPlainRecordPathValueAt<T, Item, P>
   get(path: YPlainPath) {
     return getPlainValue(this.state, path)
   }
 
   getY<const P extends YPlainTypedPath<T>>(path: P): unknown
-  getY<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
-    path: P,
-  ): unknown
+  getY<
+    Item,
+    const P extends YPlainRecordPathAt<T, Item> = YPlainRecordPathAt<T, Item>,
+  >(path: P): unknown
   getY(path: YPlainPath) {
     return this.getYValue(path)
   }
@@ -314,10 +376,10 @@ export class YPlain<T extends AnyObject = AnyObject> {
     path: P,
     value: YPlainInsertValue<T, P>,
   ): boolean
-  insert<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
-    path: P,
-    value: YPlainRecordInsertValue<Item, P>,
-  ): boolean
+  insert<
+    Item,
+    const P extends YPlainRecordPathAt<T, Item> = YPlainRecordPathAt<T, Item>,
+  >(path: P, value: YPlainRecordInsertValueAt<T, Item, P>): boolean
   insert(path: YPlainPath, value: unknown) {
     return this.runMutation(() => this.insertYPath(path, value))
   }
@@ -350,10 +412,10 @@ export class YPlain<T extends AnyObject = AnyObject> {
     path: P,
     value: YPlainPathValue<T, P> | undefined,
   ): boolean
-  set<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
-    path: P,
-    value: YPlainRecordPathValue<Item, P> | undefined,
-  ): boolean
+  set<
+    Item,
+    const P extends YPlainRecordPathAt<T, Item> = YPlainRecordPathAt<T, Item>,
+  >(path: P, value: YPlainRecordPathValueAt<T, Item, P> | undefined): boolean
   set(path: YPlainPath, value: unknown) {
     return this.runMutation(() => this.setYPath(path, value))
   }
@@ -407,10 +469,10 @@ export class YPlain<T extends AnyObject = AnyObject> {
     path: P,
     value: YPlainPathValue<T, P> | undefined,
   ): boolean
-  replace<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
-    path: P,
-    value: YPlainRecordPathValue<Item, P> | undefined,
-  ): boolean
+  replace<
+    Item,
+    const P extends YPlainRecordPathAt<T, Item> = YPlainRecordPathAt<T, Item>,
+  >(path: P, value: YPlainRecordPathValueAt<T, Item, P> | undefined): boolean
   replace(path: YPlainPath, value: unknown) {
     return this.runMutation(() => this.replaceYPath(path, value))
   }
@@ -469,9 +531,10 @@ export class YPlain<T extends AnyObject = AnyObject> {
   }
 
   delete<const P extends YPlainTypedPath<T>>(path: P): boolean
-  delete<Item, const P extends YPlainRecordPath<Item> = YPlainRecordPath<Item>>(
-    path: P,
-  ): boolean
+  delete<
+    Item,
+    const P extends YPlainRecordPathAt<T, Item> = YPlainRecordPathAt<T, Item>,
+  >(path: P): boolean
   delete(path: YPlainPath) {
     return this.runMutation(() => this.deleteYPath(path))
   }

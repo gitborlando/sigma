@@ -1,15 +1,16 @@
 import { IRect } from '@gitborlando/geo'
 import { Signal } from '@gitborlando/signal'
 import type { DragData } from '@gitborlando/toolkit/browser'
-import { clone } from '@gitborlando/utils'
+import { clone, iife } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
 import { SelectAction } from 'src/editor/action/select'
 import { Undo } from 'src/editor/action/undo'
+import { DocCreator } from 'src/editor/doc/creator'
+import { findParent } from 'src/editor/doc/finder'
+import { DocHelper } from 'src/editor/doc/helper'
+import { DocMutator } from 'src/editor/doc/mutator'
 import { createLine, Matrix, MRect } from 'src/editor/geometry'
 import { RenderTree } from 'src/editor/render/tree'
-import { SchemaCreator } from 'src/editor/schema/creator'
-import { SchemaHelper } from 'src/editor/schema/helper'
-import { SchemaMutator } from 'src/editor/schema/mutator'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
 import { StageCursor } from 'src/editor/stage/cursor'
@@ -17,7 +18,8 @@ import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
+import { GRAPHS } from 'src/global/constant'
 import { Service } from 'src/global/service'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'line', 'text'] as const
@@ -31,7 +33,7 @@ export class StageCreate extends Service {
   @observable createType: IStageCreateType = 'frame'
 
   private node!: S.Node
-  private parent!: S.NodeParent
+  private parent!: S.Parent
 
   finishCreate$ = Signal.create<void>()
 
@@ -39,10 +41,10 @@ export class StageCreate extends Service {
     private readonly renderTree: RenderTree,
     private readonly stageEvent: StageEvent,
     private readonly stageCursor: StageCursor,
-    private readonly schemaMutator: SchemaMutator,
+    private readonly docMutator: DocMutator,
     private readonly undo: Undo,
-    private readonly schemaCreator: SchemaCreator,
-    private readonly yState: YState,
+    private readonly docCreator: DocCreator,
+    private readonly yDoc: YDoc,
     private readonly select: Select,
     private readonly stageViewport: StageViewport,
     private readonly setting: Setting,
@@ -81,9 +83,9 @@ export class StageCreate extends Service {
     this.parent = this.findParent()
     this.node = this.createNode(dragData)
 
-    this.yState.transact(() => {
-      this.schemaMutator.addNodes([this.node])
-      this.schemaMutator.insertChildAt(this.parent, this.node)
+    this.yDoc.transact(() => {
+      this.docMutator.addNodes([this.node])
+      this.docMutator.insertChildAt(this.parent, this.node)
     })
 
     this.selectAction.onCreateSelect(this.node.id)
@@ -95,14 +97,14 @@ export class StageCreate extends Service {
   }
 
   private onCreateMove(dragData: DragData) {
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       this.updateNodeMRect(this.node, this.calcCreateMRect(dragData))
     })
   }
 
   private onCreateEnd({ moved }: DragData & { moved: boolean }) {
     if (!moved) {
-      this.yState.transact(() => {
+      this.yDoc.transact(() => {
         this.updateNodeMRect(this.node, this.calcDefaultMRect())
       })
     }
@@ -113,8 +115,8 @@ export class StageCreate extends Service {
   private createNode(dragData: DragData) {
     const length = XY.distance(dragData.current, dragData.start)
     const mrect = this.calcCreateMRect(dragData)
-    const node = this.schemaCreator[this.createType]({
-      name: this.schemaCreator.createNodeName(this.createType),
+    const node = this.docCreator[this.createType]({
+      name: this.docCreator.createNodeName(this.createType),
       ...mrect.plain(),
       ...(this.createType === 'line' && { width: length }),
     })
@@ -155,31 +157,34 @@ export class StageCreate extends Service {
   }
 
   private prependParentMatrix(matrix: Matrix) {
-    const forwardMatrix =
-      this.parent.type === 'page' ? Matrix.identity() : Matrix.of(this.parent.matrix)
+    const forwardMatrix = iife(() => {
+      const parent = this.parent
+      if (!DocHelper.isPage(parent)) return Matrix.of(parent.matrix)
+      return Matrix.identity()
+    })
     return forwardMatrix.invert().append(matrix).plain()
   }
 
   private updateNodeMRect(node: S.Node, mrect: MRect) {
-    this.yState.set<S.Node>([node.id, 'width'], mrect.width)
-    this.yState.set<S.Node>([node.id, 'height'], mrect.height)
-    this.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
+    this.yDoc.set<S.Node>([GRAPHS, node.id, 'width'], mrect.width)
+    this.yDoc.set<S.Node>([GRAPHS, node.id, 'height'], mrect.height)
+    this.yDoc.set<S.Node>([GRAPHS, node.id, 'matrix'], mrect.matrix)
 
     const points = this.createNodePoints(node, mrect)
-    if (points) this.yState.set<any>([node.id, 'points'], points)
+    if (points) this.yDoc.set<S.Vector>([GRAPHS, node.id, 'points'], points)
   }
 
   private createNodePoints(node: S.Node, mrect: MRect) {
-    if (SchemaHelper.is(node, 'line')) {
+    if (DocHelper.isNode(node, 'line')) {
       return createLine(XY.$(0, 0), mrect.width)
     }
   }
 
   private findParent() {
     const frame = this.stageEvent.hitSceneElems.find((elem) =>
-      SchemaHelper.isById(elem.id, 'frame'),
+      DocHelper.isNode(elem.node, 'frame'),
     )
-    if (frame) return this.yState.find<S.NodeParent>(frame.id)
-    return this.yState.find<S.Page>(this.select.selectPageId)
+    if (frame) return findParent(frame.id)
+    return this.select.getSelectedPage()
   }
 }

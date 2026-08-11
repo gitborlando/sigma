@@ -4,16 +4,18 @@ import { useShallow } from 'src/view/hooks/schema/use-shallow'
 export function useSelectNodes() {
   const { select } = useEditorServices()
   const selectIds = select.selectIds
-  return useSchema(useShallow((state) => selectIds.map((id) => state[id] as S.Node)))
+  return useSchema(
+    useShallow((state) => selectIds.map((id) => state.graphs[id] as S.Node)),
+  )
 }
 
 export function useSelectPage() {
   const { select } = useEditorServices()
   const selectPageId = select.selectPageId
-  return useSchema((state) => state[selectPageId] as S.Page)
+  return useSchema((state) => state.graphs[selectPageId] as S.Page)
 }
 
-export function useSchema<T>(selector: (state: S.Schema) => T): T {
-  const { yState } = useEditorServices()
-  return useSyncExternalStore(yState.register, () => selector(yState.state))
+export function useSchema<T>(selector: (state: S.Doc) => T): T {
+  const { yDoc } = useEditorServices()
+  return useSyncExternalStore(yDoc.register, () => selector(yDoc.doc))
 }

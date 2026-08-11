@@ -117,7 +117,7 @@ export class MobxUndo {
     }, metadata)
   }
 
-  applyState(state: MobxUndoState | undefined, metadata?: MobxUndoMetadata) {
+  applyDoc(state: MobxUndoState | undefined, metadata?: MobxUndoMetadata) {
     if (!state) return
 
     this.assertRegisteredState(state)

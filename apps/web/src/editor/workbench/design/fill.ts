@@ -1,9 +1,9 @@
 import { NodeAction } from 'src/editor/action/node'
-import { SchemaCreator } from 'src/editor/schema/creator'
+import { DocCreator } from 'src/editor/doc/creator'
 import { Select } from 'src/editor/select'
 import { COLOR } from 'src/utils/color'
 import { Undo } from '../../action/undo'
-import { YState } from '../../y-adapter/y-state'
+import { YDoc } from '../../y-adapter/y-doc'
 import { DesignEffect } from './effect'
 
 @reflection
@@ -13,18 +13,18 @@ export class DesignFill extends DesignEffect<'fills'> {
   }
 
   constructor(
-    protected readonly yState: YState,
+    protected readonly yDoc: YDoc,
     protected readonly nodeAction: NodeAction,
     protected readonly select: Select,
-    private readonly schemaCreator: SchemaCreator,
+    private readonly docCreator: DocCreator,
     private readonly undo: Undo,
   ) {
-    super('fills', () => [schemaCreator.fillColor()], yState, nodeAction, select)
+    super('fills', () => [docCreator.fillColor()], yDoc, nodeAction, select)
     autoBind(this)
   }
 
   newFill() {
-    return this.schemaCreator.fillColor(COLOR.gray, this.fills?.length ? 0.25 : 1)
+    return this.docCreator.fillColor(COLOR.gray, this.fills?.length ? 0.25 : 1)
   }
 
   addFill() {

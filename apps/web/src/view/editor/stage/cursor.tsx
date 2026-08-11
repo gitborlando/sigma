@@ -20,17 +20,17 @@ export const StageCursorsComp: FC<{}> = observer(({}) => {
 })
 
 const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
-  const { schemaCreator, stageViewport } = useEditorServices()
+  const { docCreator, stageViewport } = useEditorServices()
   xy = stageViewport.toStageXY(xy)
   const [color] = useState(() => COLOR.random())
-  const node = schemaCreator.rect({
+  const node = docCreator.rect({
     ...xy,
     width: 10,
     height: 10,
     radius: 5,
-    fills: [schemaCreator.fillColor(color, 1)],
+    fills: [docCreator.fillColor(color, 1)],
   })
-  const text = schemaCreator.text({
+  const text = docCreator.text({
     ...MRect.identity(60, 12)
       .shift({ x: xy.x + 6, y: xy.y + 16 })
       .plain(),
@@ -44,7 +44,7 @@ const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
       letterSpacing: 0,
       lineHeight: 16,
     },
-    fills: [schemaCreator.fillColor(color, 1)],
+    fills: [docCreator.fillColor(color, 1)],
   })
 
   return (

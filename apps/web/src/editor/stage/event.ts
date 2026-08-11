@@ -2,12 +2,12 @@ import type { IXY } from '@gitborlando/geo'
 import { firstOne, type NoopFunc } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { untracked } from 'mobx'
+import { DocHelper } from 'src/editor/doc/helper'
 import { Matrix } from 'src/editor/geometry'
 import { Elem } from 'src/editor/render/elem/elem'
 import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
-import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Service } from 'src/global/service'
 
@@ -109,7 +109,7 @@ export class StageEvent extends Service {
 
     const hovered = firstOne(this.hitSceneElems)
     if (!this.hintId) {
-      if (hovered?.id && SchemaHelper.isRootFrame(hovered.id)) return
+      if (hovered?.id && DocHelper.isRootFrame(hovered.id)) return
       this.hoverId = this.hoverId !== hovered?.id ? hovered?.id : this.hoverId
     }
   }

@@ -5,18 +5,19 @@ import { isLeftMouse, listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { SelectAction } from 'src/editor/action/select'
+import { findNode } from 'src/editor/doc/finder'
+import { DocHelper } from 'src/editor/doc/helper'
+import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
-import { SchemaHelper } from 'src/editor/schema/helper'
-import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { Select, type Selection } from 'src/editor/select'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageTransformer } from 'src/editor/stage/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { Service } from 'src/global/service'
 import { Undo } from '../../action/undo'
 
@@ -39,7 +40,7 @@ export class StageSelect extends Service {
     private readonly select: Select,
     private readonly selectAction: SelectAction,
     private readonly undo: Undo,
-    private readonly yState: YState,
+    private readonly yDoc: YDoc,
     private readonly stageViewport: StageViewport,
   ) {
     super()
@@ -60,14 +61,14 @@ export class StageSelect extends Service {
 
     const selectIds = this.select.selectIds
     const hoverSelected = !!this.select.selection[this.hoverId]
-    const hoverNode = this.yState.find<S.Node>(this.hoverId)
+    const hoverNode = findNode(this.hoverId)
 
     if (hoverSelected) {
-      if (hoverNode.type === 'text') {
+      if (hoverNode.variant === 'text') {
         this.onEditText(hoverNode)
       }
     } else if (selectIds.length === 1) {
-      const ancestor = SchemaHelper.findAncestor(
+      const ancestor = DocHelper.findAncestor(
         this.hoverId,
         (node) => node.parentId === firstOne(selectIds),
       )
@@ -86,7 +87,7 @@ export class StageSelect extends Service {
       return
     }
 
-    if (!this.hoverId || SchemaHelper.isRootFrame(this.hoverId)) {
+    if (!this.hoverId || DocHelper.isRootFrame(this.hoverId)) {
       if (leftMouse) {
         this.selectAction.clearSelect()
         this.onMarqueeSelect()
@@ -110,10 +111,10 @@ export class StageSelect extends Service {
       )
     }
 
-    const traverser = createSchemaTraverse<{ matrix: IMatrix }>({
+    const traverser = createGraphTraverse<{ matrix: IMatrix }>({
       enter: (ctx) => {
-        const { item, depth, childIds, forwardCtx } = ctx
-        const elem = this.renderTree.findElem(item.id)
+        const { graph, depth, childIds, forwardCtx } = ctx
+        const elem = this.renderTree.findElem(graph.id)
 
         if (!this.stageEvent.isElemVisible(elem)) {
           return false
@@ -121,7 +122,7 @@ export class StageSelect extends Service {
 
         if (childIds?.length && depth === 0) {
           if (AABB.include(marqueeAABB, elem.aabb) === 1) {
-            marqueeSelection[item.id] = true
+            marqueeSelection[graph.id] = true
             return false
           }
           ctx.matrix = Matrix.of(elem.mrect.matrix)
@@ -134,7 +135,7 @@ export class StageSelect extends Service {
           Matrix.of(forwardMatrix).append(elem.mrect.matrix).plain(),
         )
         if (hitTest(mrect)) {
-          marqueeSelection[item.id] = true
+          marqueeSelection[graph.id] = true
           ctx.matrix = Matrix.of(mrect.matrix)
           return
         }

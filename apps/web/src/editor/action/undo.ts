@@ -1,7 +1,7 @@
 import { MobxUndo, MobxUndoState } from '@gitborlando/mobx-undo'
 import { match } from '@gitborlando/utils'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
-import { YState, YStatePatch } from 'src/editor/y-adapter/y-state'
+import { YDoc, YDocPatch } from 'src/editor/y-adapter/y-doc'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
 import { Service } from 'src/global/service'
 import * as Y from 'yjs'
@@ -12,7 +12,7 @@ export type UndoInfo = {
   type: 'state' | 'client' | 'all'
   description: string
   clientState?: MobxUndoState
-  statePatches?: YStatePatch[]
+  statePatches?: YDocPatch[]
 }
 
 @reflection
@@ -25,7 +25,7 @@ export class Undo extends Service {
 
   private shouldTrack = true
 
-  constructor(private readonly yState: YState) {
+  constructor(private readonly yDoc: YDoc) {
     super()
     autoBind(makeObservable(this))
     this.effect(() => this.mobxUndo.dispose())
@@ -42,7 +42,7 @@ export class Undo extends Service {
 
   setup() {
     this.yUndo?.destroy()
-    this.yUndo = new Y.UndoManager(this.yState.doc.getMap('schema'), {
+    this.yUndo = new Y.UndoManager(this.yDoc.yDoc.getMap('doc'), {
       trackedOrigins: new Set([null, Y_STATE_LOCAL_ORIGIN]),
     })
   }
@@ -68,7 +68,7 @@ export class Undo extends Service {
 
     if (type === 'state' || type === 'all') {
       this.yUndo?.stopCapturing()
-      info.statePatches = this.yState.getPatches()
+      info.statePatches = this.yDoc.getPatches()
     }
     if (type === 'client' || type === 'all') {
       this.mobxUndo.archive()
@@ -98,18 +98,18 @@ export class Undo extends Service {
   private replayInfo(type: UndoType, info: UndoInfo | undefined) {
     if (!info) return
 
-    const replayYState = () => this.yUndo?.[type]()
+    const replayYDoc = () => this.yUndo?.[type]()
     const replayClientState = () => this.mobxUndo[type]()
 
     match(info.type, {
-      state: () => replayYState(),
+      state: () => replayYDoc(),
       client: () => replayClientState(),
       all: () => {
         if (type === 'undo') {
           replayClientState()
-          replayYState()
+          replayYDoc()
         } else {
-          replayYState()
+          replayYDoc()
           replayClientState()
         }
       },

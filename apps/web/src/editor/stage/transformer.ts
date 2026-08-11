@@ -3,16 +3,17 @@ import { iife } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
 import { NodeAction } from 'src/editor/action/node'
 import { Undo } from 'src/editor/action/undo'
+import { DocHelper } from 'src/editor/doc/helper'
+import { DocMutator } from 'src/editor/doc/mutator'
 import { HitTest, IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
-import { SchemaHelper } from 'src/editor/schema/helper'
-import { SchemaMutator } from 'src/editor/schema/mutator'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRound, snapGridRoundXY, TRBL } from 'src/editor/utils'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
+import { GRAPHS } from 'src/global/constant'
 import { Service } from 'src/global/service'
 
 type TransformerAction = 'move' | 'resize' | 'rotate' | 'flip'
@@ -64,11 +65,11 @@ export class StageTransformer extends Service {
   @observable isMoving = false
 
   @computed get isSingleSelect() {
-    return this.select.selectedNodes.length === 1
+    return this.select.observedSelectedNodes.length === 1
   }
   @computed get isSelectOneLine() {
-    if (this.select.selectedNodes.length !== 1) return false
-    return SchemaHelper.is(this.select.selectedNodes[0], 'line')
+    if (this.select.observedSelectedNodes.length !== 1) return false
+    return DocHelper.isNode(this.select.observedSelectedNodes[0], 'line')
   }
 
   private action: TransformerAction = 'move'
@@ -82,12 +83,12 @@ export class StageTransformer extends Service {
   private dragger!: Dragger
 
   constructor(
-    private readonly yState: YState,
+    private readonly yDoc: YDoc,
     private readonly undo: Undo,
     private readonly stageViewport: StageViewport,
     private readonly setting: Setting,
     private readonly select: Select,
-    private readonly schemaMutator: SchemaMutator,
+    private readonly docMutator: DocMutator,
     private readonly nodeAction: NodeAction,
   ) {
     super()
@@ -100,12 +101,12 @@ export class StageTransformer extends Service {
 
     if (selectNodes.length === 1) {
       const node = selectNodes[0]
-      const matrix = SchemaHelper.getRootMatrix(node)
+      const matrix = DocHelper.getRootMatrix(node)
       return (this.mrect = MRect.of({ ...node, matrix }))
     }
 
     const aabbList = selectNodes.map((node) => {
-      const matrix = SchemaHelper.getRootMatrix(node)
+      const matrix = DocHelper.getRootMatrix(node)
       return MRect.fromRect(node, matrix).aabb
     })
     const rect = AABB.rect(AABB.merge(aabbList))
@@ -275,7 +276,7 @@ export class StageTransformer extends Service {
     const isMoveStartHandler = directions.includes('left')
     const fixedPoint = isMoveStartHandler ? end : start
     const movingPoint = isMoveStartHandler ? start : end
-    const forwardMatrix = SchemaHelper.getAncestorMatrix(node)
+    const forwardMatrix = DocHelper.getAncestorMatrix(node)
     const [startPoint, endPoint] = node.points
 
     this.dragger
@@ -301,7 +302,7 @@ export class StageTransformer extends Service {
         }
 
         this.mrect = new MRect(width, 0, sceneMatrix.plain())
-        this.yState.transact(() =>
+        this.yDoc.transact(() =>
           this.applyNodeMRect(node, result.mrect, result.points),
         )
       })
@@ -365,7 +366,7 @@ export class StageTransformer extends Service {
   }
 
   private transform() {
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       this.select.getSelectedNodes().forEach(this.applyToNode)
     })
   }
@@ -375,7 +376,7 @@ export class StageTransformer extends Service {
     if (!this.diffMatrix || !mrect) return
 
     const startMRect = MRect.of(mrect)
-    const ancestorsMatrix = SchemaHelper.getAncestorMatrix(node)
+    const ancestorsMatrix = DocHelper.getAncestorMatrix(node)
 
     if (this.select.selectIds.length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
@@ -456,12 +457,12 @@ export class StageTransformer extends Service {
 
   private applyNodeMRect(node: S.Node, mrect: MRect, points?: S.Point[]) {
     if (points) {
-      this.yState.set<S.Line>([node.id, 'points'], points)
-      this.yState.set<S.Node>([node.id, 'width'], mrect.width)
-      this.yState.set<S.Node>([node.id, 'height'], mrect.height)
+      this.yDoc.set<S.Line>([GRAPHS, node.id, 'points'], points)
+      this.yDoc.set<S.Node>([GRAPHS, node.id, 'width'], mrect.width)
+      this.yDoc.set<S.Node>([GRAPHS, node.id, 'height'], mrect.height)
     } else {
-      this.schemaMutator.setNodeSize(node, mrect.width, mrect.height)
+      this.docMutator.setNodeSize(node, mrect.width, mrect.height)
     }
-    this.yState.set<S.Node>([node.id, 'matrix'], mrect.matrix)
+    this.yDoc.set<S.Node>([GRAPHS, node.id, 'matrix'], mrect.matrix)
   }
 }

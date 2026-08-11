@@ -2,10 +2,11 @@ import { AABB } from '@gitborlando/geo'
 import { MRect } from 'src/editor/geometry'
 import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
+import { GRAPHS } from 'src/global/constant'
 import { Service } from 'src/global/service'
 import { Undo } from '../../action/undo'
-import { SchemaHelper } from '../../schema/helper'
-import { YState } from '../../y-adapter/y-state'
+import { DocHelper } from '../../doc/helper'
+import { YDoc } from '../../y-adapter/y-doc'
 
 const alignTypes = <const>[
   'alignLeft',
@@ -27,7 +28,7 @@ export class DesignAlign extends Service {
   private aligned = false
 
   constructor(
-    private readonly yState: YState,
+    private readonly yDoc: YDoc,
     private readonly undo: Undo,
     private readonly select: Select,
     private readonly renderTree: RenderTree,
@@ -39,7 +40,7 @@ export class DesignAlign extends Service {
 
   setAlign(align: IAlignType) {
     this.setup()
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       this[align]?.(this.getAlignBound())
     })
     if (this.aligned) {
@@ -49,18 +50,15 @@ export class DesignAlign extends Service {
   }
 
   private setup() {
-    const selectedNodes = this.select.selectedNodes
+    const selectedNodes = this.select.observedSelectedNodes
 
     if (selectedNodes.length === 0) {
       this.canAlign = false
     } else if (selectedNodes.length > 1) {
       this.toAlignNodes = [...selectedNodes]
       this.canAlign = true
-    } else if (
-      selectedNodes.length === 1 &&
-      SchemaHelper.isById(selectedNodes[0].id, 'nodeParent')
-    ) {
-      this.toAlignNodes = SchemaHelper.getChildren(<S.NodeParent>selectedNodes[0])
+    } else if (selectedNodes.length === 1 && DocHelper.isParent(selectedNodes[0])) {
+      this.toAlignNodes = DocHelper.getChildren(selectedNodes[0])
       this.canAlign = true
     } else this.canAlign = false
   }
@@ -120,9 +118,9 @@ export class DesignAlign extends Service {
   private setAlignState(node: S.Node, shift: IXY) {
     if (shift.x === 0 && shift.y === 0) return
 
-    const mrect = SchemaHelper.getMRect(node)
+    const mrect = DocHelper.getMRect(node)
     const newMRect = MRect.of(mrect).shift(shift)
-    this.yState.set<S.Node>([node.id, 'matrix'], newMRect.matrix)
+    this.yDoc.set<S.Node>([GRAPHS, node.id, 'matrix'], newMRect.matrix)
     this.aligned = true
   }
 

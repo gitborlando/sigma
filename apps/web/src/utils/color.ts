@@ -32,7 +32,7 @@ export function hslRgb(h: number, s: number, l: number) {
   return Color.hsl(h, s, l).rgb().string()
 }
 
-export function makeLinearGradientCss({ start, end, stops }: S.FillLinearGradient) {
+export function makeLinearGradientCss({ start, end, stops }: S.FillLinear) {
   const degree = Angle.sweep(XY.vector(end, start)) + 90
   return `linear-gradient(${degree}deg, ${stops[0].color} 0%, ${stops
     .map(({ color, offset }) => `${color} ${offset * 100}%`)

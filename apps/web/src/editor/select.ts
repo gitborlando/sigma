@@ -3,7 +3,8 @@ import { Signal } from '@gitborlando/signal'
 import equal from 'fast-deep-equal'
 import { makeObservable, untracked } from 'mobx'
 import { Undo } from 'src/editor/action/undo'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { findNode, findPage } from 'src/editor/doc/finder'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { Service } from 'src/global/service'
 
 export type SelectState = { selection: Selection; selectPageId: ID | '' }
@@ -20,7 +21,7 @@ export class Select extends Service {
 
   constructor(
     private readonly undo: Undo,
-    private readonly yState: YState,
+    private readonly yDoc: YDoc,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -34,17 +35,17 @@ export class Select extends Service {
     return Object.keys(this.selection)
   }
 
-  @computed get selectedNodes() {
-    return this.selectIds.map((id) => this.yState.observedState[id] as S.Node)
+  get observedSelectedNodes() {
+    return this.selectIds.map((id) => this.yDoc.observedDoc.graphs[id] as S.Node)
   }
 
   getSelectedNodes() {
     const selectIds = untracked(() => this.selectIds)
-    return selectIds.map((id) => this.yState.state[id] as S.Node)
+    return selectIds.map((id) => findNode(id))
   }
 
   getSelectedPage() {
-    return this.yState.state[untracked(() => this.selectPageId)] as S.Page
+    return findPage(untracked(() => this.selectPageId))
   }
 
   select(id: ID) {

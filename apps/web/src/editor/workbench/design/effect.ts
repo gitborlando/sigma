@@ -5,13 +5,14 @@ import { Patch, produceWithPatches } from 'immer'
 import { makeObservable } from 'mobx'
 import { NodeAction } from 'src/editor/action/node'
 import { Select } from 'src/editor/select'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
+import { GRAPHS } from 'src/global/constant'
 import { Service } from 'src/global/service'
 
 type DesignEffectKey = 'fills' | 'stroke'
 type DesignEffectValue<Key extends DesignEffectKey> = S.Node[Key]
 
-type DynamicYStateMutation = {
+type DynamicYDocMutation = {
   insert: (path: YPlainPath, value: unknown) => boolean
   set: (path: YPlainPath, value: unknown) => boolean
   delete: (path: YPlainPath) => boolean
@@ -24,7 +25,7 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
   constructor(
     private readonly property: Key,
     private readonly getInitialValue: () => DesignEffectValue<Key>,
-    protected readonly yState: YState,
+    protected readonly yDoc: YDoc,
     protected readonly nodeAction: NodeAction,
     protected readonly select: Select,
   ) {
@@ -34,7 +35,7 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
   }
 
   protected onSetupValue() {
-    const nodes = this.select.selectedNodes
+    const nodes = this.select.observedSelectedNodes
     this.value = undefined
     this.isMixed = false
     if (nodes.length === 0) return
@@ -50,10 +51,10 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
     const lastValue = this.value || this.getInitialValue()
     const [value, patches] = produceWithPatches(lastValue, setter)
 
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       this.select.getSelectedNodes().forEach((node) => {
         if (!isMixed) this.applyNodePatches(node.id, patches)
-        else this.yState.set<S.Node>([node.id, this.property], value)
+        else this.yDoc.set<any>([GRAPHS, node.id, this.property], value)
       })
     })
   }
@@ -63,10 +64,10 @@ export abstract class DesignEffect<Key extends DesignEffectKey> extends Service 
   }
 
   private applyNodePatches(id: ID, patches: Patch[]) {
-    const mutation = this.yState as unknown as DynamicYStateMutation
+    const mutation = this.yDoc as unknown as DynamicYDocMutation
 
     patches.forEach((patch) => {
-      const path: YPlainPath = [id, this.property, ...patch.path]
+      const path: YPlainPath = [GRAPHS, id, this.property, ...patch.path]
 
       switch (patch.op) {
         case 'add':

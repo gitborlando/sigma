@@ -8,13 +8,26 @@ import { UserService } from 'src/global/service/user'
 import { COLOR } from 'src/utils/color'
 import { Awareness } from 'y-protocols/awareness.js'
 
+type Client = {
+  userId: string
+  userName: string
+  userAvatar: string
+  selection: Record<string, boolean>
+  selectPageId: string
+  cursor: IXY
+  color: string
+  sceneMatrix: Matrix
+}
+
+type Clients = { [clientId: number]: Client }
+
 @reflection
 export class YAware extends Service {
   clientId?: number
   awareness?: Awareness
 
-  client: S.Client = this.createClient()
-  others: S.Clients = {}
+  client: Client = this.createClient()
+  others: Clients = {}
   observingClientId?: number
 
   get observingClient() {
@@ -76,7 +89,7 @@ export class YAware extends Service {
     super.dispose()
   }
 
-  private createClient(): S.Client {
+  private createClient(): Client {
     return {
       selection: {},
       selectPageId: '',
@@ -100,7 +113,7 @@ export class YAware extends Service {
 
     awareness.setLocalState(toJS(this.client))
 
-    const clientKeys = Object.keys(this.client) as (keyof S.Client)[]
+    const clientKeys = Object.keys(this.client) as (keyof Client)[]
     const commonKeys = clientKeys.filter(
       (key) => key !== 'selection' && key !== 'selectPageId',
     )
@@ -128,11 +141,11 @@ export class YAware extends Service {
     const awareness = this.awareness
     if (!awareness) return () => {}
 
-    let prev: S.Clients = this.others
+    let prev: Clients = this.others
     const onUpdate = () => {
       const states = awareness.getStates()
       if (this.clientId) states.delete(this.clientId)
-      const others = Object.fromEntries(states.entries()) as S.Clients
+      const others = Object.fromEntries(states.entries()) as Clients
       if (!equal(prev, others)) {
         this.others = others
         prev = others

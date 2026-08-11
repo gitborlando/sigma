@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react'
+import { DocHelper } from 'src/editor/doc/helper'
 import { renderElem } from 'src/editor/render/react/reconciler'
-import { SchemaHelper } from 'src/editor/schema/helper'
 import { ContextMenu } from 'src/global/context-menu'
 import { StageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
@@ -39,7 +39,7 @@ export const StageComp: FC<{}> = observer(({}) => {
     const baseMenus = [copyPasteGroup, undoRedoGroup]
 
     if (
-      (!hoverId || SchemaHelper.isRootFrame(hoverId)) &&
+      (!hoverId || DocHelper.isRootFrame(hoverId)) &&
       !stageTransformer.isPointIn(stageViewport.toSceneXY(XY.client(e)))
     ) {
       ContextMenu.context = {}

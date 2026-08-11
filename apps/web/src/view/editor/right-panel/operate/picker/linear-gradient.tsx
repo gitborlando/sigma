@@ -4,43 +4,38 @@ import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'
 import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
 import { useEditorServices } from 'src/view/hooks/editor'
 
-export const PickerLinearGradientComp: FC<{
-  fill: S.FillLinearGradient
-  index: number
-}> = memo(({ fill, index }) => {
-  const { fillPicker, undo } = useEditorServices()
-  const [stopIndex, setStopIndex] = useState(0)
-  useEffect(() => setStopIndex(0), [index])
+export const PickerLinearComp: FC<{ fill: S.FillLinear; index: number }> = memo(
+  ({ fill, index }) => {
+    const { fillPicker, undo } = useEditorServices()
+    const [stopIndex, setStopIndex] = useState(0)
+    useEffect(() => setStopIndex(0), [index])
 
-  const setStopColor = (color: string) => {
-    fillPicker.setFill<S.FillLinearGradient>((draft) => {
-      draft.stops[stopIndex].color = color
-    })
-  }
+    const setStopColor = (color: string) => {
+      fillPicker.setFill<S.FillLinear>((draft) => {
+        draft.stops[stopIndex].color = color
+      })
+    }
 
-  const handleEnd = () => {
-    undo.track('state', t('adjust color'))
-  }
-
-  return (
-    <G vertical='auto 1fr' className={cls()}>
-      <StopsBar
-        fill={fill}
-        index={index}
-        stopIndex={stopIndex}
-        setStopIndex={setStopIndex}
-      />
-      <ColorPicker
-        color={fill.stops[stopIndex].color}
-        onChange={(color) => setStopColor(rgbaFromObject(color))}
-        onEnd={handleEnd}
-      />
-    </G>
-  )
-})
+    return (
+      <G vertical='auto 1fr' className={cls()}>
+        <StopsBar
+          fill={fill}
+          index={index}
+          stopIndex={stopIndex}
+          setStopIndex={setStopIndex}
+        />
+        <ColorPicker
+          color={fill.stops[stopIndex].color}
+          onChange={(color) => setStopColor(rgbaFromObject(color))}
+          onEnd={() => undo.track('state', t('adjust color'))}
+        />
+      </G>
+    )
+  },
+)
 
 const StopsBar: FC<{
-  fill: S.FillLinearGradient
+  fill: S.FillLinear
   index: number
   stopIndex: number
   setStopIndex: (index: number) => void
@@ -52,7 +47,7 @@ const StopsBar: FC<{
     setStopIndex(stopIndex)
     Drag.onMove(({ delta }) => {
       const deltaOffset = delta.x / stopBarRef.current!.clientWidth
-      fillPicker.setFill<S.FillLinearGradient>((draft) => {
+      fillPicker.setFill<S.FillLinear>((draft) => {
         const oldOffset = draft.stops[stopIndex].offset
         draft.stops[stopIndex].offset = min(max(oldOffset + deltaOffset, 0), 1)
       })

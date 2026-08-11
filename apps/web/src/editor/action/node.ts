@@ -1,15 +1,17 @@
 import { clone, firstOne, iife, objKeys } from '@gitborlando/utils'
 import { Undo } from 'src/editor/action/undo'
+import { DocCreator } from 'src/editor/doc/creator'
+import { findGraph, findNode, findParent } from 'src/editor/doc/finder'
+import { DocHelper } from 'src/editor/doc/helper'
+import { DocMutator } from 'src/editor/doc/mutator'
+import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { HitTest, IMRect, Matrix } from 'src/editor/geometry'
 import { MRect } from 'src/editor/geometry/mrect'
 import { RenderTree } from 'src/editor/render/tree'
-import { SchemaCreator } from 'src/editor/schema/creator'
-import { SchemaHelper } from 'src/editor/schema/helper'
-import { SchemaMutator } from 'src/editor/schema/mutator'
-import { createSchemaTraverse } from 'src/editor/schema/traverse'
 import { Select, type Selection } from 'src/editor/select'
 import { StageEvent } from 'src/editor/stage/event'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
+import { GRAPHS } from 'src/global/constant'
 import { Service } from 'src/global/service'
 
 @reflection
@@ -17,11 +19,11 @@ export class NodeAction extends Service {
   @observable renamingNodeId = ''
 
   constructor(
-    private readonly schemaMutator: SchemaMutator,
+    private readonly docMutator: DocMutator,
     private readonly select: Select,
-    private readonly yState: YState,
+    private readonly yDoc: YDoc,
     private readonly undo: Undo,
-    private readonly schemaCreator: SchemaCreator,
+    private readonly docCreator: DocCreator,
     private readonly renderTree: RenderTree,
     private readonly stageEvent: StageEvent,
   ) {
@@ -34,8 +36,8 @@ export class NodeAction extends Service {
   }
 
   renameNode(id: string, name: string) {
-    this.yState.transact(() => {
-      this.yState.set<S.Node>([id, 'name'], name)
+    this.yDoc.transact(() => {
+      this.yDoc.set<S.Node>([GRAPHS, id, 'name'], name)
     })
 
     this.undo.track('state', t('rename node'))
@@ -50,14 +52,14 @@ export class NodeAction extends Service {
   }
 
   deleteSelectedNodes() {
-    const traverse = createSchemaTraverse({
-      leave: ({ item, parent }) => {
-        if (!parent || !SchemaHelper.isNode(item)) return
-        this.schemaMutator.deleteChild(parent, item)
+    const traverse = createGraphTraverse({
+      leave: ({ graph, parent }) => {
+        if (!parent || !DocHelper.isNode(graph)) return
+        this.docMutator.deleteChild(parent, graph)
       },
     })
 
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       traverse(this.select.selectIds)
       this.select.clearSelect()
     })
@@ -75,23 +77,23 @@ export class NodeAction extends Service {
     if (!this.copiedIds.length) return
 
     const newSelection = <Selection>{}
-    const traverse = createSchemaTraverse<{ newNode?: S.Node | S.NodeParent }>({
+    const traverse = createGraphTraverse<{ newNode?: S.Node | S.Parent }>({
       enter: (ctx) => {
-        const { item, parent, forwardCtx, depth } = ctx
-        if (!parent || !SchemaHelper.isNode(item)) return false
+        const { graph, parent, forwardCtx, depth } = ctx
+        if (!parent || !DocHelper.isNode(graph)) return false
 
         const newParent = forwardCtx?.newNode || parent
-        const newNode = SchemaHelper.clone(item, {
-          name: this.schemaCreator.createNodeName(item.type),
+        const newNode = DocHelper.clone(graph, {
+          name: this.docCreator.createNodeName(graph.type),
         })
-        this.schemaMutator.addNodes([newNode])
-        this.schemaMutator.insertChildAt(newParent as S.NodeParent, newNode)
+        this.docMutator.addNodes([newNode])
+        this.docMutator.insertChildAt(newParent as S.Parent, newNode)
         ctx.newNode = newNode
         if (depth === 0) newSelection[newNode.id] = true
       },
     })
 
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       traverse(this.copiedIds)
       this.copiedIds = []
     })
@@ -101,9 +103,9 @@ export class NodeAction extends Service {
   }
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       this.select.getSelectedNodes().forEach((node) => {
-        const parent = this.yState.find<S.NodeParent>(node.parentId)
+        const parent = findParent(node.parentId)
         let index = parent.childIds.indexOf(node.id)
         index = iife(() => {
           if (type === 'up') return index - 1
@@ -111,7 +113,7 @@ export class NodeAction extends Service {
           if (type === 'top') return 0
           return parent.childIds.length - 1
         })
-        this.schemaMutator.reHierarchy(parent, node, index)
+        this.docMutator.reHierarchy(parent, node, index)
       })
     })
 
@@ -125,23 +127,21 @@ export class NodeAction extends Service {
     const aabbList = selected.map((node) => this.renderTree.findElem(node.id).aabb)
     const rect = AABB.rect(AABB.merge(aabbList))
 
-    const frameNode = this.schemaCreator.frame({
+    const frameNode = this.docCreator.frame({
       ...MRect.identity(rect.width, rect.height).shift(rect).plain(),
     })
 
-    const oldParent = this.yState.find<S.NodeParent>(selected[0].parentId)
+    const oldParent = findParent(selected[0].parentId)
     const index = oldParent.childIds.indexOf(selected[0].id)
 
-    this.yState.transact(() => {
-      selected.forEach((node) =>
-        this.schemaMutator.removeChild(oldParent.id, node.id),
-      )
-      this.schemaMutator.addNodes([frameNode])
-      this.schemaMutator.insertChildAt(oldParent, frameNode, index)
+    this.yDoc.transact(() => {
+      selected.forEach((node) => this.docMutator.removeChild(oldParent.id, node.id))
+      this.docMutator.addNodes([frameNode])
+      this.docMutator.insertChildAt(oldParent, frameNode, index)
       selected.forEach((node) => {
-        this.schemaMutator.insertChildAt(frameNode, node)
-        this.yState.set<S.Node>(
-          [node.id, 'matrix'],
+        this.docMutator.insertChildAt(frameNode, node)
+        this.docMutator.setMatrix(
+          node,
           Matrix.of(node.matrix).shift({ x: -rect.x, y: -rect.y }).plain(),
         )
       })
@@ -153,8 +153,8 @@ export class NodeAction extends Service {
 
   moveNodesInOrOutFrame(sceneXY: IXY) {
     const elems = this.stageEvent.hitSceneElems
-    const hitTopFrameElem = elems.find((elem) => elem.node.type === 'frame')
-    const estimatedParent: S.NodeParent & IMRect = hitTopFrameElem
+    const hitTopFrameElem = elems.find((elem) => elem.node.variant === 'frame')
+    const estimatedParent: S.Parent & IMRect = hitTopFrameElem
       ? (hitTopFrameElem.node as S.Frame)
       : Object.assign(
           clone(this.select.getSelectedPage()),
@@ -165,19 +165,19 @@ export class NodeAction extends Service {
     let moved = false
     const parent = estimatedParent
     const parentRootMatrix =
-      parent.type === 'page' ? parent.matrix : SchemaHelper.getRootMatrix(parent)
+      parent.type === 'page' ? parent.matrix : DocHelper.getRootMatrix(parent)
     const xy = Matrix.getLocalXY(sceneXY, parentRootMatrix)
 
     this.select.getSelectedNodes().forEach((node) => {
       if (this.select.selection[parent.id] || parent.id === node.parentId) return
 
       if (HitTest.hitRoundRect(parent.width, parent.height, 0)(xy)) {
-        const nodeRootMatrix = SchemaHelper.getRootMatrix(node)
+        const nodeRootMatrix = DocHelper.getRootMatrix(node)
         const nodeLocalMatrix = Matrix.getLocal(nodeRootMatrix, parentRootMatrix)
 
-        this.schemaMutator.removeChild(node.parentId, node.id)
-        this.schemaMutator.insertChildAt(parent, node)
-        this.schemaMutator.setMatrix(node, nodeLocalMatrix.plain())
+        this.docMutator.removeChild(node.parentId, node.id)
+        this.docMutator.insertChildAt(parent, node)
+        this.docMutator.setMatrix(node, nodeLocalMatrix.plain())
 
         this.stageEvent.hintId = parent.type !== 'page' ? parent.id : ''
         moved = true
@@ -192,18 +192,20 @@ export class NodeAction extends Service {
     let datumId = ''
 
     if (selectIds.length === 1) {
-      datumId = this.yState.find<S.Node>(firstOne(selectIds)!).parentId
+      datumId = findNode(firstOne(selectIds)!).parentId
     }
     if (selectIds.length > 1) {
       const parentIds = new Set<string>()
-      selectIds.forEach((id) => parentIds.add(this.yState.find<S.Node>(id).parentId))
+      selectIds.forEach((id) => parentIds.add(findNode(id).parentId))
       if (parentIds.size === 1) datumId = firstOne(parentIds)!
       if (parentIds.size > 1) datumId = ''
     }
 
-    const datum = this.yState.find<S.Node>(datumId)
-    if (datum && !SchemaHelper.isPageById(datum.id)) {
-      const aabb = this.renderTree.findElem(datum.id).aabb
+    if (!datumId) return XY.$(0, 0)
+
+    const graph = findGraph(datumId)
+    if (!DocHelper.isPage(graph)) {
+      const aabb = this.renderTree.findElem(graph.id).aabb
       return XY.$(aabb.minX, aabb.minY)
     } else {
       return XY.$(0, 0)

@@ -1,9 +1,10 @@
 import { NodeAction } from 'src/editor/action/node'
 import { Undo } from 'src/editor/action/undo'
-import { SchemaCreator } from 'src/editor/schema/creator'
+import { DocCreator } from 'src/editor/doc/creator'
 import { Select } from 'src/editor/select'
 import { DesignEffect } from 'src/editor/workbench/design/effect'
-import { YState } from 'src/editor/y-adapter/y-state'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
+import { GRAPHS } from 'src/global/constant'
 import { COLOR } from 'src/utils/color'
 
 @reflection
@@ -14,12 +15,12 @@ export class DesignStroke extends DesignEffect<'stroke'> {
 
   constructor(
     protected readonly undo: Undo,
-    protected readonly yState: YState,
-    protected readonly schemaCreator: SchemaCreator,
+    protected readonly yDoc: YDoc,
+    protected readonly docCreator: DocCreator,
     protected readonly nodeAction: NodeAction,
     protected readonly select: Select,
   ) {
-    super('stroke', () => schemaCreator.stroke(), yState, nodeAction, select)
+    super('stroke', () => docCreator.stroke(), yDoc, nodeAction, select)
     autoBind(this)
   }
 
@@ -40,16 +41,16 @@ export class DesignStroke extends DesignEffect<'stroke'> {
   setStrokeSide(type: Exclude<S.StrokeSide['type'], 'custom'>) {
     if (!this.strokeSide) return
 
-    this.yState.transact(() => {
+    this.yDoc.transact(() => {
       this.select.getSelectedNodes().forEach((node) => {
-        this.yState.set<S.Rectangle>([node.id, 'strokeSide'], { type })
+        this.yDoc.set<S.Rect>([GRAPHS, node.id, 'strokeSide'], { type })
       })
     })
     this.undo.track('state', t('change stroke side'))
   }
 
   addFill() {
-    const fill = this.schemaCreator.fillColor(COLOR.black)
+    const fill = this.docCreator.fillColor(COLOR.black)
     this.setStroke((stroke) => {
       stroke.visible = true
       stroke.fills = [...stroke.fills, fill]

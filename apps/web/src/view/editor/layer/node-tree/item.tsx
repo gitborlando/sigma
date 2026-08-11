@@ -2,7 +2,8 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { ChevronRight } from 'lucide-react'
-import { SchemaHelper } from 'src/editor/schema/helper'
+import { findNode } from 'src/editor/doc/finder'
+import { DocHelper } from 'src/editor/doc/helper'
 import { LayerNodeTreeInfo } from 'src/editor/workbench/layer/node-tree'
 import { ContextMenu } from 'src/global/context-menu'
 import { Input } from 'src/view/component/input'
@@ -19,10 +20,10 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
       useEditorServices()
     const { id, indent, ancestorIds } = nodeInfo
     const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
-    const node = useSchema((schema) => schema[id] as S.Node)
+    const node = useSchema(() => findNode(id) as S.Node)
 
-    const isParent = SchemaHelper.isNodeParent(node)
-    const expanded = getNodeExpanded(id)
+    const isParent = DocHelper.isParent(node)
+    const expanded = !!getNodeExpanded(id)
 
     const selection = useSelection()
     const selected = selection[id]
@@ -90,11 +91,11 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
           }}
         />
         {!isParent && <G style={{ width: 12, height: 12 }} />}
-        {node.type === 'path' ? (
+        {node.variant === 'path' ? (
           <LayerNodeTreePathIcon node={node} />
         ) : (
           <Icon
-            src={Assets.editor.node[node.type as keyof typeof Assets.editor.node]}
+            src={Assets.editor.node[node.variant as keyof typeof Assets.editor.node]}
           />
         )}
         <RenameComp node={node} />

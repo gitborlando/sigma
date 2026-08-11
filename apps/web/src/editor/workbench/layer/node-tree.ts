@@ -1,8 +1,9 @@
 import { makeObservable } from 'mobx'
-import { SchemaHelper } from 'src/editor/schema/helper'
-import { createSchemaTraverse } from 'src/editor/schema/traverse'
+import { findGraph } from 'src/editor/doc/finder'
+import { DocHelper } from 'src/editor/doc/helper'
+import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { Select } from 'src/editor/select'
-import { YState, YStatePatch } from 'src/editor/y-adapter/y-state'
+import { YDocPatch } from 'src/editor/y-adapter/y-doc'
 import { Service } from 'src/global/service'
 
 export type LayerNodeTreeInfo = { id: string; indent: number; ancestorIds: string[] }
@@ -24,16 +25,12 @@ export class LayerNodeTree extends Service {
     return false
   }
 
-  constructor(
-    private readonly select: Select,
-    private readonly yState: YState,
-  ) {
+  constructor(private readonly select: Select) {
     super()
     autoBind(makeObservable(this))
   }
 
   getNodeExpanded(id: string) {
-    if (!SchemaHelper.isNodeParent(this.yState.find(id))) return
     return this.expandedNodeMap.get(id)
   }
 
@@ -42,37 +39,39 @@ export class LayerNodeTree extends Service {
   }
 
   toggleAllNodeExpanded(expanded: boolean) {
-    const traverse = createSchemaTraverse({
-      enter: ({ item }) => {
-        if (!SchemaHelper.isNodeParent(item)) return
-        this.expandedNodeMap.set(item.id, expanded)
+    const traverse = createGraphTraverse({
+      enter: ({ graph }) => {
+        if (!DocHelper.isParent(graph)) return
+        this.expandedNodeMap.set(graph.id, expanded)
       },
     })
     traverse(this.select.getSelectedPage().childIds)
   }
 
-  onYStatePatch(patches: YStatePatch[]) {
+  onYDocPatch(patches: YDocPatch[]) {
     patches.forEach((patch) => {
-      const [id, prop] = patch.keys as [string, string]
-      if (prop !== 'childIds') return
-      if (SchemaHelper.isPageById(id)) this.nodeInfoVersion++
+      if (patch.keys[2] !== 'childIds') return
+
+      const id = patch.keys[1] as ID
+
+      if (DocHelper.isPageById(id)) this.nodeInfoVersion++
       if (this.expandedNodeMap.get(id)) this.nodeInfoVersion++
-      if (SchemaHelper.isById(id, 'frame') && patch.type === 'add')
+      if (DocHelper.isNode(findGraph(id), 'frame') && patch.type === 'add')
         this.expandedNodeMap.set(id, true)
     })
   }
 
   private getNodeInfoList() {
     const nodeInfoList: LayerNodeTreeInfo[] = []
-    const traverse = createSchemaTraverse({
-      enter: ({ item, ancestors }) => {
+    const traverse = createGraphTraverse({
+      enter: ({ graph, ancestors }) => {
         const ancestorIds = ancestors.map((node) => node.id)
         nodeInfoList.push({
-          id: item.id,
+          id: graph.id,
           indent: ancestorIds.length,
           ancestorIds: ancestorIds,
         })
-        return !!this.expandedNodeMap.get(item.id)
+        return !!this.expandedNodeMap.get(graph.id)
       },
     })
     traverse(this.select.getSelectedPage().childIds)
