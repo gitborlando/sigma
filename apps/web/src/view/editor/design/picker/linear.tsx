@@ -1,10 +1,10 @@
 import { max, min } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
 import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'
-import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
+import { ColorPicker } from 'src/view/editor/design/picker/color-picker'
 import { useEditorServices } from 'src/view/hooks/editor'
 
-export const PickerLinearComp: FC<{ fill: S.FillLinear; index: number }> = memo(
+export const PickerLinearComp: FC<{ fill: S.FillLinear; index: number }> = observer(
   ({ fill, index }) => {
     const { fillPicker, undo } = useEditorServices()
     const [stopIndex, setStopIndex] = useState(0)

@@ -5,9 +5,9 @@ import { DocCreator } from 'src/editor/doc/creator'
 import { IRGBA } from 'src/utils/color'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Segments } from 'src/view/component/segments'
-import { ColorPicker } from 'src/view/editor/right-panel/operate/picker/color-picker'
-import { PickerImageComp } from 'src/view/editor/right-panel/operate/picker/image'
-import { PickerLinearComp } from 'src/view/editor/right-panel/operate/picker/linear-gradient'
+import { ColorPicker } from 'src/view/editor/design/picker/color-picker'
+import { PickerImageComp } from 'src/view/editor/design/picker/image'
+import { PickerLinearComp } from 'src/view/editor/design/picker/linear'
 import { useEditorServices } from 'src/view/hooks/editor'
 
 const createFillCache = (docCreator: DocCreator, type: S.Fill['type']): S.Fill => {
@@ -75,7 +75,7 @@ export const DesignPickerComp = observer(
 )
 
 export const PickerSolidComp: FC<{ fill: S.FillColor; index: number }> = observer(
-  ({ fill, index }) => {
+  ({ fill }) => {
     const { fillPicker, undo } = useEditorServices()
     const getRgbaFromSolidFill = (fill: S.FillColor) => {
       const { color, alpha } = fill

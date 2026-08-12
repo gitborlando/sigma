@@ -1,9 +1,8 @@
-import { iife } from '@gitborlando/utils'
 import { withSuspense } from '@gitborlando/utils/react'
 import { Image } from 'src/global/service/image'
 import { suspend } from 'suspend-react'
 
-export const PickerImageComp: FC<{ fill: S.FillImage }> = memo(({ fill }) => {
+export const PickerImageComp: FC<{ fill: S.FillImage }> = observer(({ fill }) => {
   const uploadImage = async () => {
     throw new Error('not implemented yet')
   }
@@ -22,17 +21,16 @@ export const PickerImageComp: FC<{ fill: S.FillImage }> = memo(({ fill }) => {
   )
 })
 
-const ImgComp = withSuspense<{ url: string }>(({ url }) => {
-  const image = suspend(() => Image.getImageAsync(url), [url])
-  const imageBound = iife(() => {
-    const { width, height } = image
-    const rate = width / height
-    return rate > 1
-      ? { width: 216, height: 216 / rate }
-      : { width: 184 * rate, height: 184 }
-  })
-  return <img src={image.objectUrl} style={{ ...imageBound }}></img>
-})
+const ImgComp: FC<{ url: string }> = withSuspense(
+  observer(({ url }) => {
+    const image = suspend(() => Image.getImageAsync(url), [url])
+    return (
+      <img
+        src={image.objectUrl}
+        style={{ width: 216, height: 184, objectFit: 'contain' }}></img>
+    )
+  }),
+)
 
 const cls = classes(css`
   &:hover &-mask {
