@@ -33,3 +33,11 @@ export const memorized = <F extends (deps: any[]) => any>(func: F) => {
     }
   }
 }
+
+export const tryCatch = <T>(func: () => T) => {
+  try {
+    return [undefined, func()] as const
+  } catch (e) {
+    return [e as Error, undefined] as const
+  }
+}

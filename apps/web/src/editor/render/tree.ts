@@ -82,18 +82,17 @@ export class RenderTree extends Service {
     if (keys[0] !== GRAPHS) return
 
     const id = keys[1]
-    const node = findNode(id)
 
     switch (true) {
       case op === 'add' && keys.length === 2:
         if (DocHelper.isPageById(id)) break
-        this.mountNode(node)
+        this.mountNode(findNode(id))
         break
       case op === 'remove' && keys.length === 2:
         this.unmountNode(id)
         break
       default:
-        this.updateNode(node)
+        this.updateNode(findNode(id))
         break
     }
   }
