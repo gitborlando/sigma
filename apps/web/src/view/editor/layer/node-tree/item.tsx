@@ -6,7 +6,7 @@ import { findNode } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { LayerNodeTreeInfo } from 'src/editor/workbench/layer/node-tree'
 import { ContextMenu } from 'src/global/context-menu'
-import { Input } from 'src/view/component/input'
+import { EditableText } from 'src/view/component/editable-text'
 import { Lucide } from 'src/view/component/lucide'
 import { Icon } from 'src/view/component/svg-icon'
 import { useEditorServices } from 'src/view/hooks/editor'
@@ -98,39 +98,15 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
             src={Assets.editor.node[node.variant as keyof typeof Assets.editor.node]}
           />
         )}
-        <RenameComp node={node} />
+        <EditableText
+          canEdit={nodeAction.renamingNodeId === id}
+          value={node.name || '未命名'}
+          onEnd={(name) => nodeAction.renameNode(id, name)}
+        />
       </G>
     )
   },
 )
-
-const RenameComp: FC<{ node: S.Node }> = observer(({ node }) => {
-  const ref = useRef<HTMLInputElement>(null)
-  const { nodeAction } = useEditorServices()
-  const { renamingNodeId } = nodeAction
-  const canRename = renamingNodeId === node.id
-
-  useLayoutEffect(() => {
-    canRename && ref.current?.focus()
-  }, [canRename])
-
-  return canRename ? (
-    <Input
-      ref={ref}
-      className={renameCls()}
-      needFocusStyle={false}
-      value={node.name || '未命名'}
-      validate={(name) => !!name}
-      onBlur={() => (nodeAction.renamingNodeId = '')}
-      onEnd={(name) => {
-        nodeAction.renameNode(node.id, name!)
-        nodeAction.renamingNodeId = ''
-      }}
-    />
-  ) : (
-    <G className={renameCls()}>{node.name || '未命名'}</G>
-  )
-})
 
 const cls = classes(css`
   width: 100%;
@@ -151,13 +127,4 @@ const cls = classes(css`
   &[data-dragging='true'] {
     opacity: 0.5;
   }
-`)
-
-const renameCls = classes(css`
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-inline: 4px;
 `)

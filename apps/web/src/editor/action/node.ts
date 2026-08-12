@@ -39,6 +39,7 @@ export class NodeAction extends Service {
     this.yDoc.transact(() => {
       this.yDoc.set<S.Node>([GRAPHS, id, 'name'], name)
     })
+    this.renamingNodeId = ''
 
     this.undo.track('state', t('rename node'))
   }

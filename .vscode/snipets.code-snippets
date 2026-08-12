@@ -17,11 +17,13 @@
     ],
     "description": "Component",
   },
+
   "Sub Component": {
     "prefix": "subcomp",
     "body": ["const $1Comp: FC<{}> = observer(({}) => { return (<G></G>) })"],
     "description": "Sub Component",
   },
+
   "Widget": {
     "prefix": "widget",
     "scope": "typescriptreact",
@@ -37,6 +39,14 @@
     ],
     "description": "Widget",
   },
+
+  "Cls": {
+    "prefix": "cls",
+    "scope": "typescriptreact",
+    "body": ["const $1cls = classes(css``)"],
+    "description": "快速生成 cls 样式",
+  },
+
   "Service": {
     "prefix": "service",
     "scope": "typescript",

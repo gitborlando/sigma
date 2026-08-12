@@ -4,7 +4,7 @@ export const styles = {
   textPrimary: `color: var(--color);`,
   textLabel: `font-size: 12px;`,
   textCommon: `font-size: 13px;`,
-  textHead: `font-size: 12px;font-weight: 600;line-height: 16px;`,
+  textHead: `font-size: 12px;font-weight: 600;line-height: 12px;`,
 
   borderRadius: 'border-radius: var(--border-radius);',
   borderRadiusSM: 'border-radius: var(--border-radius-sm);',
