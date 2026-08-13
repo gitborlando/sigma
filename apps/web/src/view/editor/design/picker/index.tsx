@@ -8,7 +8,7 @@ import { Segments } from 'src/view/component/segments'
 import { ColorPicker } from 'src/view/editor/design/picker/color-picker'
 import { PickerImageComp } from 'src/view/editor/design/picker/image'
 import { PickerLinearComp } from 'src/view/editor/design/picker/linear'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 const createFillCache = (docCreator: DocCreator, type: S.Fill['type']): S.Fill => {
   if (type === 'color') return docCreator.fillColor()

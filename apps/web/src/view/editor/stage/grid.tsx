@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import { snapSceneXYToHalfPixel } from 'src/editor/utils'
 import { rgba } from 'src/utils/color'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 export const StageGridComp: FC<{}> = observer(({}) => {
   const { stageViewport } = useEditorServices()

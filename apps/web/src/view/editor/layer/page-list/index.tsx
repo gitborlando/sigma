@@ -1,15 +1,15 @@
 import Scrollbars from 'react-custom-scrollbars-2'
 import { findPage } from 'src/editor/doc/finder'
 import { Drag } from 'src/global/event/drag'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useSchema } from 'src/view/hooks/schema/use-y-state'
+import { useDoc } from 'src/view/hooks/use-doc'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 import { LayerPageListHeaderComp } from './header'
 import { LayerPageListItemComp } from './item'
 
 export const LayerPageListComp: FC<{}> = observer(({}) => {
   const { layerPageList } = useEditorServices()
   const { panelHeight, isCollapsed } = layerPageList
-  const meta = useSchema((schema) => schema.meta)
+  const meta = useDoc((doc) => doc.meta)
 
   return (
     <G vertical className={cls()}>

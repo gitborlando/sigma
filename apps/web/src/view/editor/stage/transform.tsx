@@ -8,8 +8,8 @@ import { Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { TRBL } from 'src/editor/utils'
 import { COLOR } from 'src/utils/color'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
+import { useSelectNodes } from 'src/view/hooks/use-doc'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 import { themeColor } from 'src/view/styles/color'
 
 const arrayLoopGet = <T,>(arr: T[], index: number) => {

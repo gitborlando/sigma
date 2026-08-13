@@ -1,5 +1,5 @@
-import axios from 'axios'
 import type { Database } from '@sigma/api-types/supabase'
+import axios from 'axios'
 import { supabase } from '../sdk/supabase'
 
 class FileClass {
@@ -19,7 +19,7 @@ class FileClass {
     //   createdAt: '2025-10-02T17:21:33.287943+00:00',
     //   id: 'b0fc888c-9d03-4bba-b337-d5dddb87ef2a',
     //   name: '测试文件1',
-    //   y_schema_id: '84ef9622-cb22-48d6-aad7-bc5db4cab55a',
+    //   y_doc_id: '84ef9622-cb22-48d6-aad7-bc5db4cab55a',
     // }
     const { data } = await supabase.from('files').select().eq('id', id)
     return data?.[0]

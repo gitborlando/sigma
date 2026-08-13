@@ -18,7 +18,7 @@ import {
   DesignFieldContentComp,
   DesignFieldHeaderComp,
 } from 'src/view/editor/design/share/field'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 const alignOptions = [
   { label: 'inner', value: 'inner' },

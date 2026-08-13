@@ -8,10 +8,10 @@ import type { SelectState } from 'src/editor/select'
 import { GRAPHS } from 'src/global/constant'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 type SnapshotState = {
-  schema: S.Doc
+  doc: S.Doc
   undoStack: UndoInfo[]
   undoNext: number
   savedAt: number
@@ -219,7 +219,7 @@ function createSnapshotState(
   stageViewport: StageViewport,
 ): SnapshotState {
   return {
-    schema: toPlain(yDoc.doc),
+    doc: toPlain(yDoc.doc),
     undoStack: toPlain(undo.stack),
     undoNext: undo.next,
     savedAt: Date.now(),
@@ -233,7 +233,7 @@ function restoreFinalSnapshot(
   stageViewport: StageViewport,
   snapshot: SnapshotState,
 ) {
-  replaceSchema(yDoc, snapshot.schema)
+  replaceDoc(yDoc, snapshot.doc)
   restoreUndo(yDoc, undo, snapshot)
   restoreSceneMatrix(stageViewport, snapshot)
 }
@@ -247,7 +247,7 @@ function restoreReplayableSnapshot(
   const base = snapshot.base
   if (!base) return restoreFinalSnapshot(yDoc, undo, stageViewport, snapshot)
 
-  replaceSchema(yDoc, base.schema)
+  replaceDoc(yDoc, base.doc)
   if (!resetUndo(yDoc, undo)) return
 
   replayHistoryFromBase(yDoc, undo, snapshot, base)
@@ -259,15 +259,15 @@ function restoreSceneMatrix(stageViewport: StageViewport, snapshot: SnapshotStat
   stageViewport.sceneMatrix = Matrix.of(snapshot.sceneMatrix)
 }
 
-function replaceSchema(yDoc: YDoc, schema: S.Doc) {
+function replaceDoc(yDoc: YDoc, doc: S.Doc) {
   const currentKeys = Object.keys(yDoc.doc.graphs)
-  const nextKeys = Object.keys(schema.graphs)
+  const nextKeys = Object.keys(doc.graphs)
 
   yDoc.transact(() => {
     currentKeys.forEach((key) => {
-      if (!(key in schema)) yDoc.delete<any>([GRAPHS, key])
+      if (!(key in doc)) yDoc.delete<any>([GRAPHS, key])
     })
-    nextKeys.forEach((key) => yDoc.set<any>([GRAPHS, key], schema.graphs[key]))
+    nextKeys.forEach((key) => yDoc.set<any>([GRAPHS, key], doc.graphs[key]))
   })
 }
 
@@ -371,10 +371,10 @@ function shouldInsertPatch(yDoc: YDoc, keys: readonly (string | number)[]) {
   const lastIndex = Number(keys[keys.length - 1])
   if (Number.isNaN(lastIndex)) return false
 
-  return Array.isArray(getSchemaValue(yDoc, keys.slice(0, -1)))
+  return Array.isArray(getDocValue(yDoc, keys.slice(0, -1)))
 }
 
-function getSchemaValue(yDoc: YDoc, keys: readonly (string | number)[]) {
+function getDocValue(yDoc: YDoc, keys: readonly (string | number)[]) {
   let current: any = yDoc.doc
   keys.forEach((key) => {
     current = current?.[key]

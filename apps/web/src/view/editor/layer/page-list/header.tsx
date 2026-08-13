@@ -1,8 +1,8 @@
 import { ChevronDown, Plus } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
+import { useSelectPage } from 'src/view/hooks/use-doc'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 export const LayerPageListHeaderComp: FC<{}> = observer(({}) => {
   const { pageAction, layerPageList } = useEditorServices()

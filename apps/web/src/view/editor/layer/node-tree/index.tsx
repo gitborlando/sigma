@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { LayerNodeTreeHeaderComp } from 'src/view/editor/layer/node-tree/header'
 import { LayerNodeTreeItemComp } from 'src/view/editor/layer/node-tree/item'
 import { LayerNodeTreeListComp } from 'src/view/editor/layer/node-tree/list'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 const dropAnimationConfig: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({

@@ -14,8 +14,8 @@ import { Service } from 'src/global/service'
 import { FileService } from 'src/global/service/file'
 
 @reflection
-export class SchemaAction extends Service {
-  private sessionFileId = ''
+export class DocAction extends Service {
+  private sessionId = ''
 
   constructor(
     private readonly docCreator: DocCreator,
@@ -30,42 +30,42 @@ export class SchemaAction extends Service {
     autoBind(this)
   }
 
-  async loadSchema(fileId: string) {
-    return migrateDoc(await this.fetchSchema(fileId))
+  async loadDoc(id: string) {
+    return migrateDoc(await this.fetchDoc(id))
   }
 
-  setupSchema(fileId: string, schema: S.Doc) {
-    if (fileId === this.sessionFileId) return
+  setupDoc(id: string, doc: S.Doc) {
+    if (id === this.sessionId) return
 
-    this.yDoc.setup(schema)
+    this.yDoc.setup(doc)
     setupDocGetter(() => this.yDoc.doc)
 
     this.yDoc.register(this.layerNodeTree.onYDocPatch)
     // this.yDoc.onPatch(this.nodeAction.onYDocPatch)
 
     // 开发中暂时不启用y-sync
-    // this.ySync.init(fileId, this.yDoc.doc)
+    // this.ySync.init(id, this.yDoc.doc)
     // this.yAware.init({
     //   clientId: this.yDoc.doc.clientID,
     //   awareness: this.ySync.awareness,
     // })
     this.undo.setup()
 
-    this.select.selectPage(schema.meta.pageIds[0])
+    this.select.selectPage(doc.meta.pageIds[0])
     this.undo.mobxUndo.rebase()
 
-    this.sessionFileId = fileId
-    this.effect(() => (this.sessionFileId = ''))
+    this.sessionId = id
+    this.effect(() => (this.sessionId = ''))
   }
 
-  private async fetchSchema(fileId: string) {
-    if (fileId === 'mock') {
-      const schema = mock_doc(this.docCreator)
-      if (schema) return schema
-      throw new Error('Failed to initialize mock schema')
+  private async fetchDoc(id: string) {
+    if (id === 'mock') {
+      const doc = mock_doc(this.docCreator)
+      if (doc) return doc
+      throw new Error('Failed to initialize mock doc')
     }
 
-    const fileMeta = await FileService.getFileMeta(fileId)
+    const fileMeta = await FileService.getFileMeta(id)
     if (!fileMeta) throw new Error('Failed to load file metadata')
 
     const jsZip = new JSZip()
@@ -74,9 +74,9 @@ export class SchemaAction extends Service {
     const fileText = await zipFiles
       .file(`${decodeURIComponent(fileMeta.name)}.json`)
       ?.async('text')
-    const schema = jsonParse(fileText) as S.Doc | undefined
-    if (schema) return schema
+    const doc = jsonParse(fileText) as S.Doc | undefined
+    if (doc) return doc
 
-    throw new Error('Failed to initialize schema')
+    throw new Error('Failed to initialize doc')
   }
 }

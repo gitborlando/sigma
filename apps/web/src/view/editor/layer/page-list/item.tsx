@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 import { ContextMenu } from 'src/global/context-menu'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
+import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useSelectPageId } from 'src/view/hooks/use-selection'
 
 type IPageItemComp = { name: string; id: string }
 

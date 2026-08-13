@@ -1,8 +1,8 @@
 import { DI, type ClassConstructor } from 'first-di'
 import { Command } from 'src/editor/action/command'
+import { DocAction } from 'src/editor/action/doc'
 import { NodeAction } from 'src/editor/action/node'
 import { PageAction } from 'src/editor/action/page'
-import { SchemaAction } from 'src/editor/action/schema'
 import { SelectAction } from 'src/editor/action/select'
 import { Undo } from 'src/editor/action/undo'
 import { ViewportAction } from 'src/editor/action/viewport'
@@ -44,7 +44,7 @@ const editorServices = {
   selectAction: SelectAction,
   viewportAction: ViewportAction,
   stage: Stage,
-  schemaAction: SchemaAction,
+  docAction: DocAction,
 
   /** render */
   elemDrawer: ElemDrawer,
@@ -52,7 +52,7 @@ const editorServices = {
   renderSurface: RenderSurface,
   renderPipeline: RenderPipeline,
 
-  /** schema */
+  /** doc */
   docCreator: DocCreator,
   docMutator: DocMutator,
 

@@ -3,8 +3,8 @@ import { entries } from 'mobx'
 import { Fragment } from 'react'
 import { findNode } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useSchema } from 'src/view/hooks/schema/use-y-state'
+import { useDoc } from 'src/view/hooks/use-doc'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 import { themeColor } from 'src/view/styles/color'
 
 type OutlineInfo = {
@@ -52,7 +52,7 @@ const SingleOutline: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
     const { docCreator, stageViewport, stageTransformer } = useEditorServices()
     const { color, hovered, hinted, selected } = outlineInfo
     const zoom = stageViewport.zoom
-    const node = T<S.Node>(useSchema(() => findNode(id)))
+    const node = T<S.Node>(useDoc(() => findNode(id)))
     const strokeColor = hovered || hinted || selected ? themeColor() : color
     const strokeWidth = iife(() => {
       let width = selected ? 1 : 2

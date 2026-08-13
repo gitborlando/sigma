@@ -9,9 +9,9 @@ import { ContextMenu } from 'src/global/context-menu'
 import { EditableText } from 'src/view/component/editable-text'
 import { Lucide } from 'src/view/component/lucide'
 import { Icon } from 'src/view/component/svg-icon'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useSelection } from 'src/view/hooks/schema/use-y-client'
-import { useSchema } from 'src/view/hooks/schema/use-y-state'
+import { useDoc } from 'src/view/hooks/use-doc'
+import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useSelection } from 'src/view/hooks/use-selection'
 import { LayerNodeTreePathIcon } from './path-icon'
 
 export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observer(
@@ -20,7 +20,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
       useEditorServices()
     const { id, indent, ancestorIds } = nodeInfo
     const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
-    const node = useSchema(() => findNode(id) as S.Node)
+    const node = useDoc(() => findNode(id) as S.Node)
 
     const isParent = DocHelper.isParent(node)
     const expanded = !!getNodeExpanded(id)

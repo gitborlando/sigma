@@ -10,7 +10,11 @@ import { StageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { StageOutlineComp } from 'src/view/editor/stage/outline'
 import { StageRulerComp } from 'src/view/editor/stage/ruler'
 import { StageTransformComp } from 'src/view/editor/stage/transform'
-import { EditorContext, useEditor, useEditorServices } from 'src/view/hooks/editor'
+import {
+  EditorContext,
+  useEditor,
+  useEditorServices,
+} from 'src/view/hooks/use-editor'
 
 export const StageComp: FC<{}> = observer(({}) => {
   const editor = useEditor()

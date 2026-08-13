@@ -2,7 +2,7 @@ import { max, min } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
 import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'
 import { ColorPicker } from 'src/view/editor/design/picker/color-picker'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 export const PickerLinearComp: FC<{ fill: S.FillLinear; index: number }> = observer(
   ({ fill, index }) => {

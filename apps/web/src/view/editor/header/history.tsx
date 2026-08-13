@@ -7,7 +7,7 @@ import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
   const { yDoc, undo, setting } = useEditorServices()
@@ -30,7 +30,7 @@ export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
           isDEV && (
             <Btn
               size={24}
-              title='Print current schema'
+              title='Print current doc'
               icon={<Lucide icon={Braces} />}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={() => console.log(yDoc.doc)}

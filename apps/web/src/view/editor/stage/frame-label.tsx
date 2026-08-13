@@ -4,10 +4,10 @@ import { untracked } from 'mobx'
 import { Fragment } from 'react'
 import { DocHelper } from 'src/editor/doc/helper'
 import { Matrix, MRect } from 'src/editor/geometry'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useShallow } from 'src/view/hooks/schema/use-shallow'
-import { useSelection } from 'src/view/hooks/schema/use-y-client'
-import { useSchema } from 'src/view/hooks/schema/use-y-state'
+import { useDoc } from 'src/view/hooks/use-doc'
+import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useSelection } from 'src/view/hooks/use-selection'
+import { useShallow } from 'src/view/hooks/use-shallow'
 import { themeColor } from 'src/view/styles/color'
 
 const RULER_COLOR = '#9f9f9f'
@@ -24,7 +24,7 @@ export const StageFrameLabelComp: FC<{}> = observer(({}) => {
     const sceneAABB = untracked(() => stageViewport.sceneAABB)
     return renderTree.elements.get(f.id)?.getVisible(sceneAABB)
   }
-  const rootFrames = useSchema(
+  const rootFrames = useDoc(
     useShallow((state) => {
       const graphs = Object.values(state.graphs) as S.Graph[]
       return graphs.filter(isRootFrame).filter(isFrameVisible)

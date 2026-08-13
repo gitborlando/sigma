@@ -4,7 +4,7 @@ import { Divider } from 'src/view/component/divider'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
 import { Menu } from 'src/view/component/menu'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
   const { stageViewport } = useEditorServices()

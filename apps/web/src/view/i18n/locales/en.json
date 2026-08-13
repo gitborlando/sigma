@@ -126,7 +126,7 @@
   "add shadow": "add shadow",
   "delete shadow": "delete shadow",
   "set alignment": "set alignment",
-  "print schema": "print schema",
+  "print doc": "print doc",
   "print element": "print element",
   "move up": "move up",
   "move down": "move down",

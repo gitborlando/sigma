@@ -30,8 +30,8 @@ export const findPage = (id: ID) => {
 export const findGraph = (id: ID) => {
   if (!id) throw new Error(`findGraph invalid id: ${id}`)
 
-  const schema = docGetter()
-  if (schema.graphs[id]) return schema.graphs[id] as S.Graph
+  const doc = docGetter()
+  if (doc.graphs[id]) return doc.graphs[id] as S.Graph
 
   throw new Error(`Item not found: ${id}`)
 }

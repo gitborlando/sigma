@@ -15,7 +15,7 @@ import {
   DesignFieldContentComp,
   DesignFieldHeaderComp,
 } from 'src/view/editor/design/share/field'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 import { suspend } from 'suspend-react'
 
 export const DesignFillComp: FC<{}> = observer(({}) => {

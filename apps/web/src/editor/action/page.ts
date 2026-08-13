@@ -40,7 +40,7 @@ export class PageAction extends Service {
     this.undo.track('all', t('delete page'))
   }
 
-  DEV_logPageSchema = (id: ID) => {
+  DEV_logDocOfOnePage = (id: ID) => {
     const curPage = findPage(id)
     const nodes: Record<ID, S.Node> = {}
     const findNodes = (id: string) => {

@@ -5,7 +5,7 @@ import { Loading } from 'src/view/component/loading'
 import { LeftPanelComp } from 'src/view/editor/left-panel'
 import { RightPanelComp } from 'src/view/editor/right-panel'
 import { StageComp } from 'src/view/editor/stage/stage'
-import { EditorContext } from 'src/view/hooks/editor'
+import { EditorContext } from 'src/view/hooks/use-editor'
 import { suspend } from 'suspend-react'
 import { EditorHeaderComp } from './header'
 
@@ -15,20 +15,20 @@ export const EditorComp = withSuspense(
     const editor = Editor.getInstance()
     const [isSetup, setIsSetup] = useState(false)
 
-    const schemaAction = editor.resolve('schemaAction')
+    const docAction = editor.resolve('docAction')
     const stageCursor = editor.resolve('stageCursor')
     const stage = editor.resolve('stage')
     const elemDrawer = editor.resolve('elemDrawer')
 
-    const schema = suspend(() => schemaAction.loadSchema(fileId!), [fileId])
+    const doc = suspend(() => docAction.loadDoc(fileId!), [fileId])
     const textBreaker = suspend(() => createTextBreaker(), ['text-breaker'])
 
     useEffect(() => {
-      schemaAction.setupSchema(fileId!, schema)
+      docAction.setupDoc(fileId!, doc)
       elemDrawer.setTextBreaker(textBreaker)
       setIsSetup(true)
       return () => editor.dispose()
-    }, [schema, textBreaker])
+    }, [doc, textBreaker])
 
     useEffect(() => {
       if (!isSetup) return

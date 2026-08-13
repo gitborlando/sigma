@@ -1,7 +1,7 @@
 import { values } from 'mobx'
 import { MRect } from 'src/editor/geometry/mrect'
 import { COLOR } from 'src/utils/color'
-import { useEditorServices } from 'src/view/hooks/editor'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 export const StageCursorsComp: FC<{}> = observer(({}) => {
   const { yAware } = useEditorServices()

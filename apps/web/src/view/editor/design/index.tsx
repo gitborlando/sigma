@@ -4,7 +4,7 @@ import { DesignAlignComp } from 'src/view/editor/design/align'
 import { DesignFillComp } from 'src/view/editor/design/fill'
 import { DesignPickerComp } from 'src/view/editor/design/picker'
 import { DesignStrokeComp } from 'src/view/editor/design/stroke'
-import { useSelectIds } from 'src/view/hooks/schema/use-y-client'
+import { useSelectIds } from 'src/view/hooks/use-selection'
 import { DesignGeomComp } from './geom'
 
 export const DesignPanelComp = observer(

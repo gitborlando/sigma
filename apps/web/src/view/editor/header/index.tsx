@@ -8,8 +8,8 @@ import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useSchema } from 'src/view/hooks/schema/use-y-state'
+import { useDoc } from 'src/view/hooks/use-doc'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 export const EditorHeaderComp: FC<{}> = observer(({}) => {
   const { stageViewport, stageCreate } = useEditorServices()
@@ -55,7 +55,7 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
 const DocNameComp: FC<{}> = observer(({}) => {
   const [canEdit, setCanEdit] = useState(false)
   const { yDoc, undo } = useEditorServices()
-  const docName = useSchema((doc) => doc.meta.name)
+  const docName = useDoc((doc) => doc.meta.name)
 
   const handleRename = (name: string) => {
     undo.untrack(() => yDoc.set<S.Meta>(['meta', 'name'], name))

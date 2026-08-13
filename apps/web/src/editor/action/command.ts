@@ -10,7 +10,6 @@ import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { ICommand } from 'src/global/context-menu'
 import { Service } from 'src/global/service'
 
@@ -23,7 +22,6 @@ export class Command extends Service {
     private readonly undo: Undo,
     private readonly renderTree: RenderTree,
     private readonly stageInteract: StageInteract,
-    private readonly yDoc: YDoc,
     private readonly nodeAction: NodeAction,
   ) {
     super()
@@ -71,9 +69,9 @@ export class Command extends Service {
 
     if (this.setting.devMode) {
       commands.push({
-        name: t('print schema'),
+        name: t('print doc of one page'),
         callback: ({ id }: IDPayload) => {
-          this.pageAction.DEV_logPageSchema(id)
+          this.pageAction.DEV_logDocOfOnePage(id)
         },
       })
     }
@@ -107,7 +105,7 @@ export class Command extends Service {
     if (this.setting.devMode) {
       commands.push(
         {
-          name: t('print schema'),
+          name: t('print doc of one page'),
           callback: () => {
             this.select.selectIds.forEach((id) => console.log(findNode(id)))
           },

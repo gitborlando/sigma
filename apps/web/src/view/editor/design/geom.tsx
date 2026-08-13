@@ -8,8 +8,8 @@ import { MIXED_VALUE } from 'src/global/constant'
 import { Btn } from 'src/view/component/btn'
 import { InputNum, type InputNumProps } from 'src/view/component/input-num'
 import { Icon } from 'src/view/component/svg-icon'
-import { useEditorServices } from 'src/view/hooks/editor'
-import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
+import { useSelectNodes } from 'src/view/hooks/use-doc'
+import { useEditorServices } from 'src/view/hooks/use-editor'
 
 const useSetGeomValue = () => {
   const { designGeom, undo } = useEditorServices()

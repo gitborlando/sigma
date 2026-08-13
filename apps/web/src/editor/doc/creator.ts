@@ -17,7 +17,7 @@ export class DocCreator extends Service {
     autoBind(this)
   }
 
-  schema(): S.Doc {
+  doc(): S.Doc {
     const page = this.page()
     const meta = this.meta()
     meta.pageIds = [page.id]
@@ -220,7 +220,7 @@ export class DocCreator extends Service {
     return { style: 'underline', color: themeColor(), width: 1, ...option }
   }
 
-  private createSchemaMeta(): S.NodeMeta {
+  private createNodeMeta(): S.NodeMeta {
     return {
       id: miniId(8),
       type: 'node',
@@ -234,7 +234,7 @@ export class DocCreator extends Service {
 
   private createNodeBase(): S.NodeLike {
     return {
-      ...this.createSchemaMeta(),
+      ...this.createNodeMeta(),
       opacity: 1,
       flip: 0,
       fills: [this.fillColor()],
@@ -252,13 +252,13 @@ export class DocCreator extends Service {
     return `${t(type)} ${index + 1}`
   }
 
-  addPageToSchema(schema: S.Doc, page: S.Page) {
-    schema.graphs[page.id] = page
-    schema.meta.pageIds.push(page.id)
+  addPageToDoc(doc: S.Doc, page: S.Page) {
+    doc.graphs[page.id] = page
+    doc.meta.pageIds.push(page.id)
   }
 
-  addChild(schema: S.Doc, parent: S.Parent, child: S.Node) {
-    schema.graphs[child.id] = child
+  addChild(doc: S.Doc, parent: S.Parent, child: S.Node) {
+    doc.graphs[child.id] = child
     parent.childIds.push(child.id)
     child.parentId = parent.id
   }

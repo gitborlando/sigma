@@ -10,7 +10,7 @@ export type GraphTraverseOptions<ExtendCtx extends AnyObject = {}> = {
 }
 
 export type GraphTraverseContext<ExtendCtx extends AnyObject = {}> = {
-  schema: S.Doc
+  doc: S.Doc
   graph: S.Graph
   depth: number
   index: number
@@ -39,15 +39,15 @@ export function createGraphTraverse<ExtendCtx extends AnyObject = {}>(
     childIds.forEach((id, index) => {
       if (stopped) return
 
-      const getSchema = options.getDoc ?? docGetter
-      if (!getSchema) {
+      const getDoc = options.getDoc ?? docGetter
+      if (!getDoc) {
         throw new Error(
-          'createSchemaTraverse: getSchema should be configured or injected',
+          'createGraphTraverse: getDoc should be configured or injected',
         )
       }
 
-      const schema = getSchema()
-      const graph = schema.graphs[id]
+      const doc = getDoc()
+      const graph = doc.graphs[id]
       if (!graph) return
 
       const childIds = 'childIds' in graph ? graph.childIds : undefined
@@ -58,7 +58,7 @@ export function createGraphTraverse<ExtendCtx extends AnyObject = {}>(
 
       const ctx: GraphTraverseContext<ExtendCtx> = {
         ...({} as ExtendCtx),
-        schema,
+        doc,
         graph,
         index,
         depth,
