@@ -19,7 +19,7 @@ export const autoImportConfig = autoImportPlugin({
       '@linaria/core': ['css', 'cx'],
       '@gitborlando/geo': ['AABB', 'OBB', 'XY', 'Angle'],
       'src/view/assets/assets': ['Assets'],
-      'src/view/component/grid': ['Grid', 'G', 'C'],
+      'src/view/component/grid': ['Grid', 'G', 'HC', 'VC', 'CC'],
       'src/utils/common': ['T', 'isDEV', 'isPROD'],
       'src/view/styles/styles': ['styles'],
       'src/view/styles/classes': ['classes'],

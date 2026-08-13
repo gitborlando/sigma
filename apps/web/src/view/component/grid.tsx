@@ -94,3 +94,42 @@ const cls = classes(css`
     justify-items: center;
   }
 `)
+
+/**
+ * HC = Horizontal Centered
+ */
+export const HC = forwardRef<HTMLDivElement, GridProps>(
+  ({ children, center, horizontal, ...rest }, ref) => {
+    return (
+      <G horizontal={horizontal} center={center} {...rest} ref={ref}>
+        {children}
+      </G>
+    )
+  },
+)
+
+/**
+ * VC = Vertical Centered
+ */
+export const VC = forwardRef<HTMLDivElement, GridProps>(
+  ({ children, center, vertical, ...rest }, ref) => {
+    return (
+      <G vertical={vertical} center={center} {...rest} ref={ref}>
+        {children}
+      </G>
+    )
+  },
+)
+
+/**
+ * CC = Horizontal Centered & Vertical Centered
+ */
+export const CC = forwardRef<HTMLDivElement, GridProps>(
+  ({ children, center, ...rest }, ref) => {
+    return (
+      <G center={center} {...rest} ref={ref}>
+        {children}
+      </G>
+    )
+  },
+)

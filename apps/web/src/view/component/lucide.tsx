@@ -1,11 +1,9 @@
-import { LucideProps as LucidePropsType } from 'lucide-react'
+import type { LucideProps } from 'lucide-react'
+import * as LucideReact from 'lucide-react'
 
-interface LucideProps extends LucidePropsType {
-  icon: React.ForwardRefExoticComponent<any>
-  active?: boolean
-}
-
-export const Lucide: FC<LucideProps> = observer(
+const LucideComp: FC<
+  LucideProps & { icon: React.ForwardRefExoticComponent<any>; active?: boolean }
+> = observer(
   ({ icon: Icon, className, size = 16, strokeWidth = 1.5, active, ...rest }) => {
     return (
       <Icon
@@ -18,6 +16,8 @@ export const Lucide: FC<LucideProps> = observer(
     )
   },
 )
+
+export const Lucide = Object.assign(LucideComp, LucideReact)
 
 const cls = classes(css`
   cursor: pointer;

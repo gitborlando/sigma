@@ -9,7 +9,6 @@ import { useEditorServices } from 'src/view/hooks/use-editor'
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
   const { stageViewport } = useEditorServices()
   const zoom = ~~((stageViewport.zoom || 0) * 100)
-  const [show, setShow] = useState(false)
 
   const cls = classes(css`
     width: fit-content;
@@ -25,7 +24,7 @@ export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
     <Menu
       positioning={{ placement: 'bottom' }}
       trigger={
-        <G center horizontal className={cls()} onClick={() => setShow(!show)}>
+        <G center horizontal className={cls()}>
           <G>{zoom}%</G>
           <Lucide icon={ChevronDown} size={16} />
         </G>

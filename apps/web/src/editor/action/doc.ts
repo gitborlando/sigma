@@ -79,4 +79,17 @@ export class DocAction extends Service {
 
     throw new Error('Failed to initialize doc')
   }
+
+  async exportDoc(doc: S.Doc) {
+    const fileName = `${doc.meta.name}.json`
+    const blob = new TextEncoder().encode(JSON.stringify(doc))
+    const blobUrl = URL.createObjectURL(
+      new Blob([blob], { type: 'application/json' }),
+    )
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = fileName
+    a.click()
+    URL.revokeObjectURL(blobUrl)
+  }
 }

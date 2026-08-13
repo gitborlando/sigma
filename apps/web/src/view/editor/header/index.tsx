@@ -1,8 +1,10 @@
-import { Menu, Redo, Undo as UndoIcon } from 'lucide-react'
 import { IStageCreateType } from 'src/editor/stage/interact/create'
+import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { EditableText } from 'src/view/component/editable-text'
+import { VC } from 'src/view/component/grid'
 import { Lucide } from 'src/view/component/lucide'
+import { Menu } from 'src/view/component/menu'
 import { Icon } from 'src/view/component/svg-icon'
 import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot'
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
@@ -13,7 +15,6 @@ import { useEditorServices } from 'src/view/hooks/use-editor'
 
 export const EditorHeaderComp: FC<{}> = observer(({}) => {
   const { stageViewport, stageCreate } = useEditorServices()
-  const navigate = useNavigate()
 
   return (
     <G
@@ -22,12 +23,17 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
       className={cls()}
       style={{ height: stageViewport.bound.top }}>
       <G center horizontal gap={4} jc='flex-start'>
-        <Btn
-          icon={<Lucide size={20} icon={Menu} />}
-          size={32}
-          onClick={() => navigate('/')}
-          variant='ghost'
-        />
+        <Menu
+          positioning={{ placement: 'bottom' }}
+          trigger={
+            <Btn
+              icon={<Lucide size={20} icon={Lucide.Menu} />}
+              size={32}
+              variant='ghost'
+            />
+          }>
+          <MenuPanelComp />
+        </Menu>
         <DocNameComp />
       </G>
       <G center horizontal className={cls('centerGroup')}>
@@ -49,6 +55,29 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
         <EditorHeaderZoomComp />
       </G>
     </G>
+  )
+})
+
+const MenuPanelComp: FC<{}> = observer(({}) => {
+  const navigate = useNavigate()
+  const { docAction, yDoc } = useEditorServices()
+
+  const cls = classes(css`
+    width: 160px;
+  `)
+  return (
+    <VC className={cls()}>
+      <OptionBalanceItem
+        reserveIconSpace={false}
+        label={t('返回')}
+        onClick={() => navigate(-1)}
+      />
+      <OptionBalanceItem
+        reserveIconSpace={false}
+        label={t('导出')}
+        onClick={() => docAction.exportDoc(yDoc.doc)}
+      />
+    </VC>
   )
 })
 
@@ -131,13 +160,13 @@ const UndoGroup: FC<{}> = observer(() => {
     <G horizontal gap={4}>
       <Btn
         size={32}
-        icon={<Lucide icon={UndoIcon} />}
+        icon={<Lucide icon={Lucide.Undo} />}
         disabled={!undo.canUndo}
         onClick={undo.undo}
       />
       <Btn
         size={32}
-        icon={<Lucide icon={Redo} />}
+        icon={<Lucide icon={Lucide.Redo} />}
         disabled={!undo.canRedo}
         onClick={undo.redo}
       />
