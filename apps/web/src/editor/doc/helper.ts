@@ -35,12 +35,14 @@ export class DocHelper {
     return this.isGraph(item) && 'childIds' in item
   }
 
-  static isRootFrame(id: ID) {
+  static isRootFrame(id: ID): boolean {
     const node = findGraph(id)
-    return this.isNode(node, 'frame') && this.isPageById(node.parentId)
+    return (
+      this.isNode(node, 'frame') && !!node.parentId && this.isPageById(node.parentId)
+    )
   }
 
-  static clone<T extends S.Graph>(item: T, option?: Partial<T>) {
+  static clone<T extends S.Graph>(item: T, option?: Partial<T>): T {
     const newItem = clone(item)
     newItem.id = item.type === 'page' ? `page_${miniId(8)}` : miniId(8)
     if ('childIds' in newItem) newItem.childIds = []

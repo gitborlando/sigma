@@ -77,28 +77,13 @@ export class NodeAction extends Service {
   pasteNodes() {
     if (!this.copiedIds.length) return
 
-    const newSelection = <Selection>{}
-    const traverse = createGraphTraverse<{ newNode?: S.Node | S.Parent }>({
-      enter: (ctx) => {
-        const { graph, parent, forwardCtx, depth } = ctx
-        if (!parent || !DocHelper.isNode(graph)) return false
-
-        const newParent = forwardCtx?.newNode || parent
-        const newNode = DocHelper.clone(graph, {
-          name: this.docCreator.createNodeName(graph.type),
-        })
-        this.docMutator.addNodes([newNode])
-        this.docMutator.insertChildAt(newParent as S.Parent, newNode)
-        ctx.newNode = newNode
-        if (depth === 0) newSelection[newNode.id] = true
-      },
-    })
+    let newSelection = <Selection>{}
 
     this.yDoc.transact(() => {
-      traverse(this.copiedIds)
-      this.copiedIds = []
+      newSelection = this.docMutator.cloneNodes(this.copiedIds)
     })
     this.select.replaceSelection(newSelection)
+    this.copiedIds = []
 
     this.undo.track('all', `${t('paste nodes')}: ${objKeys(newSelection).length}`)
   }
@@ -186,6 +171,14 @@ export class NodeAction extends Service {
     })
 
     return moved
+  }
+
+  altCopy() {
+    let newSelection = <Selection>{}
+    this.yDoc.transact(() => {
+      newSelection = this.docMutator.cloneNodes(this.select.selectIds)
+    })
+    this.select.replaceSelection(newSelection)
   }
 
   private getDatumXY() {

@@ -1,5 +1,6 @@
 import { Dragger } from '@gitborlando/toolkit/browser'
 import { iife } from '@gitborlando/utils'
+import hotkeys from 'hotkeys-js'
 import { makeObservable } from 'mobx'
 import { NodeAction } from 'src/editor/action/node'
 import { Undo } from 'src/editor/action/undo'
@@ -9,6 +10,7 @@ import { HitTest, IMRect, Matrix, MRect } from 'src/editor/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
+import { StageCursor } from 'src/editor/stage/cursor'
 import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRound, snapGridRoundXY, TRBL } from 'src/editor/utils'
@@ -90,6 +92,7 @@ export class StageTransformer extends Service {
     private readonly select: Select,
     private readonly docMutator: DocMutator,
     private readonly nodeAction: NodeAction,
+    private readonly stageCursor: StageCursor,
   ) {
     super()
     autoBind(makeObservable(this))
@@ -114,6 +117,9 @@ export class StageTransformer extends Service {
     return this.mrect
   }
 
+  /**
+   * @param xy sceneXY
+   */
   isPointIn(xy: IXY) {
     const { width, height, matrix } = this.mrect
     xy = Matrix.of(matrix).invert().applyXY(xy)
@@ -141,6 +147,12 @@ export class StageTransformer extends Service {
     let previousMatrix = startMatrix
 
     this.dragger
+      .onStart(() => {
+        if (!hotkeys.alt) return
+
+        this.stageCursor.setCursor('copy')
+        this.nodeAction.altCopy()
+      })
       .onMove(({ shift }) => {
         this.action = 'move'
         this.isMoving = true
