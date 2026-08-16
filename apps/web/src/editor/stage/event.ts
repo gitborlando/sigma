@@ -9,7 +9,7 @@ import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 @reflection
 export class StageEvent extends Service {

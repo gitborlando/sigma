@@ -2,7 +2,7 @@ import { getSet } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { floor } from 'src/editor/geometry/base'
 import { RenderSurface } from 'src/editor/render/surface'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 export type StageCursorType =
   | 'select'

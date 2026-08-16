@@ -16,7 +16,7 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRound, snapGridRoundXY, TRBL } from 'src/editor/utils'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { GRAPHS } from 'src/global/constant'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 type TransformerAction = 'move' | 'resize' | 'rotate' | 'flip'
 

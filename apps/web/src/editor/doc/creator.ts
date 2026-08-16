@@ -1,9 +1,9 @@
+import { Service } from '@gitborlando/di-service'
 import { XY } from '@gitborlando/geo'
 import { getSet, miniId } from '@gitborlando/utils'
 import { getLatestVersion } from 'src/editor/doc/migrate'
 import { MRect } from 'src/editor/geometry'
 import { createLine } from 'src/editor/geometry/point'
-import { Service } from 'src/global/service'
 import { COLOR } from 'src/utils/color'
 import { T } from 'src/utils/common'
 import { mergeOverrideArray } from 'src/utils/export'
@@ -26,9 +26,8 @@ export class DocCreator extends Service {
 
   meta(): S.Meta {
     return {
-      type: 'meta',
-      id: 'meta',
-      fileId: '',
+      type: 'design',
+      id: miniId(16),
       name: t('untitled'),
       version: getLatestVersion(),
       pageIds: [],

@@ -3,7 +3,7 @@ import { reflection } from 'first-di'
 import { DocMutator } from 'src/editor/doc/mutator'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { MIXED_VALUE } from 'src/global/constant'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { createSlideSession } from 'src/utils/slide-session'
 import {
   createDesignGeomInfo,

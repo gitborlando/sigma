@@ -1,5 +1,5 @@
 import { match, NoopFunc } from '@gitborlando/utils'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { StageCreate } from './create'
 import { StageMove } from './move'
 import { StageSelect } from './select'

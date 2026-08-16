@@ -1,5 +1,5 @@
 import { makeObservable } from 'mobx'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 @reflection
 export class LayerPageList extends Service {

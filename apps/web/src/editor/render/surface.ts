@@ -2,7 +2,7 @@ import { AABB } from '@gitborlando/geo'
 import { Matrix } from 'src/editor/geometry'
 import { IMatrix } from 'src/editor/geometry/matrix'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 const dpr = devicePixelRatio
 

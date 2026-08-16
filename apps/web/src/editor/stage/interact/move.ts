@@ -5,7 +5,7 @@ import { StageCursor } from 'src/editor/stage/cursor'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 @reflection
 export class StageMove extends Service {

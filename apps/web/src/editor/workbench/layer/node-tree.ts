@@ -4,7 +4,7 @@ import { DocHelper } from 'src/editor/doc/helper'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { Select } from 'src/editor/select'
 import { YDocPatch } from 'src/editor/y-adapter/y-doc'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 export type LayerNodeTreeInfo = { id: string; indent: number; ancestorIds: string[] }
 

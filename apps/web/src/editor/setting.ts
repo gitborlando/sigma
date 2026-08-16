@@ -1,6 +1,6 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { mergeOverrideArray } from 'src/utils/export'
 
 const initSetting = () => ({

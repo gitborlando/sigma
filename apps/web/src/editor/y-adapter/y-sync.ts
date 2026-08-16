@@ -1,5 +1,5 @@
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 

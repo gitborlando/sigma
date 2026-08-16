@@ -6,7 +6,7 @@ import { DocHelper } from 'src/editor/doc/helper'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { IMatrix } from 'src/editor/geometry'
 import { GRAPHS } from 'src/global/constant'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { YDoc } from '../y-adapter/y-doc'
 
 @reflection

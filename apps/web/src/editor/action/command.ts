@@ -11,7 +11,7 @@ import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { ICommand } from 'src/global/context-menu'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 @reflection
 export class Command extends Service {

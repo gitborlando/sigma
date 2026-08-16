@@ -18,7 +18,7 @@ import { StageEvent } from 'src/editor/stage/event'
 import { StageTransformer } from 'src/editor/stage/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { Undo } from '../../action/undo'
 
 @reflection

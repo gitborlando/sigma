@@ -1,6 +1,6 @@
 import { DesignFill } from 'src/editor/workbench/design/fill'
 import { DesignStroke } from 'src/editor/workbench/design/stroke'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 type DesignPickerTarget = 'fill' | 'stroke'
 

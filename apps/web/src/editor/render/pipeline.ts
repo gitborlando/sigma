@@ -12,7 +12,7 @@ import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree, type RenderDirtyType } from 'src/editor/render/tree'
 import { Setting } from 'src/editor/setting'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
 

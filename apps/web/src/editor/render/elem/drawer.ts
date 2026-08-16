@@ -6,7 +6,7 @@ import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezie
 import { ISplitText, TextBreaker } from 'src/editor/render/text-break/text-breaker'
 import { Setting } from 'src/editor/setting'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { Image } from 'src/global/service/image'
 import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'

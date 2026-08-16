@@ -5,7 +5,7 @@ import { makeObservable, untracked } from 'mobx'
 import { Undo } from 'src/editor/action/undo'
 import { findNode, findPage } from 'src/editor/doc/finder'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 export type SelectState = { selection: Selection; selectPageId: ID | '' }
 

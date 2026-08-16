@@ -1,7 +1,7 @@
 import hotkeys from 'hotkeys-js'
 import { Undo } from 'src/editor/action/undo'
 import { Select, type Selection } from 'src/editor/select'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 @reflection
 export class SelectAction extends Service {

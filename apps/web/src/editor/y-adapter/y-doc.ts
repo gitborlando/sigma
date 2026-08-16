@@ -3,7 +3,7 @@ import { clone, ThisAsAny } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
 import { createAtom } from 'mobx'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import * as Y from 'yjs'
 
 export type YDocPatch = YPlainPatch

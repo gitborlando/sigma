@@ -7,7 +7,7 @@ import { Select } from 'src/editor/select'
 import type { YDocPatch } from 'src/editor/y-adapter/y-doc'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { GRAPHS } from 'src/global/constant'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { Elem } from './elem/elem'
 
 export type RenderDirtyType = 'widget' | 'scene'

@@ -7,7 +7,7 @@ import { makeObservable } from 'mobx'
 import { IMatrix, Matrix } from 'src/editor/geometry'
 import { RenderSurface } from 'src/editor/render/surface'
 import { Select } from 'src/editor/select'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 const createInitBound = () => ({
   left: 240,

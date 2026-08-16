@@ -10,7 +10,7 @@ import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { YSync } from 'src/editor/y-adapter/y-sync'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 import { FileService } from 'src/global/service/file'
 
 @reflection

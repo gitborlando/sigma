@@ -4,7 +4,7 @@ import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 @reflection
 export class Stage extends Service {

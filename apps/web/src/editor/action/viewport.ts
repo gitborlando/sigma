@@ -3,7 +3,7 @@ import { Matrix } from 'src/editor/geometry'
 import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 @reflection
 export class ViewportAction extends Service {

@@ -33,7 +33,7 @@ import { LayerPageList } from 'src/editor/workbench/layer/page-list'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { YSync } from 'src/editor/y-adapter/y-sync'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 const editorServices = {
   /** action */

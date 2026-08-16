@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import { Editor, type EditorServiceId, type EditorServices } from 'src/editor'
-import type { Service } from 'src/global/service'
+import type { Service } from '@gitborlando/di-service'
 
 export const EditorContext = createContext<Editor>(null!)
 

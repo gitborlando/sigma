@@ -20,7 +20,7 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { GRAPHS } from 'src/global/constant'
-import { Service } from 'src/global/service'
+import { Service } from '@gitborlando/di-service'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'line', 'text'] as const
 export type IStageCreateType = (typeof createTypes)[number]
