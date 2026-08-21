@@ -1,5 +1,5 @@
 import { LayerPanelComp } from 'src/view/editor/layer'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const LeftPanelComp: FC<{}> = observer(({}) => {
   const { stageViewport } = useEditorServices()

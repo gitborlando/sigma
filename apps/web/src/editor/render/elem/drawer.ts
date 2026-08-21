@@ -1,13 +1,15 @@
+import { Service } from '@gitborlando/di-service'
 import { AABB, type IXY } from '@gitborlando/geo'
 import { getSet, iife, loopFor, match } from '@gitborlando/utils'
+import { StorageAPI } from '@sigma/api'
 import { clamp } from 'es-toolkit'
 import { HitTest, Matrix } from 'src/editor/geometry'
 import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezier'
 import { ISplitText, TextBreaker } from 'src/editor/render/text-break/text-breaker'
 import { Setting } from 'src/editor/setting'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Service } from '@gitborlando/di-service'
-import { Image } from 'src/global/service/image'
+import { Image } from 'src/global/services/image'
+import { ImageMgr } from 'src/global/services/image-mgr'
 import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
 import { Elem } from './elem'
@@ -24,6 +26,8 @@ export class ElemDrawer extends Service {
   constructor(
     private readonly setting: Setting,
     private readonly stageViewport: StageViewport,
+    private readonly imageMgr: ImageMgr,
+    private readonly storageAPI: StorageAPI,
   ) {
     super()
     autoBind(this)
@@ -296,10 +300,14 @@ export class ElemDrawer extends Service {
         break
 
       case 'image':
-        const image = Image.getImage(fill.url)
+        //Todo: rename as storageKey
+        const url = fill.url
+          ? this.storageAPI.getUrl(fill.url)
+          : Assets.editor.design.fill.defaultImage
+        const image = this.imageMgr.getImage(url)
         if (!image) {
           const elem = this.elem
-          Image.getImageAsync(fill.url).then(() => elem.dirty())
+          this.imageMgr.getImageAsync(url).then(() => elem.dirty())
         } else {
           const { width, height } = this.node
           const rate = iife(() => {

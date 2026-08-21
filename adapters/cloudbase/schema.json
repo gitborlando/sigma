@@ -1,0 +1,38 @@
+[
+  {
+    "type": "uuid",
+    "table": "files",
+    "column": "id",
+    "default": "gen_random_uuid()",
+    "udtType": "uuid",
+    "identity": false,
+    "nullable": false
+  },
+  {
+    "type": "timestamp with time zone",
+    "table": "files",
+    "column": "created_at",
+    "default": "now()",
+    "udtType": "timestamptz",
+    "identity": false,
+    "nullable": false
+  },
+  {
+    "type": "text",
+    "table": "files",
+    "column": "name",
+    "default": null,
+    "udtType": "text",
+    "identity": false,
+    "nullable": true
+  },
+  {
+    "type": "character varying",
+    "table": "files",
+    "column": "owner",
+    "default": null,
+    "udtType": "varchar",
+    "identity": false,
+    "nullable": false
+  }
+]

@@ -1,13 +1,13 @@
-import { Uploader } from 'src/global/upload'
+import { useGlobalServices } from 'src/view/hooks/use-services'
 
-type IUploaderComp = {}
-
-export const UploaderComp: FC<IUploaderComp> = ({}) => {
+export const UploaderComp: FC<{}> = ({}) => {
+  const { uploader } = useGlobalServices()
   return (
     <input
-      ref={Uploader.setInputRef}
+      ref={uploader.setInputRef}
       id='uploader'
       type='file'
-      style={{ display: 'none' }}></input>
+      style={{ display: 'none' }}
+    />
   )
 }

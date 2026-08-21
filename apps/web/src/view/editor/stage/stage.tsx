@@ -14,7 +14,7 @@ import {
   EditorContext,
   useEditor,
   useEditorServices,
-} from 'src/view/hooks/use-editor'
+} from 'src/view/hooks/use-services'
 
 export const StageComp: FC<{}> = observer(({}) => {
   const editor = useEditor()

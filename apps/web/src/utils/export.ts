@@ -34,10 +34,12 @@ export const memorized = <F extends (deps: any[]) => any>(func: F) => {
   }
 }
 
-export const tryCatch = <T>(func: () => T) => {
+export const tryCatch = async <T>(func: () => Promise<T>, final?: () => void) => {
   try {
-    return [undefined, func()] as const
+    return [await func(), undefined] as const
   } catch (e) {
-    return [e as Error, undefined] as const
+    return [undefined, e as Error] as const
+  } finally {
+    final?.()
   }
 }

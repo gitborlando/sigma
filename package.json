@@ -4,18 +4,18 @@
   "packageManager": "pnpm@9.12.2",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @sigma/web dev",
+    "i": "pnpm i",
+    "prepare": "simple-git-hooks",
     "dev:web": "pnpm --filter @sigma/web dev",
-    "build": "pnpm --filter @sigma/web build",
     "build:web": "pnpm --filter @sigma/web build",
-    "preview": "pnpm --filter @sigma/web preview",
-    "preview:web": "pnpm --filter @sigma/web preview",
     "typecheck": "pnpm -r --if-present typecheck",
     "typecheck:web": "pnpm --filter @sigma/web typecheck",
     "edgeone": "pnpm --filter @sigma/web edgeone",
-    "prepare": "simple-git-hooks",
-    "re-base:main": "git fetch origin main && git rebase origin/main",
+    "generate:schema": "pnpm --filter @sigma/cloudbase generate:schema",
     "re-i": "find . -path ./.git -prune -o -name node_modules -type d -prune -exec rm -rf '{}' + && pnpm i"
+  },
+  "dependencies": {
+    "es-toolkit": "^1.44.0"
   },
   "devDependencies": {
     "pretty-quick": "^4.2.2",

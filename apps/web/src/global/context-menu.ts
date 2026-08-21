@@ -21,9 +21,12 @@ class ContextMenuClass {
     this.ref = ref
   }
 
-  openMenu(e: MouseEvent) {
+  openMenu(e: MouseEvent, menus?: MenuItem[][], context?: AnyObject) {
     if (this.triggered) return
     this.triggered = true
+
+    this.menus = menus || []
+    this.context = context || {}
 
     e.preventDefault()
     this.ref.dispatchEvent(

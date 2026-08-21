@@ -1,6 +1,6 @@
 import { Matrix } from 'src/editor/geometry'
 import { rgbToRgba } from 'src/utils/color'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 import { themeColor } from 'src/view/styles/color'
 
 export const StageMarqueeComp: FC<{}> = observer(({}) => {

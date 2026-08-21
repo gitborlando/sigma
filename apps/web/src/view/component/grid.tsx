@@ -101,7 +101,7 @@ const cls = classes(css`
 export const HC = forwardRef<HTMLDivElement, GridProps>(
   ({ children, center, horizontal, ...rest }, ref) => {
     return (
-      <G horizontal={horizontal} center={center} {...rest} ref={ref}>
+      <G horizontal center {...rest} ref={ref}>
         {children}
       </G>
     )
@@ -114,7 +114,7 @@ export const HC = forwardRef<HTMLDivElement, GridProps>(
 export const VC = forwardRef<HTMLDivElement, GridProps>(
   ({ children, center, vertical, ...rest }, ref) => {
     return (
-      <G vertical={vertical} center={center} {...rest} ref={ref}>
+      <G vertical center {...rest} ref={ref}>
         {children}
       </G>
     )

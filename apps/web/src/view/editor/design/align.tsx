@@ -1,6 +1,6 @@
 import { Btn } from 'src/view/component/btn'
 import { Icon } from 'src/view/component/svg-icon'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const DesignAlignComp: FC<{}> = observer(({}) => {
   const { designAlign } = useEditorServices()

@@ -6,13 +6,12 @@ namespace S {
   type Doc = { meta: Meta; graphs: Record<string, Graph> }
 
   type Meta = {
-    type: 'meta'
-    id: 'meta'
-    fileId: string
+    type: 'design'
+    id: string
+    version: number
     name: string
     pageIds: string[]
     userId: string
-    version: number
   }
 
   type GraphLike = { id: string; name: string; parentId: string } & MRect

@@ -9,7 +9,7 @@ import { ElemMouseEvent } from 'src/editor/render/elem/event'
 import { TRBL } from 'src/editor/utils'
 import { COLOR } from 'src/utils/color'
 import { useSelectNodes } from 'src/view/hooks/use-doc'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 import { themeColor } from 'src/view/styles/color'
 
 const arrayLoopGet = <T,>(arr: T[], index: number) => {

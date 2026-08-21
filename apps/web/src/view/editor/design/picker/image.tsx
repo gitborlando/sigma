@@ -1,36 +1,43 @@
-import { withSuspense } from '@gitborlando/utils/react'
-import { Image } from 'src/global/service/image'
-import { suspend } from 'suspend-react'
+import { useUpload } from 'src/view/hooks/feature/use-upload'
+import { useEditorServices, useGlobalServices } from 'src/view/hooks/use-services'
 
-export const PickerImageComp: FC<{ fill: S.FillImage }> = observer(({ fill }) => {
-  const uploadImage = async () => {
-    throw new Error('not implemented yet')
-  }
+export const PickerImageComp: FC<{ fill: S.FillImage; index: number }> = observer(
+  ({ fill, index }) => {
+    const { designFill } = useEditorServices()
+    const handleUpload = useUpload()
 
-  return (
-    <G vertical center className={cls()}>
-      <G center className={cls('content')}>
-        <G center className={cls('mask')}>
-          <G center className={cls('mask-change')} onClick={uploadImage}>
-            更换图片
+    const uploadImage = async () => {
+      const res = await handleUpload()
+      if (res) {
+        console.log('res: ', res)
+        designFill.setFill<S.FillImage>(index, (fill) => {
+          fill.url = res.path
+        })
+      }
+    }
+
+    return (
+      <G vertical center className={cls()}>
+        <G center className={cls('content')}>
+          <G center className={cls('mask')}>
+            <G center className={cls('mask-change')} onClick={uploadImage}>
+              更换图片
+            </G>
           </G>
+          <ImgComp id={fill.url} />
         </G>
-        <ImgComp url={fill.url} />
       </G>
-    </G>
+    )
+  },
+)
+
+const ImgComp: FC<{ id: string }> = observer(({ id }) => {
+  const { storageAPI } = useGlobalServices()
+  const url = !!id ? storageAPI.getUrl(id) : Assets.editor.design.fill.defaultImage
+  return (
+    <img src={url} style={{ width: 216, height: 184, objectFit: 'contain' }}></img>
   )
 })
-
-const ImgComp: FC<{ url: string }> = withSuspense(
-  observer(({ url }) => {
-    const image = suspend(() => Image.getImageAsync(url), [url])
-    return (
-      <img
-        src={image.objectUrl}
-        style={{ width: 216, height: 184, objectFit: 'contain' }}></img>
-    )
-  }),
-)
 
 const cls = classes(css`
   &:hover &-mask {

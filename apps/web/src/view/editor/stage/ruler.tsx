@@ -1,6 +1,6 @@
 import { Matrix } from 'src/editor/geometry'
 import { snapSceneXYToHalfPixel } from 'src/editor/utils'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 const RULER_COLOR = '#9f9f9f'
 const TICK_SIZE = 4

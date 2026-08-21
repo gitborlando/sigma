@@ -1,7 +1,7 @@
 import { ChevronsUp } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const LayerNodeTreeHeaderComp: FC<{}> = observer(({}) => {
   const { layerNodeTree } = useEditorServices()

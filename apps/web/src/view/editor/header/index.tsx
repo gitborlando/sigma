@@ -2,7 +2,6 @@ import { IStageCreateType } from 'src/editor/stage/interact/create'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { EditableText } from 'src/view/component/editable-text'
-import { VC } from 'src/view/component/grid'
 import { Lucide } from 'src/view/component/lucide'
 import { Menu } from 'src/view/component/menu'
 import { Icon } from 'src/view/component/svg-icon'
@@ -11,7 +10,7 @@ import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
 import { useDoc } from 'src/view/hooks/use-doc'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const EditorHeaderComp: FC<{}> = observer(({}) => {
   const { stageViewport, stageCreate } = useEditorServices()
@@ -60,24 +59,18 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
 
 const MenuPanelComp: FC<{}> = observer(({}) => {
   const navigate = useNavigate()
-  const { docAction, yDoc } = useEditorServices()
 
   const cls = classes(css`
     width: 160px;
   `)
   return (
-    <VC className={cls()}>
+    <G vertical center className={cls()}>
       <OptionBalanceItem
         reserveIconSpace={false}
         label={t('返回')}
         onClick={() => navigate(-1)}
       />
-      <OptionBalanceItem
-        reserveIconSpace={false}
-        label={t('导出')}
-        onClick={() => docAction.exportDoc(yDoc.doc)}
-      />
-    </VC>
+    </G>
   )
 })
 

@@ -4,7 +4,7 @@ import { Fragment } from 'react'
 import { findNode } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { useDoc } from 'src/view/hooks/use-doc'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 import { themeColor } from 'src/view/styles/color'
 
 type OutlineInfo = {

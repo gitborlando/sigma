@@ -7,7 +7,7 @@ import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const EditorHeaderHistoryComp: FC<{}> = observer(({}) => {
   const { yDoc, undo, setting } = useEditorServices()

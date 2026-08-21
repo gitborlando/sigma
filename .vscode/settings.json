@@ -3,6 +3,7 @@
   "editor.formatOnPaste": true,
   "editor.codeActionsOnSave": { "source.organizeImports": "explicit" },
   "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.preferences.autoImportSpecifierExcludeRegexes": ["(^|/)private(/|$)"],
   "cSpell.words": [
     "aabb",
     "AABB",
@@ -17,6 +18,7 @@
     "boundfy",
     "camelcase",
     "classix",
+    "cloudbase",
     "cnpm",
     "defu",
     "degreefy",

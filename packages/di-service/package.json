@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gitborlando/toolkit": "workspace:*"
+    "@gitborlando/toolkit": "workspace:*",
+    "first-di": "^3.4.16"
   }
 }

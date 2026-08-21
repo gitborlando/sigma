@@ -1,5 +1,5 @@
 import { optionalSet } from '@gitborlando/utils'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const FPSComp: FC<{}> = observer(({}) => {
   const { setting } = useEditorServices()

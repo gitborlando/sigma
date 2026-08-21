@@ -10,8 +10,8 @@ import { EditableText } from 'src/view/component/editable-text'
 import { Lucide } from 'src/view/component/lucide'
 import { Icon } from 'src/view/component/svg-icon'
 import { useDoc } from 'src/view/hooks/use-doc'
-import { useEditorServices } from 'src/view/hooks/use-editor'
 import { useSelection } from 'src/view/hooks/use-selection'
+import { useEditorServices } from 'src/view/hooks/use-services'
 import { LayerNodeTreePathIcon } from './path-icon'
 
 export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observer(

@@ -1,9 +1,10 @@
+import { Service } from '@gitborlando/di-service'
 import { Signal } from '@gitborlando/signal'
 import { clone, ThisAsAny } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
 import { createAtom } from 'mobx'
 import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
+import { IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
 
 export type YDocPatch = YPlainPatch
@@ -14,6 +15,7 @@ type YDocDownstream = (patches: YDocPatch[]) => void
 export class YDoc extends Service {
   yDoc!: Y.Doc
   plain!: YPlain<S.Doc>
+  persistence!: IndexeddbPersistence
 
   flushPatch$ = Signal.create<YDocPatch>()
 
@@ -51,11 +53,16 @@ export class YDoc extends Service {
     return this.plain.delete
   }
 
-  setup(doc: S.Doc) {
+  async setup(id: string, doc?: S.Doc) {
     this.patches = []
     this.yDoc = new Y.Doc()
-    this.effect(() => this.yDoc.destroy())
+
+    this.persistence = new IndexeddbPersistence(id, this.yDoc)
+    await this.persistence.whenSynced
+
     this.plain = autoBind(new YPlain(this.yDoc.getMap<unknown>('doc'), doc))
+
+    this.effect(() => this.yDoc.destroy())
     this.effect(this.plain.observe())
     this.effect(this.plain.subscribe(this.distribute))
   }

@@ -1,17 +1,20 @@
 import { withSuspense } from '@gitborlando/utils/react'
-import type { Tables } from '@sigma/api-types/supabase'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { FileSchema } from '@sigma/api'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { FileService } from 'src/global/service/file'
+import { ContextMenu } from 'src/global/context-menu'
 import { Loading } from 'src/view/component/loading'
 import { Text } from 'src/view/component/text'
+import { useGlobalServices } from 'src/view/hooks/use-services'
+import { QUERY_KEY } from 'src/view/private/tanstack-query'
 
 export const HomeFilesComp = withSuspense(
   observer(() => {
+    const { fileAPI } = useGlobalServices()
     const { data } = useSuspenseQuery({
-      queryKey: ['files'],
-      queryFn: () => FileService.getFiles(),
+      queryKey: [QUERY_KEY.listFiles],
+      queryFn: () => fileAPI.listFiles(),
     })
 
     return (
@@ -29,28 +32,47 @@ export const HomeFilesComp = withSuspense(
   <Loading />,
 )
 
-const FileItemComp: FC<{ file: Tables<'files'> }> = ({ file }) => {
+const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
+  const query = useQueryClient()
+  const { fileAPI } = useGlobalServices()
+
   const navigate = useNavigate()
   const handleClick = () => navigate(`/fileId/${file.id}`)
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault()
+    ContextMenu.openMenu(e, [
+      [
+        {
+          name: t('delete'),
+          callback: async () => {
+            await fileAPI.deleteFile(file.id)
+            query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
+          },
+        },
+      ],
+    ])
+  }
+
   return (
-    <G onClick={() => handleClick()} className={cls('item')}>
+    <G
+      onClick={() => handleClick()}
+      onContextMenu={handleContextMenu}
+      className={cls('item')}>
       <G className={cls('item-cover')}>
         <img
           draggable={false}
           src={
             'https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp'
           }
-          alt={file.name}
+          alt={file.name || t('untitled')}
         />
       </G>
       <G className={cls('item-meta')}>
         <Text variant='head' className='text-[14px]'>
-          {decodeURIComponent(file.name)}
+          {decodeURIComponent(file.name || t('untitled'))}
         </Text>
-        <Text variant='common'>
-          {dayjs(file.createdAt).format('YYYY-MM-DD HH:mm:ss')}
-        </Text>
+        <Text variant='common'>{dayjs(file.createAt).format('YYYY/MM/DD')}</Text>
       </G>
     </G>
   )

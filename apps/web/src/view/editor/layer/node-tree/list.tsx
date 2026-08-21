@@ -1,7 +1,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import Scrollbars from 'react-custom-scrollbars-2'
 import { LayerNodeTreeItemComp } from 'src/view/editor/layer/node-tree/item'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const LayerNodeTreeListComp: FC<{}> = observer(({}) => {
   const { layerNodeTree } = useEditorServices()

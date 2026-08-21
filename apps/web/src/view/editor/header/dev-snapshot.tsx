@@ -8,7 +8,7 @@ import type { SelectState } from 'src/editor/select'
 import { GRAPHS } from 'src/global/constant'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 type SnapshotState = {
   doc: S.Doc

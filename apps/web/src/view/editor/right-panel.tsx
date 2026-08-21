@@ -1,4 +1,4 @@
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 import { DesignPanelComp } from './design'
 
 export const RightPanelComp: FC<{}> = observer(({}) => {

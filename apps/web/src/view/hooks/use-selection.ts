@@ -1,4 +1,4 @@
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 export function useSelectIds() {
   const { select } = useEditorServices()

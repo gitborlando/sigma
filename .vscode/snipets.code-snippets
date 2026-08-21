@@ -51,7 +51,8 @@
     "prefix": "service",
     "scope": "typescript",
     "body": [
-      "import { Service } from 'src/global/service'",
+      "import { Service } from '@gitborlando/di-service'",
+      "import autoBind from 'auto-bind'",
       "",
       "export class $1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g} extends Service {",
       "  constructor() {",
@@ -59,6 +60,18 @@
       "     autoBind(this)",
       "  }",
       "}",
+      "",
+    ],
+    "description": "Service",
+  },
+
+  "Abstract Service": {
+    "prefix": "abstract",
+    "scope": "typescript",
+    "body": [
+      "import { Service } from '@gitborlando/di-service'",
+      "",
+      "export abstract class $1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g} extends Service {}",
       "",
     ],
     "description": "Service",

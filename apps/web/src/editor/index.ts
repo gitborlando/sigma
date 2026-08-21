@@ -1,6 +1,5 @@
-import { DI, type ClassConstructor } from 'first-di'
+import { ServiceContainer, ServiceInstances } from '@gitborlando/di-service'
 import { Command } from 'src/editor/action/command'
-import { DocAction } from 'src/editor/action/doc'
 import { NodeAction } from 'src/editor/action/node'
 import { PageAction } from 'src/editor/action/page'
 import { SelectAction } from 'src/editor/action/select'
@@ -33,7 +32,6 @@ import { LayerPageList } from 'src/editor/workbench/layer/page-list'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { YSync } from 'src/editor/y-adapter/y-sync'
-import { Service } from '@gitborlando/di-service'
 
 const editorServices = {
   /** action */
@@ -44,7 +42,7 @@ const editorServices = {
   selectAction: SelectAction,
   viewportAction: ViewportAction,
   stage: Stage,
-  docAction: DocAction,
+  // docAction: DocAction,
 
   /** render */
   elemDrawer: ElemDrawer,
@@ -89,45 +87,18 @@ const editorServices = {
   select: Select,
 }
 
-type ServiceInstances<T> = {
-  [K in keyof T]: T[K] extends ClassConstructor<infer S> ? S : never
-}
-
 export type EditorServices = ServiceInstances<typeof editorServices>
 export type EditorServiceId = keyof EditorServices
 
-export class Editor extends Service {
-  private static editor: Editor
+export class Editor extends ServiceContainer<typeof editorServices> {
+  protected static instance: Editor
 
-  static getInstance() {
-    if (!this.editor) this.initInstance()
-    return this.editor
+  constructor(global?: ServiceContainer) {
+    super(editorServices, global)
   }
 
-  private static initInstance() {
-    return (this.editor = autoBind(new Editor()))
-  }
-
-  private container = new (class EditorDI extends DI {
-    dispose() {
-      ;[...this.singletonsList.values()]
-        .filter((s) => s instanceof Service)
-        .forEach((s) => s.dispose())
-      this.reset()
-    }
-  })()
-
-  constructor() {
-    super()
-    this.effect(() => this.container.dispose())
-    this.effect(() => {
-      if (Editor.editor === this) Editor.editor = undefined!
-    })
-  }
-
-  resolve = <K extends EditorServiceId>(key: K): EditorServices[K] => {
-    return this.container.singleton(
-      editorServices[key] as ClassConstructor<EditorServices[K]>,
-    )
+  static getInstance(global?: ServiceContainer) {
+    if (this.instance) return this.instance
+    return (this.instance = new this(global))
   }
 }

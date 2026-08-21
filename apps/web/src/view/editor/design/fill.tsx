@@ -1,9 +1,8 @@
-import { iife, match } from '@gitborlando/utils'
+import { match } from '@gitborlando/utils'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { withSuspense } from '@gitborlando/utils/react'
 import Color from 'color'
 import { Eye, EyeOff, Minus, Plus } from 'lucide-react'
-import { Image } from 'src/global/service/image'
 import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
 import { Btn } from 'src/view/component/btn'
 import { Input } from 'src/view/component/input'
@@ -15,8 +14,7 @@ import {
   DesignFieldContentComp,
   DesignFieldHeaderComp,
 } from 'src/view/editor/design/share/field'
-import { useEditorServices } from 'src/view/hooks/use-editor'
-import { suspend } from 'suspend-react'
+import { useEditorServices, useGlobalServices } from 'src/view/hooks/use-services'
 
 export const DesignFillComp: FC<{}> = observer(({}) => {
   const { designFill } = useEditorServices()
@@ -88,7 +86,7 @@ export const DesignFillItemComp: FC<{
           <G style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></G>
         )}
         {isLinearType && <G style={{ background: makeLinearGradientCss(fill) }}></G>}
-        {isImageType && <ImgComp url={fill.url} />}
+        {isImageType && <ImgComp id={fill.url} />}
       </G>
       <HexInputComp fill={fill} index={index} target={target} />
       <AlphaInputComp fill={fill} index={index} target={target} />
@@ -97,16 +95,12 @@ export const DesignFillItemComp: FC<{
   )
 }
 
-const ImgComp = withSuspense<{ url: string }>(({ url }) => {
-  const image = suspend(() => Image.getImageAsync(url), [url])
-  const imageBound = iife(() => {
-    const { width, height } = image
-    const rate = width / height
-    return rate > 1
-      ? { width: 18, height: 18 / rate }
-      : { width: 18 * rate, height: 18 }
-  })
-  return <img src={image.objectUrl} style={{ ...imageBound }}></img>
+const ImgComp = withSuspense<{ id: string }>(({ id }) => {
+  const { storageAPI } = useGlobalServices()
+  const url = !!id ? storageAPI.getUrl(id) : Assets.editor.design.fill.defaultImage
+  return (
+    <img src={url} style={{ width: 18, height: 18, objectFit: 'contain' }}></img>
+  )
 })
 
 const HexInputComp: FC<{ fill: S.Fill; index: number; target: DesignFillTarget }> =

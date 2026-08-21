@@ -1,0 +1,26 @@
+{
+  "name": "@sigma/cloudbase",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate:schema": "tsx scripts/generate-schema.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cloudbase/ai": "3.7.1",
+    "@cloudbase/auth": "3.7.1",
+    "@cloudbase/js-sdk": "^3.8.0",
+    "@cloudbase/model": "3.7.1",
+    "@cloudbase/mysql": "3.7.1",
+    "@cloudbase/oauth": "3.7.1",
+    "@cloudbase/types": "3.7.1",
+    "@gitborlando/di-service": "workspace:*",
+    "@sigma/api": "workspace:*",
+    "auto-bind": "^5.0.1"
+  }
+}

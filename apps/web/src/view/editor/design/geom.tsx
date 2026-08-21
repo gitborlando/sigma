@@ -9,7 +9,7 @@ import { Btn } from 'src/view/component/btn'
 import { InputNum, type InputNumProps } from 'src/view/component/input-num'
 import { Icon } from 'src/view/component/svg-icon'
 import { useSelectNodes } from 'src/view/hooks/use-doc'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 const useSetGeomValue = () => {
   const { designGeom, undo } = useEditorServices()

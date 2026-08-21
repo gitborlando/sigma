@@ -5,26 +5,30 @@ import { Loading } from 'src/view/component/loading'
 import { LeftPanelComp } from 'src/view/editor/left-panel'
 import { RightPanelComp } from 'src/view/editor/right-panel'
 import { StageComp } from 'src/view/editor/stage/stage'
-import { EditorContext } from 'src/view/hooks/use-editor'
+import {
+  EditorContext,
+  useGlobal,
+  useGlobalServices,
+} from 'src/view/hooks/use-services'
 import { suspend } from 'suspend-react'
 import { EditorHeaderComp } from './header'
 
 export const EditorComp = withSuspense(
   ({}) => {
     const { fileId } = useParams<{ fileId: string }>()
-    const editor = Editor.getInstance()
+    const { docAction } = useGlobalServices()
     const [isSetup, setIsSetup] = useState(false)
+    const editor = Editor.getInstance(useGlobal())
 
-    const docAction = editor.resolve('docAction')
     const stageCursor = editor.resolve('stageCursor')
     const stage = editor.resolve('stage')
     const elemDrawer = editor.resolve('elemDrawer')
 
-    const doc = suspend(() => docAction.loadDoc(fileId!), [fileId])
+    const doc = suspend(() => docAction.setupDoc(fileId!), [fileId])
     const textBreaker = suspend(() => createTextBreaker(), ['text-breaker'])
 
     useEffect(() => {
-      docAction.setupDoc(fileId!, doc)
+      if (!doc || !textBreaker) return
       elemDrawer.setTextBreaker(textBreaker)
       setIsSetup(true)
       return () => editor.dispose()

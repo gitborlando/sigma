@@ -8,12 +8,12 @@ import { Segments } from 'src/view/component/segments'
 import { ColorPicker } from 'src/view/editor/design/picker/color-picker'
 import { PickerImageComp } from 'src/view/editor/design/picker/image'
 import { PickerLinearComp } from 'src/view/editor/design/picker/linear'
-import { useEditorServices } from 'src/view/hooks/use-editor'
+import { useEditorServices } from 'src/view/hooks/use-services'
 
 const createFillCache = (docCreator: DocCreator, type: S.Fill['type']): S.Fill => {
   if (type === 'color') return docCreator.fillColor()
   if (type === 'linear') return docCreator.fillLinear()
-  return docCreator.fillImage(Assets.editor.design.fill.defaultImage)
+  return docCreator.fillImage('')
 }
 const fillCache = new Map<S.Fill['type'], S.Fill>()
 
@@ -65,7 +65,7 @@ export const DesignPickerComp = observer(
             {match(fill, 'type', {
               color: (fill) => <PickerSolidComp fill={fill} index={fillIndex} />,
               linear: (fill) => <PickerLinearComp fill={fill} index={fillIndex} />,
-              image: (fill) => <PickerImageComp fill={fill as S.FillImage} />,
+              image: (fill) => <PickerImageComp fill={fill} index={fillIndex} />,
             })}
           </G>
         </DragPanel>

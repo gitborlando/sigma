@@ -4,7 +4,7 @@ import equal from 'fast-deep-equal'
 import { Matrix } from 'src/editor/geometry'
 import { Select } from 'src/editor/select'
 import { Service } from '@gitborlando/di-service'
-import { UserService } from 'src/global/service/user'
+import { UserService } from 'src/global/services/user'
 import { COLOR } from 'src/utils/color'
 import { Awareness } from 'y-protocols/awareness.js'
 

@@ -1,5 +1,5 @@
-import { useEditorServices } from 'src/view/hooks/use-editor'
 import { useSelectIds, useSelectPageId } from 'src/view/hooks/use-selection'
+import { useEditorServices } from 'src/view/hooks/use-services'
 import { useShallow } from 'src/view/hooks/use-shallow'
 
 export function useSelectNodes() {
