@@ -7,6 +7,7 @@ import { Text } from 'src/view/component/text'
 import { useAsyncState } from 'src/view/hooks/toolkit/use-async-state'
 import { useGlobalServices } from 'src/view/hooks/use-services'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
+import { LoginDialogComp } from 'src/view/pages/home/login-dialog'
 import { QUERY_KEY } from 'src/view/private/tanstack-query'
 
 export const HomeHeaderComp: FC<{}> = observer(({}) => {
@@ -14,6 +15,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
   const { docAction } = useGlobalServices()
   const query = useQueryClient()
   const navigate = useNavigate()
+  const [loginOpen, setLoginOpen] = useState(false)
 
   const handleLanguageChange = () => {
     setLanguage(getLanguage() === 'zh' ? 'en' : 'zh')
@@ -47,6 +49,11 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
       </G>
       <G className={cls('right')} horizontal center gap={16}>
         <G horizontal center gap={8}>
+          {!user && (
+            <Btn variant='outline' onClick={() => setLoginOpen(true)}>
+              {t('login')}
+            </Btn>
+          )}
           <Btn
             variant='outline'
             onClick={() => navigate('fileId/mock?applyRecord=true&maxError=10')}>
@@ -63,6 +70,10 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
             }}>
             {t('new file')}
           </Btn>
+          <Btn variant='solid'>{t('new file')}</Btn>
+          <Btn variant='outline' onClick={() => authAPI.signOut()}>
+            退出登陆
+          </Btn>
         </G>
         {user ? (
           <>
@@ -77,6 +88,11 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
           </Btn>
         )}
       </G>
+      <LoginDialogComp
+        variant='split'
+        open={loginOpen}
+        onOpenChange={setLoginOpen}
+      />
     </G>
   )
 })
