@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { ContextMenu } from 'src/global/context-menu'
+import { Menu } from 'src/view/features/menu'
 import { useSelectPageId } from 'src/view/hooks/use-selection'
 import { useEditorServices } from 'src/view/hooks/use-services'
 
@@ -7,31 +7,23 @@ type IPageItemComp = { name: string; id: string }
 
 export const LayerPageListItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
   const { command, select, undo } = useEditorServices()
-  const openMenu = (e: React.MouseEvent) => {
-    ContextMenu.context = { id }
-    ContextMenu.menus = [command.pageGroup]
-    ContextMenu.openMenu(e)
-  }
+  const selectPageId = useSelectPageId()
+  const selected = selectPageId === id
+
   const selectPage = () => {
     select.selectPage(id)
     undo.track('client', t('select page'))
   }
 
-  const selectPageId = useSelectPageId()
-  const selected = selectPageId === id
-
   return (
-    <G
-      horizontal='1fr auto'
-      center
-      className={cls()}
-      onClick={selectPage}
-      onContextMenu={openMenu}>
-      <G horizontal center>
-        {name}
+    <Menu menus={[command.pageGroup]} triggerType='context'>
+      <G horizontal='1fr auto' center className={cls()} onClick={selectPage}>
+        <G horizontal center>
+          {name}
+        </G>
+        <Check x-if={selected} className={cls('check')} size={16} />
       </G>
-      <Check x-if={selected} className={cls('check')} size={16} />
-    </G>
+    </Menu>
   )
 })
 

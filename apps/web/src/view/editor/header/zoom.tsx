@@ -1,9 +1,8 @@
 import { ChevronDown } from 'lucide-react'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
-import { Divider } from 'src/view/component/divider'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
-import { Menu } from 'src/view/component/menu'
+import { Menu, MenuItem } from 'src/view/features/menu'
 import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
@@ -20,30 +19,19 @@ export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
     ${styles.textCommon}
   `)
 
-  return (
-    <Menu
-      positioning={{ placement: 'bottom' }}
-      trigger={
-        <G center horizontal className={cls()}>
-          <G>{zoom}%</G>
-          <Lucide icon={ChevronDown} size={16} />
-        </G>
-      }>
-      <PanelComp />
-    </Menu>
-  )
-})
+  const menus: MenuItem[][] = [
+    [{ name: 'input zoom', render: () => <InputZoomComp /> }],
+    [{ name: 'zooming options', render: () => <ZoomingOptionsComp /> }],
+    [{ name: 'other options', render: () => <OtherOptionsComp /> }],
+  ]
 
-const PanelComp: FC<{}> = observer(({}) => {
-  const cls = classes(css``)
   return (
-    <G vertical center className={cls()}>
-      <InputZoomComp />
-      <Divider />
-      <ZoomingOptionsComp />
-      <Divider />
-      <OtherOptionsComp />
-    </G>
+    <Menu positioning={{ placement: 'bottom' }} menus={menus}>
+      <G center horizontal className={cls()}>
+        <G>{zoom}%</G>
+        <Lucide icon={ChevronDown} size={16} />
+      </G>
+    </Menu>
   )
 })
 
@@ -54,7 +42,7 @@ const InputZoomComp: FC<{}> = observer(({}) => {
   return (
     <InputNum
       className={css`
-        width: 160px;
+        width: 100%;
         ${styles.borderRadiusSM}
       `}
       value={~~((stageViewport.zoom || 0) * 100)}

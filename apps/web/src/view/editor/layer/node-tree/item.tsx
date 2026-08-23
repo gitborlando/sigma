@@ -45,7 +45,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
     const handleContextMenu = (e: React.MouseEvent) => {
       ContextMenu.context = { id }
       ContextMenu.menus = [command.nodeGroup, command.copyPasteGroup]
-      ContextMenu.openMenu(e)
+      ContextMenu.openContextMenu(e)
     }
     const handleMouseEnter = () => {
       stageEvent.hoverId = id

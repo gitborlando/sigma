@@ -8,7 +8,6 @@ import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezie
 import { ISplitText, TextBreaker } from 'src/editor/render/text-break/text-breaker'
 import { Setting } from 'src/editor/setting'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Image } from 'src/global/services/image'
 import { ImageMgr } from 'src/global/services/image-mgr'
 import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
@@ -394,10 +393,13 @@ export class ElemDrawer extends Service {
   }
 
   private createImagePattern = (fill: S.FillImage) => {
-    const image = Image.getImage(fill.url)
+    const url = fill.url
+      ? this.storageAPI.getUrl(fill.url)
+      : Assets.editor.design.fill.defaultImage
+    const image = this.imageMgr.getImage(url)
     if (!image) {
       const elem = this.elem
-      Image.getImageAsync(fill.url).then(() => elem.dirty())
+      this.imageMgr.getImageAsync(url).then(() => elem.dirty())
       return
     }
 

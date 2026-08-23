@@ -1,7 +1,5 @@
-import { miniId } from '@gitborlando/utils'
 import vitePluginNestedAssets from '../../packages/nested-assets/src'
 import react from '@vitejs/plugin-react'
-import wywInJs from '@wyw-in-js/vite'
 import path from 'path'
 import { defineConfig } from 'vite'
 import reactXIf from 'vite-plugin-react-x-if'
@@ -12,7 +10,6 @@ export default defineConfig(() => {
     plugins: [
       vitePluginNestedAssets({ base: 'src/view/assets' }),
       autoImportConfig,
-      wywInJs({ include: 'src/**/*.tsx', classNameSlug: () => miniId(5) }),
       react({
         babel: {
           plugins: [

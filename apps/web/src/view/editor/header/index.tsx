@@ -1,14 +1,13 @@
 import { IStageCreateType } from 'src/editor/stage/interact/create'
-import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { EditableText } from 'src/view/component/editable-text'
 import { Lucide } from 'src/view/component/lucide'
-import { Menu } from 'src/view/component/menu'
 import { Icon } from 'src/view/component/svg-icon'
 import { EditorHeaderDevSnapshotComp } from 'src/view/editor/header/dev-snapshot'
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
+import { Menu } from 'src/view/features/menu'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useEditorServices } from 'src/view/hooks/use-services'
 
@@ -22,16 +21,12 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
       className={cls()}
       style={{ height: stageViewport.bound.top }}>
       <G center horizontal gap={4} jc='flex-start'>
-        <Menu
-          positioning={{ placement: 'bottom' }}
-          trigger={
-            <Btn
-              icon={<Lucide size={20} icon={Lucide.Menu} />}
-              size={32}
-              variant='ghost'
-            />
-          }>
-          <MenuPanelComp />
+        <Menu menus={[[{ name: '返回', callback: () => history.back() }]]}>
+          <Btn
+            icon={<Lucide size={20} icon={Lucide.Menu} />}
+            size={32}
+            variant='ghost'
+          />
         </Menu>
         <DocNameComp />
       </G>
@@ -53,23 +48,6 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
         <EditorHeaderSettingComp />
         <EditorHeaderZoomComp />
       </G>
-    </G>
-  )
-})
-
-const MenuPanelComp: FC<{}> = observer(({}) => {
-  const navigate = useNavigate()
-
-  const cls = classes(css`
-    width: 160px;
-  `)
-  return (
-    <G vertical center className={cls()}>
-      <OptionBalanceItem
-        reserveIconSpace={false}
-        label={t('返回')}
-        onClick={() => navigate(-1)}
-      />
     </G>
   )
 })

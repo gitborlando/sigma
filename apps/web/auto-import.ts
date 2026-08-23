@@ -16,7 +16,7 @@ export const autoImportConfig = autoImportPlugin({
       yjs: [['*', 'Y']],
       'auto-bind': [['default', 'autoBind']],
       'first-di': ['reflection'],
-      '@linaria/core': ['css', 'cx'],
+      '@emotion/css': ['css', 'cx'],
       '@gitborlando/geo': ['AABB', 'OBB', 'XY', 'Angle'],
       'src/view/assets/assets': ['Assets'],
       'src/view/component/grid': ['Grid', 'G', 'HC', 'VC', 'CC'],

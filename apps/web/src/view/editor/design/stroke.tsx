@@ -1,13 +1,10 @@
-import { Menu as ArkMenu } from '@ark-ui/react'
 import { clamp } from 'es-toolkit'
 import { Minus, Plus } from 'lucide-react'
 import { Fragment } from 'react'
-import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
-import { Menu } from 'src/view/component/menu'
 import { Segments } from 'src/view/component/segments'
 import { SelectOption } from 'src/view/component/select-option'
 import { Icon } from 'src/view/component/svg-icon'
@@ -18,6 +15,7 @@ import {
   DesignFieldContentComp,
   DesignFieldHeaderComp,
 } from 'src/view/editor/design/share/field'
+import { Menu, MenuItem } from 'src/view/features/menu'
 import { useEditorServices } from 'src/view/hooks/use-services'
 
 const alignOptions = [
@@ -192,30 +190,27 @@ const StrokeSideSelect: FC<{}> = observer(({}) => {
   const selectedOption =
     strokeSideOptions.find((option) => option.value === strokeSide?.type) ??
     strokeSideOptions[0]
+  const menus: MenuItem[][] = [
+    [
+      ...strokeSideOptions.map((option) => ({
+        name: t(option.label),
+        checked: strokeSide?.type === option.value,
+        onChecked: () => designStroke.setStrokeSide(option.value),
+      })),
+    ],
+  ]
 
   return (
     <Menu
       positioning={{ placement: 'bottom-end' }}
-      className={cls('side-menu')}
-      trigger={
-        <Btn
-          x-if={!!strokeSide}
-          size={30}
-          title={t('stroke side')}
-          icon={<Icon src={selectedOption.icon} />}
-        />
-      }>
-      {strokeSideOptions.map((option) => (
-        <ArkMenu.Item value={option.value} key={option.value} asChild>
-          <OptionBalanceItem
-            label={t(option.label)}
-            icon={<Icon src={option.icon} />}
-            checked={option.value === selectedOption.value}
-            onChecked={() =>
-              designStroke.setStrokeSide(option.value)
-            }></OptionBalanceItem>
-        </ArkMenu.Item>
-      ))}
+      menus={menus}
+      className={cls('side-menu')}>
+      <Btn
+        x-if={!!strokeSide}
+        size={30}
+        title={t('stroke side')}
+        icon={<Icon src={selectedOption.icon} />}
+      />
     </Menu>
   )
 })

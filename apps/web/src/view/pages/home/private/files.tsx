@@ -1,11 +1,14 @@
+import { stopPropagation } from '@gitborlando/utils/browser'
 import { withSuspense } from '@gitborlando/utils/react'
 import { FileSchema } from '@sigma/api'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { ContextMenu } from 'src/global/context-menu'
+import { Btn } from 'src/view/component/btn'
 import { Loading } from 'src/view/component/loading'
+import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
+import { Menu } from 'src/view/features/menu'
 import { useGlobalServices } from 'src/view/hooks/use-services'
 import { QUERY_KEY } from 'src/view/private/tanstack-query'
 
@@ -39,26 +42,20 @@ const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
   const navigate = useNavigate()
   const handleClick = () => navigate(`/fileId/${file.id}`)
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault()
-    ContextMenu.openMenu(e, [
-      [
-        {
-          name: t('delete'),
-          callback: async () => {
-            await fileAPI.deleteFile(file.id)
-            query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
-          },
+  const menus = [
+    [
+      {
+        name: t('delete'),
+        callback: async () => {
+          await fileAPI.deleteFile(file.id)
+          query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
         },
-      ],
-    ])
-  }
+      },
+    ],
+  ]
 
   return (
-    <G
-      onClick={() => handleClick()}
-      onContextMenu={handleContextMenu}
-      className={cls('item')}>
+    <G onClick={() => handleClick()} className={cls('item')}>
       <G className={cls('item-cover')}>
         <img
           draggable={false}
@@ -73,6 +70,14 @@ const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
           {decodeURIComponent(file.name || t('untitled'))}
         </Text>
         <Text variant='common'>{dayjs(file.createAt).format('YYYY/MM/DD')}</Text>
+        <Menu menus={menus}>
+          <Btn
+            size={30}
+            className={cls('item-meta-action')}
+            icon={<Lucide icon={Lucide.EllipsisVertical} />}
+            onClick={stopPropagation()}
+          />
+        </Menu>
       </G>
     </G>
   )
@@ -91,6 +96,9 @@ const cls = classes(css`
       outline: 2px solid var(--color);
       outline-offset: 1px;
     }
+    &:hover &-meta-action {
+      display: flex;
+    }
     &-cover {
       width: 100%;
       height: 180px;
@@ -101,6 +109,12 @@ const cls = classes(css`
     &-meta {
       padding: 4px 4px;
       gap: 4px;
+      &-action {
+        position: absolute;
+        right: 4px;
+        bottom: 4px;
+        display: none;
+      }
     }
   }
 `)

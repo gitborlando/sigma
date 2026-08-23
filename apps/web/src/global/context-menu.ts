@@ -11,7 +11,9 @@ export type ICommand = {
 export type MenuItem = ICommand & { children?: MenuItem[][] }
 
 class ContextMenuClass {
-  @observable menus: MenuItem[][] = []
+  @observable open = false
+
+  menus: MenuItem[][] = []
   context = <AnyObject>{}
   triggered = false
 
@@ -21,22 +23,26 @@ class ContextMenuClass {
     this.ref = ref
   }
 
-  openMenu(e: MouseEvent, menus?: MenuItem[][], context?: AnyObject) {
+  openContextMenu(e: MouseEvent, menus?: MenuItem[][], context?: AnyObject) {
     if (this.triggered) return
     this.triggered = true
 
-    this.menus = menus || []
-    this.context = context || {}
+    this.open = true
+
+    this.menus ??= menus ?? []
+    this.context ??= context ?? {}
 
     e.preventDefault()
     this.ref.dispatchEvent(
-      new MouseEvent('contextmenu', {
+      new MouseEvent('click', {
         bubbles: true,
         clientX: e.clientX,
         clientY: e.clientY,
       }),
     )
   }
+
+  openMenu(trigger: HTMLElement, menus?: MenuItem[][], context?: AnyObject) {}
 }
 
 export const ContextMenu = autoBind(makeObservable(new ContextMenuClass()))

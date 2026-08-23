@@ -1,17 +1,17 @@
+import { Service } from '@gitborlando/di-service'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { listen } from '@gitborlando/utils/browser'
+import { AuthAPI } from '@sigma/api'
 import equal from 'fast-deep-equal'
 import { Matrix } from 'src/editor/geometry'
 import { Select } from 'src/editor/select'
-import { Service } from '@gitborlando/di-service'
-import { UserService } from 'src/global/services/user'
 import { COLOR } from 'src/utils/color'
 import { Awareness } from 'y-protocols/awareness.js'
 
 type Client = {
   userId: string
   userName: string
-  userAvatar: string
+  userAvatar?: string
   selection: Record<string, boolean>
   selectPageId: string
   cursor: IXY
@@ -36,7 +36,10 @@ export class YAware extends Service {
     return others[this.observingClientId]
   }
 
-  constructor(private readonly select: Select) {
+  constructor(
+    private readonly select: Select,
+    private readonly authAPI: AuthAPI,
+  ) {
     super()
     makeObservable(this, {
       client: observable,
@@ -54,9 +57,11 @@ export class YAware extends Service {
 
     runInAction(() => {
       this.client = this.createClient()
-      this.client.userId = UserService.userId
-      this.client.userName = UserService.userName
-      this.client.userAvatar = UserService.avatar
+
+      const user = this.authAPI.getExistedUser()
+      this.client.userId = user.id
+      this.client.userName = user.name
+      this.client.userAvatar = user.avatar
     })
 
     this.effect(
