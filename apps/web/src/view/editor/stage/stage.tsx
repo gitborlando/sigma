@@ -1,5 +1,4 @@
-import { iife } from '@gitborlando/utils'
-import { CSSProperties } from 'react'
+import { CSSProperties, Fragment } from 'react'
 import { DocHelper } from 'src/editor/doc/helper'
 import { renderElem } from 'src/editor/render/react/reconciler'
 import { StageCursorsComp } from 'src/view/editor/stage/cursor'
@@ -10,7 +9,7 @@ import { StageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { StageOutlineComp } from 'src/view/editor/stage/outline'
 import { StageRulerComp } from 'src/view/editor/stage/ruler'
 import { StageTransformComp } from 'src/view/editor/stage/transform'
-import { Menu } from 'src/view/features/menu'
+import { useContextMenu } from 'src/view/hooks/feature/use-context-menu'
 import {
   EditorContext,
   useEditor,
@@ -49,7 +48,7 @@ const SurfaceComp: FC<{}> = observer(({}) => {
   const { renderSurface, command, stageEvent, stageTransformer, stageViewport } =
     useEditorServices()
 
-  const menus = iife(() => {
+  const getMenus = (option: { xy: IXY }) => {
     const { hoverId } = stageEvent
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
       command
@@ -57,13 +56,15 @@ const SurfaceComp: FC<{}> = observer(({}) => {
 
     if (
       (!hoverId || DocHelper.isRootFrame(hoverId)) &&
-      !stageTransformer.isPointIn(stageViewport.toSceneXY(XY.client(e)))
+      !stageTransformer.isPointIn(stageViewport.toSceneXY(option.xy))
     ) {
       return baseMenus
     }
 
     return [...baseMenus, nodeGroup, nodeReHierarchyGroup]
-  })
+  }
+
+  const contextMenu = useContextMenu(getMenus)
 
   const cls = classes(css`
     /* background-color: #f7f8fa; */
@@ -71,15 +72,16 @@ const SurfaceComp: FC<{}> = observer(({}) => {
   `)
 
   return (
-    <Menu
-      triggerType='context'
-      positioning={{ placement: 'top-start' }}
-      menus={menus}>
-      <G className={cls()} ref={renderSurface.setContainer}>
+    <Fragment>
+      <contextMenu.Menu />
+      <G
+        className={cls()}
+        ref={renderSurface.setContainer}
+        onContextMenu={contextMenu.handleOpenMenu}>
         <canvas ref={renderSurface.setCanvas} />
         <canvas style={{ position: 'absolute' }} ref={renderSurface.setTopCanvas} />
       </G>
-    </Menu>
+    </Fragment>
   )
 })
 
