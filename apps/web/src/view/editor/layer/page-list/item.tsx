@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { Menu } from 'src/view/features/menu'
+import { Menu } from 'src/view/component/menu'
 import { useSelectPageId } from 'src/view/hooks/use-selection'
 import { useEditorServices } from 'src/view/hooks/use-services'
 

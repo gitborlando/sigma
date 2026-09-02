@@ -5,6 +5,7 @@ import { Btn } from 'src/view/component/btn'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
+import { Menu, MenuItem } from 'src/view/component/menu'
 import { Segments } from 'src/view/component/segments'
 import { SelectOption } from 'src/view/component/select-option'
 import { Icon } from 'src/view/component/svg-icon'
@@ -15,7 +16,6 @@ import {
   DesignFieldContentComp,
   DesignFieldHeaderComp,
 } from 'src/view/editor/design/share/field'
-import { Menu, MenuItem } from 'src/view/features/menu'
 import { useEditorServices } from 'src/view/hooks/use-services'
 
 const alignOptions = [

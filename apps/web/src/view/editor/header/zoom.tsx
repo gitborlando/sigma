@@ -2,7 +2,7 @@ import { ChevronDown } from 'lucide-react'
 import { OptionBalanceItem } from 'src/view/component/balance-item'
 import { InputNum } from 'src/view/component/input-num'
 import { Lucide } from 'src/view/component/lucide'
-import { Menu, MenuItem } from 'src/view/features/menu'
+import { Menu, MenuItem } from 'src/view/component/menu'
 import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {

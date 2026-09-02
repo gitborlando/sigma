@@ -32,7 +32,7 @@ export const Menu = forwardRef<HTMLDivElement, MenuProps>(
             <ArkMenu.ContextTrigger asChild>{children}</ArkMenu.ContextTrigger>
           ),
         })}
-        <MenuContent className={className} menus={menus || []} />
+        {!!menus.length && <MenuContent className={className} menus={menus} />}
       </ArkMenu.Root>
     )
   },

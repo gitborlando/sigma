@@ -6,7 +6,7 @@ import { Drag } from 'src/global/event/drag'
 import { CommonBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
-import { Menu } from 'src/view/features/menu'
+import { Menu } from 'src/view/component/menu'
 import { z } from 'zod'
 
 type DragPanelProps = {

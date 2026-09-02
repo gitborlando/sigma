@@ -1,5 +1,5 @@
 import { FC, useRef } from 'react'
-import { Menu as MenuComp, MenuItem } from 'src/view/features/menu'
+import { Menu as MenuComp, MenuItem } from 'src/view/component/menu'
 
 export interface ContextMenuOption {
   xy: IXY
