@@ -6,7 +6,7 @@ import { RouterProvider } from 'react-router'
 import { UploaderComp } from 'src/view/component/uploader'
 import router from 'src/view/router'
 import './i18n/config'
-import { queryClient } from './private/tanstack-query'
+import { queryClient } from './query'
 
 export const App = observer(() => {
   return (

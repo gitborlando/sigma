@@ -10,7 +10,7 @@ import { Lucide } from 'src/view/component/lucide'
 import { Text } from 'src/view/component/text'
 import { Menu } from 'src/view/features/menu'
 import { useGlobalServices } from 'src/view/hooks/use-services'
-import { QUERY_KEY } from 'src/view/private/tanstack-query'
+import { QUERY_KEY } from 'src/view/query'
 
 export const HomeFilesComp = withSuspense(
   observer(() => {
