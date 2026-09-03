@@ -35,7 +35,7 @@ export const HomeFilesComp = withSuspense(
 const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
   const query = useQueryClient()
   const contextMenu = useContextMenu()
-  const { fileAPI } = useGlobalServices()
+  const { docAction } = useGlobalServices()
 
   const navigate = useNavigate()
   const handleClick = () => navigate(`/fileId/${file.id}`)
@@ -46,7 +46,7 @@ const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
         {
           name: t('delete'),
           callback: async () => {
-            await fileAPI.deleteFile(file.id)
+            await docAction.deleteFile(file.id)
             query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
           },
         },

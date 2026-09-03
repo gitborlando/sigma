@@ -58,7 +58,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
           <Btn
             variant='solid'
             onClick={async () => {
-              await docAction.newDoc(false)
+              await docAction.newFile(false)
               query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
             }}>
             {t('new file')}

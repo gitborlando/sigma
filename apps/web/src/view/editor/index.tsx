@@ -24,7 +24,7 @@ export const EditorComp = withSuspense(
     const stage = editor.resolve('stage')
     const elemDrawer = editor.resolve('elemDrawer')
 
-    const doc = suspend(() => docAction.setupDoc(fileId!), [fileId])
+    const doc = suspend(() => docAction.setupFile(fileId!), [fileId])
     const textBreaker = suspend(() => createTextBreaker(), ['text-breaker'])
 
     useEffect(() => {

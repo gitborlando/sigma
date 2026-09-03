@@ -13,11 +13,11 @@ import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { YSync } from 'src/editor/y-adapter/y-sync'
 import { ObjectMgr } from 'src/global/resource/object-mgr'
-import { Uploader } from 'src/global/resource/uploader'
 import { tryCatch } from 'src/shared/export'
+import { IndexeddbPersistence } from 'y-indexeddb'
 
 @reflection
-export class DocAction extends Service {
+export class FileAction extends Service {
   constructor(
     private readonly docCreator: DocCreator,
     private readonly yDoc: YDoc,
@@ -26,7 +26,6 @@ export class DocAction extends Service {
     private readonly undo: Undo,
     private readonly select: Select,
     private readonly layerNodeTree: LayerNodeTree,
-    private readonly uploader: Uploader,
     private readonly objectMgr: ObjectMgr,
     private readonly fileAPI: FileAPI,
     private readonly authAPI: AuthAPI,
@@ -37,7 +36,7 @@ export class DocAction extends Service {
 
   private sessionId = ''
 
-  async newDoc(isMock: boolean) {
+  async newFile(isMock: boolean) {
     const doc = isMock ? mock_doc(this.docCreator) : this.docCreator.doc()
     const user = await this.authAPI.getUser()
     if (!user) throw new Error('User not authenticated')
@@ -52,11 +51,16 @@ export class DocAction extends Service {
     // const update = Y.encodeStateAsUpdate(this.yDoc.yDoc)
   }
 
-  async loadDoc(id: string) {
-    return migrateDoc(await this.fetchDoc(id))
+  async deleteFile(id: string) {
+    await tryCatch(() => this.fileAPI.deleteFile(id))
+    await new IndexeddbPersistence(id, new Y.Doc()).clearData()
   }
 
-  async setupDoc(id: string, doc?: S.Doc) {
+  async loadFile(id: string) {
+    return migrateDoc(await this.fetchFile(id))
+  }
+
+  async setupFile(id: string, doc?: S.Doc) {
     if (id === this.sessionId) return
 
     await this.yDoc.setup(id, doc)
@@ -82,7 +86,7 @@ export class DocAction extends Service {
     return this.yDoc.doc
   }
 
-  private async fetchDoc(id: string) {
+  private async fetchFile(id: string) {
     if (id === 'mock') {
       const doc = mock_doc(this.docCreator)
       if (doc) return doc
@@ -113,14 +117,5 @@ export class DocAction extends Service {
     // if (doc) return doc
 
     // throw new Error('Failed to initialize doc')
-  }
-
-  async exportDoc(doc: S.Doc) {
-    const fileName = `${doc.meta.name}.json`
-    const blob = new TextEncoder().encode(JSON.stringify(doc))
-    this.uploader.download(
-      fileName,
-      new File([blob], fileName, { type: 'application/json' }),
-    )
   }
 }
