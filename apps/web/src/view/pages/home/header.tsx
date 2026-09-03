@@ -11,7 +11,7 @@ import { QUERY_KEY } from 'src/view/query'
 
 export const HomeHeaderComp: FC<{}> = observer(({}) => {
   const { uploader, objectMgr, authAPI } = useGlobalServices()
-  const { docAction } = useGlobalServices()
+  const { fileAction } = useGlobalServices()
   const query = useQueryClient()
   const navigate = useNavigate()
 
@@ -58,7 +58,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
           <Btn
             variant='solid'
             onClick={async () => {
-              await docAction.newFile(false)
+              await fileAction.newFile(false)
               query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
             }}>
             {t('new file')}

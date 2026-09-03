@@ -16,7 +16,7 @@ import { EditorHeaderComp } from './header'
 export const EditorComp = withSuspense(
   ({}) => {
     const { fileId } = useParams<{ fileId: string }>()
-    const { docAction } = useGlobalServices()
+    const { fileAction } = useGlobalServices()
     const [isSetup, setIsSetup] = useState(false)
     const editor = Editor.getInstance(useGlobal())
 
@@ -24,7 +24,7 @@ export const EditorComp = withSuspense(
     const stage = editor.resolve('stage')
     const elemDrawer = editor.resolve('elemDrawer')
 
-    const doc = suspend(() => docAction.setupFile(fileId!), [fileId])
+    const doc = suspend(() => fileAction.setupFile(fileId!), [fileId])
     const textBreaker = suspend(() => createTextBreaker(), ['text-breaker'])
 
     useEffect(() => {

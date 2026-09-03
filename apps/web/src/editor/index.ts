@@ -42,7 +42,6 @@ const editorServices = {
   selectAction: SelectAction,
   viewportAction: ViewportAction,
   stage: Stage,
-  // docAction: DocAction,
 
   /** render */
   elemDrawer: ElemDrawer,
