@@ -12,8 +12,8 @@ import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { YAware } from 'src/editor/y-adapter/y-aware'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { YSync } from 'src/editor/y-adapter/y-sync'
-import { ObjectMgr } from 'src/global/services/object-mgr'
-import { Uploader } from 'src/global/services/uploader'
+import { ObjectMgr } from 'src/global/services/toolkit/object-mgr'
+import { Uploader } from 'src/global/services/toolkit/uploader'
 import { tryCatch } from 'src/utils/export'
 
 @reflection

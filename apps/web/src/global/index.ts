@@ -1,9 +1,9 @@
 import { ServiceContainer, ServiceInstances } from '@gitborlando/di-service'
 import { apiServices } from '@sigma/api'
 import { DocAction } from 'src/editor/action/doc'
-import { ImageMgr } from './services/image-mgr'
-import { ObjectMgr } from './services/object-mgr'
-import { Uploader } from './services/uploader'
+import { ImageMgr } from './services/toolkit/image-mgr'
+import { ObjectMgr } from './services/toolkit/object-mgr'
+import { Uploader } from './services/toolkit/uploader'
 
 const toolServices = {
   uploader: Uploader,
