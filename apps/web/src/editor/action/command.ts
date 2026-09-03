@@ -1,3 +1,4 @@
+import { Service } from '@gitborlando/di-service'
 import { Disposer } from '@gitborlando/toolkit'
 import { listen } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
@@ -10,8 +11,13 @@ import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { ICommand } from 'src/global/context-menu'
-import { Service } from '@gitborlando/di-service'
+
+export type ICommand = {
+  name: string
+  callback: (context: any) => any
+  shortcut?: string
+  when?: () => boolean
+}
 
 @reflection
 export class Command extends Service {
