@@ -1,0 +1,21 @@
+{
+  "name": "@sigma/y-backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gitborlando/di-service": "workspace:*",
+    "@hocuspocus/extension-database": "^4.6.0",
+    "@hocuspocus/server": "^4.6.0",
+    "auto-bind": "^5.0.1",
+    "yjs": "^13.6.27",
+    "zod": "3.25.76"
+  }
+}
