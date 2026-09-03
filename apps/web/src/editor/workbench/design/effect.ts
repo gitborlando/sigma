@@ -1,3 +1,4 @@
+import { Service } from '@gitborlando/di-service'
 import { clone } from '@gitborlando/utils'
 import type { YPlainPath } from '@gitborlando/y-plain'
 import equal from 'fast-deep-equal'
@@ -6,8 +7,7 @@ import { makeObservable } from 'mobx'
 import { NodeAction } from 'src/editor/action/node'
 import { Select } from 'src/editor/select'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { GRAPHS } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
+import { GRAPHS } from 'src/shared/constant'
 
 type DesignEffectKey = 'fills' | 'stroke'
 type DesignEffectValue<Key extends DesignEffectKey> = S.Node[Key]

@@ -1,3 +1,4 @@
+import { Service } from '@gitborlando/di-service'
 import { IRect } from '@gitborlando/geo'
 import { Signal } from '@gitborlando/signal'
 import type { DragData } from '@gitborlando/toolkit/browser'
@@ -19,8 +20,7 @@ import { StageEvent } from 'src/editor/stage/event'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRoundRect, snapGridRoundXY } from 'src/editor/utils'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { GRAPHS } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
+import { GRAPHS } from 'src/shared/constant'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'line', 'text'] as const
 export type IStageCreateType = (typeof createTypes)[number]

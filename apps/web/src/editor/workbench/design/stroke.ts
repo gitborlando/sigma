@@ -4,8 +4,8 @@ import { DocCreator } from 'src/editor/doc/creator'
 import { Select } from 'src/editor/select'
 import { DesignEffect } from 'src/editor/workbench/design/effect'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { GRAPHS } from 'src/global/constant'
 import { COLOR } from 'src/shared/color'
+import { GRAPHS } from 'src/shared/constant'
 
 @reflection
 export class DesignStroke extends DesignEffect<'stroke'> {

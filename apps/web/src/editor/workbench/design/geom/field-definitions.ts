@@ -3,7 +3,7 @@ import { DocHelper } from 'src/editor/doc/helper'
 import { DocMutator } from 'src/editor/doc/mutator'
 import { max } from 'src/editor/geometry/base'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { GRAPHS, MIXED_VALUE } from 'src/global/constant'
+import { GRAPHS, MIXED_VALUE } from 'src/shared/constant'
 
 export const designOBBKeys = ['x', 'y', 'width', 'height', 'rotation'] as const
 export const designGeomKeys = [

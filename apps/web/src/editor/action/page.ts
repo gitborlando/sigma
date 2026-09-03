@@ -1,9 +1,9 @@
+import { Service } from '@gitborlando/di-service'
 import { DocCreator } from 'src/editor/doc/creator'
 import { findNode, findPage } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { Select } from 'src/editor/select'
-import { GRAPHS } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
+import { GRAPHS } from 'src/shared/constant'
 import { YDoc } from '../y-adapter/y-doc'
 import { Undo } from './undo'
 

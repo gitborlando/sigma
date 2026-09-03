@@ -3,7 +3,7 @@ import { objKeys } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { DocMutator } from 'src/editor/doc/mutator'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { MIXED_VALUE } from 'src/global/constant'
+import { MIXED_VALUE } from 'src/shared/constant'
 import { createSlideSession } from 'src/shared/slide-session'
 import {
   createDesignGeomInfo,

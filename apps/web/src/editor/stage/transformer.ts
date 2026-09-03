@@ -1,3 +1,4 @@
+import { Service } from '@gitborlando/di-service'
 import { Dragger } from '@gitborlando/toolkit/browser'
 import { iife } from '@gitborlando/utils'
 import hotkeys from 'hotkeys-js'
@@ -15,8 +16,7 @@ import { createStageDragger } from 'src/editor/stage/dragger'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { snapGridRound, snapGridRoundXY, TRBL } from 'src/editor/utils'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { GRAPHS } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
+import { GRAPHS } from 'src/shared/constant'
 
 type TransformerAction = 'move' | 'resize' | 'rotate' | 'flip'
 

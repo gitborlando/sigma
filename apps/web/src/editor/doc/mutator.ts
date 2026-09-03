@@ -1,3 +1,4 @@
+import { Service } from '@gitborlando/di-service'
 import { clampIndex } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
 import { DocCreator } from 'src/editor/doc/creator'
@@ -5,8 +6,7 @@ import { findParent } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { IMatrix } from 'src/editor/geometry'
-import { GRAPHS } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
+import { GRAPHS } from 'src/shared/constant'
 import { YDoc } from '../y-adapter/y-doc'
 
 @reflection
