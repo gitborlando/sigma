@@ -68,7 +68,7 @@ const SurfaceComp: FC<{}> = observer(({}) => {
     })
 
     contextMenu.menus = [...menus]
-    contextMenu.openMenu(e)
+    contextMenu.open(e)
   }
 
   const cls = classes(css`

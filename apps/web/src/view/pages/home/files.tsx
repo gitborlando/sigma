@@ -1,14 +1,11 @@
-import { stopPropagation } from '@gitborlando/utils/browser'
 import { withSuspense } from '@gitborlando/utils/react'
 import { FileSchema } from '@sigma/api'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { Btn } from 'src/view/component/btn'
 import { Loading } from 'src/view/component/loading'
-import { Lucide } from 'src/view/component/lucide'
-import { Menu } from 'src/view/component/menu'
 import { Text } from 'src/view/component/text'
+import { useContextMenu } from 'src/view/features/context-menu'
 import { useGlobalServices } from 'src/view/hooks/use-services'
 import { QUERY_KEY } from 'src/view/query'
 
@@ -37,25 +34,32 @@ export const HomeFilesComp = withSuspense(
 
 const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
   const query = useQueryClient()
+  const contextMenu = useContextMenu()
   const { fileAPI } = useGlobalServices()
 
   const navigate = useNavigate()
   const handleClick = () => navigate(`/fileId/${file.id}`)
 
-  const menus = [
-    [
-      {
-        name: t('delete'),
-        callback: async () => {
-          await fileAPI.deleteFile(file.id)
-          query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
+  const handleContextMenu = (e: React.MouseEvent) => {
+    contextMenu.menus = [
+      [
+        {
+          name: t('delete'),
+          callback: async () => {
+            await fileAPI.deleteFile(file.id)
+            query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
+          },
         },
-      },
-    ],
-  ]
+      ],
+    ]
+    contextMenu.open(e)
+  }
 
   return (
-    <G onClick={() => handleClick()} className={cls('item')}>
+    <G
+      className={cls('item')}
+      onClick={() => handleClick()}
+      onContextMenu={handleContextMenu}>
       <G className={cls('item-cover')}>
         <img
           draggable={false}
@@ -70,14 +74,6 @@ const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
           {decodeURIComponent(file.name || t('untitled'))}
         </Text>
         <Text variant='common'>{dayjs(file.createAt).format('YYYY/MM/DD')}</Text>
-        <Menu menus={menus}>
-          <Btn
-            size={30}
-            className={cls('item-meta-action')}
-            icon={<Lucide icon={Lucide.EllipsisVertical} />}
-            onClick={stopPropagation()}
-          />
-        </Menu>
       </G>
     </G>
   )
@@ -105,16 +101,6 @@ const cls = classes(css`
       object-fit: cover;
       ${styles.borderRadiusSM}
       overflow: hidden;
-    }
-    &-meta {
-      padding: 4px 4px;
-      gap: 4px;
-      &-action {
-        position: absolute;
-        right: 4px;
-        bottom: 4px;
-        display: none;
-      }
     }
   }
 `)

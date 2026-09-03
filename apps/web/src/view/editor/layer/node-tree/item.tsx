@@ -52,7 +52,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
     const handleOpenMenu = (e: React.MouseEvent) => {
       contextMenu.context = { id }
       contextMenu.menus = [command.nodeGroup, command.copyPasteGroup]
-      contextMenu.openMenu(e)
+      contextMenu.open(e)
     }
 
     return (

@@ -28,7 +28,7 @@ export class ContextMenuState extends Service {
     this.ref = ref
   }
 
-  openMenu(e: MouseEvent) {
+  open(e: MouseEvent) {
     e.preventDefault()
     this.ref.dispatchEvent(
       new MouseEvent('contextmenu', {
