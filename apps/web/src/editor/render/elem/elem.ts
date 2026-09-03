@@ -5,7 +5,7 @@ import {
   ElemEventHandler,
   ElemEventType,
 } from 'src/editor/render/elem/event'
-import { memorized } from 'src/utils/export'
+import { memorized } from 'src/shared/export'
 
 declare module 'react' {
   namespace JSX {

@@ -9,7 +9,7 @@ import { ISplitText, TextBreaker } from 'src/editor/render/text-break/text-break
 import { Setting } from 'src/editor/setting'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { ImageMgr } from 'src/global/services/toolkit/image-mgr'
-import { rgba } from 'src/utils/color'
+import { rgba } from 'src/shared/color'
 import { themeColor } from 'src/view/styles/color'
 import { Elem } from './elem'
 

@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 import { snapSceneXYToHalfPixel } from 'src/editor/utils'
-import { rgba } from 'src/utils/color'
+import { rgba } from 'src/shared/color'
 import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const StageGridComp: FC<{}> = observer(({}) => {

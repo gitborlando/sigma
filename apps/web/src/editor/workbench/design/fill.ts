@@ -1,7 +1,7 @@
 import { NodeAction } from 'src/editor/action/node'
 import { DocCreator } from 'src/editor/doc/creator'
 import { Select } from 'src/editor/select'
-import { COLOR } from 'src/utils/color'
+import { COLOR } from 'src/shared/color'
 import { Undo } from '../../action/undo'
 import { YDoc } from '../../y-adapter/y-doc'
 import { DesignEffect } from './effect'

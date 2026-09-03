@@ -1,10 +1,10 @@
+import { Service } from '@gitborlando/di-service'
 import { objKeys } from '@gitborlando/utils'
 import { reflection } from 'first-di'
 import { DocMutator } from 'src/editor/doc/mutator'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { MIXED_VALUE } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
-import { createSlideSession } from 'src/utils/slide-session'
+import { createSlideSession } from 'src/shared/slide-session'
 import {
   createDesignGeomInfo,
   designGeomFieldMap,

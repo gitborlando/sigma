@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { shallow } from 'src/utils/shallow'
+import { shallow } from 'src/shared/shallow'
 
 /**
  * Zustand useShallow hook

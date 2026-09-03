@@ -4,7 +4,7 @@ import { PipetteIcon } from 'lucide-react'
 import { createContext, Dispatch, RefObject, SetStateAction } from 'react'
 import { max, min } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
-import { IRGBA } from 'src/utils/color'
+import { IRGBA } from 'src/shared/color'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 

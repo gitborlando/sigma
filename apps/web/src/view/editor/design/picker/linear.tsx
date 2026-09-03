@@ -1,6 +1,6 @@
 import { max, min } from 'src/editor/geometry'
 import { Drag } from 'src/global/event/drag'
-import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'
+import { makeLinearGradientCss, rgbaFromObject } from 'src/shared/color'
 import { ColorPicker } from 'src/view/editor/design/picker/color-picker'
 import { useEditorServices } from 'src/view/hooks/use-services'
 

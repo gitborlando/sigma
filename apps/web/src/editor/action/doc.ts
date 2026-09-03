@@ -14,7 +14,7 @@ import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { YSync } from 'src/editor/y-adapter/y-sync'
 import { ObjectMgr } from 'src/global/services/toolkit/object-mgr'
 import { Uploader } from 'src/global/services/toolkit/uploader'
-import { tryCatch } from 'src/utils/export'
+import { tryCatch } from 'src/shared/export'
 
 @reflection
 export class DocAction extends Service {

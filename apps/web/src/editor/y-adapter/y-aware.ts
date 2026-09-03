@@ -5,7 +5,7 @@ import { AuthAPI } from '@sigma/api'
 import equal from 'fast-deep-equal'
 import { Matrix } from 'src/editor/geometry'
 import { Select } from 'src/editor/select'
-import { COLOR } from 'src/utils/color'
+import { COLOR } from 'src/shared/color'
 import { Awareness } from 'y-protocols/awareness.js'
 
 type Client = {
