@@ -1,6 +1,6 @@
 import Scrollbars from 'react-custom-scrollbars-2'
 import { findPage } from 'src/editor/doc/finder'
-import { Drag } from 'src/global/event/drag'
+import { Drag } from 'src/shared/drag'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useEditorServices } from 'src/view/hooks/use-services'
 import { LayerPageListHeaderComp } from './header'
