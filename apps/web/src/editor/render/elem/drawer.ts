@@ -8,7 +8,7 @@ import { pointsOnBezierCurves } from 'src/editor/geometry/bezier/points-of-bezie
 import { ISplitText, TextBreaker } from 'src/editor/render/text-break/text-breaker'
 import { Setting } from 'src/editor/setting'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { ImageMgr } from 'src/global/services/toolkit/image-mgr'
+import { ImageMgr } from 'src/global/resource/image-mgr'
 import { rgba } from 'src/shared/color'
 import { themeColor } from 'src/view/styles/color'
 import { Elem } from './elem'
