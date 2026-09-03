@@ -2,15 +2,13 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { ChevronRight } from 'lucide-react'
-import { Fragment } from 'react'
 import { findNode } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { LayerNodeTreeInfo } from 'src/editor/workbench/layer/node-tree'
-import { ContextMenu } from 'src/global/context-menu'
 import { EditableText } from 'src/view/component/editable-text'
 import { Lucide } from 'src/view/component/lucide'
 import { Icon } from 'src/view/component/svg-icon'
-import { useContextMenu } from 'src/view/hooks/feature/use-context-menu'
+import { useContextMenu } from 'src/view/features/context-menu'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useSelection } from 'src/view/hooks/use-selection'
 import { useEditorServices } from 'src/view/hooks/use-services'
@@ -23,6 +21,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
     const { id, indent, ancestorIds } = nodeInfo
     const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
     const node = useDoc(() => findNode(id) as S.Node)
+    const contextMenu = useContextMenu()
 
     const isParent = DocHelper.isParent(node)
     const expanded = !!getNodeExpanded(id)
@@ -50,67 +49,62 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
     const handleMouseLeave = () => {
       stageEvent.hoverId = undefined
     }
-
-    const contextMenu = useContextMenu(() => {
-      ContextMenu.context = { id }
-      return [command.nodeGroup, command.copyPasteGroup]
-    })
+    const handleOpenMenu = (e: React.MouseEvent) => {
+      contextMenu.context = { id }
+      contextMenu.menus = [command.nodeGroup, command.copyPasteGroup]
+      contextMenu.openMenu(e)
+    }
 
     return (
-      <Fragment>
-        <contextMenu.Menu xy={contextMenu.xy} menus={contextMenu.menus} />
-        <G
-          ref={setNodeRef}
+      <G
+        ref={setNodeRef}
+        style={{
+          transition,
+          transform: CSS.Transform.toString(transform),
+          opacity: isDragging ? 0.5 : 1,
+          paddingLeft: 8 + indent * 16,
+        }}
+        gap={4}
+        {...attributes}
+        {...listeners}
+        horizontal='auto auto 1fr auto'
+        center
+        data-hover={stageEvent.hoverId === id}
+        data-selected={selected}
+        data-sub-selected={subSelected}
+        data-dragging={isDragging}
+        className={cls()}
+        onMouseDown={select}
+        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleOpenMenu}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}>
+        <Lucide
+          x-if={isParent}
+          size={14}
+          icon={ChevronRight}
+          onClick={handleToggleExpand}
+          onMouseDown={stopPropagation()}
           style={{
-            transition,
-            transform: CSS.Transform.toString(transform),
-            opacity: isDragging ? 0.5 : 1,
-            paddingLeft: 8 + indent * 16,
+            visibility: isParent && node.childIds.length ? 'visible' : 'hidden',
+            transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s',
           }}
-          gap={4}
-          {...attributes}
-          {...listeners}
-          horizontal='auto auto 1fr auto'
-          center
-          data-hover={stageEvent.hoverId === id}
-          data-selected={selected}
-          data-sub-selected={subSelected}
-          data-dragging={isDragging}
-          className={cls()}
-          onMouseDown={select}
-          onDoubleClick={handleDoubleClick}
-          onContextMenu={contextMenu.handleOpenMenu}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}>
-          <Lucide
-            x-if={isParent}
-            size={14}
-            icon={ChevronRight}
-            onClick={handleToggleExpand}
-            onMouseDown={stopPropagation()}
-            style={{
-              visibility: isParent && node.childIds.length ? 'visible' : 'hidden',
-              transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s',
-            }}
+        />
+        {!isParent && <G style={{ width: 12, height: 12 }} />}
+        {node.variant === 'path' ? (
+          <LayerNodeTreePathIcon node={node} />
+        ) : (
+          <Icon
+            src={Assets.editor.node[node.variant as keyof typeof Assets.editor.node]}
           />
-          {!isParent && <G style={{ width: 12, height: 12 }} />}
-          {node.variant === 'path' ? (
-            <LayerNodeTreePathIcon node={node} />
-          ) : (
-            <Icon
-              src={
-                Assets.editor.node[node.variant as keyof typeof Assets.editor.node]
-              }
-            />
-          )}
-          <EditableText
-            canEdit={nodeAction.renamingNodeId === id}
-            value={node.name || '未命名'}
-            onEnd={(name) => nodeAction.renameNode(id, name)}
-          />
-        </G>
-      </Fragment>
+        )}
+        <EditableText
+          canEdit={nodeAction.renamingNodeId === id}
+          value={node.name || '未命名'}
+          onEnd={(name) => nodeAction.renameNode(id, name)}
+        />
+      </G>
     )
   },
 )

@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 import { Menu } from 'src/view/component/menu'
-import { ContextMenuState } from 'src/view/features/context-menu/context-menu'
+import { ContextMenuState } from 'src/view/features/context-menu/state'
 
 export const ContextMenuComp: FC<{}> = observer(({}) => {
   const contextMenu = useContextMenu()
