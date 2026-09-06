@@ -90,14 +90,7 @@ export type EditorServices = ServiceInstances<typeof editorServices>
 export type EditorServiceId = keyof EditorServices
 
 export class Editor extends ServiceContainer<typeof editorServices> {
-  protected static instance: Editor
-
   constructor(global?: ServiceContainer) {
     super(editorServices, global)
-  }
-
-  static getInstance(global?: ServiceContainer) {
-    if (this.instance) return this.instance
-    return (this.instance = new this(global))
   }
 }

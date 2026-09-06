@@ -61,6 +61,7 @@ export class FileAction extends Service {
   }
 
   async setupFile(id: string, doc?: S.Doc) {
+    console.log(id, this.sessionId)
     if (id === this.sessionId) return
 
     await this.yDoc.setup(id, doc)
@@ -69,8 +70,7 @@ export class FileAction extends Service {
     this.yDoc.register(this.layerNodeTree.onYDocPatch)
     // this.yDoc.onPatch(this.nodeAction.onYDocPatch)
 
-    // 开发中暂时不启用y-sync
-    // this.ySync.init(id, this.yDoc.doc)
+    // this.ySync.setup(id, this.yDoc.yDoc)
     // this.yAware.init({
     //   clientId: this.yDoc.doc.clientID,
     //   awareness: this.ySync.awareness,
@@ -81,7 +81,10 @@ export class FileAction extends Service {
     this.undo.mobxUndo.rebase()
 
     this.sessionId = id
-    this.effect(() => (this.sessionId = ''))
+    this.effect(() => {
+      this.sessionId = ''
+      console.log(this.sessionId, 'dispose')
+    })
 
     return this.yDoc.doc
   }

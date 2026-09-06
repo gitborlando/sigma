@@ -1,4 +1,5 @@
-import { withSuspense } from '@gitborlando/utils/react'
+import { iife } from '@gitborlando/utils'
+import { withPrepare, withSuspense } from '@gitborlando/utils/react'
 import { Editor } from 'src/editor'
 import { createTextBreaker } from 'src/editor/render/text-break/text-breaker'
 import { Loading } from 'src/view/component/loading'
@@ -14,46 +15,53 @@ import { suspend } from 'suspend-react'
 import { EditorHeaderComp } from './header'
 
 export const EditorComp = withSuspense(
-  ({}) => {
-    const { fileId } = useParams<{ fileId: string }>()
-    const { fileAction } = useGlobalServices()
-    const [isSetup, setIsSetup] = useState(false)
-    const editor = Editor.getInstance(useGlobal())
+  withPrepare(
+    () => {
+      const textBreaker = suspend(createTextBreaker, ['text-breaker'])
+      return { textBreaker }
+    },
+    ({ textBreaker }) => {
+      const global = useGlobal()
+      const { fileId } = useParams<{ fileId: string }>()
+      const { fileAction } = useGlobalServices()
+      const [editor] = useState(() => new Editor(global))
+      const [isSetup, setIsSetup] = useState(false)
 
-    const stageCursor = editor.resolve('stageCursor')
-    const stage = editor.resolve('stage')
-    const elemDrawer = editor.resolve('elemDrawer')
+      const elemDrawer = editor.resolve('elemDrawer')
+      const stage = editor.resolve('stage')
+      const stageCursor = editor.resolve('stageCursor')
 
-    const doc = suspend(() => fileAction.setupFile(fileId!), [fileId])
-    const textBreaker = suspend(() => createTextBreaker(), ['text-breaker'])
+      useEffect(() => {
+        iife(async () => {
+          elemDrawer.setTextBreaker(textBreaker)
+          // 因为 FileAction 是 Global Service，你 dispose editor 是没用的
+          await fileAction.setupFile(fileId!)
+          if (!editor.disposed) setIsSetup(true)
+        })
+        return () => editor.dispose()
+      }, [])
 
-    useEffect(() => {
-      if (!doc || !textBreaker) return
-      elemDrawer.setTextBreaker(textBreaker)
-      setIsSetup(true)
-      return () => editor.dispose()
-    }, [doc, textBreaker])
+      useEffect(() => {
+        if (!isSetup) return
+        stage.onCanvasInited()
+        stageCursor.setCursor('select')
+      }, [isSetup])
 
-    useEffect(() => {
-      if (!isSetup) return
-      stage.onCanvasInited()
-      stageCursor.setCursor('select')
-    }, [isSetup])
-
-    return (
-      isSetup && (
-        <EditorContext.Provider value={editor}>
-          <G vertical='auto 1fr'>
-            <EditorHeaderComp />
-            <G horizontal='auto 1fr auto'>
-              <LeftPanelComp />
-              <StageComp />
-              <RightPanelComp />
+      return (
+        isSetup && (
+          <EditorContext.Provider value={editor}>
+            <G vertical='auto 1fr'>
+              <EditorHeaderComp />
+              <G horizontal='auto 1fr auto'>
+                <LeftPanelComp />
+                <StageComp />
+                <RightPanelComp />
+              </G>
             </G>
-          </G>
-        </EditorContext.Provider>
+          </EditorContext.Provider>
+        )
       )
-    )
-  },
+    },
+  ),
   <Loading />,
 )
