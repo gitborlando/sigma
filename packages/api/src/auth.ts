@@ -14,6 +14,7 @@ export type AuthSchema = z.infer<typeof authSchema>
 
 export abstract class AuthAPI extends Service {
   abstract getUser(): Promise<AuthSchema['user'] | null>
+  abstract getExistedUser(): AuthSchema['user']
   abstract signUpWithPassword(
     email: string,
     password: string,

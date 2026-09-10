@@ -4,7 +4,7 @@ import {
   type DesignGeomFieldValue,
   type DesignGeomKey,
 } from 'src/editor/workbench/design/geom/field-definitions'
-import { MIXED_VALUE } from 'src/global/constant'
+import { MIXED_VALUE } from 'src/shared/constant'
 import { Btn } from 'src/view/component/btn'
 import { InputNum, type InputNumProps } from 'src/view/component/input-num'
 import { Icon } from 'src/view/component/svg-icon'

@@ -2,11 +2,8 @@ import { createZodStorage } from '@gitborlando/toolkit'
 import { listen, stopPropagation } from '@gitborlando/utils/browser'
 import { EllipsisVertical, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
-import { Drag } from 'src/global/event/drag'
-import {
-  CommonBalanceItem,
-  OptionBalanceItem,
-} from 'src/view/component/balance-item'
+import { Drag } from 'src/shared/drag'
+import { CommonBalanceItem } from 'src/view/component/balance-item'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
 import { Menu } from 'src/view/component/menu'
@@ -159,19 +156,19 @@ export const DragPanel: FC<DragPanelProps> = ({
           <Menu
             x-if={!!id || !!menuSlot}
             className={cls('menu')}
-            trigger={
-              <Btn
-                size={24}
-                icon={<Lucide icon={EllipsisVertical} />}
-                onMouseDown={stopPropagation()}
-              />
-            }>
-            {menuSlot}
-            <OptionBalanceItem
-              x-if={!!id}
-              label={t('auto popup')}
-              checked={autoPopup}
-              onChecked={handleAutoPopupChange}
+            menus={[
+              [
+                {
+                  name: t('auto popup'),
+                  checked: autoPopup,
+                  onChecked: handleAutoPopupChange,
+                },
+              ],
+              ...(menuSlot ? [[{ name: 'slot', render: () => menuSlot }]] : []),
+            ]}>
+            <Btn
+              size={24}
+              icon={<Lucide icon={EllipsisVertical} />}
               onMouseDown={stopPropagation()}
             />
           </Menu>
@@ -221,7 +218,7 @@ const cls = classes(css`
     height: 100%;
   }
   &-menu {
-    width: 160px;
+    min-width: 160px;
     position: relative;
     z-index: 10000;
   }

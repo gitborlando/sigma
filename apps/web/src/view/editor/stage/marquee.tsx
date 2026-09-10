@@ -1,5 +1,5 @@
 import { Matrix } from 'src/editor/geometry'
-import { rgbToRgba } from 'src/utils/color'
+import { rgbToRgba } from 'src/shared/color'
 import { useEditorServices } from 'src/view/hooks/use-services'
 import { themeColor } from 'src/view/styles/color'
 

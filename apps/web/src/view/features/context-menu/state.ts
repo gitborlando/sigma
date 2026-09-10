@@ -1,4 +1,6 @@
+import { Service } from '@gitborlando/di-service'
 import { AnyObject } from '@gitborlando/utils'
+import { listen } from '@gitborlando/utils/browser'
 import { type MouseEvent } from 'react'
 
 export type ICommand = {
@@ -10,10 +12,15 @@ export type ICommand = {
 
 export type MenuItem = ICommand & { children?: MenuItem[][] }
 
-class ContextMenuClass {
-  @observable menus: MenuItem[][] = []
+export class ContextMenuState extends Service {
+  constructor() {
+    super()
+    autoBind(makeObservable(this))
+    this.effect(this.hideMenuWhenRouterChange())
+  }
+
+  @observable.ref menus: MenuItem[][] = []
   context = <AnyObject>{}
-  triggered = false
 
   private ref!: HTMLDivElement
 
@@ -21,13 +28,7 @@ class ContextMenuClass {
     this.ref = ref
   }
 
-  openMenu(e: MouseEvent, menus?: MenuItem[][], context?: AnyObject) {
-    if (this.triggered) return
-    this.triggered = true
-
-    this.menus = menus || []
-    this.context = context || {}
-
+  open(e: MouseEvent) {
     e.preventDefault()
     this.ref.dispatchEvent(
       new MouseEvent('contextmenu', {
@@ -37,6 +38,8 @@ class ContextMenuClass {
       }),
     )
   }
-}
 
-export const ContextMenu = autoBind(makeObservable(new ContextMenuClass()))
+  private hideMenuWhenRouterChange() {
+    return listen('popstate', () => (this.menus = []))
+  }
+}

@@ -19,7 +19,7 @@
   },
 
   "Sub Component": {
-    "prefix": "subcomp",
+    "prefix": "subcomx",
     "body": ["const $1Comp: FC<{}> = observer(({}) => { return (<G></G>) })"],
     "description": "Sub Component",
   },

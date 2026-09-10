@@ -22,6 +22,11 @@ export class CloudBaseAuthAPI extends AuthAPI {
     })
   }
 
+  getExistedUser() {
+    if (!this.user) throw new Error('User not found')
+    return this.user!
+  }
+
   async signInWithPassword(email: string, password: string) {
     await this.auth.signInWithPassword({ email, password })
   }

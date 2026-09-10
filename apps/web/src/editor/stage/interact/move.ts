@@ -1,11 +1,11 @@
+import { Service } from '@gitborlando/di-service'
 import { Disposer } from '@gitborlando/toolkit/disposer'
 import { Matrix } from 'src/editor/geometry'
 import { RenderSurface } from 'src/editor/render/surface'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { Drag } from 'src/global/event/drag'
-import { Service } from '@gitborlando/di-service'
+import { Drag } from 'src/shared/drag'
 
 @reflection
 export class StageMove extends Service {

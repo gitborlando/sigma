@@ -1,7 +1,7 @@
 import { type AnyObject } from '@gitborlando/utils'
 import { findParent } from 'src/editor/doc/finder'
 import { docGetter } from 'src/editor/doc/getter'
-import { T } from 'src/utils/common'
+import { T } from 'src/shared/common'
 
 export type GraphTraverseOptions<ExtendCtx extends AnyObject = {}> = {
   getDoc?: () => S.Doc

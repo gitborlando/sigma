@@ -1,4 +1,4 @@
-import { hslRgb } from 'src/utils/color'
+import { hslRgb } from 'src/shared/color'
 
 const hue = 280
 

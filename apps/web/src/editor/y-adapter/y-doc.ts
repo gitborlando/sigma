@@ -3,7 +3,7 @@ import { Signal } from '@gitborlando/signal'
 import { clone, ThisAsAny } from '@gitborlando/utils'
 import { YPlain, type YPlainChange, type YPlainPatch } from '@gitborlando/y-plain'
 import { createAtom } from 'mobx'
-import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
+import { Y_STATE_LOCAL_ORIGIN } from 'src/shared/constant'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
 

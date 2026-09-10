@@ -3,11 +3,11 @@ import { FileSchema } from '@sigma/api'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { ContextMenu } from 'src/global/context-menu'
 import { Loading } from 'src/view/component/loading'
 import { Text } from 'src/view/component/text'
+import { useContextMenu } from 'src/view/features/context-menu'
 import { useGlobalServices } from 'src/view/hooks/use-services'
-import { QUERY_KEY } from 'src/view/private/tanstack-query'
+import { QUERY_KEY } from 'src/view/query'
 
 export const HomeFilesComp = withSuspense(
   observer(() => {
@@ -34,31 +34,32 @@ export const HomeFilesComp = withSuspense(
 
 const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
   const query = useQueryClient()
-  const { fileAPI } = useGlobalServices()
+  const contextMenu = useContextMenu()
+  const { fileAction } = useGlobalServices()
 
   const navigate = useNavigate()
   const handleClick = () => navigate(`/fileId/${file.id}`)
 
   const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault()
-    ContextMenu.openMenu(e, [
+    contextMenu.menus = [
       [
         {
           name: t('delete'),
           callback: async () => {
-            await fileAPI.deleteFile(file.id)
+            await fileAction.deleteFile(file.id)
             query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
           },
         },
       ],
-    ])
+    ]
+    contextMenu.open(e)
   }
 
   return (
     <G
+      className={cls('item')}
       onClick={() => handleClick()}
-      onContextMenu={handleContextMenu}
-      className={cls('item')}>
+      onContextMenu={handleContextMenu}>
       <G className={cls('item-cover')}>
         <img
           draggable={false}
@@ -91,16 +92,15 @@ const cls = classes(css`
       outline: 2px solid var(--color);
       outline-offset: 1px;
     }
+    &:hover &-meta-action {
+      display: flex;
+    }
     &-cover {
       width: 100%;
       height: 180px;
       object-fit: cover;
       ${styles.borderRadiusSM}
       overflow: hidden;
-    }
-    &-meta {
-      padding: 4px 4px;
-      gap: 4px;
     }
   }
 `)

@@ -1,9 +1,9 @@
+import { Service } from '@gitborlando/di-service'
 import { MobxUndo, MobxUndoState } from '@gitborlando/mobx-undo'
 import { match } from '@gitborlando/utils'
 import { computed, makeObservable, observable, runInAction, toJS } from 'mobx'
 import { YDoc, YDocPatch } from 'src/editor/y-adapter/y-doc'
-import { Y_STATE_LOCAL_ORIGIN } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
+import { Y_STATE_LOCAL_ORIGIN } from 'src/shared/constant'
 import * as Y from 'yjs'
 
 export type UndoType = 'undo' | 'redo'

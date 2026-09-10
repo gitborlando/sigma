@@ -1,6 +1,6 @@
 import { docGetter } from 'src/editor/doc/getter'
 import { DocHelper } from 'src/editor/doc/helper'
-import { debugId } from 'src/utils/dev'
+import { debugId } from 'src/shared/dev'
 
 export function findNode(id: ID): S.Node
 export function findNode<V extends S.Node['variant']>(

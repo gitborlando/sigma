@@ -7,11 +7,11 @@ import { Text } from 'src/view/component/text'
 import { useAsyncState } from 'src/view/hooks/toolkit/use-async-state'
 import { useGlobalServices } from 'src/view/hooks/use-services'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
-import { QUERY_KEY } from 'src/view/private/tanstack-query'
+import { QUERY_KEY } from 'src/view/query'
 
 export const HomeHeaderComp: FC<{}> = observer(({}) => {
   const { uploader, objectMgr, authAPI } = useGlobalServices()
-  const { docAction } = useGlobalServices()
+  const { fileAction } = useGlobalServices()
   const query = useQueryClient()
   const navigate = useNavigate()
 
@@ -58,7 +58,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
           <Btn
             variant='solid'
             onClick={async () => {
-              await docAction.newDoc(false)
+              await fileAction.newFile(false)
               query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
             }}>
             {t('new file')}

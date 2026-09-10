@@ -1,21 +1,32 @@
 import './app.css'
+import './i18n/config'
 
 import { preventDefault } from '@gitborlando/utils/browser'
 import { QueryClientContext } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router'
-import { ContextMenuComp } from 'src/view/component/context-menu'
 import { UploaderComp } from 'src/view/component/uploader'
+import { ContextMenuComp, ContextMenuContext } from 'src/view/features/context-menu'
+import { ContextMenuState } from 'src/view/features/context-menu/state'
 import router from 'src/view/router'
-import './i18n/config'
-import { queryClient } from './private/tanstack-query'
+import { queryClient } from './query'
 
 export const App = observer(() => {
+  const contextMenu = useMemo(() => new ContextMenuState(), [])
+
+  useEffect(() => {
+    return () => {
+      contextMenu.dispose()
+    }
+  }, [])
+
   return (
     <G onContextMenuCapture={preventDefault()}>
       <QueryClientContext.Provider value={queryClient}>
-        <ContextMenuComp />
-        <UploaderComp />
-        <RouterProvider router={router} />
+        <ContextMenuContext.Provider value={contextMenu}>
+          <RouterProvider router={router} />
+          <ContextMenuComp />
+          <UploaderComp />
+        </ContextMenuContext.Provider>
       </QueryClientContext.Provider>
     </G>
   )

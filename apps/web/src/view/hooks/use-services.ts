@@ -6,19 +6,15 @@ import type {
 import { createContext, useContext } from 'react'
 import { Editor } from 'src/editor'
 import { Global } from 'src/global'
-import { ViewState } from 'src/view/state'
 
 export const GlobalContext = createContext<Global>(null!)
 export const EditorContext = createContext<Editor>(null!)
-export const ViewStateContext = createContext<ViewState>(null!)
 
 export const useGlobal = () => useContext(GlobalContext)
 export const useEditor = () => useContext(EditorContext)
-export const useViewState = () => useContext(ViewStateContext)
 
 export const useGlobalServices = () => getServiceProxy(useGlobal())
 export const useEditorServices = () => getServiceProxy(useEditor())
-export const useViewStateServices = () => getServiceProxy(useViewState())
 
 const serviceProxyMap = new WeakMap<object, object>()
 

@@ -1,6 +1,6 @@
 import { values } from 'mobx'
 import { MRect } from 'src/editor/geometry/mrect'
-import { COLOR } from 'src/utils/color'
+import { COLOR } from 'src/shared/color'
 import { useEditorServices } from 'src/view/hooks/use-services'
 
 export const StageCursorsComp: FC<{}> = observer(({}) => {

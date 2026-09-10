@@ -5,10 +5,10 @@ import { ChevronRight } from 'lucide-react'
 import { findNode } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { LayerNodeTreeInfo } from 'src/editor/workbench/layer/node-tree'
-import { ContextMenu } from 'src/global/context-menu'
 import { EditableText } from 'src/view/component/editable-text'
 import { Lucide } from 'src/view/component/lucide'
 import { Icon } from 'src/view/component/svg-icon'
+import { useContextMenu } from 'src/view/features/context-menu'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useSelection } from 'src/view/hooks/use-selection'
 import { useEditorServices } from 'src/view/hooks/use-services'
@@ -21,6 +21,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
     const { id, indent, ancestorIds } = nodeInfo
     const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
     const node = useDoc(() => findNode(id) as S.Node)
+    const contextMenu = useContextMenu()
 
     const isParent = DocHelper.isParent(node)
     const expanded = !!getNodeExpanded(id)
@@ -42,16 +43,16 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
       selectAction.onPanelSelect(id)
       nodeAction.renamingNodeId = id
     }
-    const handleContextMenu = (e: React.MouseEvent) => {
-      ContextMenu.context = { id }
-      ContextMenu.menus = [command.nodeGroup, command.copyPasteGroup]
-      ContextMenu.openMenu(e)
-    }
     const handleMouseEnter = () => {
       stageEvent.hoverId = id
     }
     const handleMouseLeave = () => {
       stageEvent.hoverId = undefined
+    }
+    const handleOpenMenu = (e: React.MouseEvent) => {
+      contextMenu.context = { id }
+      contextMenu.menus = [command.nodeGroup, command.copyPasteGroup]
+      contextMenu.open(e)
     }
 
     return (
@@ -75,7 +76,7 @@ export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observ
         className={cls()}
         onMouseDown={select}
         onDoubleClick={handleDoubleClick}
-        onContextMenu={handleContextMenu}
+        onContextMenu={handleOpenMenu}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}>
         <Lucide

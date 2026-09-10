@@ -1,3 +1,4 @@
+import { Service } from '@gitborlando/di-service'
 import { clone, firstOne, iife, objKeys } from '@gitborlando/utils'
 import { Undo } from 'src/editor/action/undo'
 import { DocCreator } from 'src/editor/doc/creator'
@@ -11,8 +12,7 @@ import { RenderTree } from 'src/editor/render/tree'
 import { Select, type Selection } from 'src/editor/select'
 import { StageEvent } from 'src/editor/stage/event'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { GRAPHS } from 'src/global/constant'
-import { Service } from '@gitborlando/di-service'
+import { GRAPHS } from 'src/shared/constant'
 
 @reflection
 export class NodeAction extends Service {

@@ -1,7 +1,7 @@
+import { Service } from '@gitborlando/di-service'
 import { jsonFy, jsonParse } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
-import { Service } from '@gitborlando/di-service'
-import { mergeOverrideArray } from 'src/utils/export'
+import { mergeOverrideArray } from 'src/shared/export'
 
 const initSetting = () => ({
   autosave: true,

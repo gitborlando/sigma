@@ -1,7 +1,7 @@
 import { AnyObject, clone, getSet, miniId } from '@gitborlando/utils'
 import { findGraph, findNode, findParent } from 'src/editor/doc/finder'
 import { Matrix, MRect } from 'src/editor/geometry'
-import { mergeOverrideArray } from 'src/utils/export'
+import { mergeOverrideArray } from 'src/shared/export'
 
 export class DocHelper {
   private static mrectCache = new Map<ID, MRect>()

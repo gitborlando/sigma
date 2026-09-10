@@ -1,7 +1,7 @@
+import { iife } from '@gitborlando/utils'
 import { CSSProperties } from 'react'
 import { DocHelper } from 'src/editor/doc/helper'
 import { renderElem } from 'src/editor/render/react/reconciler'
-import { ContextMenu } from 'src/global/context-menu'
 import { StageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
 import { StageFrameLabelComp } from 'src/view/editor/stage/frame-label'
@@ -10,6 +10,7 @@ import { StageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { StageOutlineComp } from 'src/view/editor/stage/outline'
 import { StageRulerComp } from 'src/view/editor/stage/ruler'
 import { StageTransformComp } from 'src/view/editor/stage/transform'
+import { useContextMenu } from 'src/view/features/context-menu'
 import {
   EditorContext,
   useEditor,
@@ -18,10 +19,9 @@ import {
 
 export const StageComp: FC<{}> = observer(({}) => {
   const editor = useEditor()
-  const { command, renderTree, stageEvent, stageViewport, stageTransformer } =
-    useEditorServices()
+  const { renderTree } = useEditorServices()
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     return renderElem(
       <EditorContext.Provider value={editor}>
         <StageGridComp />
@@ -36,29 +36,8 @@ export const StageComp: FC<{}> = observer(({}) => {
     )
   }, [editor, renderTree])
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    const { hoverId } = stageEvent
-    const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
-      command
-    const baseMenus = [copyPasteGroup, undoRedoGroup]
-
-    if (
-      (!hoverId || DocHelper.isRootFrame(hoverId)) &&
-      !stageTransformer.isPointIn(stageViewport.toSceneXY(XY.client(e)))
-    ) {
-      ContextMenu.context = {}
-      ContextMenu.menus = baseMenus
-      ContextMenu.openMenu(e)
-      return
-    }
-
-    ContextMenu.context = { id: hoverId }
-    ContextMenu.menus = [...baseMenus, nodeGroup, nodeReHierarchyGroup]
-    ContextMenu.openMenu(e)
-  }
-
   return (
-    <G onContextMenu={handleContextMenu}>
+    <G>
       <SurfaceComp />
       <FPSComp />
       <CooperateObservingBorderComp />
@@ -67,7 +46,30 @@ export const StageComp: FC<{}> = observer(({}) => {
 })
 
 const SurfaceComp: FC<{}> = observer(({}) => {
-  const { renderSurface } = useEditorServices()
+  const { renderSurface, command, stageEvent, stageTransformer, stageViewport } =
+    useEditorServices()
+
+  const contextMenu = useContextMenu()
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    const menus = iife(() => {
+      const { hoverId } = stageEvent
+      const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
+        command
+      const baseMenus = [copyPasteGroup, undoRedoGroup]
+
+      if (
+        (!hoverId || DocHelper.isRootFrame(hoverId)) &&
+        !stageTransformer.isPointIn(stageViewport.toSceneXY(XY.client(e)))
+      ) {
+        return baseMenus
+      }
+      return [...baseMenus, nodeGroup, nodeReHierarchyGroup]
+    })
+
+    contextMenu.menus = [...menus]
+    contextMenu.open(e)
+  }
 
   const cls = classes(css`
     /* background-color: #f7f8fa; */
@@ -75,7 +77,10 @@ const SurfaceComp: FC<{}> = observer(({}) => {
   `)
 
   return (
-    <G className={cls()} ref={renderSurface.setContainer}>
+    <G
+      className={cls()}
+      ref={renderSurface.setContainer}
+      onContextMenu={handleContextMenu}>
       <canvas ref={renderSurface.setCanvas} />
       <canvas style={{ position: 'absolute' }} ref={renderSurface.setTopCanvas} />
     </G>
