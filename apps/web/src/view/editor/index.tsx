@@ -1,14 +1,24 @@
 import { iife } from '@gitborlando/utils'
 import { withPrepare, withSuspense } from '@gitborlando/utils/react'
+import { ReactSVG } from 'react-svg'
 import { Editor } from 'src/editor'
 import { createTextBreaker } from 'src/editor/render/text-break/text-breaker'
-import { Loading } from 'src/view/component/loading'
 import { LeftPanelComp } from 'src/view/editor/left-panel'
 import { RightPanelComp } from 'src/view/editor/right-panel'
 import { StageComp } from 'src/view/editor/stage/stage'
 import { EditorContext, useGlobal } from 'src/view/hooks/use-services'
 import { suspend } from 'suspend-react'
 import { EditorHeaderComp } from './header'
+
+const SkeletonLoading: FC<{}> = observer(({}) => {
+  return (
+    <ReactSVG
+      wrapper='svg'
+      src={Assets.editor.skeleton}
+      style={{ width: '100vw', height: '100vh' }}
+    />
+  )
+})
 
 export const EditorComp = withSuspense(
   withPrepare(
@@ -38,21 +48,20 @@ export const EditorComp = withSuspense(
         if (isSetup) return session.onCanvasInited()
       }, [isSetup])
 
+      if (!isSetup) return <SkeletonLoading />
       return (
-        isSetup && (
-          <EditorContext.Provider value={editor}>
-            <G vertical='auto 1fr'>
-              <EditorHeaderComp />
-              <G horizontal='auto 1fr auto'>
-                <LeftPanelComp />
-                <StageComp />
-                <RightPanelComp />
-              </G>
+        <EditorContext.Provider value={editor}>
+          <G vertical='auto 1fr'>
+            <EditorHeaderComp />
+            <G horizontal='auto 1fr auto'>
+              <LeftPanelComp />
+              <StageComp />
+              <RightPanelComp />
             </G>
-          </EditorContext.Provider>
-        )
+          </G>
+        </EditorContext.Provider>
       )
     },
   ),
-  <Loading />,
+  <SkeletonLoading />,
 )

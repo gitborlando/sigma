@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" role="img" aria-labelledby="title desc">
+  <rect width="100%" height="100%" fill="#f2f3f4" />
+  <svg x="50%" y="50%" width="56" height="56" overflow="visible">
+    <g transform="translate(-28 -4)">
+      <svg viewBox="281 246 399 468" width="56" height="56" role="img" aria-label="Sigma 加载动画" overflow="visible" preserveAspectRatio="xMidYMid meet">
+        <style>
+.sigma-loading-group { opacity: 0; animation: sigmaLoadingGroupFade 3.6s linear infinite; }
+.sigma-loading-path {
+  fill: #000; fill-opacity: 0; stroke: #000; stroke-opacity: 1; stroke-width: 1;
+  stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  shape-rendering: geometricPrecision; stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: sigmaLoadingDraw 3.6s linear infinite, sigmaLoadingFillIntegrate 3.6s linear infinite, sigmaLoadingSoftenStroke 3.6s linear infinite;
+}
+@keyframes sigmaLoadingDraw {
+  0%, 5% { stroke-dashoffset: 1; animation-timing-function: cubic-bezier(.4,0,.2,1); }
+  68%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes sigmaLoadingFillIntegrate {
+  0%, 42% { fill-opacity: 0; animation-timing-function: cubic-bezier(.4,0,.2,1); }
+  76%, 100% { fill-opacity: 1; }
+}
+@keyframes sigmaLoadingSoftenStroke {
+  0%, 48% { stroke-opacity: 1; animation-timing-function: cubic-bezier(.4,0,.2,1); }
+  78%, 100% { stroke-opacity: 0; }
+}
+@keyframes sigmaLoadingGroupFade {
+  0% { opacity: 0; animation-timing-function: cubic-bezier(.4,0,.2,1); }
+  16%, 78% { opacity: 1; animation-timing-function: cubic-bezier(.4,0,.2,1); }
+  98%, 100% { opacity: 0; }
+}
+</style>
+        <g class="sigma-loading-group">
+          <path class="sigma-loading-path" pathLength="1" d="M281.0,246.0 L287.0,256.0 L301.0,274.0 L317.0,298.0 L326.0,309.0 L330.0,316.0 L356.0,351.0 L367.0,368.0 L379.0,383.0 L383.0,390.0 L389.0,397.0 L398.0,411.0 L404.0,418.0 L406.0,422.0 L412.0,429.0 L432.0,458.0 L438.0,465.0 L455.0,490.0 L462.0,498.0 L459.0,507.0 L452.0,522.0 L452.0,524.0 L449.0,529.0 L448.0,534.0 L445.0,539.0 L444.0,544.0 L437.0,560.0 L438.0,560.0 L453.0,541.0 L459.0,535.0 L467.0,524.0 L472.0,519.0 L475.0,514.0 L481.0,508.0 L493.0,492.0 L498.0,487.0 L513.0,467.0 L511.0,463.0 L480.0,422.0 L478.0,418.0 L440.0,367.0 L423.0,342.0 L393.0,302.0 L374.0,274.0 L375.0,273.0 L479.0,273.0 L479.0,272.0 L446.0,261.0 L443.0,261.0 L415.0,251.0 L412.0,251.0 L409.0,249.0 L400.0,246.0 L329.0,246.0 L328.0,247.0 L327.0,246.0 L325.0,247.0 L324.0,246.0 Z" />
+          <path class="sigma-loading-path" pathLength="1" d="M466.0,246.0 L466.0,247.0 L484.0,253.0 L487.0,253.0 L500.0,258.0 L510.0,260.0 L529.0,267.0 L532.0,267.0 L556.0,275.0 L575.0,284.0 L584.0,290.0 L600.0,304.0 L614.0,322.0 L623.0,339.0 L623.0,341.0 L627.0,349.0 L631.0,361.0 L632.0,368.0 L646.0,368.0 L646.0,361.0 L645.0,360.0 L645.0,353.0 L644.0,352.0 L644.0,344.0 L643.0,343.0 L643.0,335.0 L642.0,334.0 L642.0,326.0 L641.0,325.0 L640.0,309.0 L639.0,308.0 L639.0,299.0 L638.0,298.0 L638.0,291.0 L637.0,290.0 L637.0,281.0 L636.0,280.0 L634.0,255.0 L633.0,254.0 L633.0,248.0 L632.0,246.0 L630.0,247.0 Z" />
+          <path class="sigma-loading-path" pathLength="1" d="M282.0,713.0 L282.0,714.0 L640.0,714.0 L640.0,711.0 L643.0,704.0 L645.0,693.0 L648.0,686.0 L649.0,679.0 L652.0,672.0 L654.0,661.0 L658.0,650.0 L659.0,643.0 L665.0,625.0 L667.0,614.0 L674.0,593.0 L674.0,590.0 L678.0,578.0 L678.0,575.0 L680.0,571.0 L680.0,568.0 L668.0,568.0 L650.0,603.0 L634.0,626.0 L624.0,637.0 L613.0,646.0 L608.0,648.0 L604.0,651.0 L602.0,651.0 L596.0,654.0 L586.0,655.0 L585.0,656.0 L368.0,656.0 L367.0,655.0 L382.0,625.0 L384.0,623.0 L384.0,621.0 L413.0,564.0 L414.0,560.0 L416.0,558.0 L416.0,557.0 L415.0,557.0 L409.0,563.0 L395.0,581.0 L382.0,595.0 L360.0,622.0 L352.0,630.0 L352.0,631.0 L328.0,658.0 L324.0,664.0 L317.0,671.0 L308.0,683.0 Z" />
+        </g>
+      </svg>
+    </g>
+  </svg>
+  <svg x="0" y="48" width="240" height="100%" overflow="hidden">
+    <rect width="240" height="100%" fill="white" />
+    <path d="M239.5 0V2000" stroke="#e8eaed" />
+    <g fill="#dfe2e7" opacity="0.5">
+      <rect x="16" y="16" width="190" height="10" rx="4" />
+      <rect x="16" y="49" width="16" height="16" rx="4" />
+      <rect x="44" y="52" width="86" height="10" rx="4" />
+      <rect x="28" y="252" width="14" height="14" rx="3" />
+      <rect x="54" y="254" width="112" height="10" rx="4" />
+      <rect x="28" y="284" width="14" height="14" rx="3" />
+      <rect x="54" y="286" width="88" height="10" rx="4" />
+      <rect x="28" y="316" width="14" height="14" rx="3" />
+      <rect x="54" y="318" width="130" height="10" rx="4" />
+      <rect x="28" y="348" width="14" height="14" rx="3" />
+      <rect x="54" y="350" width="98" height="10" rx="4" />
+      <rect x="16" y="207" width="56" height="10" rx="4" />
+      <animate attributeName="opacity" values="0.5;0.28;0.5" keyTimes="0;0.5;1" dur="2s" begin="0s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+    </g>
+    <path d="M0 194H240" stroke="#f0f1f3" />
+  </svg>
+  <svg x="100%" y="48" width="240" height="100%" overflow="visible">
+    <g transform="translate(-240)">
+      <rect width="240" height="100%" fill="white" />
+      <path d="M0.5 0V2000" stroke="#e8eaed" />
+      <g fill="#dfe2e7" opacity="0.5">
+        <rect x="16" y="16" width="46" height="12" rx="4" />
+        <rect x="70" y="16" width="46" height="12" rx="4" />
+        <rect x="124" y="16" width="46" height="12" rx="4" />
+        <rect x="178" y="16" width="46" height="12" rx="4" />
+        <rect x="16" y="66" width="62" height="10" rx="4" />
+        <rect x="16" y="92" width="96" height="28" rx="4" />
+        <rect x="124" y="92" width="100" height="28" rx="4" />
+        <rect x="16" y="131" width="180" height="9" rx="4" />
+        <rect x="16" y="164" width="62" height="10" rx="4" />
+        <rect x="16" y="190" width="96" height="28" rx="4" />
+        <rect x="124" y="190" width="100" height="28" rx="4" />
+        <rect x="16" y="229" width="180" height="9" rx="4" />
+        <animate attributeName="opacity" values="0.5;0.28;0.5" keyTimes="0;0.5;1" dur="2s" begin="0.2s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      </g>
+    </g>
+  </svg>
+  <rect width="100%" height="48" fill="white" />
+  <path d="M0 47.5H10000" stroke="#f1f2f4" />
+  <g fill="#dfe2e7" opacity="0.5">
+    <rect x="16" y="18" width="232" height="12" rx="4" />
+    <rect x="264" y="18" width="282" height="12" rx="4" />
+    <animate attributeName="opacity" values="0.5;0.28;0.5" keyTimes="0;0.5;1" dur="2s" begin="0.08s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+  </g>
+</svg>

@@ -38,6 +38,7 @@ import editorNodeImage from './editor/node/image.svg'
 import editorNodeLine from './editor/node/line.svg'
 import editorNodeRect from './editor/node/rect.svg'
 import editorNodeText from './editor/node/text.svg'
+import editorSkeleton from './editor/skeleton.svg'
 import favIconSigmaLoading2 from './fav-icon/sigma-loading-2.svg'
 import favIconSigmaLoading from './fav-icon/sigma-loading.svg'
 import favIconSigmaLogoText2 from './fav-icon/sigma-logo-text-2.svg'
@@ -94,6 +95,7 @@ export const Assets = {
       rect: editorNodeRect,
       text: editorNodeText,
     },
+    skeleton: editorSkeleton,
   },
   favIcon: {
     sigmaLoading2: favIconSigmaLoading2,
