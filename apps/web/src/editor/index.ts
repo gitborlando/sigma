@@ -12,8 +12,8 @@ import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
+import { Session } from 'src/editor/session'
 import { Setting } from 'src/editor/setting'
-import { Stage } from 'src/editor/stage'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageEvent } from 'src/editor/stage/event'
 import { StageCreate } from 'src/editor/stage/interact/create'
@@ -41,7 +41,6 @@ const editorServices = {
   pageAction: PageAction,
   selectAction: SelectAction,
   viewportAction: ViewportAction,
-  stage: Stage,
 
   /** render */
   elemDrawer: ElemDrawer,
@@ -82,6 +81,7 @@ const editorServices = {
   yDoc: YDoc,
 
   /** misc */
+  session: Session,
   setting: Setting,
   select: Select,
 }
@@ -90,14 +90,7 @@ export type EditorServices = ServiceInstances<typeof editorServices>
 export type EditorServiceId = keyof EditorServices
 
 export class Editor extends ServiceContainer<typeof editorServices> {
-  protected static instance: Editor
-
   constructor(global?: ServiceContainer) {
     super(editorServices, global)
-  }
-
-  static getInstance(global?: ServiceContainer) {
-    if (this.instance) return this.instance
-    return (this.instance = new this(global))
   }
 }

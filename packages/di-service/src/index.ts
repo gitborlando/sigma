@@ -10,9 +10,29 @@ export type ServiceInstances<Map extends ServiceMap> = {
     : never
 }
 
+export abstract class Service {
+  disposed = false
+  protected disposer = new Disposer()
+
+  protected effect(...disposers: DisposerFunc[]) {
+    return this.disposer.register(...disposers)
+  }
+
+  dispose() {
+    this.disposer.dispose()
+    this.disposed = true
+  }
+}
+
 export class ScopedDI extends DI {
-  constructor(protected parent?: ScopedDI) {
+  private readonly constructors: Set<ServiceMap[string]>
+
+  constructor(
+    services: ServiceMap,
+    protected parent?: ScopedDI,
+  ) {
     super()
+    this.constructors = new Set(Object.values(services))
   }
 
   protected override makeResolve<T extends object>(
@@ -21,7 +41,7 @@ export class ScopedDI extends DI {
     caller?: object,
     propertyKey?: string | symbol,
   ) {
-    if (this.parent) {
+    if (this.parent && !this.constructors.has(constructor)) {
       return this.parent.resolve(constructor, options, caller, propertyKey)
     }
     return super.makeResolve(constructor, options, caller, propertyKey)
@@ -35,18 +55,6 @@ export class ScopedDI extends DI {
   }
 }
 
-export abstract class Service {
-  protected disposer = new Disposer()
-
-  protected effect(...disposers: DisposerFunc[]) {
-    return this.disposer.register(...disposers)
-  }
-
-  dispose() {
-    this.disposer.dispose()
-  }
-}
-
 export class ServiceContainer<Map extends ServiceMap = {}> extends Service {
   container: ScopedDI
 
@@ -55,7 +63,7 @@ export class ServiceContainer<Map extends ServiceMap = {}> extends Service {
     private readonly parent?: ServiceContainer,
   ) {
     super()
-    this.container = new ScopedDI(this.parent?.container)
+    this.container = new ScopedDI(this.services, this.parent?.container)
     this.effect(() => this.container.dispose())
   }
 

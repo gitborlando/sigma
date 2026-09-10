@@ -4,7 +4,6 @@ import { AuthAPI, FileAPI } from '@sigma/api'
 import JSZip from 'jszip'
 import { Undo } from 'src/editor/action/undo'
 import { DocCreator } from 'src/editor/doc/creator'
-import { setupDocGetter } from 'src/editor/doc/getter'
 import { migrateDoc } from 'src/editor/doc/migrate'
 import { mock_doc } from 'src/editor/doc/mock'
 import { Select } from 'src/editor/select'
@@ -34,8 +33,6 @@ export class FileAction extends Service {
     autoBind(this)
   }
 
-  private sessionId = ''
-
   async newFile(isMock: boolean) {
     const doc = isMock ? mock_doc(this.docCreator) : this.docCreator.doc()
     const user = await this.authAPI.getUser()
@@ -58,32 +55,6 @@ export class FileAction extends Service {
 
   async loadFile(id: string) {
     return migrateDoc(await this.fetchFile(id))
-  }
-
-  async setupFile(id: string, doc?: S.Doc) {
-    if (id === this.sessionId) return
-
-    await this.yDoc.setup(id, doc)
-    setupDocGetter(() => this.yDoc.doc)
-
-    this.yDoc.register(this.layerNodeTree.onYDocPatch)
-    // this.yDoc.onPatch(this.nodeAction.onYDocPatch)
-
-    // 开发中暂时不启用y-sync
-    // this.ySync.init(id, this.yDoc.doc)
-    // this.yAware.init({
-    //   clientId: this.yDoc.doc.clientID,
-    //   awareness: this.ySync.awareness,
-    // })
-    this.undo.setup()
-
-    this.select.selectPage(this.yDoc.doc.meta.pageIds[0])
-    this.undo.mobxUndo.rebase()
-
-    this.sessionId = id
-    this.effect(() => (this.sessionId = ''))
-
-    return this.yDoc.doc
   }
 
   private async fetchFile(id: string) {

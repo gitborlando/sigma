@@ -7,7 +7,7 @@
   // Placeholders with the same ids are connected.
   // Example:
   "Component": {
-    "prefix": "comp",
+    "prefix": "comx",
     "body": [
       "export const $1${TM_FILENAME_BASE}Comp: FC<{}> = observer(({}) => {",
       "  return <G className={cls()}></G>",
@@ -54,6 +54,7 @@
       "import { Service } from '@gitborlando/di-service'",
       "import autoBind from 'auto-bind'",
       "",
+      "@reflection",
       "export class $1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g} extends Service {",
       "  constructor() {",
       "     super()",

@@ -1,5 +1,5 @@
-import { HocuspocusProvider } from '@hocuspocus/provider'
 import { Service } from '@gitborlando/di-service'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 
@@ -15,7 +15,7 @@ export class YSync extends Service {
     autoBind(this)
   }
 
-  init(fileId: string, document: Y.Doc) {
+  setup(fileId: string, document: Y.Doc) {
     this.provider = new HocuspocusProvider({
       url: DEFAULT_PROVIDER_URL,
       name: fileId,
