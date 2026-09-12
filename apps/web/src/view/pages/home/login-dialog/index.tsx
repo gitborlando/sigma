@@ -2,7 +2,7 @@ import { Dialog } from '@ark-ui/react/dialog'
 import { Portal } from '@ark-ui/react/portal'
 import { X } from 'lucide-react'
 import { Lucide } from 'src/view/component/lucide'
-import { useGlobalServices } from 'src/view/hooks/use-global'
+import { useGlobalServices } from 'src/view/hooks/use-services'
 import { MinimalLoginDialogComp } from './minimal-dialog'
 import { SplitLoginDialogComp } from './split-dialog'
 
@@ -19,7 +19,7 @@ export const LoginDialogComp: FC<LoginDialogProps> = ({
   open,
   onOpenChange,
 }) => {
-  const { auth } = useGlobalServices()
+  const { authAPI } = useGlobalServices()
   const [mode, setMode] = useState<'options' | 'wechat'>('options')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,7 +45,7 @@ export const LoginDialogComp: FC<LoginDialogProps> = ({
     setLoading(true)
     setError(null)
     try {
-      await auth.signInWithOAuth({ provider: 'google' })
+      await authAPI.signInWithOAuth({ provider: 'google' })
     } catch (cause) {
       console.error(cause)
       setError(t('google login failed'))
