@@ -15,6 +15,11 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
   const { fileAction } = useGlobalServices()
   const [loginOpen, setLoginOpen] = useState(false)
 
+  const { data: user } = useQuery({
+    queryKey: [QUERY_KEY.getUser],
+    queryFn: authAPI.getUser,
+  })
+
   const handleLanguageChange = () => {
     setLanguage(getLanguage() === 'zh' ? 'en' : 'zh')
   }
@@ -27,11 +32,6 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
     objectMgr.addObject('file', file.name, file)
     navigate(`fileId/${file.name}?applyRecord=true&maxError=10`)
   }
-
-  const { data: user } = useQuery({
-    queryKey: [QUERY_KEY.getUser],
-    queryFn: authAPI.getUser,
-  })
 
   return (
     <G className={cls()} horizontal='auto 1fr' center gap={16}>
