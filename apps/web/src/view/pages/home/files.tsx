@@ -1,19 +1,19 @@
 import { withSuspense } from '@gitborlando/utils/react'
 import { FileSchema } from '@sigma/api'
-import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import Scrollbars from 'react-custom-scrollbars-2'
 import { Loading } from 'src/view/component/loading'
 import { Text } from 'src/view/component/text'
 import { useContextMenu } from 'src/view/features/context-menu'
 import { useGlobalServices } from 'src/view/hooks/use-services'
-import { QUERY_KEY } from 'src/view/query'
+import { invalidateQuery, QUERY_KEY } from 'src/view/query'
 
 export const HomeFilesComp = withSuspense(
   observer(() => {
     const { fileAPI } = useGlobalServices()
     const { data } = useSuspenseQuery({
-      queryKey: [QUERY_KEY.listFiles],
+      queryKey: [QUERY_KEY.listFiles, QUERY_KEY.getUser],
       queryFn: () => fileAPI.listFiles(),
     })
 
@@ -33,7 +33,6 @@ export const HomeFilesComp = withSuspense(
 )
 
 const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
-  const query = useQueryClient()
   const contextMenu = useContextMenu()
   const { fileAction } = useGlobalServices()
 
@@ -47,7 +46,7 @@ const FileItemComp: FC<{ file: FileSchema['file'] }> = ({ file }) => {
           name: t('delete'),
           callback: async () => {
             await fileAction.deleteFile(file.id)
-            query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
+            invalidateQuery(QUERY_KEY.listFiles)
           },
         },
       ],

@@ -30,9 +30,6 @@ import editorDesignStrokeSideLeft from './editor/design/stroke/side-left.svg'
 import editorDesignStrokeSideRight from './editor/design/stroke/side-right.svg'
 import editorDesignStrokeSideTop from './editor/design/stroke/side-top.svg'
 import editorDesignStrokeStrokeWidth from './editor/design/stroke/stroke-width.svg'
-import editorHeaderLoginGoogle from './editor/header/login/google.svg'
-import editorHeaderLoginMockQr from './editor/header/login/mock-qr.svg'
-import editorHeaderLoginWechat from './editor/header/login/wechat.svg'
 import editorHeaderMove from './editor/header/move.svg'
 import editorHeaderSelect from './editor/header/select.svg'
 import editorNodeEllipse from './editor/node/ellipse.svg'
@@ -47,6 +44,10 @@ import favIconSigmaLoading from './fav-icon/sigma-loading.svg'
 import favIconSigmaLogoText2 from './fav-icon/sigma-logo-text-2.svg'
 import favIconSigmaLogoText from './fav-icon/sigma-logo-text.svg'
 import favIconSigmaLogo from './fav-icon/sigma-logo.jpg'
+import homeLoginGoogle from './home/login/google.svg'
+import homeLoginGuest from './home/login/guest.svg'
+import homeLoginMockQr from './home/login/mock-qr.svg'
+import homeLoginWechat from './home/login/wechat.svg'
 
 export const Assets = {
   editor: {
@@ -89,15 +90,7 @@ export const Assets = {
         strokeWidth: editorDesignStrokeStrokeWidth,
       },
     },
-    header: {
-      login: {
-        google: editorHeaderLoginGoogle,
-        mockQr: editorHeaderLoginMockQr,
-        wechat: editorHeaderLoginWechat,
-      },
-      move: editorHeaderMove,
-      select: editorHeaderSelect,
-    },
+    header: { move: editorHeaderMove, select: editorHeaderSelect },
     node: {
       ellipse: editorNodeEllipse,
       frame: editorNodeFrame,
@@ -114,5 +107,13 @@ export const Assets = {
     sigmaLogoText2: favIconSigmaLogoText2,
     sigmaLogoText: favIconSigmaLogoText,
     sigmaLogo: favIconSigmaLogo,
+  },
+  home: {
+    login: {
+      google: homeLoginGoogle,
+      guest: homeLoginGuest,
+      mockQr: homeLoginMockQr,
+      wechat: homeLoginWechat,
+    },
   },
 } as const

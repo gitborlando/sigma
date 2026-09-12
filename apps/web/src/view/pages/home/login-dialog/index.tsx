@@ -3,22 +3,14 @@ import { Portal } from '@ark-ui/react/portal'
 import { X } from 'lucide-react'
 import { Lucide } from 'src/view/component/lucide'
 import { useGlobalServices } from 'src/view/hooks/use-services'
-import { MinimalLoginDialogComp } from './minimal-dialog'
 import { SplitLoginDialogComp } from './split-dialog'
 
-export type LoginDialogVariant = 'split' | 'minimal'
-
 export type LoginDialogProps = {
-  variant: LoginDialogVariant
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export const LoginDialogComp: FC<LoginDialogProps> = ({
-  variant,
-  open,
-  onOpenChange,
-}) => {
+export const LoginDialogComp: FC<LoginDialogProps> = ({ open, onOpenChange }) => {
   const { authAPI } = useGlobalServices()
   const [mode, setMode] = useState<'options' | 'wechat'>('options')
   const [loading, setLoading] = useState(false)
@@ -83,11 +75,7 @@ export const LoginDialogComp: FC<LoginDialogProps> = ({
             <Dialog.CloseTrigger className={cls('close')} aria-label={t('close')}>
               <Lucide icon={X} size={18} />
             </Dialog.CloseTrigger>
-            {variant === 'split' ? (
-              <SplitLoginDialogComp {...contentProps} />
-            ) : (
-              <MinimalLoginDialogComp {...contentProps} />
-            )}
+            <SplitLoginDialogComp {...contentProps} />
           </Dialog.Content>
         </Dialog.Positioner>
       </Portal>

@@ -1,20 +1,18 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Github, LucideLanguages } from 'lucide-react'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
+import { Menu } from 'src/view/component/menu'
 import { Icon } from 'src/view/component/svg-icon'
-import { Text } from 'src/view/component/text'
-import { useAsyncState } from 'src/view/hooks/toolkit/use-async-state'
 import { useGlobalServices } from 'src/view/hooks/use-services'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
 import { LoginDialogComp } from 'src/view/pages/home/login-dialog'
-import { QUERY_KEY } from 'src/view/query'
+import { invalidateQuery, QUERY_KEY } from 'src/view/query'
 
 export const HomeHeaderComp: FC<{}> = observer(({}) => {
+  const navigate = useNavigate()
   const { uploader, objectMgr, authAPI } = useGlobalServices()
   const { fileAction } = useGlobalServices()
-  const query = useQueryClient()
-  const navigate = useNavigate()
   const [loginOpen, setLoginOpen] = useState(false)
 
   const handleLanguageChange = () => {
@@ -30,7 +28,10 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
     navigate(`fileId/${file.name}?applyRecord=true&maxError=10`)
   }
 
-  const [user] = useAsyncState(null, authAPI.getUser)
+  const { data: user } = useQuery({
+    queryKey: [QUERY_KEY.getUser],
+    queryFn: authAPI.getUser,
+  })
 
   return (
     <G className={cls()} horizontal='auto 1fr' center gap={16}>
@@ -49,11 +50,6 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
       </G>
       <G className={cls('right')} horizontal center gap={16}>
         <G horizontal center gap={8}>
-          {!user && (
-            <Btn variant='outline' onClick={() => setLoginOpen(true)}>
-              {t('login')}
-            </Btn>
-          )}
           <Btn
             variant='outline'
             onClick={() => navigate('fileId/mock?applyRecord=true&maxError=10')}>
@@ -66,33 +62,35 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
             variant='solid'
             onClick={async () => {
               await fileAction.newFile(false)
-              query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
+              invalidateQuery(QUERY_KEY.listFiles)
             }}>
             {t('new file')}
           </Btn>
-          <Btn variant='solid'>{t('new file')}</Btn>
-          <Btn variant='outline' onClick={() => authAPI.signOut()}>
-            退出登陆
-          </Btn>
         </G>
-        {user ? (
-          <>
-            <img src={user?.avatar} className={cls('avatar')} />
-            <Text variant='common'>{user?.name}</Text>
-          </>
-        ) : (
-          <Btn
-            variant='outline'
-            onClick={() => authAPI.signInWithOAuth({ provider: 'google' })}>
-            Google登录
+        {!user && (
+          <Btn variant='outline' onClick={() => setLoginOpen(true)}>
+            {t('login')}
           </Btn>
         )}
+        <Menu
+          menus={[
+            [
+              {
+                name: '退出登陆',
+                callback: async () => {
+                  await authAPI.signOut()
+                  invalidateQuery('getUser')
+                },
+              },
+            ],
+          ]}>
+          <img
+            src={user ? user?.avatar : Assets.home.login.guest}
+            className={cls('avatar')}
+          />
+        </Menu>
       </G>
-      <LoginDialogComp
-        variant='split'
-        open={loginOpen}
-        onOpenChange={setLoginOpen}
-      />
+      <LoginDialogComp open={loginOpen} onOpenChange={setLoginOpen} />
     </G>
   )
 })

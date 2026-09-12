@@ -17,7 +17,7 @@ const BrandIcon: FC<{ brand: 'google' | 'wechat' }> = ({ brand }) => {
     width: 28px;
     height: 28px;
   `)
-  return <img className={cls()} src={Assets.editor.header.login[brand]} />
+  return <img className={cls()} src={Assets.home.login[brand]} />
 }
 
 export const LoginContentComp: FC<LoginContentProps> = ({
@@ -46,9 +46,7 @@ export const LoginContentComp: FC<LoginContentProps> = ({
             <p>{t('wechat mock description')}</p>
           </div>
         </G>
-        <img
-          className={cls('qr-wrap')}
-          src={Assets.editor.header.login.mockQr}></img>
+        <img className={cls('qr-wrap')} src={Assets.home.login.mockQr}></img>
         <G horizontal center className={cls('scan-tip')}>
           <Lucide icon={QrCode} size={16} />
           {t('open wechat to scan')}
