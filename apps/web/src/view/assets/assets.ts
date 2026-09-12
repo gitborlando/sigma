@@ -30,6 +30,9 @@ import editorDesignStrokeSideLeft from './editor/design/stroke/side-left.svg'
 import editorDesignStrokeSideRight from './editor/design/stroke/side-right.svg'
 import editorDesignStrokeSideTop from './editor/design/stroke/side-top.svg'
 import editorDesignStrokeStrokeWidth from './editor/design/stroke/stroke-width.svg'
+import editorHeaderLoginGoogle from './editor/header/login/google.svg'
+import editorHeaderLoginMockQr from './editor/header/login/mock-qr.svg'
+import editorHeaderLoginWechat from './editor/header/login/wechat.svg'
 import editorHeaderMove from './editor/header/move.svg'
 import editorHeaderSelect from './editor/header/select.svg'
 import editorNodeEllipse from './editor/node/ellipse.svg'
@@ -86,7 +89,15 @@ export const Assets = {
         strokeWidth: editorDesignStrokeStrokeWidth,
       },
     },
-    header: { move: editorHeaderMove, select: editorHeaderSelect },
+    header: {
+      login: {
+        google: editorHeaderLoginGoogle,
+        mockQr: editorHeaderLoginMockQr,
+        wechat: editorHeaderLoginWechat,
+      },
+      move: editorHeaderMove,
+      select: editorHeaderSelect,
+    },
     node: {
       ellipse: editorNodeEllipse,
       frame: editorNodeFrame,

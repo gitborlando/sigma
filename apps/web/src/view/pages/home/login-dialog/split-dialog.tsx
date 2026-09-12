@@ -3,7 +3,7 @@ import { LoginContentComp, LoginContentProps } from './login-content'
 export const SplitLoginDialogComp: FC<LoginContentProps> = (props) => {
   return (
     <div className={cls()}>
-      <section className={cls('brand')}>
+      <G vertical='auto 1fr' className={cls('brand')}>
         <span className={cls('orb-one')} />
         <span className={cls('orb-two')} />
         <div className={cls('grid')} />
@@ -24,7 +24,7 @@ export const SplitLoginDialogComp: FC<LoginContentProps> = (props) => {
         <div className={cls('status')}>
           <i /> SIGMA CLOUD · ONLINE
         </div>
-      </section>
+      </G>
       <section className={cls('form')}>
         <LoginContentComp {...props} />
       </section>
@@ -95,6 +95,7 @@ const cls = classes(css`
     animation-delay: -3s;
   }
   &-brand-logo {
+    height: fit-content;
     position: relative;
     z-index: 1;
     display: flex;
@@ -113,17 +114,15 @@ const cls = classes(css`
   &-showcase {
     position: relative;
     z-index: 1;
-    margin-top: 118px;
+    padding-top: 30px;
     max-width: 360px;
     h1 {
-      max-width: 330px;
       font-size: 42px;
       line-height: 1.02;
       letter-spacing: -2.4px;
     }
     p {
       margin-top: 20px;
-      max-width: 330px;
       color: rgba(255, 255, 255, 0.68);
       font-size: 13px;
       line-height: 1.7;
@@ -173,7 +172,7 @@ const cls = classes(css`
     min-width: 0;
     display: grid;
     place-items: center;
-    padding: 54px 48px 42px;
+    padding: 54px 38px;
     background:
       radial-gradient(circle at 100% 0%, #f0efff 0, transparent 38%), white;
   }
