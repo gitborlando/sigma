@@ -11,7 +11,6 @@ export type ServiceInstances<Map extends ServiceMap> = {
 }
 
 export abstract class Service {
-  disposed = false
   protected disposer = new Disposer()
 
   protected effect(...disposers: DisposerFunc[]) {
@@ -20,7 +19,6 @@ export abstract class Service {
 
   dispose() {
     this.disposer.dispose()
-    this.disposed = true
   }
 }
 

@@ -1,21 +1,27 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { AuthSchema } from '@sigma/api'
+import { useQuery } from '@tanstack/react-query'
 import { Github, LucideLanguages } from 'lucide-react'
+import { Fragment } from 'react'
 import { Btn } from 'src/view/component/btn'
 import { Lucide } from 'src/view/component/lucide'
+import { Menu, MenuItem } from 'src/view/component/menu'
 import { Icon } from 'src/view/component/svg-icon'
-import { Text } from 'src/view/component/text'
-import { useAsyncState } from 'src/view/hooks/toolkit/use-async-state'
 import { useGlobalServices } from 'src/view/hooks/use-services'
 import { getLanguage, setLanguage } from 'src/view/i18n/config'
+import { invalidateAuthState } from 'src/view/pages/home'
 import { LoginDialogComp } from 'src/view/pages/home/login-dialog'
-import { QUERY_KEY } from 'src/view/query'
+import { invalidateQuery, QUERY_KEY } from 'src/view/query'
+import { useHomeState } from 'src/view/states/home'
 
 export const HomeHeaderComp: FC<{}> = observer(({}) => {
+  const navigate = useNavigate()
   const { uploader, objectMgr, authAPI } = useGlobalServices()
   const { fileAction } = useGlobalServices()
-  const query = useQueryClient()
-  const navigate = useNavigate()
-  const [loginOpen, setLoginOpen] = useState(false)
+
+  const { data: user } = useQuery({
+    queryKey: [QUERY_KEY.getUser],
+    queryFn: authAPI.getUser,
+  })
 
   const handleLanguageChange = () => {
     setLanguage(getLanguage() === 'zh' ? 'en' : 'zh')
@@ -29,8 +35,6 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
     objectMgr.addObject('file', file.name, file)
     navigate(`fileId/${file.name}?applyRecord=true&maxError=10`)
   }
-
-  const [user] = useAsyncState(null, authAPI.getUser)
 
   return (
     <G className={cls()} horizontal='auto 1fr' center gap={16}>
@@ -49,11 +53,6 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
       </G>
       <G className={cls('right')} horizontal center gap={16}>
         <G horizontal center gap={8}>
-          {!user && (
-            <Btn variant='outline' onClick={() => setLoginOpen(true)}>
-              {t('login')}
-            </Btn>
-          )}
           <Btn
             variant='outline'
             onClick={() => navigate('fileId/mock?applyRecord=true&maxError=10')}>
@@ -66,34 +65,49 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
             variant='solid'
             onClick={async () => {
               await fileAction.newFile(false)
-              query.invalidateQueries({ queryKey: [QUERY_KEY.listFiles] })
+              invalidateQuery([QUERY_KEY.listFiles])
             }}>
             {t('new file')}
           </Btn>
-          <Btn variant='solid'>{t('new file')}</Btn>
-          <Btn variant='outline' onClick={() => authAPI.signOut()}>
-            退出登陆
-          </Btn>
         </G>
-        {user ? (
-          <>
-            <img src={user?.avatar} className={cls('avatar')} />
-            <Text variant='common'>{user?.name}</Text>
-          </>
-        ) : (
-          <Btn
-            variant='outline'
-            onClick={() => authAPI.signInWithOAuth({ provider: 'google' })}>
-            Google登录
-          </Btn>
-        )}
+        <AuthComp user={user} />
       </G>
-      <LoginDialogComp
-        variant='split'
-        open={loginOpen}
-        onOpenChange={setLoginOpen}
-      />
+      <LoginDialogComp />
     </G>
+  )
+})
+
+const AuthComp: FC<{ user: AuthSchema['user'] | Nil }> = observer(({ user }) => {
+  const homeState = useHomeState()
+  const { authAPI } = useGlobalServices()
+
+  let menus: MenuItem[][] = [
+    [
+      {
+        name: '退出登陆',
+        callback: async () => {
+          await authAPI.signOut()
+          invalidateAuthState()
+        },
+      },
+    ],
+  ]
+
+  return (
+    <Fragment>
+      {!user && (
+        <Btn variant='outline' onClick={() => (homeState.loginDialogOpened = true)}>
+          {t('login')}
+        </Btn>
+      )}
+      {user ? (
+        <Menu menus={menus}>
+          <img src={user?.avatar} className={cls('avatar')} />
+        </Menu>
+      ) : (
+        <img src={Assets.home.login.guest} className={cls('avatar')} />
+      )}
+    </Fragment>
   )
 })
 
@@ -126,5 +140,6 @@ const cls = classes(css`
     width: 32px;
     height: 32px;
     border-radius: 50%;
+    cursor: pointer;
   }
 `)

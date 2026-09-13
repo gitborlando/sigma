@@ -43,3 +43,19 @@ export const tryCatch = async <T>(func: () => Promise<T>, final?: () => void) =>
     final?.()
   }
 }
+
+export const Try = async <T>(
+  promise: Promise<T> | (() => Promise<T>),
+  error?: (e: Error) => void,
+  final?: () => void,
+) => {
+  const pending = typeof promise === 'function' ? promise() : promise
+  try {
+    return [await pending, undefined] as const
+  } catch (e) {
+    error && error(e as Error)
+    return [undefined, e as Error] as const
+  } finally {
+    final?.()
+  }
+}

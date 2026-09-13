@@ -44,6 +44,10 @@ import favIconSigmaLoading from './fav-icon/sigma-loading.svg'
 import favIconSigmaLogoText2 from './fav-icon/sigma-logo-text-2.svg'
 import favIconSigmaLogoText from './fav-icon/sigma-logo-text.svg'
 import favIconSigmaLogo from './fav-icon/sigma-logo.jpg'
+import homeLoginGoogle from './home/login/google.svg'
+import homeLoginGuest from './home/login/guest.svg'
+import homeLoginMockQr from './home/login/mock-qr.svg'
+import homeLoginWechat from './home/login/wechat.svg'
 
 export const Assets = {
   editor: {
@@ -103,5 +107,13 @@ export const Assets = {
     sigmaLogoText2: favIconSigmaLogoText2,
     sigmaLogoText: favIconSigmaLogoText,
     sigmaLogo: favIconSigmaLogo,
+  },
+  home: {
+    login: {
+      google: homeLoginGoogle,
+      guest: homeLoginGuest,
+      mockQr: homeLoginMockQr,
+      wechat: homeLoginWechat,
+    },
   },
 } as const

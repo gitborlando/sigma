@@ -78,8 +78,31 @@
     "description": "Service",
   },
 
+  "View State": {
+    "prefix": "statx",
+    "scope": "typescript",
+    "body": [
+      "import { Service } from '@gitborlando/di-service'",
+      "import autoBind from 'auto-bind'",
+      "import { makeObservable } from 'mobx'",
+      "import { createContext, useContext } from 'react'",
+      "",
+      "export class $1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g}State extends Service {",
+      "  constructor() {",
+      "    super()",
+      "    autoBind(makeObservable(this))",
+      "  }",
+      "}",
+      "",
+      "export const $1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g}StateContext = createContext<$1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g}State>(null!)",
+      "",
+      "export const use$1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g}State = () => useContext($1${TM_FILENAME_BASE/(^|-)([a-z])/${2:/upcase}/g}StateContext)",
+    ],
+    "description": "快速生成带 React Context 的视图状态",
+  },
+
   "Private Readonly Service Dependency Injection": {
-    "prefix": "prsr",
+    "prefix": "xrsr",
     "scope": "typescript",
     "body": ["private readonly $1: ${1/([a-z])(.*)/${1:/upcase}${2}/},"],
     "description": "快速生成 private readonly 服务注入",

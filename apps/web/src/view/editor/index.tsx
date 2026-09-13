@@ -36,12 +36,16 @@ export const EditorComp = withSuspense(
       const session = editor.resolve('session')
 
       useEffect(() => {
+        let disposed = false
         elemDrawer.setTextBreaker(textBreaker)
         iife(async () => {
           await session.setupFile(fileId!)
-          if (!editor.disposed) setIsSetup(true)
+          if (!disposed) setIsSetup(true)
         })
-        return () => editor.dispose()
+        return () => {
+          editor.dispose()
+          disposed = true
+        }
       }, [])
 
       useEffect(() => {

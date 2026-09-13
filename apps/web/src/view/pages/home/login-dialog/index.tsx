@@ -1,25 +1,15 @@
 import { Dialog } from '@ark-ui/react/dialog'
 import { Portal } from '@ark-ui/react/portal'
 import { X } from 'lucide-react'
+import { Try } from 'src/shared/export'
 import { Lucide } from 'src/view/component/lucide'
-import { useGlobalServices } from 'src/view/hooks/use-global'
-import { MinimalLoginDialogComp } from './minimal-dialog'
+import { useGlobalServices } from 'src/view/hooks/use-services'
+import { useHomeState } from 'src/view/states/home'
 import { SplitLoginDialogComp } from './split-dialog'
 
-export type LoginDialogVariant = 'split' | 'minimal'
-
-export type LoginDialogProps = {
-  variant: LoginDialogVariant
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-export const LoginDialogComp: FC<LoginDialogProps> = ({
-  variant,
-  open,
-  onOpenChange,
-}) => {
-  const { auth } = useGlobalServices()
+export const LoginDialogComp: FC<{}> = observer(({}) => {
+  const homeState = useHomeState()
+  const { authAPI } = useGlobalServices()
   const [mode, setMode] = useState<'options' | 'wechat'>('options')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -36,7 +26,7 @@ export const LoginDialogComp: FC<LoginDialogProps> = ({
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) reset()
-    onOpenChange(nextOpen)
+    homeState.loginDialogOpened = nextOpen
   }
 
   const handleGoogleLogin = async () => {
@@ -44,14 +34,12 @@ export const LoginDialogComp: FC<LoginDialogProps> = ({
 
     setLoading(true)
     setError(null)
-    try {
-      await auth.signInWithOAuth({ provider: 'google' })
-    } catch (cause) {
-      console.error(cause)
-      setError(t('google login failed'))
-    } finally {
-      setLoading(false)
-    }
+
+    await Try(
+      authAPI.signInWithOAuth({ provider: 'google' }),
+      () => setError(t('google login failed')),
+      () => setLoading(false),
+    )
   }
 
   const contentProps = {
@@ -68,7 +56,7 @@ export const LoginDialogComp: FC<LoginDialogProps> = ({
 
   return (
     <Dialog.Root
-      open={open}
+      open={homeState.loginDialogOpened}
       onOpenChange={({ open: nextOpen }) => handleOpenChange(nextOpen)}
       lazyMount
       unmountOnExit>
@@ -83,18 +71,13 @@ export const LoginDialogComp: FC<LoginDialogProps> = ({
             <Dialog.CloseTrigger className={cls('close')} aria-label={t('close')}>
               <Lucide icon={X} size={18} />
             </Dialog.CloseTrigger>
-            {variant === 'split' ? (
-              <SplitLoginDialogComp {...contentProps} />
-            ) : (
-              <MinimalLoginDialogComp {...contentProps} />
-            )}
+            <SplitLoginDialogComp {...contentProps} />
           </Dialog.Content>
         </Dialog.Positioner>
       </Portal>
     </Dialog.Root>
   )
-}
-
+})
 const cls = classes(css`
   &-backdrop {
     position: fixed;
