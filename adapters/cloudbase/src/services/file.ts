@@ -22,6 +22,10 @@ export class CloudBaseFileAPI extends FileAPI {
     return this.transformFile(data[0])
   }
 
+  async getFile2(id: string): Promise<FileSchema['file']> {
+    const { data } = await cloudbase.database().collection('files').doc(id).get()
+  }
+
   async listFiles(): Promise<FileSchema['file'][]> {
     const { data, error } = await this.from('files').select('*').limit(30)
 
