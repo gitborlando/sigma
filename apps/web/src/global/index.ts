@@ -1,5 +1,10 @@
-import { ServiceContainer, ServiceInstances } from '@gitborlando/di-service'
+import {
+  ScopedDI,
+  ServiceContainer,
+  ServiceInstances,
+} from '@gitborlando/di-service'
 import { apiServices } from '@sigma/api'
+import { cloudBaseServices } from '@sigma/cloudbase'
 import { FileAction } from 'src/global/file'
 import { ImageMgr } from './resource/image-mgr'
 import { ObjectMgr } from './resource/object-mgr'
@@ -28,4 +33,11 @@ export class Global extends ServiceContainer<typeof globalServices> {
     if (this.instance) return this.instance
     return (this.instance = new this())
   }
+}
+
+export function setupCloudbaseAPI(container: ScopedDI) {
+  container.override(apiServices.authAPI, cloudBaseServices.authAPI)
+  container.override(apiServices.storageAPI, cloudBaseServices.storageAPI)
+  container.override(apiServices.fileAPI, cloudBaseServices.fileAPI)
+  container.override(apiServices.docAPI, cloudBaseServices.docAPI)
 }
