@@ -11,7 +11,6 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "typecheck:web": "pnpm --filter @sigma/web typecheck",
     "edgeone": "pnpm --filter @sigma/web edgeone",
-    "generate:schema": "pnpm --filter @sigma/cloudbase generate:schema",
     "re-i": "find . -path ./.git -prune -o -name node_modules -type d -prune -exec rm -rf '{}' + && pnpm i"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 import { Service } from '@gitborlando/di-service'
 import { jsonParse } from '@gitborlando/utils'
-import { AuthAPI, FileAPI } from '@sigma/api'
+import { FileAPI } from '@sigma/api'
 import JSZip from 'jszip'
 import { Undo } from 'src/editor/action/undo'
 import { DocCreator } from 'src/editor/doc/creator'
@@ -27,7 +27,6 @@ export class FileAction extends Service {
     private readonly layerNodeTree: LayerNodeTree,
     private readonly objectMgr: ObjectMgr,
     private readonly fileAPI: FileAPI,
-    private readonly authAPI: AuthAPI,
   ) {
     super()
     autoBind(this)
@@ -35,12 +34,7 @@ export class FileAction extends Service {
 
   async newFile(isMock: boolean) {
     const doc = isMock ? mock_doc(this.docCreator) : this.docCreator.doc()
-    const user = await this.authAPI.getUser()
-    if (!user) throw new Error('User not authenticated')
-
-    const [file, error] = await tryCatch(() =>
-      this.fileAPI.createFile({ userId: user.id }),
-    )
+    const [file, error] = await tryCatch(() => this.fileAPI.createFile())
     if (error) throw error
 
     await this.yDoc.setup(file.id, doc)
@@ -49,7 +43,7 @@ export class FileAction extends Service {
   }
 
   async deleteFile(id: string) {
-    await tryCatch(() => this.fileAPI.deleteFile(id))
+    await this.fileAPI.deleteFile(id)
     await new IndexeddbPersistence(id, new Y.Doc()).clearData()
   }
 

@@ -1,6 +1,6 @@
 import { limitConsoleMaxError } from '@gitborlando/utils/browser'
 import { setupAPIImplements } from '@sigma/api'
-import { cloudBaseServices } from '@sigma/cloudbase'
+import { supabaseServices } from '@sigma/supabase'
 import { enablePatches } from 'immer'
 import { configure } from 'mobx'
 import { createRoot } from 'react-dom/client'
@@ -14,7 +14,7 @@ limitConsoleMaxError({ enable: isDEV })
 configure({ enforceActions: 'never' })
 
 const global = Global.getInstance()
-setupAPIImplements(global.container, cloudBaseServices)
+setupAPIImplements(global.container, supabaseServices)
 
 createRoot(document.getElementById('root')!).render(
   <GlobalContext.Provider value={global}>

@@ -15,6 +15,6 @@ export type FileSchema = z.infer<typeof fileSchema>
 export abstract class FileAPI extends Service {
   abstract getFile(id: string): Promise<FileSchema['file']>
   abstract listFiles(): Promise<FileSchema['file'][]>
-  abstract createFile(option: { userId: string }): Promise<FileSchema['file']>
+  abstract createFile(): Promise<FileSchema['file']>
   abstract deleteFile(id: string): Promise<void>
 }

@@ -30,7 +30,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@rc-component/input-number": "^1.6.2",
     "@sigma/api": "workspace:^",
-    "@sigma/cloudbase": "workspace:^",
+    "@sigma/supabase": "workspace:^",
     "@tanstack/react-query": "^5.90.5",
     "@tanstack/react-virtual": "^3.13.12",
     "auto-bind": "^5.0.1",
