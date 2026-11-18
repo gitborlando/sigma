@@ -12,6 +12,7 @@ import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useEditorServices } from 'src/view/hooks/use-services'
+import { AiPanel } from '../ai/panel'
 
 export const EditorHeaderComp: FC<{}> = observer(({}) => {
   const { stageViewport, stageCreate } = useEditorServices()
@@ -46,6 +47,7 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
         </G>
       </G>
       <G center horizontal gap={8} jc='flex-end'>
+        <AiPanel />
         <EditorHeaderDevSnapshotComp x-if={isDEV} />
         <EditorHeaderHistoryComp />
         <EditorHeaderSettingComp />

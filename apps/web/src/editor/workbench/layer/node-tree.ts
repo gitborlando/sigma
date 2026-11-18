@@ -15,6 +15,7 @@ export class LayerNodeTree extends Service {
 
   @computed get nodeInfoList() {
     this.nodeInfoVersion
+    this.select.selectPageId
     return this.getNodeInfoList()
   }
 

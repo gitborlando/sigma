@@ -1,3 +1,4 @@
+import { AiPreviewComp } from '../ai/preview'
 import { iife } from '@gitborlando/utils'
 import { CSSProperties } from 'react'
 import { DocHelper } from 'src/editor/doc/helper'
@@ -39,6 +40,7 @@ export const StageComp: FC<{}> = observer(({}) => {
   return (
     <G>
       <SurfaceComp />
+      <AiPreviewComp />
       <FPSComp />
       <CooperateObservingBorderComp />
     </G>
