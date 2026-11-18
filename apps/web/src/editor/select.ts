@@ -40,7 +40,8 @@ export class Select extends Service {
   }
 
   @computed get selectIds() {
-    return Object.keys(this.selection)
+    const graphs = this.yDoc.observedDoc.graphs
+    return Object.keys(this.selection).filter((id) => graphs[id]?.type === 'node')
   }
 
   get observedSelectedNodes() {
@@ -73,7 +74,7 @@ export class Select extends Service {
   }
 
   clearSelect() {
-    if (this.selectIds.length === 0) return
+    if (Object.keys(this.selection).length === 0) return
 
     this.selectUndo.set((state) => {
       state.selection = {}
@@ -111,7 +112,7 @@ export class Select extends Service {
   }
 
   selectPage(id: ID) {
-    if (this.selectPageId === id && this.selectIds.length === 0) return
+    if (this.selectPageId === id && Object.keys(this.selection).length === 0) return
 
     this.selectUndo.set((state) => {
       state.selectPageId = id

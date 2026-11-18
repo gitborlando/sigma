@@ -1,3 +1,4 @@
+import { AiPreviewComp } from '../ai/preview'
 import { iife } from '@gitborlando/utils'
 import { CSSProperties } from 'react'
 import { renderElem } from 'src/editor/render/react/reconciler'
@@ -38,6 +39,7 @@ export const StageComp: FC<{}> = observer(({}) => {
   return (
     <G>
       <SurfaceComp />
+      <AiPreviewComp />
       <FPSComp />
       <CooperateObservingBorderComp />
     </G>

@@ -12,6 +12,7 @@ export type UndoInfo = {
   type: 'state' | 'client' | 'all'
   description: string
   clientState?: MobxUndoState
+  clientChanged?: boolean
   statePatches?: YDocPatch[]
 }
 
@@ -71,7 +72,7 @@ export class Undo extends Service {
       info.statePatches = this.yDoc.getPatches()
     }
     if (type === 'client' || type === 'all') {
-      this.mobxUndo.archive()
+      info.clientChanged = this.mobxUndo.archive()
       info.clientState = toJS(this.mobxUndo.state)
     }
 
@@ -99,7 +100,9 @@ export class Undo extends Service {
     if (!info) return
 
     const replayYDoc = () => this.yUndo?.[type]()
-    const replayClientState = () => this.mobxUndo[type]()
+    const replayClientState = () => {
+      if (info.clientChanged !== false) this.mobxUndo[type]()
+    }
 
     this.yDoc.runBatch(() => {
       match(info.type, {

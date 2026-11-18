@@ -1,4 +1,6 @@
+import { AiPreview } from './ai/preview'
 import { ServiceContainer, ServiceInstances } from '@gitborlando/di-service'
+import { AiEdit } from './ai/apply-edit'
 import { Command } from 'src/editor/action/command'
 import { NodeAction } from 'src/editor/action/node'
 import { PageAction } from 'src/editor/action/page'
@@ -36,6 +38,8 @@ import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { YSync } from 'src/editor/y-adapter/y-sync'
 
 const editorServices = {
+  aiEdit: AiEdit,
+  aiPreview: AiPreview,
   /** action */
   undo: Undo,
   command: Command,
