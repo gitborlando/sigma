@@ -6,9 +6,9 @@ import { DocMutator } from '../doc/mutator'
 import { MRect } from '../geometry'
 import { Select } from '../select'
 import { YDoc } from '../y-adapter/y-doc'
-import { readAiPageMarker } from './read-page'
 import { normalizeAiEdit } from './normalize-edit'
-import type { AiFill } from './schema'
+import { readAiPageMarker } from './read-page'
+import type { AiFill, AiTarget } from './schema'
 
 type Changes = Extract<
   import('./schema').AiEditResult['operations'][number],
@@ -27,7 +27,7 @@ export class AiEdit extends Service {
     super()
   }
 
-  apply(input: unknown, target: 'new' | 'current', pageId: string, marker?: string) {
+  apply(input: unknown, target: AiTarget, pageId: string, marker?: string) {
     const result = normalizeAiEdit(input, pageId, target)
     const doc = this.yDoc.doc
     if (target === 'current') {

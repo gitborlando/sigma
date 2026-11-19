@@ -1,30 +1,36 @@
 import { Service } from '@gitborlando/di-service'
 import { makeObservable, observable } from 'mobx'
-import type { AiPageSnapshot } from './schema'
+import { projectAiPreview, type AiPreviewScene } from './preview-scene'
+import type { AiPageSnapshot, AiTarget } from './schema'
 
 @reflection
 export class AiPreview extends Service {
-  @observable.ref operations: unknown[] = []
-  @observable.ref snapshot?: AiPageSnapshot
-  @observable target: 'new' | 'current' = 'new'
   @observable active = false
+  @observable.ref scene?: AiPreviewScene
+
+  private target: AiTarget = 'new'
+  private snapshot?: AiPageSnapshot
 
   constructor() {
     super()
     makeObservable(this)
   }
-  begin(target: 'new' | 'current', snapshot?: AiPageSnapshot) {
+
+  begin(target: AiTarget, snapshot?: AiPageSnapshot) {
     this.target = target
     this.snapshot = snapshot
-    this.operations = []
     this.active = true
+    this.scene = projectAiPreview(target, snapshot, [])
   }
+
   update(operations: unknown[]) {
-    this.operations = operations
+    if (!this.active) return
+    this.scene = projectAiPreview(this.target, this.snapshot, operations)
   }
+
   clear() {
     this.active = false
-    this.operations = []
+    this.scene = undefined
     this.snapshot = undefined
   }
 }
