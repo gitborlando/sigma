@@ -88,6 +88,7 @@ export const aiConfigSchema = z
 export type AiFill = z.infer<typeof aiFillSchema>
 export type AiEditResult = z.infer<typeof aiEditSchema>
 export type AiConfig = z.infer<typeof aiConfigSchema>
+export type AiTarget = 'new' | 'current'
 export type AiSnapshotNode = {
   id: string
   type: 'frame' | 'rect' | 'ellipse' | 'text' | 'unsupported'
