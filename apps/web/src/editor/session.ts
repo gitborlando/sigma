@@ -11,11 +11,13 @@ import { StageEvent } from 'src/editor/stage/event'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
+import { YSync } from 'src/editor/y-adapter/y-sync'
 
 @reflection
 export class Session extends Service {
   constructor(
     private readonly yDoc: YDoc,
+    private readonly ySync: YSync,
     private readonly undo: Undo,
     private readonly select: Select,
     private readonly renderSurface: RenderSurface,
@@ -36,6 +38,8 @@ export class Session extends Service {
     if (id === this.sessionId) return
 
     await this.yDoc.setup(id, doc)
+    await this.ySync.setup(id)
+
     setupDocGetter(() => this.yDoc.doc)
 
     this.yDoc.register(this.layerNodeTree.onYDocPatch)

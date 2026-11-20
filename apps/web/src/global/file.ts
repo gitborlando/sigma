@@ -1,31 +1,15 @@
 import { Service } from '@gitborlando/di-service'
-import { jsonParse } from '@gitborlando/utils'
+import { YPlain } from '@gitborlando/y-plain'
 import { FileAPI } from '@sigma/api'
-import JSZip from 'jszip'
-import { Undo } from 'src/editor/action/undo'
 import { DocCreator } from 'src/editor/doc/creator'
-import { migrateDoc } from 'src/editor/doc/migrate'
 import { mock_doc } from 'src/editor/doc/mock'
-import { Select } from 'src/editor/select'
-import { LayerNodeTree } from 'src/editor/workbench/layer/node-tree'
-import { YAware } from 'src/editor/y-adapter/y-aware'
-import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { YSync } from 'src/editor/y-adapter/y-sync'
-import { ObjectMgr } from 'src/global/resource/object-mgr'
-import { tryCatch } from 'src/shared/export'
+import { Try } from 'src/shared/export'
 import { IndexeddbPersistence } from 'y-indexeddb'
 
 @reflection
 export class FileAction extends Service {
   constructor(
     private readonly docCreator: DocCreator,
-    private readonly yDoc: YDoc,
-    private readonly ySync: YSync,
-    private readonly yAware: YAware,
-    private readonly undo: Undo,
-    private readonly select: Select,
-    private readonly layerNodeTree: LayerNodeTree,
-    private readonly objectMgr: ObjectMgr,
     private readonly fileAPI: FileAPI,
   ) {
     super()
@@ -34,53 +18,22 @@ export class FileAction extends Service {
 
   async newFile(isMock: boolean) {
     const doc = isMock ? mock_doc(this.docCreator) : this.docCreator.doc()
-    const [file, error] = await tryCatch(() => this.fileAPI.createFile())
-    if (error) throw error
+    const yDoc = new Y.Doc()
 
-    await this.yDoc.setup(file.id, doc)
+    new YPlain(yDoc.getMap('doc'), doc)
 
-    // const update = Y.encodeStateAsUpdate(this.yDoc.yDoc)
+    const id = crypto.randomUUID()
+    const update = Y.encodeStateAsUpdate(yDoc)
+
+    Try(
+      () => this.fileAPI.createFile(id, update),
+      Try.throwError,
+      () => yDoc.destroy(),
+    )
   }
 
   async deleteFile(id: string) {
     await this.fileAPI.deleteFile(id)
     await new IndexeddbPersistence(id, new Y.Doc()).clearData()
-  }
-
-  async loadFile(id: string) {
-    return migrateDoc(await this.fetchFile(id))
-  }
-
-  private async fetchFile(id: string) {
-    if (id === 'mock') {
-      const doc = mock_doc(this.docCreator)
-      if (doc) return doc
-      throw new Error('Failed to initialize mock doc')
-    }
-
-    const jsZip = new JSZip()
-
-    const object = this.objectMgr.getObject('file', id)
-    if (object) {
-      const docText = await object.file.text()
-      const doc = jsonParse(docText) as S.Doc | undefined
-      this.objectMgr.removeObject('file', id)
-      if (doc) return doc
-
-      throw new Error('Failed to initialize doc')
-    }
-
-    // const fileMeta = await this.userFileAPI.getFileMeta(id)
-    // if (!fileMeta) throw new Error('Failed to load file metadata')
-
-    // const zipBuffer = await this.userFileAPI.loadFile(fileMeta.url)
-    // const zipFiles = await jsZip.loadAsync(zipBuffer)
-    // const fileText = await zipFiles
-    //   .file(`${decodeURIComponent(fileMeta.name)}.json`)
-    //   ?.async('text')
-    // const doc = jsonParse(fileText) as S.Doc | undefined
-    // if (doc) return doc
-
-    // throw new Error('Failed to initialize doc')
   }
 }

@@ -23,6 +23,20 @@
   background-color: white;
 }
 
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
 body {
   font-family: 'GoogleSansCode';
   --gray-border: rgba(138, 138, 138, 0.15);

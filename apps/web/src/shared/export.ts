@@ -34,28 +34,36 @@ export const memorized = <F extends (deps: any[]) => any>(func: F) => {
   }
 }
 
-export const tryCatch = async <T>(func: () => Promise<T>, final?: () => void) => {
+type TryFunction = {
+  <T>(
+    promise: Promise<T> | (() => Promise<T>),
+    error?: (e: Error) => void,
+    final?: () => void,
+  ): Promise<readonly [T, undefined] | readonly [undefined, Error]>
+  throwError: (error: Error) => never
+}
+
+const runTry = async <T>(
+  promise: Promise<T> | (() => Promise<T>),
+  error?: (e: Error) => void,
+  final?: () => void,
+) => {
   try {
-    return [await func(), undefined] as const
+    return [
+      await (typeof promise === 'function' ? promise() : promise),
+      undefined,
+    ] as const
   } catch (e) {
-    return [undefined, e as Error] as const
+    const caught = e instanceof Error ? e : new Error(String(e))
+    error?.(caught)
+    return [undefined, caught] as const
   } finally {
     final?.()
   }
 }
 
-export const Try = async <T>(
-  promise: Promise<T> | (() => Promise<T>),
-  error?: (e: Error) => void,
-  final?: () => void,
-) => {
-  const pending = typeof promise === 'function' ? promise() : promise
-  try {
-    return [await pending, undefined] as const
-  } catch (e) {
-    error && error(e as Error)
-    return [undefined, e as Error] as const
-  } finally {
-    final?.()
-  }
-}
+export const Try: TryFunction = Object.assign(runTry, {
+  throwError: (error: Error): never => {
+    throw error
+  },
+})

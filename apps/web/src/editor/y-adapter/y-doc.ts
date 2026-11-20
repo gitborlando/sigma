@@ -18,6 +18,7 @@ export class YDoc extends Service {
   persistence!: IndexeddbPersistence
 
   flushPatch$ = Signal.create<YDocPatch>()
+  beforeDestroy$ = Signal.create()
 
   private patches: YDocPatch[] = []
   private downstream = new Set<YDocDownstream>()
@@ -62,7 +63,10 @@ export class YDoc extends Service {
 
     this.plain = autoBind(new YPlain(this.yDoc.getMap<unknown>('doc'), doc))
 
-    this.effect(() => this.yDoc.destroy())
+    this.effect(() => {
+      this.beforeDestroy$.dispatch()
+      this.yDoc.destroy()
+    })
     this.effect(this.plain.observe())
     this.effect(this.plain.subscribe(this.distribute))
   }

@@ -1,3 +1,5 @@
+import { match } from '@gitborlando/utils'
+import { ArrowUp, Check, Cloud, X } from 'lucide-react'
 import { IStageCreateType } from 'src/editor/stage/interact/create'
 import { Btn } from 'src/view/component/btn'
 import { EditableText } from 'src/view/component/editable-text'
@@ -29,6 +31,7 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
           />
         </Menu>
         <DocNameComp />
+        <SyncStatusComp />
       </G>
       <G center horizontal className={cls('centerGroup')}>
         <UndoGroup />
@@ -49,6 +52,34 @@ export const EditorHeaderComp: FC<{}> = observer(({}) => {
         <EditorHeaderZoomComp />
       </G>
     </G>
+  )
+})
+
+const SyncStatusComp: FC<{}> = observer(() => {
+  const { ySync } = useEditorServices()
+  const StatusIcon = match(ySync.status, {
+    pending: null,
+    syncing: () => ArrowUp,
+    synced: () => Check,
+    error: () => X,
+  })
+  const label = match(ySync.status, {
+    pending: t('sync pending'),
+    syncing: t('syncing'),
+    synced: t('synced'),
+    error: t('sync failed'),
+  })
+  return (
+    <span
+      className={cls('syncStatus')}
+      title={label}
+      aria-label={label}
+      role='status'>
+      <Cloud size={20} strokeWidth={1.5} />
+      {StatusIcon && (
+        <StatusIcon className={cls('syncStatus-icon')} size={8} strokeWidth={2} />
+      )}
+    </span>
   )
 })
 
@@ -148,6 +179,22 @@ const UndoGroup: FC<{}> = observer(() => {
 const cls = classes(css`
   padding-inline: 8px;
   border-bottom: 1px solid var(--gray-border);
+
+  &-syncStatus {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+
+    &-icon {
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      transform: translate(-50%, -50%);
+    }
+  }
 
   &-centerGroup {
     justify-content: center;
