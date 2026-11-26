@@ -22,6 +22,7 @@ export class StageEvent extends Service {
   private isPointerEventNone = false
 
   constructor(
+    private readonly docHelper: DocHelper,
     private readonly renderTree: RenderTree,
     private readonly renderSurface: RenderSurface,
     private readonly renderPipeline: RenderPipeline,
@@ -109,7 +110,7 @@ export class StageEvent extends Service {
 
     const hovered = firstOne(this.hitSceneElems)
     if (!this.hintId) {
-      if (hovered?.id && DocHelper.isRootFrame(hovered.id)) return
+      if (hovered?.id && this.docHelper.isRootFrame(hovered.id)) return
       this.hoverId = this.hoverId !== hovered?.id ? hovered?.id : this.hoverId
     }
   }

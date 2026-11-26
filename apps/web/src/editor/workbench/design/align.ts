@@ -28,6 +28,7 @@ export class DesignAlign extends Service {
   private aligned = false
 
   constructor(
+    private readonly docHelper: DocHelper,
     private readonly yDoc: YDoc,
     private readonly undo: Undo,
     private readonly select: Select,
@@ -58,7 +59,7 @@ export class DesignAlign extends Service {
       this.toAlignNodes = [...selectedNodes]
       this.canAlign = true
     } else if (selectedNodes.length === 1 && DocHelper.isParent(selectedNodes[0])) {
-      this.toAlignNodes = DocHelper.getChildren(selectedNodes[0])
+      this.toAlignNodes = this.docHelper.getChildren(selectedNodes[0])
       this.canAlign = true
     } else this.canAlign = false
   }

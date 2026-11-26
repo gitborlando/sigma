@@ -5,7 +5,7 @@ import { isLeftMouse, listen } from '@gitborlando/utils/browser'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { SelectAction } from 'src/editor/action/select'
-import { findNode } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { IMatrix, Matrix, MRect } from 'src/editor/geometry'
@@ -33,6 +33,8 @@ export class StageSelect extends Service {
   private isPointerDown = false
 
   constructor(
+    private readonly docFinder: DocFinder,
+    private readonly docHelper: DocHelper,
     private readonly renderTree: RenderTree,
     private readonly renderSurface: RenderSurface,
     private readonly stageEvent: StageEvent,
@@ -61,14 +63,14 @@ export class StageSelect extends Service {
 
     const selectIds = this.select.selectIds
     const hoverSelected = !!this.select.selection[this.hoverId]
-    const hoverNode = findNode(this.hoverId)
+    const hoverNode = this.docFinder.findNode(this.hoverId)
 
     if (hoverSelected) {
       if (hoverNode.variant === 'text') {
         this.onEditText(hoverNode)
       }
     } else if (selectIds.length === 1) {
-      const ancestor = DocHelper.findAncestor(
+      const ancestor = this.docHelper.findAncestor(
         this.hoverId,
         (node) => node.parentId === firstOne(selectIds),
       )
@@ -87,7 +89,7 @@ export class StageSelect extends Service {
       return
     }
 
-    if (!this.hoverId || DocHelper.isRootFrame(this.hoverId)) {
+    if (!this.hoverId || this.docHelper.isRootFrame(this.hoverId)) {
       if (leftMouse) {
         this.selectAction.clearSelect()
         this.onMarqueeSelect()
@@ -112,6 +114,7 @@ export class StageSelect extends Service {
     }
 
     const traverser = createGraphTraverse<{ matrix: IMatrix }>({
+      getDoc: () => this.yDoc.doc,
       enter: (ctx) => {
         const { graph, depth, childIds, forwardCtx } = ctx
         const elem = this.renderTree.findElem(graph.id)

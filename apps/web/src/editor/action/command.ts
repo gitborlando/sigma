@@ -6,7 +6,7 @@ import { makeObservable } from 'mobx'
 import { NodeAction } from 'src/editor/action/node'
 import { PageAction } from 'src/editor/action/page'
 import { Undo } from 'src/editor/action/undo'
-import { findNode, findPage } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
 import { Setting } from 'src/editor/setting'
@@ -22,6 +22,7 @@ export type ICommand = {
 @reflection
 export class Command extends Service {
   constructor(
+    private readonly docFinder: DocFinder,
     private readonly pageAction: PageAction,
     private readonly select: Select,
     private readonly setting: Setting,
@@ -68,7 +69,7 @@ export class Command extends Service {
       {
         name: t('delete page'),
         callback: ({ id }: IDPayload) => {
-          this.pageAction.removePage(findPage(id))
+          this.pageAction.removePage(this.docFinder.findPage(id))
         },
       },
     ]
@@ -113,7 +114,9 @@ export class Command extends Service {
         {
           name: t('print doc of one page'),
           callback: () => {
-            this.select.selectIds.forEach((id) => console.log(findNode(id)))
+            this.select.selectIds.forEach((id) =>
+              console.log(this.docFinder.findNode(id)),
+            )
           },
         },
         {

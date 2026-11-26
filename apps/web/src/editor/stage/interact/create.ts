@@ -7,7 +7,7 @@ import { makeObservable } from 'mobx'
 import { SelectAction } from 'src/editor/action/select'
 import { Undo } from 'src/editor/action/undo'
 import { DocCreator } from 'src/editor/doc/creator'
-import { findParent } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { DocMutator } from 'src/editor/doc/mutator'
 import { createLine, Matrix, MRect } from 'src/editor/geometry'
@@ -38,6 +38,7 @@ export class StageCreate extends Service {
   finishCreate$ = Signal.create<void>()
 
   constructor(
+    private readonly docFinder: DocFinder,
     private readonly renderTree: RenderTree,
     private readonly stageEvent: StageEvent,
     private readonly stageCursor: StageCursor,
@@ -184,7 +185,7 @@ export class StageCreate extends Service {
     const frame = this.stageEvent.hitSceneElems.find((elem) =>
       DocHelper.isNode(elem.node, 'frame'),
     )
-    if (frame) return findParent(frame.id)
+    if (frame) return this.docFinder.findParent(frame.id)
     return this.select.getSelectedPage()
   }
 }

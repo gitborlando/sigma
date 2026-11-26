@@ -2,7 +2,7 @@ import { Service } from '@gitborlando/di-service'
 import { clampIndex } from '@gitborlando/utils'
 import { makeObservable } from 'mobx'
 import { DocCreator } from 'src/editor/doc/creator'
-import { findParent } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { IMatrix } from 'src/editor/geometry'
@@ -12,6 +12,7 @@ import { YDoc } from '../y-adapter/y-doc'
 @reflection
 export class DocMutator extends Service {
   constructor(
+    private readonly docFinder: DocFinder,
     private readonly yDoc: YDoc,
     private readonly docCreator: DocCreator,
   ) {
@@ -58,7 +59,7 @@ export class DocMutator extends Service {
   }
 
   removeChild(parentId: ID, nodeId: ID) {
-    const parent = findParent(parentId)
+    const parent = this.docFinder.findParent(parentId)
     const index = parent.childIds.indexOf(nodeId)
     this.yDoc.delete<S.Parent>([GRAPHS, parent.id, 'childIds', index])
     this.yDoc.set<S.Node>([GRAPHS, nodeId, 'parentId'], '')
@@ -80,6 +81,7 @@ export class DocMutator extends Service {
   cloneNodes(ids: ID[]) {
     const newSelection: Record<ID, true> = {}
     const traverse = createGraphTraverse<{ newNode?: S.Node | S.Parent }>({
+      getDoc: () => this.yDoc.doc,
       enter: (ctx) => {
         const { graph, parent, forwardCtx, depth } = ctx
         if (!parent || !DocHelper.isNode(graph)) return false

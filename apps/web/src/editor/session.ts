@@ -1,7 +1,6 @@
 import { Service } from '@gitborlando/di-service'
 import autoBind from 'auto-bind'
 import { Undo } from 'src/editor/action/undo'
-import { setupDocGetter } from 'src/editor/doc/getter'
 import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
@@ -39,8 +38,6 @@ export class Session extends Service {
 
     await this.yDoc.setup(id, doc)
     await this.ySync.setup(id)
-
-    setupDocGetter(() => this.yDoc.doc)
 
     this.yDoc.register(this.layerNodeTree.onYDocPatch)
     // this.yDoc.onPatch(this.nodeAction.onYDocPatch)

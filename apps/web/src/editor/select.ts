@@ -3,7 +3,7 @@ import { Signal } from '@gitborlando/signal'
 import equal from 'fast-deep-equal'
 import { makeObservable, untracked } from 'mobx'
 import { Undo } from 'src/editor/action/undo'
-import { findNode, findPage } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { Service } from '@gitborlando/di-service'
 
@@ -20,6 +20,7 @@ export class Select extends Service {
   private selectUndo: MobxUndoSlice<SelectState>
 
   constructor(
+    private readonly docFinder: DocFinder,
     private readonly undo: Undo,
     private readonly yDoc: YDoc,
   ) {
@@ -41,11 +42,11 @@ export class Select extends Service {
 
   getSelectedNodes() {
     const selectIds = untracked(() => this.selectIds)
-    return selectIds.map((id) => findNode(id))
+    return selectIds.map((id) => this.docFinder.findNode(id))
   }
 
   getSelectedPage() {
-    return findPage(untracked(() => this.selectPageId))
+    return this.docFinder.findPage(untracked(() => this.selectPageId))
   }
 
   select(id: ID) {

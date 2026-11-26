@@ -5,6 +5,8 @@ import { PageAction } from 'src/editor/action/page'
 import { SelectAction } from 'src/editor/action/select'
 import { Undo } from 'src/editor/action/undo'
 import { ViewportAction } from 'src/editor/action/viewport'
+import { DocFinder } from './doc/finder'
+import { DocHelper } from './doc/helper'
 import { DocCreator } from 'src/editor/doc/creator'
 import { DocMutator } from 'src/editor/doc/mutator'
 import { ElemDrawer } from 'src/editor/render/elem/drawer'
@@ -49,6 +51,8 @@ const editorServices = {
   renderPipeline: RenderPipeline,
 
   /** doc */
+  docFinder: DocFinder,
+  docHelper: DocHelper,
   docCreator: DocCreator,
   docMutator: DocMutator,
 

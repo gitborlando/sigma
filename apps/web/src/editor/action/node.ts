@@ -2,7 +2,7 @@ import { Service } from '@gitborlando/di-service'
 import { clone, firstOne, iife, objKeys } from '@gitborlando/utils'
 import { Undo } from 'src/editor/action/undo'
 import { DocCreator } from 'src/editor/doc/creator'
-import { findGraph, findNode, findParent } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { DocMutator } from 'src/editor/doc/mutator'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
@@ -19,6 +19,8 @@ export class NodeAction extends Service {
   @observable renamingNodeId = ''
 
   constructor(
+    private readonly docFinder: DocFinder,
+    private readonly docHelper: DocHelper,
     private readonly docMutator: DocMutator,
     private readonly select: Select,
     private readonly yDoc: YDoc,
@@ -54,6 +56,7 @@ export class NodeAction extends Service {
 
   deleteSelectedNodes() {
     const traverse = createGraphTraverse({
+      getDoc: () => this.yDoc.doc,
       leave: ({ graph, parent }) => {
         if (!parent || !DocHelper.isNode(graph)) return
         this.docMutator.deleteChild(parent, graph)
@@ -91,7 +94,7 @@ export class NodeAction extends Service {
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
     this.yDoc.transact(() => {
       this.select.getSelectedNodes().forEach((node) => {
-        const parent = findParent(node.parentId)
+        const parent = this.docFinder.findParent(node.parentId)
         let index = parent.childIds.indexOf(node.id)
         index = iife(() => {
           if (type === 'up') return index - 1
@@ -117,7 +120,7 @@ export class NodeAction extends Service {
       ...MRect.identity(rect.width, rect.height).shift(rect).plain(),
     })
 
-    const oldParent = findParent(selected[0].parentId)
+    const oldParent = this.docFinder.findParent(selected[0].parentId)
     const index = oldParent.childIds.indexOf(selected[0].id)
 
     this.yDoc.transact(() => {
@@ -151,14 +154,14 @@ export class NodeAction extends Service {
     let moved = false
     const parent = estimatedParent
     const parentRootMatrix =
-      parent.type === 'page' ? parent.matrix : DocHelper.getRootMatrix(parent)
+      parent.type === 'page' ? parent.matrix : this.docHelper.getRootMatrix(parent)
     const xy = Matrix.getLocalXY(sceneXY, parentRootMatrix)
 
     this.select.getSelectedNodes().forEach((node) => {
       if (this.select.selection[parent.id] || parent.id === node.parentId) return
 
       if (HitTest.hitRoundRect(parent.width, parent.height, 0)(xy)) {
-        const nodeRootMatrix = DocHelper.getRootMatrix(node)
+        const nodeRootMatrix = this.docHelper.getRootMatrix(node)
         const nodeLocalMatrix = Matrix.getLocal(nodeRootMatrix, parentRootMatrix)
 
         this.docMutator.removeChild(node.parentId, node.id)
@@ -186,18 +189,18 @@ export class NodeAction extends Service {
     let datumId = ''
 
     if (selectIds.length === 1) {
-      datumId = findNode(firstOne(selectIds)!).parentId
+      datumId = this.docFinder.findNode(firstOne(selectIds)!).parentId
     }
     if (selectIds.length > 1) {
       const parentIds = new Set<string>()
-      selectIds.forEach((id) => parentIds.add(findNode(id).parentId))
+      selectIds.forEach((id) => parentIds.add(this.docFinder.findNode(id).parentId))
       if (parentIds.size === 1) datumId = firstOne(parentIds)!
       if (parentIds.size > 1) datumId = ''
     }
 
     if (!datumId) return XY.$(0, 0)
 
-    const graph = findGraph(datumId)
+    const graph = this.docFinder.findGraph(datumId)
     if (!DocHelper.isPage(graph)) {
       const aabb = this.renderTree.findElem(graph.id).aabb
       return XY.$(aabb.minX, aabb.minY)

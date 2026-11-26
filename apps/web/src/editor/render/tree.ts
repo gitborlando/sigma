@@ -1,7 +1,7 @@
 import { Service } from '@gitborlando/di-service'
 import { Signal } from '@gitborlando/signal'
 import { clone } from '@gitborlando/utils'
-import { findNode, findParent } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { Select } from 'src/editor/select'
@@ -30,6 +30,8 @@ export class RenderTree extends Service {
   }
 
   constructor(
+    private readonly docFinder: DocFinder,
+    private readonly docHelper: DocHelper,
     private readonly select: Select,
     private readonly yDoc: YDoc,
   ) {
@@ -46,6 +48,7 @@ export class RenderTree extends Service {
     ;[...this.sceneRoot.children].forEach((child) => this.unmountNode(child.id))
 
     createGraphTraverse({
+      getDoc: () => this.yDoc.doc,
       enter: ({ graph }) => {
         if (!DocHelper.isNode(graph)) return false
         this.render('add', [GRAPHS, graph.id])
@@ -85,14 +88,14 @@ export class RenderTree extends Service {
 
     switch (true) {
       case op === 'add' && keys.length === 2:
-        if (DocHelper.isPageById(id)) break
-        this.mountNode(findNode(id))
+        if (this.docHelper.isPageById(id)) break
+        this.mountNode(this.docFinder.findNode(id))
         break
       case op === 'remove' && keys.length === 2:
         this.unmountNode(id)
         break
       default:
-        this.updateNode(findNode(id))
+        this.updateNode(this.docFinder.findNode(id))
         break
     }
   }
@@ -132,7 +135,7 @@ export class RenderTree extends Service {
 
   private reHierarchy(patch: YDocPatch) {
     const id = patch.keys[1] as ID
-    const parentNode = findParent(id)
+    const parentNode = this.docFinder.findParent(id)
     if (!parentNode) return
 
     const parent = this.findElem(id) || this.sceneRoot

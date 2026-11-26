@@ -1,46 +1,19 @@
-import { AnyObject, clone, getSet, miniId } from '@gitborlando/utils'
-import { findGraph, findNode, findParent } from 'src/editor/doc/finder'
+import { Service } from '@gitborlando/di-service'
+import { clone, getSet, miniId } from '@gitborlando/utils'
 import { Matrix, MRect } from 'src/editor/geometry'
 import { mergeOverrideArray } from 'src/shared/export'
+import { DocFinder } from './finder'
+import { DocGuards } from './guards'
 
-export class DocHelper {
-  private static mrectCache = new Map<ID, MRect>()
-
-  private static isGraph(item: AnyObject): item is S.Graph {
-    return typeof item === 'object' && item !== null && 'type' in item
+@reflection
+export class DocHelper extends Service {
+  constructor(private readonly finder: DocFinder) {
+    super()
   }
 
-  static isPage(item: AnyObject): item is S.Page {
-    return this.isGraph(item) && item.type === 'page'
-  }
-
-  static isPageById(id: ID): boolean {
-    const item = findGraph(id)
-    return this.isPage(item)
-  }
-
-  static isNode(item: AnyObject): item is S.Node
-  static isNode(
-    item: AnyObject,
-    variant: S.Node['variant'],
-  ): item is Extract<S.Node, { variant: typeof variant }>
-  static isNode(item: AnyObject, variant?: S.Node['variant']): item is S.Node {
-    if (!this.isGraph(item))
-      throw new Error(`DocHelper.isNode error: invalid item ${item}`)
-    if (!variant) return item.type === 'node'
-    return 'variant' in item && item.variant === variant
-  }
-
-  static isParent<T extends S.Parent>(item: AnyObject): item is T {
-    return this.isGraph(item) && 'childIds' in item
-  }
-
-  static isRootFrame(id: ID): boolean {
-    const node = findGraph(id)
-    return (
-      this.isNode(node, 'frame') && !!node.parentId && this.isPageById(node.parentId)
-    )
-  }
+  static isPage = DocGuards.isPage.bind(DocGuards)
+  static isNode = DocGuards.isNode.bind(DocGuards) as typeof DocGuards.isNode
+  static isParent = DocGuards.isParent.bind(DocGuards) as typeof DocGuards.isParent
 
   static clone<T extends S.Graph>(item: T, option?: Partial<T>): T {
     const newItem = clone(item)
@@ -54,31 +27,47 @@ export class DocHelper {
     return getSet(this.mrectCache, node.id, () => MRect.of(node), compare)
   }
 
-  static getChildren(parent: S.Parent) {
-    return parent.childIds.map((id) => findNode(id))
+  private static mrectCache = new Map<ID, MRect>()
+
+  isPageById(id: ID): boolean {
+    const item = this.finder.findGraph(id)
+    return DocHelper.isPage(item)
   }
 
-  static findAncestor(id: ID | S.Node, utilFunc?: (node: S.Node) => boolean) {
-    let node = typeof id === 'string' ? findNode(id) : id
-    utilFunc ||= (node: S.Node) => DocHelper.isPageById(node.parentId)
+  isRootFrame(id: ID): boolean {
+    const node = this.finder.findGraph(id)
+    return (
+      DocHelper.isNode(node, 'frame') &&
+      !!node.parentId &&
+      this.isPageById(node.parentId)
+    )
+  }
+
+  getChildren(parent: S.Parent) {
+    return parent.childIds.map((id) => this.finder.findNode(id))
+  }
+
+  findAncestor(id: ID | S.Node, utilFunc?: (node: S.Node) => boolean) {
+    let node = typeof id === 'string' ? this.finder.findNode(id) : id
+    utilFunc ||= (node: S.Node) => this.isPageById(node.parentId)
     while (node.parentId) {
       if (utilFunc(node)) return node
-      node = findNode(node.parentId)
+      node = this.finder.findNode(node.parentId)
     }
     return node
   }
 
-  static getAncestorMatrix(node: S.Node) {
+  getAncestorMatrix(node: S.Node) {
     let found: S.Graph = node
     const matrix = Matrix.identity()
     while (found.parentId) {
-      found = findParent(found.parentId)
+      found = this.finder.findParent(found.parentId)
       if (found.matrix) matrix.prepend(found.matrix)
     }
     return matrix
   }
 
-  static getRootMatrix(node: S.Node) {
+  getRootMatrix(node: S.Node) {
     return Matrix.of(node.matrix).prepend(this.getAncestorMatrix(node))
   }
 }

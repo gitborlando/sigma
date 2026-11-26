@@ -1,6 +1,5 @@
 import { iife } from '@gitborlando/utils'
 import { CSSProperties } from 'react'
-import { DocHelper } from 'src/editor/doc/helper'
 import { renderElem } from 'src/editor/render/react/reconciler'
 import { StageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
@@ -46,8 +45,14 @@ export const StageComp: FC<{}> = observer(({}) => {
 })
 
 const SurfaceComp: FC<{}> = observer(({}) => {
-  const { renderSurface, command, stageEvent, stageTransformer, stageViewport } =
-    useEditorServices()
+  const {
+    docHelper,
+    renderSurface,
+    command,
+    stageEvent,
+    stageTransformer,
+    stageViewport,
+  } = useEditorServices()
 
   const contextMenu = useContextMenu()
 
@@ -59,7 +64,7 @@ const SurfaceComp: FC<{}> = observer(({}) => {
       const baseMenus = [copyPasteGroup, undoRedoGroup]
 
       if (
-        (!hoverId || DocHelper.isRootFrame(hoverId)) &&
+        (!hoverId || docHelper.isRootFrame(hoverId)) &&
         !stageTransformer.isPointIn(stageViewport.toSceneXY(XY.client(e)))
       ) {
         return baseMenus

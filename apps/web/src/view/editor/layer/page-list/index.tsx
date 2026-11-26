@@ -1,5 +1,4 @@
 import Scrollbars from 'react-custom-scrollbars-2'
-import { findPage } from 'src/editor/doc/finder'
 import { Drag } from 'src/shared/drag'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useEditorServices } from 'src/view/hooks/use-services'
@@ -7,7 +6,7 @@ import { LayerPageListHeaderComp } from './header'
 import { LayerPageListItemComp } from './item'
 
 export const LayerPageListComp: FC<{}> = observer(({}) => {
-  const { layerPageList } = useEditorServices()
+  const { docFinder, layerPageList } = useEditorServices()
   const { panelHeight, isCollapsed } = layerPageList
   const meta = useDoc((doc) => doc.meta)
 
@@ -21,7 +20,7 @@ export const LayerPageListComp: FC<{}> = observer(({}) => {
         style={{ height: panelHeight - 37 }}>
         <Scrollbars style={{ height: panelHeight - 37 }}>
           {meta.pageIds.map((id) => {
-            const page = findPage(id)
+            const page = docFinder.findPage(id)
             return (
               <LayerPageListItemComp key={page.id} name={page.name} id={page.id} />
             )

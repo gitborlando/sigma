@@ -2,7 +2,6 @@ import { stopPropagation } from '@gitborlando/utils/browser'
 import { clamp } from 'es-toolkit'
 import { untracked } from 'mobx'
 import { Fragment } from 'react'
-import { DocHelper } from 'src/editor/doc/helper'
 import { Matrix, MRect } from 'src/editor/geometry'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useSelection } from 'src/view/hooks/use-selection'
@@ -16,10 +15,10 @@ const LINE_HEIGHT = 18
 const TEXT_WIDTH = 54
 
 export const StageFrameLabelComp: FC<{}> = observer(({}) => {
-  const { renderTree, stageViewport } = useEditorServices()
+  const { docHelper, renderTree, stageViewport } = useEditorServices()
 
   const isRootFrame = (graph: S.Graph): graph is S.Frame =>
-    DocHelper.isRootFrame(graph.id)
+    docHelper.isRootFrame(graph.id)
   const isFrameVisible = (f: S.Frame) => {
     const sceneAABB = untracked(() => stageViewport.sceneAABB)
     return renderTree.elements.get(f.id)?.getVisible(sceneAABB)
@@ -41,8 +40,14 @@ export const StageFrameLabelComp: FC<{}> = observer(({}) => {
 })
 
 const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
-  const { stageViewport, docCreator, stageEvent, selectAction, elemDrawer } =
-    useEditorServices()
+  const {
+    docHelper,
+    stageViewport,
+    docCreator,
+    stageEvent,
+    selectAction,
+    elemDrawer,
+  } = useEditorServices()
   const { zoom } = stageViewport
   const [hovered, setHovered] = useState(false)
   const selected = useSelection()[frame.id]
@@ -54,7 +59,8 @@ const FrameLabelComp: FC<{ frame: S.Frame }> = observer(({ frame }) => {
     ) || TEXT_WIDTH
 
   const getTextMatrix = (rotation: number, x: number, y: number) =>
-    DocHelper.getAncestorMatrix(frame)
+    docHelper
+      .getAncestorMatrix(frame)
       .append(Matrix.of(frame.matrix))
       .append(
         Matrix.identity()

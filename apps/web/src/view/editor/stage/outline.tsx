@@ -1,8 +1,7 @@
+import { DocHelper } from 'src/editor/doc/helper'
 import { iife } from '@gitborlando/utils'
 import { entries } from 'mobx'
 import { Fragment } from 'react'
-import { findNode } from 'src/editor/doc/finder'
-import { DocHelper } from 'src/editor/doc/helper'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useEditorServices } from 'src/view/hooks/use-services'
 import { themeColor } from 'src/view/styles/color'
@@ -49,17 +48,18 @@ export const StageOutlineComp: FC<{}> = observer(({}) => {
 
 const SingleOutline: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
   ({ id, outlineInfo }) => {
-    const { docCreator, stageViewport, stageTransformer } = useEditorServices()
+    const { docFinder, docHelper, docCreator, stageViewport, stageTransformer } =
+      useEditorServices()
     const { color, hovered, hinted, selected } = outlineInfo
     const zoom = stageViewport.zoom
-    const node = T<S.Node>(useDoc(() => findNode(id)))
+    const node = T<S.Node>(useDoc(() => docFinder.findNode(id)))
     const strokeColor = hovered || hinted || selected ? themeColor() : color
     const strokeWidth = iife(() => {
       let width = selected ? 1 : 2
       if (stageTransformer.isMoving && !hinted) width = 0
       return width
     })
-    const matrix = DocHelper.getRootMatrix(node)
+    const matrix = docHelper.getRootMatrix(node)
     const outline = DocHelper.clone<S.Node>(node, {
       id: `${id}-outline`,
       fills: [],

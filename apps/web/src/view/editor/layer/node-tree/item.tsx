@@ -2,7 +2,6 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { ChevronRight } from 'lucide-react'
-import { findNode } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { LayerNodeTreeInfo } from 'src/editor/workbench/layer/node-tree'
 import { EditableText } from 'src/view/component/editable-text'
@@ -16,11 +15,17 @@ import { LayerNodeTreePathIcon } from './path-icon'
 
 export const LayerNodeTreeItemComp: FC<{ nodeInfo: LayerNodeTreeInfo }> = observer(
   ({ nodeInfo }) => {
-    const { command, layerNodeTree, stageEvent, selectAction, nodeAction } =
-      useEditorServices()
+    const {
+      docFinder,
+      command,
+      layerNodeTree,
+      stageEvent,
+      selectAction,
+      nodeAction,
+    } = useEditorServices()
     const { id, indent, ancestorIds } = nodeInfo
     const { toggleNodeExpanded, getNodeExpanded } = layerNodeTree
-    const node = useDoc(() => findNode(id) as S.Node)
+    const node = useDoc(() => docFinder.findNode(id) as S.Node)
     const contextMenu = useContextMenu()
 
     const isParent = DocHelper.isParent(node)

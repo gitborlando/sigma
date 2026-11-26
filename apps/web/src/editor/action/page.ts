@@ -1,6 +1,6 @@
 import { Service } from '@gitborlando/di-service'
 import { DocCreator } from 'src/editor/doc/creator'
-import { findNode, findPage } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { Select } from 'src/editor/select'
 import { GRAPHS } from 'src/shared/constant'
@@ -10,6 +10,7 @@ import { Undo } from './undo'
 @reflection
 export class PageAction extends Service {
   constructor(
+    private readonly docFinder: DocFinder,
     private readonly docCreator: DocCreator,
     private readonly yDoc: YDoc,
     private readonly undo: Undo,
@@ -41,14 +42,14 @@ export class PageAction extends Service {
   }
 
   DEV_logDocOfOnePage = (id: ID) => {
-    const curPage = findPage(id)
+    const curPage = this.docFinder.findPage(id)
     const nodes: Record<ID, S.Node> = {}
     const findNodes = (id: string) => {
-      const node = findNode(id)
+      const node = this.docFinder.findNode(id)
       nodes[node.id] = node
       if (DocHelper.isParent(node)) {
         node.childIds
-          .map((id) => findNode(id))
+          .map((id) => this.docFinder.findNode(id))
           .forEach((node) => (nodes[node.id] = node))
       }
     }

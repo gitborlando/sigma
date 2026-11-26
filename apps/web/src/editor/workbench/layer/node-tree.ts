@@ -1,5 +1,6 @@
+import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { makeObservable } from 'mobx'
-import { findGraph } from 'src/editor/doc/finder'
+import { DocFinder } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { Select } from 'src/editor/select'
@@ -25,7 +26,12 @@ export class LayerNodeTree extends Service {
     return false
   }
 
-  constructor(private readonly select: Select) {
+  constructor(
+    private readonly docFinder: DocFinder,
+    private readonly docHelper: DocHelper,
+    private readonly yDoc: YDoc,
+    private readonly select: Select,
+  ) {
     super()
     autoBind(makeObservable(this))
   }
@@ -40,6 +46,7 @@ export class LayerNodeTree extends Service {
 
   toggleAllNodeExpanded(expanded: boolean) {
     const traverse = createGraphTraverse({
+      getDoc: () => this.yDoc.doc,
       enter: ({ graph }) => {
         if (!DocHelper.isParent(graph)) return
         this.expandedNodeMap.set(graph.id, expanded)
@@ -54,9 +61,12 @@ export class LayerNodeTree extends Service {
 
       const id = patch.keys[1] as ID
 
-      if (DocHelper.isPageById(id)) this.nodeInfoVersion++
+      if (this.docHelper.isPageById(id)) this.nodeInfoVersion++
       if (this.expandedNodeMap.get(id)) this.nodeInfoVersion++
-      if (DocHelper.isNode(findGraph(id), 'frame') && patch.type === 'add')
+      if (
+        DocHelper.isNode(this.docFinder.findGraph(id), 'frame') &&
+        patch.type === 'add'
+      )
         this.expandedNodeMap.set(id, true)
     })
   }
@@ -64,6 +74,7 @@ export class LayerNodeTree extends Service {
   private getNodeInfoList() {
     const nodeInfoList: LayerNodeTreeInfo[] = []
     const traverse = createGraphTraverse({
+      getDoc: () => this.yDoc.doc,
       enter: ({ graph, ancestors }) => {
         const ancestorIds = ancestors.map((node) => node.id)
         nodeInfoList.push({

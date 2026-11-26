@@ -1,47 +1,55 @@
-import { docGetter } from 'src/editor/doc/getter'
-import { DocHelper } from 'src/editor/doc/helper'
+import { Service } from '@gitborlando/di-service'
+import { DocGuards } from './guards'
+import { YDoc } from '../y-adapter/y-doc'
 import { debugId } from 'src/shared/dev'
 
-export function findNode(id: ID): S.Node
-export function findNode<V extends S.Node['variant']>(
-  id: ID,
-  variant: V,
-): Extract<S.Node, { variant: V }>
-export function findNode(id: ID, variant?: S.Node['variant']): S.Node {
-  if (!id) throw new Error(`findNode invalid id: ${id}`)
+@reflection
+export class DocFinder extends Service {
+  constructor(private readonly yDoc: YDoc) {
+    super()
+  }
 
-  const node = docGetter().graphs[id]
-  if (!DocHelper.isNode(node)) throw new Error(`Node not found: ${id}`)
-  if (!variant) return node
-  if ('variant' in node && node.variant === variant) return node
+  findNode(id: ID): S.Node
+  findNode<V extends S.Node['variant']>(
+    id: ID,
+    variant: V,
+  ): Extract<S.Node, { variant: V }>
+  findNode(id: ID, variant?: S.Node['variant']): S.Node {
+    if (!id) throw new Error(`findNode invalid id: ${id}`)
 
-  throw new Error(`Node ${id} is not of variant ${variant}`)
-}
+    const node = this.yDoc.doc.graphs[id]
+    if (!DocGuards.isNode(node)) throw new Error(`Node not found: ${id}`)
+    if (!variant) return node
+    if ('variant' in node && node.variant === variant) return node
 
-export const findPage = (id: ID) => {
-  if (!id) throw new Error(`findPage invalid id: ${id}`)
+    throw new Error(`Node ${id} is not of variant ${variant}`)
+  }
 
-  const page = docGetter().graphs[id]
-  if (DocHelper.isPage(page)) return page
+  findPage(id: ID) {
+    if (!id) throw new Error(`findPage invalid id: ${id}`)
 
-  throw new Error(`Page not found: ${id}`)
-}
+    const page = this.yDoc.doc.graphs[id]
+    if (DocGuards.isPage(page)) return page
 
-export const findGraph = (id: ID) => {
-  if (!id) throw new Error(`findGraph invalid id: ${id}`)
+    throw new Error(`Page not found: ${id}`)
+  }
 
-  const doc = docGetter()
-  if (doc.graphs[id]) return doc.graphs[id] as S.Graph
+  findGraph(id: ID) {
+    if (!id) throw new Error(`findGraph invalid id: ${id}`)
 
-  throw new Error(`Item not found: ${id}`)
-}
+    const doc = this.yDoc.doc
+    if (doc.graphs[id]) return doc.graphs[id] as S.Graph
 
-export const findParent = (id: ID) => {
-  if (!id) throw new Error(`findParent invalid id: ${id}`)
+    throw new Error(`Item not found: ${id}`)
+  }
 
-  const parent = findGraph(id)
-  debugId === '11' && console.log('parent: ', parent)
-  if (DocHelper.isParent(parent)) return parent
+  findParent(id: ID) {
+    if (!id) throw new Error(`findParent invalid id: ${id}`)
 
-  throw new Error(`Parent not found: ${id}`)
+    const parent = this.findGraph(id)
+    debugId === '11' && console.log('parent: ', parent)
+    if (DocGuards.isParent(parent)) return parent
+
+    throw new Error(`Parent not found: ${id}`)
+  }
 }

@@ -85,6 +85,7 @@ export class StageTransformer extends Service {
   private dragger!: Dragger
 
   constructor(
+    private readonly docHelper: DocHelper,
     private readonly yDoc: YDoc,
     private readonly undo: Undo,
     private readonly stageViewport: StageViewport,
@@ -104,12 +105,12 @@ export class StageTransformer extends Service {
 
     if (selectNodes.length === 1) {
       const node = selectNodes[0]
-      const matrix = DocHelper.getRootMatrix(node)
+      const matrix = this.docHelper.getRootMatrix(node)
       return (this.mrect = MRect.of({ ...node, matrix }))
     }
 
     const aabbList = selectNodes.map((node) => {
-      const matrix = DocHelper.getRootMatrix(node)
+      const matrix = this.docHelper.getRootMatrix(node)
       return MRect.fromRect(node, matrix).aabb
     })
     const rect = AABB.rect(AABB.merge(aabbList))
@@ -288,7 +289,7 @@ export class StageTransformer extends Service {
     const isMoveStartHandler = directions.includes('left')
     const fixedPoint = isMoveStartHandler ? end : start
     const movingPoint = isMoveStartHandler ? start : end
-    const forwardMatrix = DocHelper.getAncestorMatrix(node)
+    const forwardMatrix = this.docHelper.getAncestorMatrix(node)
     const [startPoint, endPoint] = node.points
 
     this.dragger
@@ -388,7 +389,7 @@ export class StageTransformer extends Service {
     if (!this.diffMatrix || !mrect) return
 
     const startMRect = MRect.of(mrect)
-    const ancestorsMatrix = DocHelper.getAncestorMatrix(node)
+    const ancestorsMatrix = this.docHelper.getAncestorMatrix(node)
 
     if (this.select.selectIds.length === 1 && this.action === 'resize') {
       startMRect.transform(this.diffMatrix, true)
