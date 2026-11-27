@@ -2,6 +2,7 @@ import { Service } from '@gitborlando/di-service'
 import autoBind from 'auto-bind'
 import { Undo } from 'src/editor/action/undo'
 import { RenderPipeline } from 'src/editor/render/pipeline'
+import { batchStageUpdates } from 'src/editor/render/react/reconciler'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { Select } from 'src/editor/select'
@@ -29,6 +30,7 @@ export class Session extends Service {
   ) {
     super()
     autoBind(this)
+    this.yDoc.bindBatch(batchStageUpdates)
   }
 
   sessionId = ''

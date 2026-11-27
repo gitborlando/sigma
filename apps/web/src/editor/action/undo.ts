@@ -101,18 +101,15 @@ export class Undo extends Service {
     const replayYDoc = () => this.yUndo?.[type]()
     const replayClientState = () => this.mobxUndo[type]()
 
-    match(info.type, {
-      state: () => replayYDoc(),
-      client: () => replayClientState(),
-      all: () => {
-        if (type === 'undo') {
-          replayClientState()
-          replayYDoc()
-        } else {
+    this.yDoc.runBatch(() => {
+      match(info.type, {
+        state: () => replayYDoc(),
+        client: () => replayClientState(),
+        all: () => {
           replayYDoc()
           replayClientState()
-        }
-      },
+        },
+      })
     })
   }
 }

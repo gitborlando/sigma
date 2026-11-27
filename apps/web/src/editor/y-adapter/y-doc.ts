@@ -19,9 +19,14 @@ export class YDoc extends Service {
 
   flushPatch$ = Signal.create<YDocPatch>()
   beforeDestroy$ = Signal.create()
+  settler$ = Signal.create<void>()
+
+  private batchCallback?: () => unknown
+  private batch: (fn: () => void) => void = (fn) => fn()
 
   private patches: YDocPatch[] = []
   private downstream = new Set<YDocDownstream>()
+
   private stateAtom = createAtom('YDoc.observedDoc')
 
   constructor() {
@@ -72,7 +77,30 @@ export class YDoc extends Service {
   }
 
   transact(callback: () => void, origin = Y_STATE_LOCAL_ORIGIN) {
-    this.plain.transact(origin, callback)
+    this.runBatch(() => this.plain.transact(origin, callback))
+  }
+
+  bindBatch(batch: (fn: () => void) => void) {
+    this.batch = batch
+  }
+
+  runBatch<T>(fn: () => T) {
+    if (this.batchCallback) return fn()
+
+    this.batchCallback = fn
+    try {
+      let result!: T
+      this.batch(() => {
+        try {
+          result = fn()
+        } finally {
+          this.settler$.dispatch()
+        }
+      })
+      return result
+    } finally {
+      this.batchCallback = undefined
+    }
   }
 
   register(downstream: YDocDownstream) {
@@ -91,13 +119,16 @@ export class YDoc extends Service {
   }
 
   private distribute = ({ patches }: YPlainChange<S.Doc>) => {
-    if (!patches.length) return
-    isDEV && (ThisAsAny.doc = this.doc)
+    this.runBatch(() => {
+      this.settler$.dispatch()
+      if (!patches.length) return
+      isDEV && (ThisAsAny.doc = this.doc)
 
-    this.patches.push(...clone(patches))
-    this.downstream.forEach((handle) => handle(patches))
-    patches.forEach((patch) => this.flushPatch$.dispatch(patch))
+      this.patches.push(...clone(patches))
+      this.downstream.forEach((handle) => handle(patches))
+      patches.forEach((patch) => this.flushPatch$.dispatch(patch))
 
-    this.stateAtom.reportChanged()
+      this.stateAtom.reportChanged()
+    })
   }
 }

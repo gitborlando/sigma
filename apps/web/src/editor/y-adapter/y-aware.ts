@@ -19,7 +19,7 @@ type Client = {
   sceneMatrix: Matrix
 }
 
-type Clients = { [clientId: number]: Client }
+type Clients = { [clientId: string]: Client }
 
 @reflection
 export class YAware extends Service {

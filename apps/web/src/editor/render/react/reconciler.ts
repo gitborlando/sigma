@@ -121,6 +121,10 @@ const hostConfig: HostConfig<
 
 const reconciler = Reconciler(hostConfig)
 
+export const batchStageUpdates = (fn: () => void) => {
+  reconciler.batchedUpdates(fn, undefined)
+}
+
 export function renderElem(reactNode: ReactNode, elem: Elem) {
   const root = reconciler.createContainer(
     elem,

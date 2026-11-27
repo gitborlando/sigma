@@ -1,6 +1,5 @@
 import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { makeObservable } from 'mobx'
-import { DocFinder } from 'src/editor/doc/finder'
 import { DocHelper } from 'src/editor/doc/helper'
 import { createGraphTraverse } from 'src/editor/doc/traverse'
 import { Select } from 'src/editor/select'
@@ -27,7 +26,6 @@ export class LayerNodeTree extends Service {
   }
 
   constructor(
-    private readonly docFinder: DocFinder,
     private readonly docHelper: DocHelper,
     private readonly yDoc: YDoc,
     private readonly select: Select,
@@ -60,14 +58,15 @@ export class LayerNodeTree extends Service {
       if (patch.keys[2] !== 'childIds') return
 
       const id = patch.keys[1] as ID
+      // 节点可能已被删除，不能用找不到时会抛错的 findGraph。
+      const graph = this.yDoc.doc.graphs[id]
+      if (!graph) return
 
       if (this.docHelper.isPageById(id)) this.nodeInfoVersion++
       if (this.expandedNodeMap.get(id)) this.nodeInfoVersion++
-      if (
-        DocHelper.isNode(this.docFinder.findGraph(id), 'frame') &&
-        patch.type === 'add'
-      )
+      if (patch.type === 'add' && DocHelper.isNode(graph, 'frame')) {
         this.expandedNodeMap.set(id, true)
+      }
     })
   }
 

@@ -135,8 +135,8 @@ export class RenderTree extends Service {
 
   private reHierarchy(patch: YDocPatch) {
     const id = patch.keys[1] as ID
-    const parentNode = this.docFinder.findParent(id)
-    if (!parentNode) return
+    const parentNode = this.yDoc.doc.graphs[id]
+    if (!parentNode || !DocHelper.isParent(parentNode)) return
 
     const parent = this.findElem(id) || this.sceneRoot
     const nextChildren: Elem[] = []

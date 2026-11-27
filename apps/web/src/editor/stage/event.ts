@@ -9,6 +9,7 @@ import { RenderPipeline } from 'src/editor/render/pipeline'
 import { RenderSurface } from 'src/editor/render/surface'
 import { RenderTree } from 'src/editor/render/tree'
 import { StageViewport } from 'src/editor/stage/viewport'
+import { YDoc } from 'src/editor/y-adapter/y-doc'
 import { Service } from '@gitborlando/di-service'
 
 @reflection
@@ -27,9 +28,19 @@ export class StageEvent extends Service {
     private readonly renderSurface: RenderSurface,
     private readonly renderPipeline: RenderPipeline,
     private readonly stageViewport: StageViewport,
+    private readonly yDoc: YDoc,
   ) {
     super()
     autoBind(makeObservable(this))
+    this.effect(this.yDoc.settler$.hook(this.releaseMissingNodes))
+  }
+
+  private releaseMissingNodes() {
+    if (!this.yDoc.plain) return
+
+    const graphs = this.yDoc.doc.graphs
+    if (this.hoverId && !graphs[this.hoverId]) this.hoverId = undefined
+    if (this.hintId && !graphs[this.hintId]) this.hintId = undefined
   }
 
   onCanvasInited() {

@@ -1,6 +1,6 @@
 import { DocHelper } from 'src/editor/doc/helper'
 import { iife } from '@gitborlando/utils'
-import { entries } from 'mobx'
+import { withPrepare } from '@gitborlando/utils/react'
 import { Fragment } from 'react'
 import { useDoc } from 'src/view/hooks/use-doc'
 import { useEditorServices } from 'src/view/hooks/use-services'
@@ -20,7 +20,7 @@ export const StageOutlineComp: FC<{}> = observer(({}) => {
 
   const outlineInfoLMap = iife(() => {
     const map: Record<string, OutlineInfo> = {}
-    for (const [_, client] of entries(others)) {
+    for (const [_, client] of Object.entries(others)) {
       for (const id of Object.keys(client.selection || {})) {
         map[id] = {
           hovered: hoverId === id,
@@ -46,40 +46,46 @@ export const StageOutlineComp: FC<{}> = observer(({}) => {
   )
 })
 
-const SingleOutline: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
-  ({ id, outlineInfo }) => {
-    const { docFinder, docHelper, docCreator, stageViewport, stageTransformer } =
-      useEditorServices()
-    const { color, hovered, hinted, selected } = outlineInfo
-    const zoom = stageViewport.zoom
-    const node = T<S.Node>(useDoc(() => docFinder.findNode(id)))
-    const strokeColor = hovered || hinted || selected ? themeColor() : color
-    const strokeWidth = iife(() => {
-      let width = selected ? 1 : 2
-      if (stageTransformer.isMoving && !hinted) width = 0
-      return width
-    })
-    const matrix = docHelper.getRootMatrix(node)
-    const outline = DocHelper.clone<S.Node>(node, {
-      id: `${id}-outline`,
-      fills: [],
-      matrix: matrix,
-    })
+const SingleOutline = observer(
+  withPrepare<{ node: S.Node }, { id: string; outlineInfo: OutlineInfo }>(
+    ({ id }) => {
+      const node = useDoc((doc) => doc.graphs[id])
+      return node?.type === 'node' ? { node } : null
+    },
+    observer(({ id, node, outlineInfo }) => {
+      const { docHelper, docCreator, stageViewport, stageTransformer } =
+        useEditorServices()
 
-    if ('strokeSide' in outline) outline.strokeSide = { type: 'all' }
-
-    if (node.variant === 'text') {
-      T<S.Text>(outline).style.decoration = docCreator.textDecoration({
-        color: strokeColor!,
-        width: strokeWidth / zoom,
+      const { color, hovered, hinted, selected } = outlineInfo
+      const zoom = stageViewport.zoom
+      const strokeColor = hovered || hinted || selected ? themeColor() : color
+      const strokeWidth = iife(() => {
+        let width = selected ? 1 : 2
+        if (stageTransformer.isMoving && !hinted) width = 0
+        return width
       })
-    } else if (strokeWidth) {
-      T<S.Node>(outline).stroke = docCreator.solidStroke(
-        strokeColor,
-        strokeWidth / zoom,
-      )
-    }
+      const matrix = docHelper.getRootMatrix(node)
+      const outline = DocHelper.clone<S.Node>(node, {
+        id: `${id}-outline`,
+        fills: [],
+        matrix: matrix,
+      })
 
-    return <elem node={outline} />
-  },
+      if ('strokeSide' in outline) outline.strokeSide = { type: 'all' }
+
+      if (node.variant === 'text') {
+        T<S.Text>(outline).style.decoration = docCreator.textDecoration({
+          color: strokeColor!,
+          width: strokeWidth / zoom,
+        })
+      } else if (strokeWidth) {
+        T<S.Node>(outline).stroke = docCreator.solidStroke(
+          strokeColor,
+          strokeWidth / zoom,
+        )
+      }
+
+      return <elem node={outline} />
+    }),
+  ),
 )

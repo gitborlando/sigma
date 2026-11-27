@@ -1,11 +1,11 @@
+import { Service } from '@gitborlando/di-service'
 import { MobxUndoSlice } from '@gitborlando/mobx-undo'
 import { Signal } from '@gitborlando/signal'
 import equal from 'fast-deep-equal'
-import { makeObservable, untracked } from 'mobx'
+import { intercept, makeObservable, untracked } from 'mobx'
 import { Undo } from 'src/editor/action/undo'
 import { DocFinder } from 'src/editor/doc/finder'
 import { YDoc } from 'src/editor/y-adapter/y-doc'
-import { Service } from '@gitborlando/di-service'
 
 export type SelectState = { selection: Selection; selectPageId: ID | '' }
 
@@ -26,6 +26,13 @@ export class Select extends Service {
   ) {
     super()
     autoBind(makeObservable(this))
+    this.effect(
+      intercept(this, 'selection', (change) => {
+        change.newValue = this.omitMissing(change.newValue)
+        return change
+      }),
+      this.yDoc.settler$.hook(this.dropMissingSelection),
+    )
     this.selectUndo = this.undo.mobxUndo.register('select', this, [
       'selection',
       'selectPageId',
@@ -83,6 +90,24 @@ export class Select extends Service {
 
   appendSelection(selection: Selection) {
     this.replaceSelection({ ...this.selection, ...selection })
+  }
+
+  private dropMissingSelection = () => {
+    const next = this.omitMissing(this.selection)
+    if (next !== this.selection) this.selection = next
+  }
+
+  private omitMissing(value: Selection) {
+    if (!this.yDoc.plain) return value
+
+    const graphs = this.yDoc.doc.graphs
+    let next = value
+    for (const id of Object.keys(value)) {
+      if (graphs[id]) continue
+      if (next === value) next = { ...value }
+      delete next[id]
+    }
+    return next
   }
 
   selectPage(id: ID) {
